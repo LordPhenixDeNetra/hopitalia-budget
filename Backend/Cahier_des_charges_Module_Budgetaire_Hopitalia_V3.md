@@ -314,7 +314,7 @@ Chaque indicateur a **une seule définition**, documentée ici et implémentée 
 | Cumul liquidé / transmis / payé | Comme en 6.1, restreint au contrat. |
 | Engagé non encore facturé | Cumul engagé − cumul facturé. |
 | Reste contractuel à payer | Montant actualisé − cumul payé. |
-| Taux de consommation | Cumul engagé / montant actualisé *(base paramétrable : engagé ou liquidé)*. Déclenche les alertes à 80, 90 et 100 %. |
+| Taux de consommation | Cumul engagé / montant actualisé *(base paramétrable : engagé par défaut, ou liquidé ; section 17, point 5)*. Déclenche les alertes à 80, 90 et 100 %. |
 
 ### 6.3. Par liquidation et par facture
 
@@ -1742,19 +1742,19 @@ Le lot 0 est ajouté : l'audit, l'idempotence et le cloisonnement sont difficile
 
 ## 17. Points ouverts
 
-À trancher par l'établissement avant ou pendant le lot 0.
+Statuts : **Décidé** (définitif) ; **Provisoire** (appliqué dès maintenant, à confirmer par la DAF lors de la validation du cahier des charges) ; **Ouvert** (en attente d'une information externe). Les questions encore ouvertes sont regroupées dans les questionnaires du dossier `docs/cadrage/`.
 
-| # | Question | Proposition par défaut |
-|---|---|---|
-| 1 | Base de données. Décidé : backend **FastAPI** (Python), interface **React + Ant Design** (12.1). | PostgreSQL (verrouillage de lignes pour RG-20). |
-| 2 | Authentification : fournisseur d'identité existant dans Hopitalia ? | Réutiliser celui d'Hopitalia. |
-| 3 | Nomenclature budgétaire de référence applicable. | Paramétrable ; à fournir par la DAF. |
-| 4 | Fournisseurs partagés entre établissements ou propres à chacun ? | Partagés, coordonnées bancaires par établissement. |
-| 5 | Base du taux de consommation d'un marché : engagé ou liquidé ? | Engagé. |
-| 6 | Traitement budgétaire de l'avance (6.3). | Consommée à sa liquidation, déduite ensuite. |
-| 7 | Valeurs de limitation de débit et durée de maintien d'une version d'API. | 11.7 et 11.8. |
-| 8 | Durées de conservation des pièces par type. | Politique d'archivage de l'établissement. |
-| 9 | Seuils hors marché par type de dépense. | Réglementation applicable à l'établissement. |
+| # | Sujet | Décision | Statut |
+|---|---|---|---|
+| 1 | Pile technique | Backend **FastAPI** (Python) ; interface **React + TypeScript + Ant Design** (12.1) ; base **PostgreSQL** (verrouillage de lignes pour RG-20, types numériques exacts, JSON pour l'audit). | Décidé |
+| 2 | Authentification | Réutiliser le fournisseur d'identité d'Hopitalia s'il existe. | Ouvert (équipe Hopitalia) |
+| 3 | Nomenclature budgétaire de référence | Paramétrable ; contenu à fournir par la DAF. | Ouvert (DAF) |
+| 4 | Fournisseurs partagés entre établissements ou propres à chacun | Référentiel partagé ; coordonnées bancaires et statut propres à chaque établissement. | Provisoire |
+| 5 | Base du taux de consommation d'un marché | Engagé (cumul engagé / montant actualisé). | Provisoire |
+| 6 | Traitement budgétaire de l'avance | L'avance consomme le crédit à sa liquidation ; sa récupération sur les décomptes réduit leur consommation (6.3). | Provisoire |
+| 7 | Limitation de débit et maintien des versions d'API | 300 requêtes par minute par utilisateur, 10 imports ou exports par heure ; version d'API maintenue 12 mois après la suivante ; clés d'idempotence conservées 24 heures. Valeurs paramétrables. | Provisoire |
+| 8 | Durées de conservation des pièces | Paramétrable par type de pièce ; **10 ans** par défaut, durée de conservation des pièces comptables dans l'espace OHADA. | Provisoire |
+| 9 | Seuils hors marché par type de dépense | Paramétrables par type de dépense. Tant qu'aucun seuil n'est renseigné pour un type, une dépense hors marché de ce type exige une dérogation. | Provisoire (valeurs à fournir par la DAF) |
 
 ## 18. Annexes
 
@@ -1780,7 +1780,7 @@ Le lot 0 est ajouté : l'audit, l'idempotence et le cloisonnement sont difficile
 
 ### 18.2. Exemple de suivi d'un marché (jeu d'essai)
 
-Marché annuel de fournitures médicales, montant contractuel actualisé : 100 000 000 XOF.
+Marché annuel de fournitures médicales, montant contractuel actualisé : 100 000 000 XOF. Le détail pièce par pièce (engagements, réceptions, factures, liquidations, paiements) et les contrôles à tester sont dans `docs/cadrage/jeu-essai-marche-fournitures.md`.
 
 | Indicateur | Valeur (XOF) |
 |---|---:|
