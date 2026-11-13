@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.1 · 13 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.2 · 13 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -8,6 +8,7 @@
 | 2.0 | Novembre 2026 | Recentrage sur le suivi après attribution ; diagramme de classes V2. |
 | 3.0 | 13/11/2026 | Fusion du cahier des charges V2 et du diagramme de classes V2, corrections du modèle, ajout des principes d'architecture (SOLID) et des conventions d'API. |
 | 3.1 | 13/11/2026 | Validation ; intégration des réponses de cadrage (authentification propre, application séparée, référentiels gérés dans le module, plan SYSCOHADA, circuits avec ordonnateur, échanges par fichiers) ; section 17 mise à jour. |
+| 3.2 | 13/11/2026 | Lecture du code `hopitalia-backend` : connexion Hopitalia réutilisée, fournisseurs et services importés, achats pharmaceutiques repris d'Hopitalia ; note d'intégration `docs/cadrage/integration-hopitalia.md`. |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -91,17 +92,21 @@ flowchart LR
     API["API REST /api/v1"]
     UI --> API
   end
-  subgraph Hopitalia["Autres modules Hopitalia (API)"]
-    STK["Stocks et pharmacie"]
-    FAC["Facturation patient<br/>et recouvrement"]
+  subgraph Hopitalia["Backend Hopitalia (API)"]
+    AUTH["Connexion des agents"]
+    REF["Fournisseurs, services"]
+    PHA["Pharmacie : commandes,<br/>approvisionnements"]
+    FAC["Facturation et<br/>encaissements"]
   end
   subgraph Fichiers["Échanges par fichiers"]
     CPT["Comptabilité<br/>export tableur, CSV"]
     INST["Tutelle<br/>états exportés"]
   end
   U1 & U2 & U3 & U4 --> UI
-  API <--> STK
-  API <--> FAC
+  API -->|relais de connexion| AUTH
+  REF -->|import| API
+  PHA -->|import| API
+  FAC -->|import, volet recettes| API
   API --> CPT
   API --> INST
 ```
@@ -152,7 +157,7 @@ Chaque exigence porte un identifiant stable, repris dans la recette (section 15)
 | EF-REF-02 | Axes de classement : exercice et période (annuelle, trimestrielle, mensuelle), compte budgétaire, nature économique, programme ou projet, source de financement ou bailleur, centre de responsabilité, site. |
 | EF-REF-03 | Le compte budgétaire de contrôle est distinct du compte comptable ; une table de correspondance les relie. |
 | EF-REF-04 | Référentiels administrables : fournisseurs et coordonnées de paiement, services et responsables, types de dépenses, familles d'achats, modes de règlement, comptes de trésorerie, types de pièces, statuts. |
-| EF-REF-05 | Les référentiels (fournisseurs, services, établissements, sites) sont gérés dans le module : Hopitalia n'en dispose pas. Ils peuvent être importés par fichier à la mise en service. |
+| EF-REF-05 | Les fournisseurs et les services sont **importés depuis Hopitalia** (identifiant externe `codeFourn`, `codeService`) et complétés dans le module (coordonnées bancaires, identifiants administratifs, fournisseurs hors pharmacie). Les établissements et sites sont gérés dans le module. |
 
 ### 4.2. Budgets et crédits (lot 1)
 
@@ -203,6 +208,7 @@ Chaque exigence porte un identifiant stable, repris dans la recette (section 15)
 | EF-REC-04 | Pièces : bon de livraison, procès-verbal, attestation de service fait, décompte. |
 | EF-REC-05 | Service réceptionnaire et agent responsable identifiés ; la réception est validée avant de servir de preuve. |
 | EF-REC-06 | Suivi des prestations non réalisées, des retards et des réserves à lever. |
+| EF-REC-07 | Les **achats pharmaceutiques** ne sont pas ressaisis : les bons de commande et approvisionnements de la pharmacie Hopitalia sont importés, rattachés aux engagements par l'agent financier, et les approvisionnements valent réceptions validées (preuve : bon de livraison). Un approvisionnement supprimé dans Hopitalia annule la réception importée, avec trace. |
 
 ### 4.6. Factures et liquidation (lot 4)
 
@@ -493,6 +499,7 @@ class CompteComptable {
 }
 class CentreResponsabilite {
   +UUID id
+  +String codeHopitalia
   +String code
   +String libelle
   +TypeService type
@@ -545,6 +552,7 @@ class Fournisseur {
   +UUID id
   +String code
   +String raisonSociale
+  +String codeHopitalia
   +String identifiantsAdministratifs
   +String adresse
   +String contact
@@ -700,6 +708,7 @@ class DepenseHorsMarche {
 class BonCommande {
   +UUID id
   +String numero
+  +String referenceHopitalia
   +TypeOrdre type
   +Date dateEmission
   +String lieuLivraison
@@ -719,7 +728,7 @@ class Reception {
   +String numero
   +Date date
   +TypeReception type
-  +boolean entreeStockDeclenchee
+  +String referenceHopitalia
 }
 class LigneReception {
   +Decimal quantiteRecue
@@ -849,7 +858,7 @@ Reception "1" --> "0..1" AttestationServiceFait
 Reception "1" *-- "*" ReserveReception
 Reception "*" --> "1" CentreResponsabilite : service receptionnaire
 Reception "*" --> "1" Utilisateur : agent responsable
-Reception "0..1" --> "0..*" MouvementStock : alimente apres validation
+Reception "0..*" --> "0..1" MouvementStock : importee de (pharmacie)
 Facture "*" --> "1" Fournisseur
 Facture "*" --> "1" Engagement
 Facture "*" --> "0..1" BonCommande
@@ -989,6 +998,8 @@ classDiagram
 direction TB
 class Utilisateur {
   +UUID id
+  +Long idHopitalia
+  +String codeAgent
   +String nom
   +String email
   +boolean actif
@@ -1562,7 +1573,7 @@ Règle d'usage : **un seul niveau d'imbrication**. Au-delà, on repart de la res
 
 - Le champ `code` est stable et sert de clé de traduction côté frontend ; `title` et `detail` suivent l'en-tête `Accept-Language` (I18N-07).
 - `401` sans authentification, `403` sans habilitation ou hors de l'établissement de l'utilisateur, `404` pour un objet d'un autre établissement (on ne révèle pas son existence).
-- TLS obligatoire ; jetons d'accès à durée courte, révocables ; authentification propre au module (section 17, point 2).
+- TLS obligatoire ; jetons d'accès à durée courte, révocables ; connexion relayée vers Hopitalia et vérification locale des jetons Hopitalia ; les droits budgétaires sont propres au module (section 17, point 2).
 - Documentation OpenAPI 3 générée par FastAPI et publiée avec chaque version.
 
 ## 12. Exigences non fonctionnelles
@@ -1621,9 +1632,9 @@ L'application est internationalisée dès le lot 0 : ajouter une langue ne deman
 
 | Réf. | Exigence |
 |---|---|
-| INT-01 | *Sans objet :* Hopitalia n'a pas de référentiels communs ; ils sont gérés dans le module (EF-REF-05). |
+| INT-01 | Importer les fournisseurs et les services d'Hopitalia ; un élément disparu d'Hopitalia est désactivé, jamais supprimé. |
 | INT-02 | Échanger avec la facturation hospitalière pour le volet recettes. |
-| INT-03 | Échanger avec les stocks et la pharmacie pour rapprocher commandes, réceptions et consommations, sans confondre consommation de stock et paiement fournisseur. |
+| INT-03 | Importer de la pharmacie d'Hopitalia les bons de commande et les approvisionnements (EF-REC-07). Le module n'écrit jamais dans le stock, et ne confond pas consommation de stock et paiement fournisseur. |
 | INT-04 | Échanges avec la comptabilité par export de fichiers (tableur, CSV) ; confirmations de virement saisies dans le module, sans échange automatique avec les banques. |
 | INT-05 | Import et export des budgets, engagements, liquidations et paiements en formats structurés. |
 | INT-06 | Identifiants uniques partagés entre modules pour éviter les doublons. |
@@ -1739,12 +1750,12 @@ Le lot 0 est ajouté : l'audit, l'idempotence et le cloisonnement sont difficile
 
 ## 17. Décisions de cadrage
 
-Réponses aux questionnaires de cadrage (`docs/cadrage/`), données par le responsable du projet le 13/11/2026. Statuts : **Décidé** ; **Provisoire** (appliqué, à confirmer) ; **Ouvert** (information encore attendue).
+Réponses aux questionnaires de cadrage (`docs/cadrage/`), données par le responsable du projet le 13/11/2026, puis corrigées le même jour après lecture du code `hopitalia-backend` (points 2, 12, 13 et 19 ; détail dans `docs/cadrage/integration-hopitalia.md`). Statuts : **Décidé** ; **Provisoire** (appliqué, à confirmer) ; **Ouvert** (information encore attendue).
 
 | # | Sujet | Décision | Statut |
 |---|---|---|---|
 | 1 | Pile technique | Backend **FastAPI** (Python) ; interface **React + TypeScript + Ant Design** (12.1) ; base **PostgreSQL** (verrouillage de lignes pour RG-20, types numériques exacts, JSON pour l'audit). | Décidé |
-| 2 | Authentification | Hopitalia n'a pas de service de connexion commun : **comptes gérés par le module** (mot de passe haché, jetons d'accès courts et révocables, verrouillage après échecs répétés, expiration des accès). | Décidé |
+| 2 | Authentification | **Connexion Hopitalia réutilisée** : le backend du module relaie la connexion vers Hopitalia et vérifie localement les jetons Hopitalia (HS512, clé en variable d'environnement). Les droits budgétaires (profils, établissements) sont attribués dans le module ; les rôles Hopitalia n'y donnent aucun droit. | Décidé |
 | 3 | Nomenclature et plan comptable | Comptes comptables du **plan SYSCOHADA révisé** ; nomenclature budgétaire construite sur ce plan, chargée par import et relue par la DAF. | Décidé |
 | 4 | Fournisseurs | Référentiel partagé entre établissements ; coordonnées bancaires et statut propres à chaque établissement. | Décidé |
 | 5 | Taux de consommation d'un marché | Calculé sur l'engagé (cumul engagé / montant actualisé). | Décidé |
@@ -1754,15 +1765,16 @@ Réponses aux questionnaires de cadrage (`docs/cadrage/`), données par le respo
 | 9 | Seuils hors marché | Paramétrables par type de dépense. Tant qu'aucun seuil n'est renseigné pour un type, une dépense hors marché de ce type exige une dérogation. Valeurs saisies plus tard par paramétrage. | Décidé |
 | 10 | Intégration de l'interface | **Application séparée**, accessible par un lien depuis Hopitalia. | Décidé |
 | 11 | Hébergement | **Serveurs de l'hôpital**, sur le réseau hospitalier. | Décidé |
-| 12 | Référentiels | Gérés dans le module (EF-REF-05) ; import par fichier possible à la mise en service. | Décidé |
-| 13 | Stocks et facturation patient | Modules Hopitalia dotés d'API : échanges par API (INT-02, INT-03). Documentation et accès de test à obtenir. | Ouvert |
+| 12 | Référentiels | Fournisseurs et services importés depuis Hopitalia, complétés dans le module ; établissements et sites gérés dans le module (EF-REF-05, INT-01). | Décidé |
+| 13 | Stocks et facturation patient | API Hopitalia documentées à partir du code (`docs/cadrage/integration-hopitalia.md`). Environnement de test Hopitalia à monter. | Décidé |
 | 14 | Volet recettes | Activé après la mise en service, pas au démarrage. | Décidé |
 | 15 | Langues | Français par défaut et anglais (I18N-01). | Décidé |
 | 16 | Circuits de validation | L'ordonnateur valide **toujours**, après le valideur (DAF), quel que soit le montant : révisions, avenants, engagements, liquidations, dérogations. | Décidé |
 | 17 | Comptabilité et banque | Export de fichiers vers la comptabilité ; confirmations de virement saisies dans le module (INT-04). | Décidé |
 | 18 | États réglementaires | Pas de modèle officiel imposé par la tutelle : présentation libre (14.4). | Décidé |
+| 19 | Achats pharmaceutiques | Commandes et approvisionnements de la pharmacie repris d'Hopitalia, sans ressaisie (EF-REC-07, INT-03). Les autres achats sont saisis dans le module. | Décidé |
 
-**Encore attendus** (questionnaires) : charte graphique Hopitalia (Q-H04), documentation des API stocks et facturation (Q-H08), établissements du premier déploiement (Q-H11), données réelles anonymisées pour la recette (Q-D08), interlocuteurs (Q-H12, Q-D14).
+**Encore attendus** (questionnaires) : charte graphique Hopitalia (Q-H04), établissements du premier déploiement (Q-H11), données réelles anonymisées pour la recette (Q-D08), interlocuteurs (Q-H12, Q-D14), compte technique et clé de vérification des jetons Hopitalia (T-017).
 
 ## 18. Annexes
 

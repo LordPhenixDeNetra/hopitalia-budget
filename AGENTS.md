@@ -26,7 +26,8 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 - **Backend :** Python, FastAPI, SQLAlchemy 2, Alembic, Pydantic. Base de données : PostgreSQL.
 - **Frontend :** React, TypeScript, Vite, Ant Design 5, TanStack Query, `react-i18next`, client d'API généré par `orval` depuis l'OpenAPI de FastAPI.
 - **Tests :** `pytest` ; Vitest et Playwright.
-- **Déploiement :** application séparée (lien depuis Hopitalia), hébergée sur les serveurs de l'hôpital ; comptes utilisateurs gérés par le module (pas de connexion commune Hopitalia) ; comptes comptables du plan SYSCOHADA révisé. Détails : section 17 du cahier des charges.
+- **Déploiement et Hopitalia :** application séparée (lien depuis Hopitalia), hébergée sur les serveurs de l'hôpital. La connexion des agents passe par Hopitalia (jetons vérifiés localement) ; les droits budgétaires sont propres au module. Fournisseurs, services et achats pharmaceutiques sont importés d'Hopitalia, jamais ressaisis. Comptes comptables du plan SYSCOHADA révisé. Détails : section 17 du cahier des charges et [note d'intégration](docs/cadrage/integration-hopitalia.md).
+- **Secrets :** la clé de vérification des jetons Hopitalia et le compte technique Hopitalia sont des secrets de production, en variables d'environnement, jamais dans le dépôt.
 - **Organisation :** dépôt unique avec `backend/`, `frontend/` et `docs/` (structure à créer : T-022).
 - **Noms techniques :** paquet Python `hopitalia_budget`, paquet npm `@hopitalia/budget-web`, base `hopitalia_budget`, images `hopitalia-budget-api` et `hopitalia-budget-web`.
 

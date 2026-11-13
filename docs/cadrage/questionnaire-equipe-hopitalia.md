@@ -8,11 +8,11 @@ Ces réponses conditionnent le démarrage du développement : authentification, 
 
 **Q-H01 — Fournisseur d'identité.** Hopitalia dispose-t-il d'un service de connexion commun à ses modules ? Si oui : quel protocole (OpenID Connect, SAML, LDAP, autre), quel produit (Keycloak, Active Directory…), et comment un nouveau module s'y déclare-t-il ?
 
-> Réponse (13/11/2026) : pas de service de connexion commun ; le module gère ses propres comptes.
+> Réponse (13/11/2026, corrigée après lecture du code `hopitalia-backend`) : Hopitalia a sa propre connexion (`/api/auth/login`, jetons JWT HS512 avec rôles et permissions). Décision : le module réutilise cette connexion (voir [note d'intégration](integration-hopitalia.md)).
 
 **Q-H02 — Profils et droits.** Les profils et droits des utilisateurs sont-ils gérés de façon centrale dans Hopitalia, ou chaque module gère-t-il les siens ?
 
-> Réponse (13/11/2026, déduite de Q-H01) : sans objet : les comptes, profils et droits sont gérés dans le module.
+> Réponse (13/11/2026, corrigée après lecture du code `hopitalia-backend`) : rôles et permissions gérés dans Hopitalia ; le module attribue ses propres profils budgétaires, les rôles Hopitalia n'y donnent aucun droit.
 
 ## 2. Interface
 
@@ -28,7 +28,7 @@ Ces réponses conditionnent le démarrage du développement : authentification, 
 
 **Q-H05 — Référentiels.** Les fournisseurs, services hospitaliers, établissements et sites existent-ils déjà dans Hopitalia ? Si oui : par quelle API les lire, avec quel identifiant unique, et à quelle fréquence changent-ils ?
 
-> Réponse (13/11/2026) : ces référentiels n'existent pas dans Hopitalia ; ils sont créés et gérés dans le module.
+> Réponse (13/11/2026, corrigée après lecture du code `hopitalia-backend`) : Hopitalia contient des fournisseurs (pharmacie, `codeFourn`) et des services (`codeService`). Décision : import depuis Hopitalia, complété dans le module.
 
 **Q-H06 — Stocks et pharmacie.** Le module stocks expose-t-il une API pour recevoir les réceptions validées (entrées en stock) et rapprocher commandes et livraisons ?
 
@@ -40,17 +40,17 @@ Ces réponses conditionnent le démarrage du développement : authentification, 
 
 **Q-H08 — Documentation.** Merci de joindre la documentation des API concernées (OpenAPI, Postman ou autre) et d'indiquer un environnement de test accessible.
 
-> Réponse :
+> Réponse (13/11/2026) : pas de documentation séparée ; les API sont documentées à partir du code dans la [note d'intégration](integration-hopitalia.md). Hopitalia publie aussi son OpenAPI à l'exécution (`/v3/api-docs`).
 
 ## 4. Hébergement
 
 **Q-H09 — Base de données.** Quelle base de données Hopitalia utilise-t-il ? Le module prévoit PostgreSQL : est-ce compatible avec votre exploitation ?
 
-> Réponse :
+> Réponse (13/11/2026, constatée dans le code) : PostgreSQL.
 
 **Q-H10 — Infrastructure.** Où le module sera-t-il hébergé (serveurs de l'hôpital, centre de données, nuage) ? Les conteneurs Docker sont-ils autorisés ? L'accès à Internet depuis les serveurs est-il filtré ?
 
-> Réponse (13/11/2026) : serveurs de l'hôpital, sur le réseau hospitalier. Docker et filtrage d'Internet : à préciser.
+> Réponse (13/11/2026) : serveurs de l'hôpital, sur le réseau hospitalier. Hopitalia est déjà déployé en conteneurs Docker (constaté dans le code). Filtrage d'Internet : à préciser.
 
 **Q-H11 — Établissements.** Quels établissements et sites seront concernés au premier déploiement ?
 
