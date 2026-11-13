@@ -17,12 +17,13 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 | [Cahier des charges V3](Backend/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) | **Source de vérité** : exigences, règles de gestion, formules, modèle de données, conventions d'API. En cas de doute, il prime sur ce fichier. |
 | [CAHIER_DES_TACHES.md](CAHIER_DES_TACHES.md) | Tâches par priorité, statuts, dépendances, critères de fin. |
 | [POINTS_REPORTES.md](POINTS_REPORTES.md) | Ce qui a été volontairement remis à plus tard. |
+| [docs/cadrage/](docs/cadrage/) | Questionnaires (DAF, équipe Hopitalia), matrice des habilitations, jeu d'essai de référence. |
 
 **État actuel :** phase de cadrage, aucun code encore. Commencer par les tâches P0 du cahier des tâches.
 
 ## Pile technique
 
-- **Backend :** Python, FastAPI, SQLAlchemy 2, Alembic, Pydantic. Base de données : PostgreSQL (à confirmer, T-012).
+- **Backend :** Python, FastAPI, SQLAlchemy 2, Alembic, Pydantic. Base de données : PostgreSQL.
 - **Frontend :** React, TypeScript, Vite, Ant Design 5, TanStack Query, `react-i18next`, client d'API généré par `orval` depuis l'OpenAPI de FastAPI.
 - **Tests :** `pytest` ; Vitest et Playwright.
 - **Organisation :** dépôt unique avec `backend/`, `frontend/` et `docs/` (structure à créer : T-022).
