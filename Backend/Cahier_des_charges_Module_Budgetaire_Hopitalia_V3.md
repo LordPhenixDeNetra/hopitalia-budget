@@ -1,12 +1,13 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.0 · 13 novembre 2026 · Statut : proposition à valider**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.1 · 13 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
 | 1.0 | — | Première version (incluait la passation des marchés). |
 | 2.0 | Novembre 2026 | Recentrage sur le suivi après attribution ; diagramme de classes V2. |
 | 3.0 | 13/11/2026 | Fusion du cahier des charges V2 et du diagramme de classes V2, corrections du modèle, ajout des principes d'architecture (SOLID) et des conventions d'API. |
+| 3.1 | 13/11/2026 | Validation ; intégration des réponses de cadrage (authentification propre, application séparée, référentiels gérés dans le module, plan SYSCOHADA, circuits avec ordonnateur, échanges par fichiers) ; section 17 mise à jour. |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -28,7 +29,7 @@
 14. [Tableaux de bord, alertes et états](#14-tableaux-de-bord-alertes-et-états)
 15. [Recette](#15-recette)
 16. [Livrables et lots](#16-livrables-et-lots)
-17. [Points ouverts](#17-points-ouverts)
+17. [Décisions de cadrage](#17-décisions-de-cadrage)
 18. [Annexes](#18-annexes)
 
 ---
@@ -90,24 +91,18 @@ flowchart LR
     API["API REST /api/v1"]
     UI --> API
   end
-  subgraph Hopitalia["Autres modules Hopitalia"]
-    REF["Référentiels<br/>fournisseurs, services"]
+  subgraph Hopitalia["Autres modules Hopitalia (API)"]
     STK["Stocks et pharmacie"]
     FAC["Facturation patient<br/>et recouvrement"]
-    SSO["Authentification"]
   end
-  subgraph Tiers["Systèmes tiers autorisés"]
-    CPT["Comptabilité"]
-    BNK["Banques"]
-    INST["Tutelle, institutions"]
+  subgraph Fichiers["Échanges par fichiers"]
+    CPT["Comptabilité<br/>export tableur, CSV"]
+    INST["Tutelle<br/>états exportés"]
   end
   U1 & U2 & U3 & U4 --> UI
-  API <--> REF
   API <--> STK
   API <--> FAC
-  API <--> SSO
-  API <--> CPT
-  API <--> BNK
+  API --> CPT
   API --> INST
 ```
 
@@ -157,7 +152,7 @@ Chaque exigence porte un identifiant stable, repris dans la recette (section 15)
 | EF-REF-02 | Axes de classement : exercice et période (annuelle, trimestrielle, mensuelle), compte budgétaire, nature économique, programme ou projet, source de financement ou bailleur, centre de responsabilité, site. |
 | EF-REF-03 | Le compte budgétaire de contrôle est distinct du compte comptable ; une table de correspondance les relie. |
 | EF-REF-04 | Référentiels administrables : fournisseurs et coordonnées de paiement, services et responsables, types de dépenses, familles d'achats, modes de règlement, comptes de trésorerie, types de pièces, statuts. |
-| EF-REF-05 | Les référentiels déjà présents dans Hopitalia (fournisseurs, services) sont réutilisés, sans double saisie. |
+| EF-REF-05 | Les référentiels (fournisseurs, services, établissements, sites) sont gérés dans le module : Hopitalia n'en dispose pas. Ils peuvent être importés par fichier à la mise en service. |
 
 ### 4.2. Budgets et crédits (lot 1)
 
@@ -1567,7 +1562,7 @@ Règle d'usage : **un seul niveau d'imbrication**. Au-delà, on repart de la res
 
 - Le champ `code` est stable et sert de clé de traduction côté frontend ; `title` et `detail` suivent l'en-tête `Accept-Language` (I18N-07).
 - `401` sans authentification, `403` sans habilitation ou hors de l'établissement de l'utilisateur, `404` pour un objet d'un autre établissement (on ne révèle pas son existence).
-- TLS obligatoire ; jetons d'accès à durée courte, révocables ; authentification unifiée avec Hopitalia *(à confirmer, section 17)*.
+- TLS obligatoire ; jetons d'accès à durée courte, révocables ; authentification propre au module (section 17, point 2).
 - Documentation OpenAPI 3 générée par FastAPI et publiée avec chaque version.
 
 ## 12. Exigences non fonctionnelles
@@ -1626,10 +1621,10 @@ L'application est internationalisée dès le lot 0 : ajouter une langue ne deman
 
 | Réf. | Exigence |
 |---|---|
-| INT-01 | Réutiliser les référentiels Hopitalia (fournisseurs, services, structures). |
+| INT-01 | *Sans objet :* Hopitalia n'a pas de référentiels communs ; ils sont gérés dans le module (EF-REF-05). |
 | INT-02 | Échanger avec la facturation hospitalière pour le volet recettes. |
 | INT-03 | Échanger avec les stocks et la pharmacie pour rapprocher commandes, réceptions et consommations, sans confondre consommation de stock et paiement fournisseur. |
-| INT-04 | API sécurisées pour les systèmes comptables, bancaires ou institutionnels autorisés. |
+| INT-04 | Échanges avec la comptabilité par export de fichiers (tableur, CSV) ; confirmations de virement saisies dans le module, sans échange automatique avec les banques. |
 | INT-05 | Import et export des budgets, engagements, liquidations et paiements en formats structurés. |
 | INT-06 | Identifiants uniques partagés entre modules pour éviter les doublons. |
 | INT-07 | Chaque échange est journalisé (`JournalIntegration`) ; les erreurs sont reprises automatiquement ou manuellement ; les reprises sont idempotentes. |
@@ -1667,6 +1662,8 @@ Taux d'engagement, de liquidation et de paiement ; reste à engager sur marchés
 ### 14.4. États et éditions
 
 Budget primitif et révisé par compte et service ; situation des crédits disponibles ; engagements par fournisseur, marché et compte ; exécution financière de chaque contrat ; commandes et réceptions ; factures reçues, rejetées, validées et liquidées ; dossiers transmis en paiement ; paiements et rapprochements ; restes à engager, à liquider et à payer ; dépenses par service, compte, nature et période ; contrats arrivant à échéance ; journal des opérations et rapport d'audit.
+
+La tutelle n'impose pas de modèle officiel : la présentation des états est libre (réponse de cadrage Q-D11).
 
 ## 15. Recette
 
@@ -1740,21 +1737,32 @@ Données budgétaires exactes et rapprochées des référentiels validés ; marc
 
 Le lot 0 est ajouté : l'audit, l'idempotence et le cloisonnement sont difficiles à ajouter après coup.
 
-## 17. Points ouverts
+## 17. Décisions de cadrage
 
-Statuts : **Décidé** (définitif) ; **Provisoire** (appliqué dès maintenant, à confirmer par la DAF lors de la validation du cahier des charges) ; **Ouvert** (en attente d'une information externe). Les questions encore ouvertes sont regroupées dans les questionnaires du dossier `docs/cadrage/`.
+Réponses aux questionnaires de cadrage (`docs/cadrage/`), données par le responsable du projet le 13/11/2026. Statuts : **Décidé** ; **Provisoire** (appliqué, à confirmer) ; **Ouvert** (information encore attendue).
 
 | # | Sujet | Décision | Statut |
 |---|---|---|---|
 | 1 | Pile technique | Backend **FastAPI** (Python) ; interface **React + TypeScript + Ant Design** (12.1) ; base **PostgreSQL** (verrouillage de lignes pour RG-20, types numériques exacts, JSON pour l'audit). | Décidé |
-| 2 | Authentification | Réutiliser le fournisseur d'identité d'Hopitalia s'il existe. | Ouvert (équipe Hopitalia) |
-| 3 | Nomenclature budgétaire de référence | Paramétrable ; contenu à fournir par la DAF. | Ouvert (DAF) |
-| 4 | Fournisseurs partagés entre établissements ou propres à chacun | Référentiel partagé ; coordonnées bancaires et statut propres à chaque établissement. | Provisoire |
-| 5 | Base du taux de consommation d'un marché | Engagé (cumul engagé / montant actualisé). | Provisoire |
-| 6 | Traitement budgétaire de l'avance | L'avance consomme le crédit à sa liquidation ; sa récupération sur les décomptes réduit leur consommation (6.3). | Provisoire |
-| 7 | Limitation de débit et maintien des versions d'API | 300 requêtes par minute par utilisateur, 10 imports ou exports par heure ; version d'API maintenue 12 mois après la suivante ; clés d'idempotence conservées 24 heures. Valeurs paramétrables. | Provisoire |
-| 8 | Durées de conservation des pièces | Paramétrable par type de pièce ; **10 ans** par défaut, durée de conservation des pièces comptables dans l'espace OHADA. | Provisoire |
-| 9 | Seuils hors marché par type de dépense | Paramétrables par type de dépense. Tant qu'aucun seuil n'est renseigné pour un type, une dépense hors marché de ce type exige une dérogation. | Provisoire (valeurs à fournir par la DAF) |
+| 2 | Authentification | Hopitalia n'a pas de service de connexion commun : **comptes gérés par le module** (mot de passe haché, jetons d'accès courts et révocables, verrouillage après échecs répétés, expiration des accès). | Décidé |
+| 3 | Nomenclature et plan comptable | Comptes comptables du **plan SYSCOHADA révisé** ; nomenclature budgétaire construite sur ce plan, chargée par import et relue par la DAF. | Décidé |
+| 4 | Fournisseurs | Référentiel partagé entre établissements ; coordonnées bancaires et statut propres à chaque établissement. | Décidé |
+| 5 | Taux de consommation d'un marché | Calculé sur l'engagé (cumul engagé / montant actualisé). | Décidé |
+| 6 | Avance | L'avance consomme le crédit à sa liquidation ; sa récupération sur les décomptes réduit leur consommation (6.3). | Décidé |
+| 7 | Limites techniques de l'API | 300 requêtes par minute par utilisateur, 10 imports ou exports par heure ; version d'API maintenue 12 mois après la suivante ; clés d'idempotence conservées 24 heures. Valeurs paramétrables. | Provisoire |
+| 8 | Conservation des pièces | 10 ans par défaut, modifiable par type de pièce. | Décidé |
+| 9 | Seuils hors marché | Paramétrables par type de dépense. Tant qu'aucun seuil n'est renseigné pour un type, une dépense hors marché de ce type exige une dérogation. Valeurs saisies plus tard par paramétrage. | Décidé |
+| 10 | Intégration de l'interface | **Application séparée**, accessible par un lien depuis Hopitalia. | Décidé |
+| 11 | Hébergement | **Serveurs de l'hôpital**, sur le réseau hospitalier. | Décidé |
+| 12 | Référentiels | Gérés dans le module (EF-REF-05) ; import par fichier possible à la mise en service. | Décidé |
+| 13 | Stocks et facturation patient | Modules Hopitalia dotés d'API : échanges par API (INT-02, INT-03). Documentation et accès de test à obtenir. | Ouvert |
+| 14 | Volet recettes | Activé après la mise en service, pas au démarrage. | Décidé |
+| 15 | Langues | Français par défaut et anglais (I18N-01). | Décidé |
+| 16 | Circuits de validation | L'ordonnateur valide **toujours**, après le valideur (DAF), quel que soit le montant : révisions, avenants, engagements, liquidations, dérogations. | Décidé |
+| 17 | Comptabilité et banque | Export de fichiers vers la comptabilité ; confirmations de virement saisies dans le module (INT-04). | Décidé |
+| 18 | États réglementaires | Pas de modèle officiel imposé par la tutelle : présentation libre (14.4). | Décidé |
+
+**Encore attendus** (questionnaires) : charte graphique Hopitalia (Q-H04), documentation des API stocks et facturation (Q-H08), établissements du premier déploiement (Q-H11), données réelles anonymisées pour la recette (Q-D08), interlocuteurs (Q-H12, Q-D14).
 
 ## 18. Annexes
 
