@@ -31,20 +31,17 @@
 
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P0 | 16 | 2 | 52 | 1 | 0 | 0 | 71 |
+| P0 | 17 | 3 | 51 | 0 | 0 | 1 | 72 |
 | P1 | 0 | 0 | 81 | 0 | 0 | 0 | 81 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
-| P3 | 0 | 0 | 19 | 2 | 0 | 2 | 23 |
-| **Total** | **16** | **2** | **184** | **3** | **0** | **2** | **207** |
+| P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
+| **Total** | **17** | **3** | **186** | **0** | **0** | **2** | **208** |
 
-Avancement : 16 / 205 tâches actives terminées (8 %), hors 2 abandonnées.
+Avancement : 17 / 206 tâches actives terminées (8 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
-| Tâche | Bloqué par | Qui peut débloquer |
-|---|---|---|
-| T-011 | Documentation et accès de test aux API stocks et facturation. | Équipe Hopitalia ([questionnaire](docs/cadrage/questionnaire-equipe-hopitalia.md), Q-H08) |
-| T-202, T-203 | Dépendent de T-011. | Équipe Hopitalia |
+Aucune tâche bloquée.
 
 ## Ordre de réalisation
 
@@ -79,15 +76,16 @@ flowchart LR
 | T-005 | Recommander l'organisation des dépôts. | — | — | Fait | Dépôt unique recommandé. |
 | T-006 | Valider le cahier des charges V3 avec la DAF et l'équipe Hopitalia. | — | T-001 | Fait | Version validée, remarques intégrées (version 3.1). |
 | T-007 | Confirmer le dépôt unique (monorepo). | — | T-005 | Fait | Décision écrite. |
-| T-008 | Choisir l'authentification : fournisseur d'identité d'Hopitalia ou authentification propre. | §11.9, §17.2 | — | Fait | Décision écrite : authentification propre au module (§17, point 2). |
-| T-009 | Construire la nomenclature budgétaire sur le plan SYSCOHADA révisé (sections, chapitres, articles, comptes) et la faire relire par la DAF. | EF-REF-01, §17.3 | — | À faire | Fichier d'import de la nomenclature relu par la DAF. |
+| T-008 | Choisir l'authentification : fournisseur d'identité d'Hopitalia ou authentification propre. | §11.9, §17.2 | — | Fait | Décision écrite : connexion Hopitalia réutilisée, droits budgétaires propres au module (§17, point 2). |
+| T-009 | Construire la nomenclature budgétaire sur le plan SYSCOHADA révisé (sections, chapitres, articles, comptes) et la faire relire par la DAF. | EF-REF-01, §17.3 | — | En cours | Fichier d'import de la nomenclature relu par la DAF. *Projet prêt : `docs/cadrage/nomenclature-budgetaire.csv`.* |
 | T-010 | Vérifier si Hopitalia a un frontend et un dépôt central où le module doit s'intégrer. | §17.1 | — | Fait | Réponse écrite : application séparée (§17, point 10). |
-| T-011 | Obtenir la documentation et un accès de test aux API stocks et facturation patient d'Hopitalia. | §13 | — | Bloqué | Documentation et environnement de test disponibles. *Bloqué : équipe Hopitalia ; question Q-H08.* |
+| T-011 | Documenter les API Hopitalia utilisées (connexion, référentiels, pharmacie, facturation) et monter un environnement de test Hopitalia. | §13 | — | En cours | Note d'intégration écrite (fait : `docs/cadrage/integration-hopitalia.md`) et environnement de test Hopitalia en fonctionnement. |
 | T-012 | Confirmer PostgreSQL comme base de données. | ENF-08, §17.1 | — | Fait | Décision écrite. |
 | T-013 | Trancher les points ouverts 4 à 9 de la section 17 (fournisseurs partagés, base du taux de consommation, traitement de l'avance, limites de débit, conservation, seuils hors marché). | §17 | T-006 | Fait | Chaque point a une décision inscrite dans le cahier des charges. |
-| T-014 | Vérifier le rendu des 17 diagrammes Mermaid du cahier des charges. | — | T-001 | En cours | Tous les diagrammes s'affichent sur GitHub. |
+| T-014 | Vérifier le rendu des 17 diagrammes Mermaid du cahier des charges. | — | T-001 | Fait | Tous les diagrammes s'affichent sur GitHub (vérifié par le responsable du projet). |
 | T-015 | Constituer un jeu de données d'essai réaliste (budget, contrats, factures) avec la DAF, dont l'exemple de l'annexe 18.2. | §18.2 | T-009 | Fait | Jeu d'essai validé le 13/11/2026 (codes fictifs à remplacer, T-009). |
 | T-016 | Établir la matrice des habilitations (profil × opération × seuil). | §3, RG-13 | T-006 | Fait | Matrice validée le 13/11/2026 (l'ordonnateur valide toujours). |
+| T-017 | Obtenir de l'équipe Hopitalia un compte technique en lecture et la clé de vérification des jetons ; lui transmettre, hors du dépôt, les points de sécurité relevés. | §17.2, INT-01 | T-011 | À faire | Compte et clé fournis hors dépôt ; points de sécurité transmis par écrit. |
 
 ### P0.B — Dépôt et outillage
 
@@ -124,8 +122,8 @@ flowchart LR
 | T-049 | Idempotence : en-tête `Idempotency-Key`, table `CleIdempotence`, rejeu de la réponse. | §11.3, API-01 à 03 | T-042 | À faire | Tests API-01, API-02, API-03 verts. |
 | T-050 | Concurrence optimiste : `ETag`, `If-Match`, réponses `412` et `428`. | §11.3, API-05 | T-042 | À faire | Test API-05 vert. |
 | T-051 | Limitation de débit par utilisateur et par client, en-têtes `RateLimit-*`, `429`. | §11.7, API-08 | T-040 | À faire | Test API-08 vert. |
-| T-052 | Authentification propre au module : connexion, jetons d'accès courts, rafraîchissement, révocation. | ENF-02 | T-008 | À faire | Appel sans jeton donne `401`. |
-| T-039 | Gestion des comptes utilisateurs : création par l'administrateur, mot de passe haché (Argon2), réinitialisation, verrouillage après échecs répétés, désactivation, expiration des accès. | ENF-02, §17.2 | T-052 | À faire | Tests : compte verrouillé après N échecs, compte expiré refusé, aucun mot de passe en clair. |
+| T-052 | Connexion relayée vers Hopitalia (connexion, rafraîchissement, déconnexion) et vérification locale des jetons Hopitalia (HS512, clé en variable d'environnement). | ENF-02 | T-008, T-017 | À faire | Jeton Hopitalia valide accepté ; jeton expiré ou mal signé refusé (`401`) ; agent sans profil budgétaire refusé (`403`). |
+| T-039 | Gestion des comptes utilisateurs : création par l'administrateur, mot de passe haché (Argon2), réinitialisation, verrouillage après échecs répétés, désactivation, expiration des accès. | ENF-02, §17.2 | T-052 | Abandonné | *Abandonné : la connexion Hopitalia est réutilisée ; seuls les droits budgétaires sont gérés dans le module (T-053).* |
 | T-053 | Habilitations : profils, permissions, seuils de montant. | §3, ENF-02 | T-052, T-016 | À faire | Appel non autorisé donne `403`. |
 | T-054 | Cloisonnement par établissement, appliqué côté serveur à chaque requête. | ENF-04, REC-17 | T-053 | À faire | Tests REC-17 et API-10 verts (`404` hors établissement). |
 | T-055 | Journal d'audit en ajout seul (ancienne et nouvelle valeur, IP), protégé en base contre la modification. | EF-AUD-01, ENF-05 | T-042 | À faire | Un `UPDATE` ou `DELETE` sur la table d'audit échoue. |
@@ -349,9 +347,9 @@ flowchart LR
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
 | T-200 | Journal d'intégration, reprises automatiques et manuelles, idempotentes. | INT-07 | T-049 | À faire | Échange en échec repris sans doublon. |
-| T-201 | Synchronisation des référentiels Hopitalia (fournisseurs, services). | INT-01, EF-REF-05 | T-011, T-200 | Abandonné | *Abandonné : Hopitalia n'a pas de référentiels communs ; ils sont gérés dans le module (§17, point 12).* |
-| T-202 | Échange avec les stocks et la pharmacie (réception → mouvement de stock). | INT-03 | T-011, T-165 | Bloqué | Réception validée transmise une seule fois. *Bloqué : T-011.* |
-| T-203 | Échange avec la facturation patient et le recouvrement (volet recettes). | INT-02 | T-011, T-262 | Bloqué | Facturé et encaissé alimentés par interface. *Bloqué : T-011.* |
+| T-201 | Import des fournisseurs et services depuis Hopitalia (identifiant externe, désactivation sans suppression). | INT-01, EF-REF-05 | T-011, T-017, T-200 | À faire | Deux synchronisations successives sans doublon ; un fournisseur retiré d'Hopitalia est désactivé. |
+| T-202 | Import des bons de commande et approvisionnements de la pharmacie Hopitalia, rattachement aux engagements, annulation des réceptions supprimées. | INT-03 | T-011, T-017, T-160, T-161, T-200 | À faire | Approvisionnement importé une seule fois ; suppression dans Hopitalia annule la réception avec trace (EF-REC-07). |
+| T-203 | Échange avec la facturation patient et le recouvrement (volet recettes). | INT-02 | T-011, T-017, T-262 | À faire | Facturé et encaissé alimentés par interface. *Bloqué : T-011.* |
 | T-204 | Échange avec la banque (confirmation des virements). | INT-04 | T-187 | Abandonné | *Abandonné : confirmations de virement saisies à la main dans le module (§17, point 17).* |
 | T-205 | Export vers la comptabilité par fichier (tableur, CSV). | INT-04 | T-187, T-206 | À faire | Fichier accepté par le service comptable. |
 | T-206 | Import et export structurés (budgets, engagements, liquidations, paiements). | INT-05 | T-200 | À faire | Aller-retour export → import sans perte. |
@@ -405,3 +403,8 @@ flowchart LR
 | 13/11/2026 | T-009, T-205 | Bloqué | À faire | Nomenclature construite sur le plan SYSCOHADA révisé ; export comptable par fichier. |
 | 13/11/2026 | T-201, T-204 | À faire, Bloqué | Abandonné | Pas de référentiels communs Hopitalia ; pas d'échange bancaire automatique. |
 | 13/11/2026 | T-039 | — | À faire | Ajout : gestion des comptes utilisateurs propres au module. |
+| 13/11/2026 | T-014 | En cours | Fait | Diagrammes vérifiés sur GitHub. |
+| 13/11/2026 | T-009, T-011 | À faire, Bloqué | En cours | Projet de nomenclature SYSCOHADA prêt ; note d'intégration Hopitalia écrite à partir du code. |
+| 13/11/2026 | T-039 | À faire | Abandonné | Connexion Hopitalia réutilisée. |
+| 13/11/2026 | T-201, T-202, T-203 | Abandonné, Bloqué | À faire | Référentiels et achats pharmaceutiques importés d'Hopitalia ; API documentées. |
+| 13/11/2026 | T-017 | — | À faire | Ajout : compte technique et clé Hopitalia, points de sécurité. |
