@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Version 3.0 · 13 novembre 2026 · Statut : proposition à valider**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.0 · 13 novembre 2026 · Statut : proposition à valider**
 
 | Version | Date | Objet |
 |---|---|---|

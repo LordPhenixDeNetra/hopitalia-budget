@@ -4,6 +4,8 @@ Règles du projet pour tout agent de code et tout développeur. [CLAUDE.md](CLAU
 
 ## Le projet
 
+**Nom :** `hopitalia-budget` · **Dépôt :** https://github.com/LordPhenixDeNetra/hopitalia-budget · **Nom affiché :** Hopitalia Budget
+
 Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia : crédits, marchés et contrats, engagements, réceptions, factures, liquidations, paiements, tableaux de bord.
 
 **Périmètre non négociable :** le module suit les marchés **déjà attribués** et les contrats **déjà signés**. Ne jamais ajouter de fonction de lancement, de passation, d'évaluation ou d'attribution de marché (RG-12).
@@ -23,7 +25,8 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 - **Backend :** Python, FastAPI, SQLAlchemy 2, Alembic, Pydantic. Base de données : PostgreSQL (à confirmer, T-012).
 - **Frontend :** React, TypeScript, Vite, Ant Design 5, TanStack Query, `react-i18next`, client d'API généré par `orval` depuis l'OpenAPI de FastAPI.
 - **Tests :** `pytest` ; Vitest et Playwright.
-- **Organisation :** dépôt unique avec `backend/`, `frontend/` et `docs/` (recommandé, à confirmer : T-007).
+- **Organisation :** dépôt unique avec `backend/`, `frontend/` et `docs/` (structure à créer : T-022).
+- **Noms techniques :** paquet Python `hopitalia_budget`, paquet npm `@hopitalia/budget-web`, base `hopitalia_budget`, images `hopitalia-budget-api` et `hopitalia-budget-web`.
 
 ## Règles métier à ne jamais enfreindre
 
