@@ -1,10 +1,10 @@
 # Jeu d'essai — marché annuel de fournitures médicales
 
-**Projet :** Hopitalia Budget · **Statut :** validé le 13/11/2026, codes budgétaires fictifs (tâche T-015) · **Référence :** cahier des charges V3, annexe 18.2
+**Projet :** Hopitalia Budget · **Statut :** validé le 13/11/2026 ; codes du projet de nomenclature (tâche T-009) · **Référence :** cahier des charges V3, annexe 18.2
 
 Ce jeu d'essai détaille, pièce par pièce, l'exemple chiffré de l'annexe 18.2. Il sert de référence aux tests automatisés et à la recette : chaque résultat attendu doit être retrouvé exactement par l'application.
 
-Les codes budgétaires sont **fictifs** : ils seront remplacés par les comptes du plan SYSCOHADA révisé retenus dans la nomenclature (tâche T-009). Pour simplifier, les montants sont toutes taxes comprises et sans retenue (net à payer = montant liquidé). Montants en francs CFA (XOF).
+Les codes budgétaires sont ceux du [projet de nomenclature](nomenclature-budgetaire.md) construit sur le plan SYSCOHADA révisé : `604-MED` (médicaments consommés dans les soins) et `604-CMD` (consommables médicaux). Pour simplifier, les montants sont toutes taxes comprises et sans retenue (net à payer = montant liquidé). Montants en francs CFA (XOF).
 
 ## 1. Situation de départ
 
@@ -12,21 +12,21 @@ Les codes budgétaires sont **fictifs** : ils seront remplacés par les comptes 
 
 | Ligne budgétaire | Code (fictif) | Dotation |
 |---|---|---:|
-| Médicaments | 6021-MED | 90 000 000 |
-| Consommables médicaux | 6022-CONS | 40 000 000 |
+| Médicaments | 604-MED | 90 000 000 |
+| Consommables médicaux | 604-CMD | 40 000 000 |
 
 **Marché** M-2026-001, fournitures médicales, fournisseur « Pharma Test SA » (fictif), signé le 05/01/2026, montant 100 000 000, sans avenant.
 
 | Ventilation du marché | Montant |
 |---|---:|
-| 6021-MED | 70 000 000 |
-| 6022-CONS | 30 000 000 |
+| 604-MED | 70 000 000 |
+| 604-CMD | 30 000 000 |
 
 ## 2. Pièces
 
 ### Engagements
 
-| Engagement | Date | 6021-MED | 6022-CONS | Total | Statut |
+| Engagement | Date | 604-MED | 604-CMD | Total | Statut |
 |---|---|---:|---:|---:|---|
 | ENG-001 | 15/01/2026 | 50 000 000 | — | 50 000 000 | Validé |
 | ENG-002 | 10/02/2026 | 15 000 000 | 15 000 000 | 30 000 000 | Validé |
@@ -45,9 +45,9 @@ Les codes budgétaires sont **fictifs** : ils seront remplacés par les comptes 
 
 | Facture | Montant | Rattachement | Liquidation | Imputation | Montant liquidé | Statut liquidation |
 |---|---:|---|---|---|---:|---|
-| FAC-001 | 30 000 000 | ENG-001, REC-001 | LIQ-001 | ENG-001 / 6021-MED | 30 000 000 | Validée |
-| FAC-002 | 15 000 000 | ENG-002, REC-002 | LIQ-002 | ENG-002 / 6021-MED | 10 000 000 | Validée |
-| | | | LIQ-003 | ENG-002 / 6022-CONS | 5 000 000 | Validée |
+| FAC-001 | 30 000 000 | ENG-001, REC-001 | LIQ-001 | ENG-001 / 604-MED | 30 000 000 | Validée |
+| FAC-002 | 15 000 000 | ENG-002, REC-002 | LIQ-002 | ENG-002 / 604-MED | 10 000 000 | Validée |
+| | | | LIQ-003 | ENG-002 / 604-CMD | 5 000 000 | Validée |
 | FAC-003 | 5 000 000 | ENG-001, REC-003 | — | — | — | Facture en contrôle |
 
 FAC-002 porte sur les deux lignes de l'engagement ENG-002 : elle donne deux liquidations, une par imputation (règle RG-17).
@@ -90,7 +90,7 @@ LIQ-002 n'est pas encore ordonnancée.
 
 ### Lignes budgétaires
 
-| Indicateur | 6021-MED | 6022-CONS | Total |
+| Indicateur | 604-MED | 604-CMD | Total |
 |---|---:|---:|---:|
 | Budget révisé | 90 000 000 | 40 000 000 | 130 000 000 |
 | Engagé | 65 000 000 | 15 000 000 | 80 000 000 |
@@ -131,7 +131,7 @@ LIQ-002 n'est pas encore ordonnancée.
 | Action | Résultat attendu | Règle |
 |---|---|---|
 | Créer ENG-003 de 25 000 000 sur le marché | Refusé : dépasse le reste à engager (20 000 000), sauf avenant ou dérogation. | RG-04 |
-| Créer un engagement de 30 000 000 sur 6022-CONS, sur décision autorisée (sans marché) | Refusé : dépasse le disponible (25 000 000), sauf dérogation. | RG-02 |
+| Créer un engagement de 30 000 000 sur 604-CMD, sur décision autorisée (sans marché) | Refusé : dépasse le disponible (25 000 000), sauf dérogation. | RG-02 |
 | Enregistrer à nouveau FAC-001 (même fournisseur, numéro, date, montant) | Refusé : doublon. | RG-16 |
 | Payer 6 000 000 sur LIQ-001 | Refusé : dépasse le reste dû (5 000 000). | RG-07 |
 | Liquider FAC-003 pour 6 000 000 | Refusé : dépasse la facture et la réception acceptée (5 000 000). | EF-LIQ-05 |

@@ -1,0 +1,86 @@
+﻿niveau;code;libelle;code_parent;compte_syscohada
+SECTION;F;Fonctionnement;;
+SECTION;I;Investissement;;
+CHAPITRE;60;Achats et variations de stocks;F;60
+ARTICLE;601;Achats de marchandises;60;601
+PARAGRAPHE;601-PHA;Médicaments revendus aux patients (pharmacie);601;601
+ARTICLE;604;Achats stockés de matières et fournitures consommables;60;604
+PARAGRAPHE;604-MED;Médicaments consommés dans les soins;604;604
+PARAGRAPHE;604-CMD;Consommables médicaux;604;604
+PARAGRAPHE;604-REA;Réactifs et produits de laboratoire;604;604
+PARAGRAPHE;604-IMG;Films et produits d'imagerie;604;604
+PARAGRAPHE;604-GAZ;Gaz médicaux;604;604
+PARAGRAPHE;604-ENT;Produits d'entretien;604;604
+PARAGRAPHE;604-BUR;Fournitures de bureau;604;604
+PARAGRAPHE;604-ALI;Denrées alimentaires;604;604
+ARTICLE;605;Autres achats;60;605
+PARAGRAPHE;605-EAU;Eau;605;605
+PARAGRAPHE;605-ELE;Électricité;605;605
+PARAGRAPHE;605-CAR;Carburants et lubrifiants;605;605
+PARAGRAPHE;605-PMO;Petit matériel et outillage;605;605
+CHAPITRE;61;Transports;F;61
+ARTICLE;614;Transports du personnel;61;614
+PARAGRAPHE;614-GEN;Transports du personnel;614;614
+ARTICLE;618;Autres frais de transport;61;618
+PARAGRAPHE;618-EVA;Évacuations et transferts de patients;618;618
+CHAPITRE;62;Services extérieurs;F;62
+ARTICLE;621;Sous-traitance générale;62;621
+PARAGRAPHE;621-NET;Nettoyage;621;621
+PARAGRAPHE;621-GAR;Gardiennage;621;621
+PARAGRAPHE;621-RES;Restauration sous-traitée;621;621
+PARAGRAPHE;621-DEC;Collecte et traitement des déchets;621;621
+ARTICLE;622;Locations et charges locatives;62;622
+PARAGRAPHE;622-GEN;Locations;622;622
+ARTICLE;624;Entretien, réparations et maintenance;62;624
+PARAGRAPHE;624-BIO;Maintenance biomédicale;624;624
+PARAGRAPHE;624-BAT;Entretien des bâtiments;624;624
+PARAGRAPHE;624-INF;Maintenance informatique et télécoms;624;624
+PARAGRAPHE;624-VEH;Entretien des véhicules;624;624
+ARTICLE;625;Primes d'assurance;62;625
+PARAGRAPHE;625-GEN;Assurances;625;625
+ARTICLE;626;Études, recherches et documentation;62;626
+PARAGRAPHE;626-GEN;Études et documentation;626;626
+ARTICLE;628;Frais de télécommunications;62;628
+PARAGRAPHE;628-GEN;Téléphone et internet;628;628
+CHAPITRE;63;Autres services extérieurs;F;63
+ARTICLE;631;Frais bancaires;63;631
+PARAGRAPHE;631-GEN;Frais bancaires;631;631
+ARTICLE;632;Rémunérations d'intermédiaires et de conseils;63;632
+PARAGRAPHE;632-GEN;Honoraires et prestations intellectuelles;632;632
+ARTICLE;633;Frais de formation du personnel;63;633
+PARAGRAPHE;633-GEN;Formation;633;633
+ARTICLE;634;Redevances pour brevets, licences, logiciels;63;634
+PARAGRAPHE;634-LOG;Licences et abonnements logiciels;634;634
+ARTICLE;637;Rémunérations de personnel extérieur à l'entité;63;637
+PARAGRAPHE;637-GEN;Personnel extérieur;637;637
+ARTICLE;638;Autres charges externes;63;638
+PARAGRAPHE;638-MIS;Frais de mission et de déplacement;638;638
+CHAPITRE;64;Impôts et taxes;F;64
+ARTICLE;641;Impôts et taxes directs;64;641
+PARAGRAPHE;641-GEN;Impôts et taxes directs;641;641
+CHAPITRE;65;Autres charges;F;65
+ARTICLE;658;Charges diverses;65;658
+PARAGRAPHE;658-GEN;Charges diverses;658;658
+CHAPITRE;66;Charges de personnel;F;66
+ARTICLE;661;Rémunérations directes versées au personnel national;66;661
+PARAGRAPHE;661-GEN;Salaires;661;661
+ARTICLE;663;Indemnités forfaitaires versées au personnel;66;663
+PARAGRAPHE;663-GEN;Indemnités et primes;663;663
+ARTICLE;664;Charges sociales;66;664
+PARAGRAPHE;664-GEN;Cotisations sociales;664;664
+CHAPITRE;21;Immobilisations incorporelles;I;21
+ARTICLE;213;Logiciels et sites internet;21;213
+PARAGRAPHE;213-GEN;Logiciels;213;213
+CHAPITRE;23;Bâtiments, installations techniques et agencements;I;23
+ARTICLE;231;Bâtiments;23;231
+PARAGRAPHE;231-GEN;Construction et extension de bâtiments;231;231
+ARTICLE;234;Installations techniques et agencements;23;234
+PARAGRAPHE;234-GEN;Installations techniques;234;234
+CHAPITRE;24;Matériel, mobilier et actifs biologiques;I;24
+ARTICLE;241;Matériel et outillage;24;241
+PARAGRAPHE;241-BIO;Équipements biomédicaux;241;241
+ARTICLE;244;Matériel et mobilier;24;244
+PARAGRAPHE;244-INF;Matériel informatique;244;244
+PARAGRAPHE;244-MOB;Mobilier;244;244
+ARTICLE;245;Matériel de transport;24;245
+PARAGRAPHE;245-VEH;Véhicules et ambulances;245;245
