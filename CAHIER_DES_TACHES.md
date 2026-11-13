@@ -1,6 +1,6 @@
 # Cahier des tâches — Module de suivi budgétaire Hopitalia
 
-**Référence :** [cahier des charges V3](Backend/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) · **Pile :** FastAPI, PostgreSQL (à confirmer), React, TypeScript, Ant Design · **Mise à jour :** 13/11/2026
+**Projet :** `hopitalia-budget` · **Dépôt :** https://github.com/LordPhenixDeNetra/hopitalia-budget · **Référence :** [cahier des charges V3](Backend/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) · **Pile :** FastAPI, PostgreSQL (à confirmer), React, TypeScript, Ant Design · **Mise à jour :** 13/11/2026
 
 ## Légende
 
@@ -31,13 +31,13 @@
 
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P0 | 6 | 1 | 56 | 4 | 3 | 0 | 70 |
+| P0 | 9 | 1 | 54 | 4 | 2 | 0 | 70 |
 | P1 | 0 | 0 | 81 | 0 | 0 | 0 | 81 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 18 | 5 | 0 | 0 | 23 |
-| **Total** | **6** | **1** | **187** | **9** | **3** | **0** | **206** |
+| **Total** | **9** | **1** | **185** | **9** | **2** | **0** | **206** |
 
-Avancement : 6 / 206 tâches terminées (3 %).
+Avancement : 9 / 206 tâches terminées (4 %).
 
 **Bloquants actuels**
 
@@ -81,7 +81,7 @@ flowchart LR
 | T-004 | Définir la charte d'interface. | IHM-01 à 12 | T-003 | Fait | Section 12.1 du cahier des charges. |
 | T-005 | Recommander l'organisation des dépôts. | — | — | Fait | Dépôt unique recommandé. |
 | T-006 | Valider le cahier des charges V3 avec la DAF et l'équipe Hopitalia. | — | T-001 | À faire | Version validée, remarques intégrées. |
-| T-007 | Confirmer le dépôt unique (monorepo). | — | T-005, T-010 | En attente | Décision écrite. |
+| T-007 | Confirmer le dépôt unique (monorepo). | — | T-005 | Fait | Décision écrite. |
 | T-008 | Choisir l'authentification : fournisseur d'identité d'Hopitalia ou authentification propre. | §11.9, §17.2 | — | Bloqué | Protocole (OIDC…) et fournisseur connus. *Bloqué : information Hopitalia.* |
 | T-009 | Obtenir la nomenclature budgétaire de référence (sections, chapitres, articles, comptes). | EF-REF-01, §17.3 | — | Bloqué | Fichier de nomenclature reçu. *Bloqué : DAF.* |
 | T-010 | Vérifier si Hopitalia a un frontend et un dépôt central où le module doit s'intégrer. | §17.1 | — | Bloqué | Réponse écrite. *Bloqué : équipe Hopitalia.* |
@@ -96,8 +96,8 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-020 | Initialiser le dépôt git et la branche `main`. | — | T-007 | À faire | `git log` montre le premier commit. |
-| T-021 | Créer le dépôt distant et y pousser `main`. | — | T-020 | À faire | `gh repo view` fonctionne. |
+| T-020 | Initialiser le dépôt git et la branche `main`. | — | T-007 | Fait | `git log` montre le premier commit. |
+| T-021 | Créer le dépôt distant et y pousser `main`. | — | T-020 | Fait | `gh repo view` fonctionne. |
 | T-022 | Créer la structure `backend/`, `frontend/`, `docs/` ; déplacer le cahier des charges et les images dans `docs/`. | — | T-020 | À faire | Arborescence en place, liens internes à jour. |
 | T-023 | Écrire `.gitignore` (Python, Node, environnements, `CLAUDE.local.md`). | — | T-020 | En cours | `git status` propre après installation. |
 | T-033 | Écrire `AGENTS.md` (règles du projet) et `CLAUDE.md` qui l'importe. | — | — | Fait | `CLAUDE.md` importe `AGENTS.md` ; liens vérifiés. |
@@ -400,3 +400,4 @@ flowchart LR
 | 13/11/2026 | T-059, T-063, T-076 à T-079, T-272, T-273 | — | À faire | Ajout de l'internationalisation (I18N-01 à 10). |
 | 13/11/2026 | T-023 | À faire | En cours | `.gitignore` créé à la racine ; à vérifier par `git status` après T-020 et l'installation des dépendances. |
 | 13/11/2026 | T-033 | — | Fait | `AGENTS.md` et `CLAUDE.md` créés. |
+| 13/11/2026 | T-007, T-020, T-021 | En attente, À faire | Fait | Dépôt unique `hopitalia-budget` créé sur GitHub, `main` poussée (« Init Commit »). |
