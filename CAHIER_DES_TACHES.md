@@ -31,13 +31,13 @@
 
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P0 | 17 | 3 | 51 | 0 | 0 | 1 | 72 |
+| P0 | 18 | 3 | 50 | 0 | 0 | 1 | 72 |
 | P1 | 0 | 0 | 81 | 0 | 0 | 0 | 81 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **17** | **3** | **186** | **0** | **0** | **2** | **208** |
+| **Total** | **18** | **3** | **185** | **0** | **0** | **2** | **208** |
 
-Avancement : 17 / 206 tâches actives terminées (8 %), hors 2 abandonnées.
+Avancement : 18 / 206 tâches actives terminées (9 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -79,13 +79,13 @@ flowchart LR
 | T-008 | Choisir l'authentification : fournisseur d'identité d'Hopitalia ou authentification propre. | §11.9, §17.2 | — | Fait | Décision écrite : connexion Hopitalia réutilisée, droits budgétaires propres au module (§17, point 2). |
 | T-009 | Construire la nomenclature budgétaire sur le plan SYSCOHADA révisé (sections, chapitres, articles, comptes) et la faire relire par la DAF. | EF-REF-01, §17.3 | — | En cours | Fichier d'import de la nomenclature relu par la DAF. *Projet prêt : `docs/cadrage/nomenclature-budgetaire.csv`.* |
 | T-010 | Vérifier si Hopitalia a un frontend et un dépôt central où le module doit s'intégrer. | §17.1 | — | Fait | Réponse écrite : application séparée (§17, point 10). |
-| T-011 | Documenter les API Hopitalia utilisées (connexion, référentiels, pharmacie, facturation) et monter un environnement de test Hopitalia. | §13 | — | En cours | Note d'intégration écrite (fait : `docs/cadrage/integration-hopitalia.md`) et environnement de test Hopitalia en fonctionnement. |
+| T-011 | Documenter les API Hopitalia utilisées (connexion, référentiels, pharmacie, facturation) et monter un environnement de test Hopitalia. | §13 | — | Fait | Note d'intégration écrite et vérifiée (`docs/cadrage/integration-hopitalia.md`) ; environnement de test Hopitalia en fonctionnement (11 vérifications sur 12 conformes du premier coup, la dernière après correction des paramètres de date). |
 | T-012 | Confirmer PostgreSQL comme base de données. | ENF-08, §17.1 | — | Fait | Décision écrite. |
 | T-013 | Trancher les points ouverts 4 à 9 de la section 17 (fournisseurs partagés, base du taux de consommation, traitement de l'avance, limites de débit, conservation, seuils hors marché). | §17 | T-006 | Fait | Chaque point a une décision inscrite dans le cahier des charges. |
 | T-014 | Vérifier le rendu des 17 diagrammes Mermaid du cahier des charges. | — | T-001 | Fait | Tous les diagrammes s'affichent sur GitHub (vérifié par le responsable du projet). |
 | T-015 | Constituer un jeu de données d'essai réaliste (budget, contrats, factures) avec la DAF, dont l'exemple de l'annexe 18.2. | §18.2 | T-009 | Fait | Jeu d'essai validé le 13/11/2026 (codes fictifs à remplacer, T-009). |
 | T-016 | Établir la matrice des habilitations (profil × opération × seuil). | §3, RG-13 | T-006 | Fait | Matrice validée le 13/11/2026 (l'ordonnateur valide toujours). |
-| T-017 | Obtenir de l'équipe Hopitalia un compte technique en lecture et la clé de vérification des jetons ; lui transmettre, hors du dépôt, les points de sécurité relevés. | §17.2, INT-01 | T-011 | À faire | Compte et clé fournis hors dépôt ; points de sécurité transmis par écrit. |
+| T-017 | Obtenir de l'équipe Hopitalia un compte technique en lecture et la clé de vérification des jetons ; lui transmettre, hors du dépôt, les points de sécurité relevés. | §17.2, INT-01 | T-011 | En cours | Compte et clé fournis hors dépôt ; points de sécurité transmis par écrit. *Note de sécurité et besoins du module rédigés hors dépôt ; reste à transmettre et à recevoir le compte et la clé.* |
 
 ### P0.B — Dépôt et outillage
 
@@ -408,3 +408,5 @@ flowchart LR
 | 13/11/2026 | T-039 | À faire | Abandonné | Connexion Hopitalia réutilisée. |
 | 13/11/2026 | T-201, T-202, T-203 | Abandonné, Bloqué | À faire | Référentiels et achats pharmaceutiques importés d'Hopitalia ; API documentées. |
 | 13/11/2026 | T-017 | — | À faire | Ajout : compte technique et clé Hopitalia, points de sécurité. |
+| 13/11/2026 | T-017 | À faire | En cours | Note de sécurité Hopitalia et besoins du module (compte technique, clé, variables) rédigés ; transmission à faire. |
+| 13/11/2026 | T-011 | En cours | Fait | Instance Hopitalia de test montée en local (Docker) ; routes de la note vérifiées ; chemin OpenAPI et formats de date corrigés dans la note. |
