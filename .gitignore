@@ -1,0 +1,65 @@
+# Fichiers personnels (jamais versionnés)
+CLAUDE.local.md
+.claude/settings.local.json
+
+# Secrets et environnements
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python (backend FastAPI)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.python-version
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Node (frontend React + Vite)
+node_modules/
+dist/
+dist-ssr/
+*.local
+.vite/
+coverage/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Tests Playwright
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# Données locales (Docker, fichiers déposés, exports)
+.data/
+uploads/
+exports/
+
+# Journaux
+logs/
+*.log
+
+# Éditeurs
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+
+# Systèmes
+.DS_Store
+Thumbs.db
+desktop.ini
+~$*
