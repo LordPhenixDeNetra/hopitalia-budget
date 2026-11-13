@@ -1,10 +1,10 @@
 # Jeu d'essai — marché annuel de fournitures médicales
 
-**Projet :** Hopitalia Budget · **Statut :** brouillon, à valider par la DAF (tâche T-015) · **Référence :** cahier des charges V3, annexe 18.2
+**Projet :** Hopitalia Budget · **Statut :** validé le 13/11/2026, codes budgétaires fictifs (tâche T-015) · **Référence :** cahier des charges V3, annexe 18.2
 
 Ce jeu d'essai détaille, pièce par pièce, l'exemple chiffré de l'annexe 18.2. Il sert de référence aux tests automatisés et à la recette : chaque résultat attendu doit être retrouvé exactement par l'application.
 
-Les codes budgétaires sont **fictifs** en attendant la nomenclature de l'établissement (tâche T-009). Pour simplifier, les montants sont toutes taxes comprises et sans retenue (net à payer = montant liquidé). Montants en francs CFA (XOF).
+Les codes budgétaires sont **fictifs** : ils seront remplacés par les comptes du plan SYSCOHADA révisé retenus dans la nomenclature (tâche T-009). Pour simplifier, les montants sont toutes taxes comprises et sans retenue (net à payer = montant liquidé). Montants en francs CFA (XOF).
 
 ## 1. Situation de départ
 

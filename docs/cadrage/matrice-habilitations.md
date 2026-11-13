@@ -1,6 +1,6 @@
-# Matrice des habilitations — projet à valider
+# Matrice des habilitations
 
-**Projet :** Hopitalia Budget · **Statut :** brouillon, à valider par la DAF (tâche T-016) · **Références :** cahier des charges V3, sections 3, 7.6 et règle RG-13
+**Projet :** Hopitalia Budget · **Statut :** validée le 13/11/2026 (tâche T-016) · **Références :** cahier des charges V3, sections 3, 7.6 et règle RG-13
 
 Cette matrice indique, pour chaque profil, ce qu'il peut faire sur chaque opération. Une fois validée, elle sert au paramétrage des profils, des permissions et des circuits de validation. Chaque établissement peut l'adapter.
 
@@ -60,17 +60,20 @@ Le droit de consulter est limité au périmètre de l'utilisateur : son ou ses �
 
 Pour l'annulation d'une opération validée, AF saisit la demande et VAL ou ORD la valide.
 
-## Seuils de validation (à compléter par la DAF)
+## Ordre des validations
 
-Le profil VAL valide jusqu'au seuil ; au-delà, la validation de l'ordonnateur (ORD) est requise en plus.
+Il n'y a pas de seuil de montant : **l'ordonnateur valide toujours**, après le valideur (DAF), quel que soit le montant.
 
-| Opération | Seuil VAL (XOF) | Au-delà |
+| Opération | 1re validation | 2e validation |
 |---|---|---|
-| Révision budgétaire | à fixer | ORD |
-| Avenant | à fixer | ORD |
-| Engagement | à fixer | ORD |
-| Liquidation | à fixer | ORD |
-| Dérogation | à fixer | ORD |
+| Révision budgétaire | VAL | ORD |
+| Contrat, avenant | VAL | ORD |
+| Engagement | VAL | ORD |
+| Liquidation | VAL | ORD |
+| Dérogation | VAL | ORD |
+| Annulation d'une opération validée | VAL | ORD |
+
+Dans la matrice ci-dessus, la mention « V » pour VAL et pour ORD sur une même opération signifie donc deux validations successives, et non l'une ou l'autre.
 
 ## Séparation des tâches (RG-13)
 
@@ -88,8 +91,6 @@ Pour une **même opération**, une même personne ne peut pas cumuler :
 
 Ces règles s'appliquent aussi en cas de délégation : le délégataire ne peut pas valider une opération qu'il a lui-même saisie.
 
-## Questions pour la DAF
+## Validation
 
-1. Les droits proposés correspondent-ils à l'organisation actuelle ?
-2. Quels sont les seuils de validation ?
-3. Un même agent cumule-t-il parfois deux profils (par exemple AF et GMC) ? Si oui, les incompatibilités ci-dessus suffisent-elles ?
+Matrice validée telle quelle le 13/11/2026, avec la règle « l'ordonnateur valide toujours ». Chaque établissement peut l'adapter par paramétrage.
