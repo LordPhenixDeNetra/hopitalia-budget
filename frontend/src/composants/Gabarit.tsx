@@ -1,4 +1,12 @@
-import { HomeOutlined, LogoutOutlined, SafetyOutlined, ShopOutlined } from '@ant-design/icons'
+import {
+  ApartmentOutlined,
+  FundOutlined,
+  HomeOutlined,
+  LogoutOutlined,
+  SafetyOutlined,
+  SettingOutlined,
+  ShopOutlined,
+} from '@ant-design/icons'
 import { Breadcrumb, Button, Flex, Layout, Menu, Select, Typography, theme } from 'antd'
 import { Link, Outlet, useLocation, useMatches, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
@@ -58,6 +66,21 @@ export function Gabarit() {
               key: '/etablissements',
               icon: <ShopOutlined aria-hidden />,
               label: t('menu.etablissements'),
+            },
+            {
+              key: '/budgets',
+              icon: <FundOutlined aria-hidden />,
+              label: t('menu.budgets'),
+            },
+            {
+              key: '/nomenclature',
+              icon: <ApartmentOutlined aria-hidden />,
+              label: t('menu.nomenclature'),
+            },
+            {
+              key: '/parametrage',
+              icon: <SettingOutlined aria-hidden />,
+              label: t('menu.parametrage'),
             },
             ...(voitHabilitations
               ? [

@@ -31,7 +31,7 @@ docs/       Cahier des charges, cadrage, références
 ## Démarrage rapide (tout dans Docker)
 
 ```bash
-cp .env.example .env        # puis renseigner POSTGRES_PASSWORD (et l'accès Hopitalia)
+cp .env.example .env        # puis renseigner POSTGRES_PASSWORD, COORDONNEES_CLE (et l'accès Hopitalia)
 docker compose up -d --build
 ```
 
@@ -45,6 +45,13 @@ docker compose exec api python -m hopitalia_budget.outils.habiliter \
 ```
 
 Ensuite, les administrateurs attribuent et retirent les profils dans l'écran **Habilitations** de l'interface, avec le seul code agent Hopitalia ; chaque changement est tracé dans le journal d'audit. Un administrateur ne peut pas modifier ses propres profils.
+
+**Paramétrage initial.** Un administrateur importe la nomenclature budgétaire (écran **Nomenclature**, fichier [`docs/cadrage/nomenclature-budgetaire.csv`](docs/cadrage/nomenclature-budgetaire.csv)), puis crée les référentiels (écran **Paramétrage**) et l'exercice. Le responsable budgétaire crée ensuite le budget et importe ses dotations (fiche budget, onglet « Import des dotations »).
+
+| Import CSV (séparateur `;`, UTF-8) | Colonnes |
+|---|---|
+| Nomenclature | `niveau;code;libelle;code_parent;compte_syscohada` |
+| Dotations d'un budget | `code;libelle;compte;centre;source;programme;dotation` (codes des référentiels ; montant `8500000` ou `8 500 000,50`) |
 
 | Service | Adresse |
 |---|---|

@@ -13,6 +13,7 @@ import {
 } from '../api/genere/budget'
 import type { EtablissementModification } from '../api/genere/budget.schemas'
 import { BadgeStatut } from '../composants/BadgeStatut'
+import { ParametresCalcul } from './parametrage/Parametrage'
 
 /** Fiche accessible par lien profond : /etablissements/:id (T-065). */
 export function FicheEtablissement() {
@@ -103,6 +104,7 @@ export function FicheEtablissement() {
           </Flex>
         </Form>
       </Card>
+      <ParametresCalcul etablissementId={id} />
     </Flex>
   )
 }

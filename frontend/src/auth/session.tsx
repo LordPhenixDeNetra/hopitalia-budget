@@ -69,3 +69,9 @@ export function useSession(): Session {
   if (!session) throw new Error('useSession hors de FournisseurSession')
   return session
 }
+
+/** Vrai si l'utilisateur a au moins un des profils (dans un établissement quelconque). */
+export function useAProfil(profils: string[]): boolean {
+  const { moi } = useSession()
+  return (moi?.habilitations ?? []).some((h) => profils.includes(h.profil))
+}

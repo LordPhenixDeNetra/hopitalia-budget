@@ -37,7 +37,14 @@ function afficher(adresse: string) {
 
 beforeAll(async () => {
   await i18n.changeLanguage('fr')
-  await i18n.loadNamespaces(['commun', 'erreurs', 'etablissements', 'habilitations'])
+  await i18n.loadNamespaces([
+    'commun',
+    'erreurs',
+    'etablissements',
+    'habilitations',
+    'parametrage',
+    'budget',
+  ])
 })
 
 afterEach(async () => {
@@ -166,10 +173,11 @@ describe('erreurs affichées dans la fiche (T-067, T-068)', () => {
       ],
     })
     afficher('/etablissements/a1')
-    const enregistrer = await screen.findByRole('button', { name: 'Enregistrer' })
-    await userEvent.click(enregistrer)
+    // Le premier « Enregistrer » est celui de la fiche ; le second, celui des paramètres de calcul.
+    const [enregistrer] = await screen.findAllByRole('button', { name: 'Enregistrer' })
+    await userEvent.click(enregistrer!)
     expect(await screen.findByText('Ce champ est trop court.')).toBeTruthy()
-    await userEvent.click(enregistrer)
+    await userEvent.click(enregistrer!)
     expect(await screen.findByText(/modifiée par quelqu'un d'autre/)).toBeTruthy()
   })
 })
@@ -238,5 +246,141 @@ describe('gestion des habilitations (T-121)', () => {
       etablissementId: null,
     })
     expect(new Headers(envoi[1]!.headers).get('Idempotency-Key')).toMatch(/[0-9a-f-]{36}/)
+  })
+})
+
+describe('paramétrage et budget (lot 1)', () => {
+  const page = (donnees: unknown[]) =>
+    json({ donnees, pagination: { page: 1, taille: 25, total: donnees.length, suivant: null } })
+  const BUDGET = {
+    id: 'b1',
+    reference: 'BP-2026',
+    type: 'PRIMITIF',
+    exerciceId: 'x1',
+    etablissementId: 'a1',
+    version: 1,
+  }
+  const ZERO = Object.fromEntries(
+    [
+      'budgetInitial',
+      'modificationsPositives',
+      'modificationsNegatives',
+      'budgetRevise',
+      'engage',
+      'enCoursValidation',
+      'disponibleApresEngagements',
+      'disponiblePrevisionnel',
+      'liquide',
+      'paye',
+      'engageRestantALiquider',
+      'resteAPayer',
+    ].map((c) => [c, '0.00']),
+  )
+  const SITUATION = json({ budgetId: 'b1', lignes: [], totaux: ZERO })
+  const REVISION = {
+    id: 'r1',
+    budgetId: 'b1',
+    etablissementId: 'a1',
+    type: 'VIREMENT',
+    sens: null,
+    ligneSourceId: 'l1',
+    ligneCibleId: 'l2',
+    montant: '5000000.00',
+    motif: 'Besoin urgent',
+    statut: 'SOUMISE',
+    creeParCode: 'AG002',
+    creeLe: '2026-03-01T10:00:00Z',
+    visas: [],
+  }
+
+  test('création d’un exercice : formulaire générique, clé d’idempotence (T-087)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(MOI)],
+      'POST /api/v1/exercices': [json({ id: 'x1', code: '2026' }, 201)],
+    })
+    afficher('/parametrage/exercices')
+    await userEvent.click(await screen.findByRole('button', { name: /Ajouter/ }))
+    const dialogue = await screen.findByRole('dialog')
+    await userEvent.type(within(dialogue).getByLabelText('Code'), '2026')
+    await userEvent.type(within(dialogue).getByLabelText('Ouverture'), '2026-01-01')
+    await userEvent.type(within(dialogue).getByLabelText('Clôture'), '2026-12-31')
+    await userEvent.click(within(dialogue).getByRole('button', { name: 'Enregistrer' }))
+    expect(await screen.findByText('Élément ajouté.')).toBeTruthy()
+
+    const envoi = appel.mock.calls.find(([, options]) => options?.method === 'POST')!
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({
+      code: '2026',
+      dateOuverture: '2026-01-01',
+      dateCloture: '2026-12-31',
+    })
+    expect(new Headers(envoi[1]!.headers).get('Idempotency-Key')).toMatch(/[0-9a-f-]{36}/)
+  })
+
+  test('import des dotations : envoi CSV brut, suivi, anomalies traduites (T-089)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const travail = {
+      id: 'i1',
+      budgetId: 'b1',
+      lignesImportees: 2,
+      anomalies: [],
+      creeLe: '2026-01-05T10:00:00Z',
+      termineLe: null,
+    }
+    const appel = simulerApi({
+      'GET /api/v1/moi': [
+        json({ ...MOI, habilitations: [{ profil: 'RB', etablissementId: 'a1' }] }),
+      ],
+      'GET /api/v1/budgets/b1': [json(BUDGET)],
+      'GET /api/v1/budgets/b1/situation': [SITUATION],
+      'POST /api/v1/budgets/b1/imports': [json({ ...travail, statut: 'EN_COURS' }, 202)],
+      'GET /api/v1/imports-dotations/i1': [
+        json({
+          ...travail,
+          statut: 'TERMINE',
+          anomalies: [{ ligne: 4, code: 'COMPTE_INCONNU', valeur: '999' }],
+        }),
+      ],
+    })
+    afficher('/budgets/b1')
+    await userEvent.click(await screen.findByRole('tab', { name: 'Import des dotations' }))
+    const csv = new File(
+      ['code;libelle;compte;centre;source;programme;dotation\n'],
+      'dotations.csv',
+      {
+        type: 'text/csv',
+      },
+    )
+    const champ = document.querySelector('input[type=file]') as HTMLInputElement
+    await userEvent.upload(champ, csv)
+    expect(await screen.findByText('Compte budgétaire inconnu')).toBeTruthy()
+    expect(screen.getByText('Lignes importées : 2')).toBeTruthy()
+
+    const envoi = appel.mock.calls.find(([, options]) => options?.method === 'POST')!
+    expect(new Headers(envoi[1]!.headers).get('Content-Type')).toBe('text/csv')
+    expect(String(envoi[1]!.body)).toMatch(/^code;libelle/)
+  })
+
+  test('révision : visa DAF proposé au seul profil de l’étape (T-095)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [
+        json({ ...MOI, habilitations: [{ profil: 'VAL', etablissementId: 'a1' }] }),
+      ],
+      'GET /api/v1/budgets/b1': [json(BUDGET)],
+      'GET /api/v1/budgets/b1/situation': [SITUATION],
+      'GET /api/v1/revisions-budgetaires': [page([REVISION])],
+      'POST /api/v1/revisions-budgetaires/r1/validations': [json({ ...REVISION, statut: 'VISEE' })],
+    })
+    afficher('/budgets/b1')
+    await userEvent.click(await screen.findByRole('tab', { name: 'Révisions' }))
+    expect(await screen.findByText('En attente du visa DAF')).toBeTruthy()
+    // Le profil VAL ne peut pas demander de révision (réservé au RB).
+    expect(screen.queryByRole('button', { name: 'Demander une révision' })).toBeNull()
+    await userEvent.click(screen.getByRole('button', { name: 'Viser' }))
+    expect(await screen.findByText('Décision enregistrée.')).toBeTruthy()
+
+    const envoi = appel.mock.calls.find(([, options]) => options?.method === 'POST')!
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({ decision: 'VALIDE' })
   })
 })

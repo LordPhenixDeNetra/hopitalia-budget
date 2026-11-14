@@ -15,6 +15,9 @@ class Parametres(BaseSettings):
     hopitalia_api_url: str = "http://localhost:8080"
     hopitalia_jwt_cle: SecretStr = SecretStr("")
     hopitalia_delai_secondes: float = 10.0
+    # Clé Fernet de chiffrement des coordonnées bancaires (ENF-03), générée une fois par
+    # installation et conservée hors dépôt.
+    coordonnees_cle: SecretStr = SecretStr("")
     limite_requetes_par_minute: int = 300
     duree_cle_idempotence_heures: int = 24
     dossier_pieces: Path = Path("pieces")
