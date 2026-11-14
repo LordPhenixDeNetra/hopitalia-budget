@@ -17,6 +17,12 @@ services:
   api:
     build: ./backend
     image: hopitalia-budget-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-hopitalia}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-hopitalia_budget}
+      HOPITALIA_API_URL: ${HOPITALIA_API_URL:-}
+      HOPITALIA_JWT_CLE: ${HOPITALIA_JWT_CLE:-}
+    volumes:
+      - pieces:/app/pieces
     depends_on:
       db:
         condition: service_healthy
@@ -33,3 +39,4 @@ services:
 
 volumes:
   db-data:
+  pieces:

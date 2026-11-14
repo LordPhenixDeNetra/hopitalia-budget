@@ -63,3 +63,6 @@ logs/
 Thumbs.db
 desktop.ini
 ~$*
+
+# Pièces justificatives stockées en local (dossier par défaut du backend)
+pieces/
