@@ -1,0 +1,34 @@
+/* Polices hébergées avec l'application (IHM-04) : aucune requête vers Google. */
+@import '@fontsource/source-sans-3/400.css';
+@import '@fontsource/source-sans-3/600.css';
+@import '@fontsource/lexend/500.css';
+@import '@fontsource/lexend/600.css';
+
+/* Aucune couleur ici : elles viennent du thème Ant Design (src/theme/theme.ts). */
+body {
+  margin: 0;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5 {
+  font-family: 'Lexend', system-ui, sans-serif;
+}
+
+/* Montants : chiffres à chasse fixe, alignés à droite (IHM-05). */
+.montant {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

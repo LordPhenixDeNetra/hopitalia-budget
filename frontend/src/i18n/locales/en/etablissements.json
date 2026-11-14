@@ -1,0 +1,32 @@
+{
+  "titre": "Facilities",
+  "colonnes": {
+    "code": "Code",
+    "nom": "Name",
+    "statut": "Status"
+  },
+  "filtres": {
+    "statut": "Status",
+    "tous": "All",
+    "actifs": "Active",
+    "inactifs": "Inactive"
+  },
+  "actions": {
+    "creer": "New facility",
+    "desactiver": "Deactivate",
+    "activer": "Reactivate",
+    "modifier": "Edit"
+  },
+  "formulaire": {
+    "titreCreation": "New facility",
+    "code": "Code",
+    "aideCode": "Capital letters, digits and hyphens, for example CHU-FANN.",
+    "nom": "Name"
+  },
+  "notifications": {
+    "cree": "Facility {{code}} created.",
+    "modifie": "Facility {{code}} saved.",
+    "desactives_one": "{{count}} facility deactivated.",
+    "desactives_other": "{{count}} facilities deactivated."
+  }
+}

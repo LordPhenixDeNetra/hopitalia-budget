@@ -1,0 +1,45 @@
+{
+  "application": { "nom": "Hopitalia Budget" },
+  "menu": {
+    "accueil": "Accueil",
+    "etablissements": "Établissements",
+    "navigation": "Navigation principale"
+  },
+  "entete": {
+    "langue": "Langue",
+    "deconnexion": "Se déconnecter",
+    "etablissement": "Établissement",
+    "tousEtablissements": "Tous les établissements",
+    "ouvrirMenu": "Ouvrir le menu"
+  },
+  "langues": { "fr": "Français", "en": "English" },
+  "connexion": {
+    "titre": "Connexion",
+    "sousTitre": "Utilisez votre compte Hopitalia.",
+    "identifiant": "Identifiant",
+    "motDePasse": "Mot de passe",
+    "valider": "Se connecter",
+    "sessionExpiree": "Votre session a expiré. Reconnectez-vous.",
+    "obligatoire": "Ce champ est obligatoire."
+  },
+  "accueil": {
+    "titre": "Tableau de bord",
+    "bienvenue": "Bienvenue, {{nom}}",
+    "profils": "Vos profils budgétaires",
+    "tousEtablissements": "tous les établissements"
+  },
+  "tableau": {
+    "selection_one": "{{count}} élément sélectionné",
+    "selection_other": "{{count}} éléments sélectionnés",
+    "aucun": "Aucun élément",
+    "total": "{{count}} au total",
+    "chargement": "Chargement…"
+  },
+  "statut": { "actif": "Actif", "inactif": "Inactif" },
+  "actions": { "annuler": "Annuler", "enregistrer": "Enregistrer", "recharger": "Recharger" },
+  "introuvable": {
+    "titre": "Page introuvable",
+    "detail": "Cette page n'existe pas ou n'est pas accessible.",
+    "retour": "Retour à l'accueil"
+  }
+}

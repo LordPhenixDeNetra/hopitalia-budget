@@ -1,0 +1,45 @@
+{
+  "application": { "nom": "Hopitalia Budget" },
+  "menu": {
+    "accueil": "Home",
+    "etablissements": "Facilities",
+    "navigation": "Main navigation"
+  },
+  "entete": {
+    "langue": "Language",
+    "deconnexion": "Sign out",
+    "etablissement": "Facility",
+    "tousEtablissements": "All facilities",
+    "ouvrirMenu": "Open the menu"
+  },
+  "langues": { "fr": "Français", "en": "English" },
+  "connexion": {
+    "titre": "Sign in",
+    "sousTitre": "Use your Hopitalia account.",
+    "identifiant": "Username",
+    "motDePasse": "Password",
+    "valider": "Sign in",
+    "sessionExpiree": "Your session has expired. Please sign in again.",
+    "obligatoire": "This field is required."
+  },
+  "accueil": {
+    "titre": "Dashboard",
+    "bienvenue": "Welcome, {{nom}}",
+    "profils": "Your budget profiles",
+    "tousEtablissements": "all facilities"
+  },
+  "tableau": {
+    "selection_one": "{{count}} item selected",
+    "selection_other": "{{count}} items selected",
+    "aucun": "No items",
+    "total": "{{count}} in total",
+    "chargement": "Loading…"
+  },
+  "statut": { "actif": "Active", "inactif": "Inactive" },
+  "actions": { "annuler": "Cancel", "enregistrer": "Save", "recharger": "Reload" },
+  "introuvable": {
+    "titre": "Page not found",
+    "detail": "This page does not exist or is not accessible.",
+    "retour": "Back to home"
+  }
+}

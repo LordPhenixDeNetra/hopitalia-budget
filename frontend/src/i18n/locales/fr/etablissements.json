@@ -1,0 +1,32 @@
+{
+  "titre": "Établissements",
+  "colonnes": {
+    "code": "Code",
+    "nom": "Nom",
+    "statut": "Statut"
+  },
+  "filtres": {
+    "statut": "Statut",
+    "tous": "Tous",
+    "actifs": "Actifs",
+    "inactifs": "Inactifs"
+  },
+  "actions": {
+    "creer": "Nouvel établissement",
+    "desactiver": "Désactiver",
+    "activer": "Réactiver",
+    "modifier": "Modifier"
+  },
+  "formulaire": {
+    "titreCreation": "Nouvel établissement",
+    "code": "Code",
+    "aideCode": "Majuscules, chiffres et tirets, par exemple CHU-FANN.",
+    "nom": "Nom"
+  },
+  "notifications": {
+    "cree": "Établissement {{code}} créé.",
+    "modifie": "Établissement {{code}} enregistré.",
+    "desactives_one": "{{count}} établissement désactivé.",
+    "desactives_other": "{{count}} établissements désactivés."
+  }
+}

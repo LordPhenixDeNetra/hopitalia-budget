@@ -1,0 +1,29 @@
+{
+  "RESSOURCE_INTROUVABLE": "The requested resource does not exist or is not accessible.",
+  "METHODE_NON_AUTORISEE": "This operation is not accepted.",
+  "AUTHENTIFICATION_REQUISE": "Please sign in.",
+  "JETON_INVALIDE": "Your session is no longer valid. Please sign in again.",
+  "IDENTIFIANTS_INVALIDES": "Incorrect username or password.",
+  "AUCUN_PROFIL": "No budget profile is assigned to your account. Contact the module administrator.",
+  "ACCES_REFUSE": "You are not allowed to perform this operation.",
+  "VALIDATION": "Some fields are invalid.",
+  "MONTANT_INVALIDE": "Invalid amount: at most two decimals.",
+  "PARAMETRE_INCONNU": "Unsupported search parameter.",
+  "TRI_INVALIDE": "Unsupported sort.",
+  "CURSEUR_INVALIDE": "Invalid pagination position; reload the list.",
+  "IDEMPOTENCE_CLE_MANQUANTE": "Operation impossible: missing request identifier.",
+  "IDEMPOTENCE_CONFLIT": "This operation was already sent with different data. Reload the form.",
+  "IDEMPOTENCE_EN_COURS": "This operation is still being processed. Wait a few seconds.",
+  "PRECONDITION_REQUISE": "Reload the record before editing it.",
+  "PRECONDITION_ECHOUEE": "Someone else changed this record since you opened it. It has been reloaded: check it and try again.",
+  "CODE_DEJA_UTILISE": "This code is already used.",
+  "LIMITE_DEBIT": "Too many requests. Try again shortly.",
+  "HOPITALIA_INDISPONIBLE": "The Hopitalia login service is not responding. Try again later.",
+  "ERREUR_INTERNE": "An unexpected error occurred.",
+  "champ": {
+    "missing": "This field is required.",
+    "string_too_short": "This field is too short.",
+    "string_too_long": "This field is too long.",
+    "string_pattern_mismatch": "Invalid format."
+  }
+}
