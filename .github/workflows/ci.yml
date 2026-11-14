@@ -1,0 +1,106 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  changements:
+    name: changements
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filtre.outputs.backend }}
+      frontend: ${{ steps.filtre.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - id: filtre
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          # Sans base exploitable (premier push d'une branche), tout est vérifié.
+          if fichiers=$(git diff --name-only "$BASE" "$GITHUB_SHA" 2>/dev/null); then :; else fichiers="backend/ frontend/"; fi
+          echo "$fichiers"
+          grep -qE '^(backend/|\.github/workflows/)' <<<"$fichiers" && echo "backend=true" >> "$GITHUB_OUTPUT" || echo "backend=false" >> "$GITHUB_OUTPUT"
+          grep -qE '^(frontend/|\.github/workflows/)' <<<"$fichiers" && echo "frontend=true" >> "$GITHUB_OUTPUT" || echo "frontend=false" >> "$GITHUB_OUTPUT"
+
+  backend:
+    name: backend
+    needs: changements
+    if: needs.changements.outputs.backend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/pyproject.toml
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy
+      - run: pytest
+
+  frontend:
+    name: frontend
+    needs: changements
+    if: needs.changements.outputs.frontend == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+
+  dco:
+    name: dco
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          manquants=0
+          for c in $(git rev-list --no-merges "$BASE..$HEAD"); do
+            if ! git log -1 --format=%B "$c" | grep -qE '^Signed-off-by: .+ <.+>$'; then
+              echo "Commit sans signature DCO : $(git log -1 --format='%h %s' "$c")"
+              manquants=1
+            fi
+          done
+          exit $manquants
+
+  ci-ok:
+    name: ci-ok
+    if: always()
+    needs: [changements, backend, frontend, dco]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          RESULTATS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "Résultats : $RESULTATS"
+          if grep -qE 'failure|cancelled' <<<"$RESULTATS"; then exit 1; fi
