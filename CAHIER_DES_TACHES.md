@@ -1,6 +1,6 @@
 # Cahier des tâches — Module de suivi budgétaire Hopitalia
 
-**Projet :** `hopitalia-budget` · **Dépôt :** https://github.com/LordPhenixDeNetra/hopitalia-budget · **Référence :** [cahier des charges V3](docs/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) · **Pile :** FastAPI, PostgreSQL (à confirmer), React, TypeScript, Ant Design · **Mise à jour :** 13/11/2026
+**Projet :** `hopitalia-budget` · **Dépôt :** https://github.com/LordPhenixDeNetra/hopitalia-budget · **Référence :** [cahier des charges V3](docs/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) · **Pile :** FastAPI, PostgreSQL (à confirmer), React, TypeScript, Ant Design · **Mise à jour :** 14/11/2026
 
 ## Légende
 
@@ -32,12 +32,12 @@
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
-| P1 | 1 | 0 | 81 | 0 | 0 | 0 | 82 |
+| P1 | 18 | 0 | 64 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **70** | **2** | **135** | **0** | **0** | **2** | **209** |
+| **Total** | **87** | **2** | **118** | **0** | **0** | **2** | **209** |
 
-Avancement : 70 / 207 tâches actives terminées (34 %), hors 2 abandonnées.
+Avancement : 87 / 207 tâches actives terminées (42 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -165,23 +165,23 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-080 | Établissements et sites. | EF-REF-02 | T-054 | À faire | CRUD API + écran + tests. |
-| T-081 | Centres de responsabilité (hiérarchie, responsable habilité). | EF-REF-02 | T-080 | À faire | CRUD API + écran + tests. |
-| T-082 | Sources de financement et programmes ou projets. | EF-REF-02 | T-080 | À faire | CRUD API + écran + tests. |
-| T-083 | Nomenclature hiérarchique (section, chapitre, article, paragraphe). | EF-REF-01 | T-009 | À faire | Import de la nomenclature reçue + arbre affiché. |
-| T-084 | Comptes budgétaires, comptes comptables et leur correspondance. | EF-REF-03 | T-083 | À faire | Correspondance consultable dans les deux sens. |
-| T-085 | Fournisseurs et coordonnées de paiement (coordonnées chiffrées). | EF-REF-04, ENF-03 | T-080 | À faire | Numéro de compte chiffré en base, masqué à l'écran. |
-| T-086 | Familles d'achats, types de dépenses (seuil hors marché), modes de règlement, comptes de trésorerie, types de pièces. | EF-REF-04 | T-080 | À faire | CRUD API + écrans + tests. |
-| T-087 | Exercices budgétaires et périodes. | EF-BUD-01 | T-080 | À faire | Exercice ouvert avec ses périodes. |
-| T-088 | Budgets (primitif, modificatif) par exercice et établissement. | EF-BUD-01 | T-087 | À faire | Un seul budget primitif par exercice et établissement. |
-| T-089 | Lignes budgétaires et leurs axes (compte, centre, source, programme, période). | EF-BUD-01 | T-084, T-088 | À faire | Saisie et liste filtrable. |
-| T-090 | Import asynchrone des dotations (`202`, suivi, rapport d'anomalies). | EF-BUD-02, REC-01 | T-089 | À faire | Import du jeu d'essai T-015, anomalies listées ligne par ligne. |
-| T-091 | Notifications de crédits. | EF-BUD-03 | T-089 | À faire | Notification rattachée à ses lignes. |
-| T-092 | Paramètres de calcul par établissement (`ParametreCalcul`). | §6 | T-080 | À faire | Chaque option paramétrable de la section 6 est lisible depuis ce paramétrage. |
-| T-093 | Service unique de calcul des indicateurs de ligne (6.1). | §6.1, RG-14, ARC-S | T-089, T-092 | À faire | Tests unitaires de chaque formule ; aucune autre implémentation. |
-| T-094 | Endpoint `/lignes-budgetaires/{id}/disponibilite`. | EF-BUD-06, 07 | T-093 | À faire | Valeurs conformes aux tests de T-093. |
-| T-095 | Révisions budgétaires (modificatif, virement, réallocation), effectives après validation. | EF-BUD-04, 05 | T-089, T-110 | À faire | Un virement non validé ne change pas les disponibles. |
-| T-096 | Écrans du lot 1 : budgets, lignes, disponibilités, révisions. | EF-BUD-06 | T-094, T-070 | À faire | Parcours Playwright REC-01 vert. |
+| T-080 | Établissements et sites. | EF-REF-02 | T-054 | Fait | CRUD API + écran + tests. Sites par établissement : API, écran Paramétrage, tests (test_lot1). |
+| T-081 | Centres de responsabilité (hiérarchie, responsable habilité). | EF-REF-02 | T-080 | Fait | CRUD API + écran + tests. Hiérarchie sans cycle, parent et site du même établissement ; responsable saisi par code agent. |
+| T-082 | Sources de financement et programmes ou projets. | EF-REF-02 | T-080 | Fait | CRUD API + écran + tests. Sources (type, bailleur) et programmes (dates contrôlées) : API, écran, tests. |
+| T-083 | Nomenclature hiérarchique (section, chapitre, article, paragraphe). | EF-REF-01 | T-009 | Fait | Import de la nomenclature reçue + arbre affiché. Nomenclature du cadrage importée (85 éléments, 45 paragraphes) ; arbre dans l'écran Nomenclature. |
+| T-084 | Comptes budgétaires, comptes comptables et leur correspondance. | EF-REF-03 | T-083 | Fait | Correspondance consultable dans les deux sens. Compte budgétaire vers SYSCOHADA et `/comptes-comptables/{code}` en sens inverse ; testé. |
+| T-085 | Fournisseurs et coordonnées de paiement (coordonnées chiffrées). | EF-REF-04, ENF-03 | T-080 | Fait | Numéro de compte chiffré en base, masqué à l'écran. Numéro chiffré (Fernet, `COORDONNEES_CLE`), affiché masqué, jamais en clair dans l'audit ; testé. |
+| T-086 | Familles d'achats, types de dépenses (seuil hors marché), modes de règlement, comptes de trésorerie, types de pièces. | EF-REF-04 | T-080 | Fait | CRUD API + écrans + tests. Cinq référentiels sur les routes communes ; écran Paramétrage ; tests. |
+| T-087 | Exercices budgétaires et périodes. | EF-BUD-01 | T-080 | Fait | Exercice ouvert avec ses périodes. Exercice ouvert avec 17 périodes (année, 4 trimestres, 12 mois) ; testé, parcours REC-01. |
+| T-088 | Budgets (primitif, modificatif) par exercice et établissement. | EF-BUD-01 | T-087 | Fait | Un seul budget primitif par exercice et établissement. Second budget primitif refusé (`BUDGET_PRIMITIF_EXISTANT`) ; testé. |
+| T-089 | Lignes budgétaires et leurs axes (compte, centre, source, programme, période). | EF-BUD-01 | T-084, T-088 | Fait | Saisie et liste filtrable. Axes contrôlés (paragraphe, centre, source, programme, période) ; liste filtrable ; testé. |
+| T-090 | Import asynchrone des dotations (`202`, suivi, rapport d'anomalies). | EF-BUD-02, REC-01 | T-089 | Fait | Import du jeu d'essai T-015, anomalies listées ligne par ligne. Lignes du jeu d'essai T-015 importées sans anomalie ; anomalies listées par ligne ; testé et parcours REC-01. |
+| T-091 | Notifications de crédits. | EF-BUD-03 | T-089 | Fait | Notification rattachée à ses lignes. Somme des lignes égale au montant (`NOTIFICATION_INCOHERENTE`) ; onglet de la fiche budget ; testé. |
+| T-092 | Paramètres de calcul par établissement (`ParametreCalcul`). | §6 | T-080 | Fait | Chaque option paramétrable de la section 6 est lisible depuis ce paramétrage. Les 4 options de la section 6 lues et modifiées par établissement (fiche établissement) ; testé. |
+| T-093 | Service unique de calcul des indicateurs de ligne (6.1). | §6.1, RG-14, ARC-S | T-089, T-092 | Fait | Tests unitaires de chaque formule ; aucune autre implémentation. `domaine/indicateurs.py`, seule implémentation ; tests unitaires de chaque formule. |
+| T-094 | Endpoint `/lignes-budgetaires/{id}/disponibilite`. | EF-BUD-06, 07 | T-093 | Fait | Valeurs conformes aux tests de T-093. Endpoint conforme aux tests de T-093 ; situation du budget avec totaux. |
+| T-095 | Révisions budgétaires (modificatif, virement, réallocation), effectives après validation. | EF-BUD-04, 05 | T-089, T-110 | Fait | Un virement non validé ne change pas les disponibles. Virement sans effet avant la décision de l'ordonnateur (testé). Circuit fixe du point 16 de la section 17 (visa DAF puis ordonnateur) ; T-110 à T-112 le rendront paramétrable. |
+| T-096 | Écrans du lot 1 : budgets, lignes, disponibilités, révisions. | EF-BUD-06 | T-094, T-070 | Fait | Parcours Playwright REC-01 vert. Écrans Paramétrage, Nomenclature, Budgets, fiche budget et fiche ligne ; parcours Playwright REC-01 vert (ordinateur et téléphone). |
 
 ### P1.B — Workflow transverse (validations, pièces, corrections)
 
@@ -420,3 +420,4 @@ flowchart LR
 | 14/11/2026 | T-121 | — | À faire | Ajout : gestion des habilitations dans le module (la connexion passe par Hopitalia). |
 | 14/11/2026 | T-075 | En cours | Fait | CI verte sur la demande n° 8 (Vitest, Playwright, backend sur PostgreSQL). P0.C et P0.D terminés. |
 | 14/11/2026 | T-121 | À faire | Fait | Écran et API « Habilitations » : attribution par code agent Hopitalia, retrait, liste cloisonnée, journal d'audit, pas d'auto-attribution ; migration 0002. |
+| 14/11/2026 | T-080 à T-096 (P1.A) | À faire | Fait | Lot 1 : référentiels, nomenclature, exercices, budgets, lignes, import des dotations, notifications, paramètres et service de calcul, révisions avec visas ; migration 0003 ; 106 tests backend, 27 tests Vitest, parcours REC-01. T-095 suit le circuit fixe en attendant T-110 à T-112. |
