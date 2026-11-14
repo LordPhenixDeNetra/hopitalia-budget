@@ -31,8 +31,16 @@ docs/       Cahier des charges, cadrage, références
 ## Démarrage rapide (tout dans Docker)
 
 ```bash
-cp .env.example .env        # puis renseigner POSTGRES_PASSWORD
+cp .env.example .env        # puis renseigner POSTGRES_PASSWORD (et l'accès Hopitalia)
 docker compose up -d --build
+```
+
+Les migrations de la base s'appliquent au démarrage de l'API.
+
+**Premier administrateur.** La connexion passe par Hopitalia, mais les droits budgétaires sont propres au module : un agent sans profil est refusé. Attribuer le premier profil d'administrateur avec l'identifiant Hopitalia de l'agent (`userId`) :
+
+```bash
+docker compose exec api python -m hopitalia_budget.outils.habiliter   --utilisateur-id 42 --code-agent AG042 --profil ADM
 ```
 
 | Service | Adresse |
@@ -52,8 +60,24 @@ cd backend
 python -m venv .venv
 source .venv/Scripts/activate      # Windows (Git Bash) ; sous Linux ou macOS : source .venv/bin/activate
 pip install -e ".[dev]"
+export DATABASE_URL=postgresql+psycopg://hopitalia:<mot-de-passe>@localhost:5432/hopitalia_budget
+alembic upgrade head
 uvicorn hopitalia_budget.main:app --reload
 ```
+
+Documentation interactive de l'API : http://127.0.0.1:8000/api/v1/docs
+
+**Base de test.** Les tests créent une base temporaire sur un serveur PostgreSQL de test, puis la suppriment :
+
+```bash
+docker run -d --name hb-budget-test-db -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test   -p 127.0.0.1:55433:5432 postgres:16-alpine
+export TEST_DATABASE_URL=postgresql+psycopg://test:test@127.0.0.1:55433/postgres
+pytest
+```
+
+Sans `TEST_DATABASE_URL`, les tests qui ont besoin d'une base sont ignorés en local (et refusés en CI).
+
+**Nouvelle migration** après une modification des modèles : `alembic revision -m "objet"`, puis écrire la migration dans `migrations/versions/`.
 
 | Vérification | Commande |
 |---|---|
@@ -61,6 +85,7 @@ uvicorn hopitalia_budget.main:app --reload
 | Format | `ruff format --check .` (corriger : `ruff format .`) |
 | Typage | `mypy` |
 | Tests | `pytest` |
+| OpenAPI pour le frontend | `python -m hopitalia_budget.outils.exporter_openapi > ../frontend/openapi.json` |
 
 ### Frontend
 
@@ -70,13 +95,17 @@ npm ci
 npm run dev
 ```
 
+L'interface de développement (http://127.0.0.1:5173) envoie les appels `/api` à l'API locale (port 8000).
+
 | Vérification | Commande |
 |---|---|
 | Format | `npm run format:check` (corriger : `npm run format`) |
 | Lint (dont accessibilité) | `npm run lint` |
 | Typage | `npm run typecheck` |
 | Tests | `npm test` |
+| Parcours de bout en bout (ordinateur et téléphone, API simulée) | `npm run e2e` (première fois : `npx playwright install chromium`) |
 | Build | `npm run build` |
+| Client d'API généré | `npm run api` (après mise à jour de `openapi.json`) |
 
 ### Hooks avant commit
 
