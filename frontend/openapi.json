@@ -1689,17 +1689,15 @@
             }
           }
         }
-      }
-    },
-    "/api/v1/revisions-budgetaires/{revision_id}/validations": {
-      "post": {
+      },
+      "patch": {
         "tags": [
           "budget",
           "révisions"
         ],
-        "summary": "Decider Revision",
-        "description": "Visa de la DAF, puis validation de l'ordonnateur ; rejet motivé à chaque étape.",
-        "operationId": "decider_revision",
+        "summary": "Corriger Revision",
+        "description": "Correction après retour (RG-18) : 409 sur une révision en circuit, validée ou rejetée.",
+        "operationId": "corriger_revision",
         "parameters": [
           {
             "name": "revision_id",
@@ -1710,6 +1708,22 @@
               "format": "uuid",
               "title": "Revision Id"
             }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
           }
         ],
         "requestBody": {
@@ -1717,7 +1731,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DecisionRevision"
+                "$ref": "#/components/schemas/RevisionCorrection"
               }
             }
           }
@@ -5383,10 +5397,1441 @@
           }
         }
       }
+    },
+    "/api/v1/{ressource}/{identifiant}/validations": {
+      "get": {
+        "tags": [
+          "workflow"
+        ],
+        "summary": "Lire Validations",
+        "description": "Circuit figé, historique des visas, étapes ouvertes et droit de l'agent à décider.",
+        "operationId": "lire_validations",
+        "parameters": [
+          {
+            "name": "ressource",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "const": "revisions-budgetaires",
+              "type": "string",
+              "title": "Ressource"
+            }
+          },
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EtatValidationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "workflow"
+        ],
+        "summary": "Decider",
+        "description": "Visa, rejet motivé ou retour pour correction à l'étape ouverte du circuit.",
+        "operationId": "decider",
+        "parameters": [
+          {
+            "name": "ressource",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "const": "revisions-budgetaires",
+              "type": "string",
+              "title": "Ressource"
+            }
+          },
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EtatValidationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/{ressource}/{identifiant}/soumissions": {
+      "post": {
+        "tags": [
+          "workflow"
+        ],
+        "summary": "Resoumettre",
+        "description": "Après correction, l'auteur renvoie l'opération au début de son circuit.",
+        "operationId": "resoumettre",
+        "parameters": [
+          {
+            "name": "ressource",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "const": "revisions-budgetaires",
+              "type": "string",
+              "title": "Ressource"
+            }
+          },
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EtatValidationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/{ressource}/{identifiant}/pieces": {
+      "get": {
+        "tags": [
+          "workflow"
+        ],
+        "summary": "Lister Pieces",
+        "operationId": "lister_pieces",
+        "parameters": [
+          {
+            "name": "ressource",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "const": "revisions-budgetaires",
+              "type": "string",
+              "title": "Ressource"
+            }
+          },
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PieceSortie"
+                  },
+                  "title": "Response Lister Pieces"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "workflow"
+        ],
+        "summary": "Deposer Piece",
+        "description": "Dépôt par l'auteur ou un valideur ; contenu rangé sous son empreinte SHA-256.",
+        "operationId": "deposer_piece",
+        "parameters": [
+          {
+            "name": "ressource",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "const": "revisions-budgetaires",
+              "type": "string",
+              "title": "Ressource"
+            }
+          },
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/Body_deposer_piece"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PieceSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/pieces/{piece_id}/contenu": {
+      "get": {
+        "tags": [
+          "workflow"
+        ],
+        "summary": "Telecharger Piece",
+        "description": "Contenu vérifié par son empreinte : un fichier altéré est refusé (EF-DOC-02).",
+        "operationId": "telecharger_piece",
+        "parameters": [
+          {
+            "name": "piece_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Piece Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/delegations": {
+      "post": {
+        "tags": [
+          "workflow",
+          "délégations"
+        ],
+        "summary": "Creer Delegation",
+        "description": "L'agent délègue ses propres profils, pour une période, à un agent déjà habilité.",
+        "operationId": "creer_delegation",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DelegationCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelegationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "workflow",
+          "délégations"
+        ],
+        "summary": "Lister Delegations",
+        "description": "Délégations données ou reçues ; toutes pour l'administrateur et l'auditeur.",
+        "operationId": "lister_delegations",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_DelegationSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/delegations/{delegation_id}": {
+      "patch": {
+        "tags": [
+          "workflow",
+          "délégations"
+        ],
+        "summary": "Modifier Delegation",
+        "operationId": "modifier_delegation",
+        "parameters": [
+          {
+            "name": "delegation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Delegation Id"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DelegationModification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DelegationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transitions-statuts/{identifiant}": {
+      "delete": {
+        "tags": [
+          "workflow",
+          "transitions-statuts"
+        ],
+        "summary": "Supprimer Transition",
+        "description": "Paramétrage, pas une donnée financière : la suppression est tracée dans le journal.",
+        "operationId": "supprimer_transition",
+        "parameters": [
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "transitions-statuts"
+        ],
+        "summary": "Obtenir Transition Statut",
+        "operationId": "obtenir_transition_statut",
+        "parameters": [
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "transitions-statuts"
+        ],
+        "summary": "Modifier Transition Statut",
+        "operationId": "modifier_transition_statut",
+        "parameters": [
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionModification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statuts-reference/{type_objet}": {
+      "get": {
+        "tags": [
+          "workflow",
+          "transitions-statuts"
+        ],
+        "summary": "Lire Transitions Reference",
+        "description": "Cycle de vie de référence, point de départ d'un paramétrage d'établissement.",
+        "operationId": "lire_transitions_reference",
+        "parameters": [
+          {
+            "name": "type_objet",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "const": "RevisionBudgetaire",
+              "type": "string",
+              "title": "Type Objet"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransitionReference"
+                  },
+                  "title": "Response Lire Transitions Reference"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/circuits-validation": {
+      "get": {
+        "tags": [
+          "circuits-validation"
+        ],
+        "summary": "Lister Circuits Validation",
+        "operationId": "lister_circuits_validation",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          },
+          {
+            "name": "tri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Champs libelle ; - : décroissant",
+              "title": "Tri"
+            },
+            "description": "Champs libelle ; - : décroissant"
+          },
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "typeObjet",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Typeobjet"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_CircuitSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "circuits-validation"
+        ],
+        "summary": "Creer Circuit Validation",
+        "operationId": "creer_circuit_validation",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CircuitCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CircuitSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/circuits-validation/{identifiant}": {
+      "get": {
+        "tags": [
+          "circuits-validation"
+        ],
+        "summary": "Obtenir Circuit Validation",
+        "operationId": "obtenir_circuit_validation",
+        "parameters": [
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CircuitSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "circuits-validation"
+        ],
+        "summary": "Modifier Circuit Validation",
+        "operationId": "modifier_circuit_validation",
+        "parameters": [
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CircuitModification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CircuitSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statuts-personnalises": {
+      "get": {
+        "tags": [
+          "statuts-personnalises"
+        ],
+        "summary": "Lister Statuts Personnalises",
+        "operationId": "lister_statuts_personnalises",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          },
+          {
+            "name": "tri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Champs code ; - : décroissant",
+              "title": "Tri"
+            },
+            "description": "Champs code ; - : décroissant"
+          },
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "typeObjet",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Typeobjet"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_StatutSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "statuts-personnalises"
+        ],
+        "summary": "Creer Statut Personnalise",
+        "operationId": "creer_statut_personnalise",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatutCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatutSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/statuts-personnalises/{identifiant}": {
+      "get": {
+        "tags": [
+          "statuts-personnalises"
+        ],
+        "summary": "Obtenir Statut Personnalise",
+        "operationId": "obtenir_statut_personnalise",
+        "parameters": [
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatutSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "statuts-personnalises"
+        ],
+        "summary": "Modifier Statut Personnalise",
+        "operationId": "modifier_statut_personnalise",
+        "parameters": [
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/StatutModification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatutSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/transitions-statuts": {
+      "get": {
+        "tags": [
+          "transitions-statuts"
+        ],
+        "summary": "Lister Transitions Statuts",
+        "operationId": "lister_transitions_statuts",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          },
+          {
+            "name": "tri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Champs depuis ; - : décroissant",
+              "title": "Tri"
+            },
+            "description": "Champs depuis ; - : décroissant"
+          },
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "typeObjet",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Typeobjet"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_TransitionSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "transitions-statuts"
+        ],
+        "summary": "Creer Transition Statut",
+        "operationId": "creer_transition_statut",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransitionCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransitionSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "Action": {
+        "type": "string",
+        "enum": [
+          "SOUMETTRE",
+          "VISER",
+          "VALIDER",
+          "REJETER",
+          "RETOURNER"
+        ],
+        "title": "Action"
+      },
       "Anomalie": {
         "properties": {
           "ligne": {
@@ -5425,6 +6870,26 @@
           "BUDGET_INITIAL"
         ],
         "title": "BaseTaux"
+      },
+      "Body_deposer_piece": {
+        "properties": {
+          "fichier": {
+            "type": "string",
+            "contentMediaType": "application/octet-stream",
+            "title": "Fichier"
+          },
+          "typePieceId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Typepieceid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "fichier",
+          "typePieceId"
+        ],
+        "title": "Body_deposer_piece"
       },
       "BudgetCreation": {
         "properties": {
@@ -5790,6 +7255,260 @@
         ],
         "title": "CentreSortie"
       },
+      "CircuitCreation": {
+        "properties": {
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "typeObjet": {
+            "type": "string",
+            "const": "RevisionBudgetaire",
+            "title": "Typeobjet"
+          },
+          "libelle": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Libelle"
+          },
+          "centreId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Centreid"
+          },
+          "seuilMin": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Seuilmin",
+            "default": "0",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "seuilMax": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seuilmax"
+          },
+          "separationTaches": {
+            "type": "boolean",
+            "title": "Separationtaches",
+            "default": true
+          },
+          "etapes": {
+            "items": {
+              "$ref": "#/components/schemas/EtapeSchema"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Etapes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "etablissementId",
+          "typeObjet",
+          "libelle",
+          "etapes"
+        ],
+        "title": "CircuitCreation"
+      },
+      "CircuitModification": {
+        "properties": {
+          "libelle": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Libelle"
+          },
+          "seuilMin": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seuilmin"
+          },
+          "seuilMax": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seuilmax"
+          },
+          "separationTaches": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Separationtaches"
+          },
+          "actif": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actif"
+          },
+          "etapes": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/EtapeSchema"
+                },
+                "type": "array",
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etapes"
+          }
+        },
+        "type": "object",
+        "title": "CircuitModification"
+      },
+      "CircuitSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "typeObjet": {
+            "type": "string",
+            "title": "Typeobjet"
+          },
+          "libelle": {
+            "type": "string",
+            "title": "Libelle"
+          },
+          "centreId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Centreid"
+          },
+          "seuilMin": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Seuilmin",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "seuilMax": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seuilmax"
+          },
+          "separationTaches": {
+            "type": "boolean",
+            "title": "Separationtaches"
+          },
+          "actif": {
+            "type": "boolean",
+            "title": "Actif"
+          },
+          "etapes": {
+            "items": {
+              "$ref": "#/components/schemas/EtapeSchema"
+            },
+            "type": "array",
+            "title": "Etapes"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "typeObjet",
+          "libelle",
+          "centreId",
+          "seuilMin",
+          "seuilMax",
+          "separationTaches",
+          "actif",
+          "etapes",
+          "version"
+        ],
+        "title": "CircuitSortie"
+      },
       "CompteComptableSortie": {
         "properties": {
           "code": {
@@ -6048,15 +7767,19 @@
         ],
         "title": "CoordonneeSortie"
       },
-      "DecisionRevision": {
+      "Decision": {
+        "type": "string",
+        "enum": [
+          "VALIDE",
+          "REJETE",
+          "A_CORRIGER"
+        ],
+        "title": "Decision"
+      },
+      "DecisionCreation": {
         "properties": {
           "decision": {
-            "type": "string",
-            "enum": [
-              "VALIDE",
-              "REJETE"
-            ],
-            "title": "Decision"
+            "$ref": "#/components/schemas/Decision"
           },
           "motif": {
             "anyOf": [
@@ -6069,13 +7792,119 @@
               }
             ],
             "title": "Motif"
+          },
+          "visa": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visa"
           }
         },
         "type": "object",
         "required": [
           "decision"
         ],
-        "title": "DecisionRevision"
+        "title": "DecisionCreation"
+      },
+      "DelegationCreation": {
+        "properties": {
+          "delegataireCode": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Delegatairecode"
+          },
+          "dateDebut": {
+            "type": "string",
+            "format": "date",
+            "title": "Datedebut"
+          },
+          "dateFin": {
+            "type": "string",
+            "format": "date",
+            "title": "Datefin"
+          },
+          "motif": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Motif"
+          }
+        },
+        "type": "object",
+        "required": [
+          "delegataireCode",
+          "dateDebut",
+          "dateFin",
+          "motif"
+        ],
+        "title": "DelegationCreation"
+      },
+      "DelegationModification": {
+        "properties": {
+          "dateFin": {
+            "type": "string",
+            "format": "date",
+            "title": "Datefin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dateFin"
+        ],
+        "title": "DelegationModification"
+      },
+      "DelegationSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "delegantCode": {
+            "type": "string",
+            "title": "Delegantcode"
+          },
+          "delegataireCode": {
+            "type": "string",
+            "title": "Delegatairecode"
+          },
+          "dateDebut": {
+            "type": "string",
+            "format": "date",
+            "title": "Datedebut"
+          },
+          "dateFin": {
+            "type": "string",
+            "format": "date",
+            "title": "Datefin"
+          },
+          "motif": {
+            "type": "string",
+            "title": "Motif"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "delegantCode",
+          "delegataireCode",
+          "dateDebut",
+          "dateFin",
+          "motif",
+          "version"
+        ],
+        "title": "DelegationSortie"
       },
       "DisponibiliteSortie": {
         "properties": {
@@ -6300,6 +8129,83 @@
           "version"
         ],
         "title": "EtablissementSortie"
+      },
+      "EtapeSchema": {
+        "properties": {
+          "ordre": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Ordre"
+          },
+          "libelle": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Libelle"
+          },
+          "profil": {
+            "$ref": "#/components/schemas/Profil"
+          },
+          "obligatoire": {
+            "type": "boolean",
+            "title": "Obligatoire",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "ordre",
+          "libelle",
+          "profil"
+        ],
+        "title": "EtapeSchema"
+      },
+      "EtatValidationSortie": {
+        "properties": {
+          "statut": {
+            "type": "string",
+            "title": "Statut"
+          },
+          "separationTaches": {
+            "type": "boolean",
+            "title": "Separationtaches"
+          },
+          "etapes": {
+            "items": {
+              "$ref": "#/components/schemas/EtapeSchema"
+            },
+            "type": "array",
+            "title": "Etapes"
+          },
+          "visas": {
+            "items": {
+              "$ref": "#/components/schemas/VisaSortie"
+            },
+            "type": "array",
+            "title": "Visas"
+          },
+          "etapesOuvertes": {
+            "items": {
+              "type": "integer"
+            },
+            "type": "array",
+            "title": "Etapesouvertes"
+          },
+          "peutDecider": {
+            "type": "boolean",
+            "title": "Peutdecider"
+          }
+        },
+        "type": "object",
+        "required": [
+          "statut",
+          "separationTaches",
+          "etapes",
+          "visas",
+          "etapesOuvertes",
+          "peutDecider"
+        ],
+        "title": "EtatValidationSortie"
       },
       "ExerciceCreation": {
         "properties": {
@@ -7482,6 +9388,26 @@
         ],
         "title": "Page[CentreSortie]"
       },
+      "Page_CircuitSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/CircuitSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[CircuitSortie]"
+      },
       "Page_CompteTresorerieSortie_": {
         "properties": {
           "donnees": {
@@ -7501,6 +9427,26 @@
           "pagination"
         ],
         "title": "Page[CompteTresorerieSortie]"
+      },
+      "Page_DelegationSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/DelegationSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[DelegationSortie]"
       },
       "Page_EtablissementSortie_": {
         "properties": {
@@ -7722,6 +9668,46 @@
         ],
         "title": "Page[SourceSortie]"
       },
+      "Page_StatutSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/StatutSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[StatutSortie]"
+      },
+      "Page_TransitionSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/TransitionSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[TransitionSortie]"
+      },
       "Page_TypeDepenseSortie_": {
         "properties": {
           "donnees": {
@@ -7847,6 +9833,57 @@
           "consommationDeduitAvanceRecuperee"
         ],
         "title": "ParametresCalculSchema"
+      },
+      "PieceSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "typePieceId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Typepieceid"
+          },
+          "nomFichier": {
+            "type": "string",
+            "title": "Nomfichier"
+          },
+          "typeMime": {
+            "type": "string",
+            "title": "Typemime"
+          },
+          "taille": {
+            "type": "integer",
+            "title": "Taille"
+          },
+          "empreinteSha256": {
+            "type": "string",
+            "title": "Empreintesha256"
+          },
+          "deposeParCode": {
+            "type": "string",
+            "title": "Deposeparcode"
+          },
+          "deposeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Deposele"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "typePieceId",
+          "nomFichier",
+          "typeMime",
+          "taille",
+          "empreinteSha256",
+          "deposeParCode",
+          "deposeLe"
+        ],
+        "title": "PieceSortie"
       },
       "Preferences": {
         "properties": {
@@ -8195,6 +10232,30 @@
         ],
         "title": "ReferentielSortie"
       },
+      "RevisionCorrection": {
+        "properties": {
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "motif": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Motif"
+          }
+        },
+        "type": "object",
+        "required": [
+          "montant",
+          "motif"
+        ],
+        "title": "RevisionCorrection"
+      },
       "RevisionCreation": {
         "properties": {
           "budgetId": {
@@ -8328,12 +10389,9 @@
             "format": "date-time",
             "title": "Creele"
           },
-          "visas": {
-            "items": {
-              "$ref": "#/components/schemas/VisaSortie"
-            },
-            "type": "array",
-            "title": "Visas"
+          "version": {
+            "type": "integer",
+            "title": "Version"
           }
         },
         "type": "object",
@@ -8350,7 +10408,7 @@
           "statut",
           "creeParCode",
           "creeLe",
-          "visas"
+          "version"
         ],
         "title": "RevisionSortie"
       },
@@ -8669,15 +10727,277 @@
         ],
         "title": "SourceSortie"
       },
+      "StatutCreation": {
+        "properties": {
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "typeObjet": {
+            "type": "string",
+            "const": "RevisionBudgetaire",
+            "title": "Typeobjet"
+          },
+          "code": {
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 1,
+            "pattern": "^[A-Z0-9_]+$",
+            "title": "Code"
+          },
+          "libelle": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Libelle"
+          },
+          "statutReference": {
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 1,
+            "title": "Statutreference"
+          }
+        },
+        "type": "object",
+        "required": [
+          "etablissementId",
+          "typeObjet",
+          "code",
+          "libelle",
+          "statutReference"
+        ],
+        "title": "StatutCreation"
+      },
+      "StatutModification": {
+        "properties": {
+          "libelle": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Libelle"
+          }
+        },
+        "type": "object",
+        "title": "StatutModification"
+      },
       "StatutRevision": {
         "type": "string",
         "enum": [
           "SOUMISE",
-          "VISEE",
+          "EN_VALIDATION",
+          "A_CORRIGER",
           "VALIDEE",
           "REJETEE"
         ],
-        "title": "StatutRevision"
+        "title": "StatutRevision",
+        "description": "Statuts de référence (domaine/workflow.py) ; le circuit est celui de l'établissement."
+      },
+      "StatutSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "typeObjet": {
+            "type": "string",
+            "title": "Typeobjet"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "libelle": {
+            "type": "string",
+            "title": "Libelle"
+          },
+          "statutReference": {
+            "type": "string",
+            "title": "Statutreference"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "typeObjet",
+          "code",
+          "libelle",
+          "statutReference",
+          "version"
+        ],
+        "title": "StatutSortie"
+      },
+      "TransitionCreation": {
+        "properties": {
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "typeObjet": {
+            "type": "string",
+            "const": "RevisionBudgetaire",
+            "title": "Typeobjet"
+          },
+          "depuis": {
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 1,
+            "title": "Depuis"
+          },
+          "action": {
+            "$ref": "#/components/schemas/Action"
+          },
+          "vers": {
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 1,
+            "title": "Vers"
+          },
+          "profil": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Profil"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "etablissementId",
+          "typeObjet",
+          "depuis",
+          "action",
+          "vers"
+        ],
+        "title": "TransitionCreation"
+      },
+      "TransitionModification": {
+        "properties": {
+          "vers": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 30,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Vers"
+          },
+          "profil": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Profil"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "title": "TransitionModification"
+      },
+      "TransitionReference": {
+        "properties": {
+          "depuis": {
+            "type": "string",
+            "title": "Depuis"
+          },
+          "action": {
+            "$ref": "#/components/schemas/Action"
+          },
+          "vers": {
+            "type": "string",
+            "title": "Vers"
+          }
+        },
+        "type": "object",
+        "required": [
+          "depuis",
+          "action",
+          "vers"
+        ],
+        "title": "TransitionReference"
+      },
+      "TransitionSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "typeObjet": {
+            "type": "string",
+            "title": "Typeobjet"
+          },
+          "depuis": {
+            "type": "string",
+            "title": "Depuis"
+          },
+          "action": {
+            "$ref": "#/components/schemas/Action"
+          },
+          "vers": {
+            "type": "string",
+            "title": "Vers"
+          },
+          "profil": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Profil"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "typeObjet",
+          "depuis",
+          "action",
+          "vers",
+          "profil",
+          "version"
+        ],
+        "title": "TransitionSortie"
       },
       "TypeDepenseCreation": {
         "properties": {
@@ -8833,6 +11153,14 @@
             "minimum": 1.0,
             "title": "Dureeconservationans",
             "default": 10
+          },
+          "typesObjets": {
+            "items": {
+              "type": "string",
+              "const": "RevisionBudgetaire"
+            },
+            "type": "array",
+            "title": "Typesobjets"
           }
         },
         "type": "object",
@@ -8880,6 +11208,21 @@
               }
             ],
             "title": "Dureeconservationans"
+          },
+          "typesObjets": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "const": "RevisionBudgetaire"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typesobjets"
           }
         },
         "type": "object",
@@ -8918,6 +11261,21 @@
               }
             ],
             "title": "Dureeconservationans"
+          },
+          "typesObjets": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "const": "RevisionBudgetaire"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typesobjets"
           }
         },
         "type": "object",
@@ -8927,7 +11285,8 @@
           "libelle",
           "actif",
           "version",
-          "dureeConservationAns"
+          "dureeConservationAns",
+          "typesObjets"
         ],
         "title": "TypePieceSortie"
       },
@@ -8982,13 +11341,30 @@
       },
       "VisaSortie": {
         "properties": {
+          "ordre": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ordre"
+          },
           "etape": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Etape"
           },
           "decision": {
-            "type": "string",
-            "title": "Decision"
+            "$ref": "#/components/schemas/Decision"
           },
           "motif": {
             "anyOf": [
@@ -9001,9 +11377,31 @@
             ],
             "title": "Motif"
           },
+          "visa": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Visa"
+          },
           "codeAgent": {
             "type": "string",
             "title": "Codeagent"
+          },
+          "delegantCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delegantcode"
           },
           "horodatage": {
             "type": "string",
@@ -9013,10 +11411,13 @@
         },
         "type": "object",
         "required": [
+          "ordre",
           "etape",
           "decision",
           "motif",
+          "visa",
           "codeAgent",
+          "delegantCode",
           "horodatage"
         ],
         "title": "VisaSortie"

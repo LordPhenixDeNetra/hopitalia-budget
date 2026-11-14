@@ -23,7 +23,10 @@
     "tauxLiquidation": "Taux de liquidation",
     "tauxPaiement": "Taux de paiement"
   },
-  "situation": { "ligne": "Ligne", "total": "Total du budget" },
+  "situation": {
+    "ligne": "Ligne",
+    "total": "Total du budget"
+  },
   "import": {
     "intro": "Fichier CSV séparé par des points-virgules, colonnes : code;libelle;compte;centre;source;programme;dotation. Les lignes valides sont créées, les autres listées en anomalie.",
     "choisir": "Choisir un fichier CSV",
@@ -77,8 +80,7 @@
     "REALLOCATION": "Réallocation",
     "AUGMENTATION": "Augmentation",
     "DIMINUTION": "Diminution",
-    "SOUMISE": "En attente du visa DAF",
-    "VISEE": "En attente de l'ordonnateur",
+    "SOUMISE": "Soumise",
     "VALIDEE": "Validée",
     "REJETEE": "Rejetée",
     "valider": "Viser",
@@ -88,7 +90,11 @@
     "visas": "Visas",
     "VALIDE": "Visa favorable",
     "REJETE": "Rejet",
-    "aide": "Une révision n'a aucun effet sur les crédits avant la décision de l'ordonnateur."
+    "aide": "Une révision n'a aucun effet sur les crédits avant la décision de l'ordonnateur.",
+    "EN_VALIDATION": "En cours de validation",
+    "A_CORRIGER": "À corriger"
   },
-  "ligne": { "disponibilite": "Disponibilité" }
+  "ligne": {
+    "disponibilite": "Disponibilité"
+  }
 }

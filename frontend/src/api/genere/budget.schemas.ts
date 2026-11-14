@@ -4,6 +4,17 @@
  * Hopitalia Budget
  * OpenAPI spec version: 0.1.0
  */
+export type Action = typeof Action[keyof typeof Action];
+
+
+export const Action = {
+  SOUMETTRE: 'SOUMETTRE',
+  VISER: 'VISER',
+  VALIDER: 'VALIDER',
+  REJETER: 'REJETER',
+  RETOURNER: 'RETOURNER',
+} as const;
+
 export interface Anomalie {
   ligne: number;
   code: string;
@@ -25,6 +36,11 @@ export const BaseTaux = {
   BUDGET_REVISE: 'BUDGET_REVISE',
   BUDGET_INITIAL: 'BUDGET_INITIAL',
 } as const;
+
+export interface BodyDeposerPiece {
+  fichier: Blob | File;
+  typePieceId: string;
+}
 
 export type BudgetCreationType = typeof BudgetCreationType[keyof typeof BudgetCreationType];
 
@@ -123,6 +139,76 @@ export interface CentreSortie {
   version: number;
 }
 
+export type Profil = typeof Profil[keyof typeof Profil];
+
+
+export const Profil = {
+  ADM: 'ADM',
+  RB: 'RB',
+  AF: 'AF',
+  GMC: 'GMC',
+  SD: 'SD',
+  REC: 'REC',
+  VAL: 'VAL',
+  ORD: 'ORD',
+  CPT: 'CPT',
+  AUD: 'AUD',
+  LEC: 'LEC',
+} as const;
+
+export interface EtapeSchema {
+  /** @minimum 1 */
+  ordre: number;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  profil: Profil;
+  obligatoire?: boolean;
+}
+
+export interface CircuitCreation {
+  etablissementId: string;
+  typeObjet: 'RevisionBudgetaire';
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  centreId?: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  seuilMin?: string;
+  seuilMax?: string | null;
+  separationTaches?: boolean;
+  /** @minItems 1 */
+  etapes: EtapeSchema[];
+}
+
+export interface CircuitModification {
+  libelle?: string | null;
+  seuilMin?: string | null;
+  seuilMax?: string | null;
+  separationTaches?: boolean | null;
+  actif?: boolean | null;
+  etapes?: EtapeSchema[] | null;
+}
+
+export interface CircuitSortie {
+  id: string;
+  etablissementId: string;
+  typeObjet: string;
+  libelle: string;
+  centreId: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  seuilMin: string;
+  seuilMax: string | null;
+  separationTaches: boolean;
+  actif: boolean;
+  etapes: EtapeSchema[];
+  version: number;
+}
+
 export interface NoeudSortie {
   id: string;
   niveau: string;
@@ -208,17 +294,48 @@ export interface CoordonneeSortie {
   parDefaut: boolean;
 }
 
-export type DecisionRevisionDecision = typeof DecisionRevisionDecision[keyof typeof DecisionRevisionDecision];
+export type Decision = typeof Decision[keyof typeof Decision];
 
 
-export const DecisionRevisionDecision = {
+export const Decision = {
   VALIDE: 'VALIDE',
   REJETE: 'REJETE',
+  A_CORRIGER: 'A_CORRIGER',
 } as const;
 
-export interface DecisionRevision {
-  decision: DecisionRevisionDecision;
+export interface DecisionCreation {
+  decision: Decision;
   motif?: string | null;
+  visa?: string | null;
+}
+
+export interface DelegationCreation {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     */
+  delegataireCode: string;
+  dateDebut: string;
+  dateFin: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  motif: string;
+}
+
+export interface DelegationModification {
+  dateFin: string;
+}
+
+export interface DelegationSortie {
+  id: string;
+  delegantCode: string;
+  delegataireCode: string;
+  dateDebut: string;
+  dateFin: string;
+  motif: string;
+  version: number;
 }
 
 export interface IndicateursSortie {
@@ -303,6 +420,26 @@ export interface EtablissementSortie {
   version: number;
 }
 
+export interface VisaSortie {
+  ordre: number | null;
+  etape: string | null;
+  decision: Decision;
+  motif: string | null;
+  visa: string | null;
+  codeAgent: string;
+  delegantCode: string | null;
+  horodatage: string;
+}
+
+export interface EtatValidationSortie {
+  statut: string;
+  separationTaches: boolean;
+  etapes: EtapeSchema[];
+  visas: VisaSortie[];
+  etapesOuvertes: number[];
+  peutDecider: boolean;
+}
+
 export interface ExerciceCreation {
   /**
      * @minLength 4
@@ -377,23 +514,6 @@ export interface ValidationError {
 export interface HTTPValidationError {
   detail?: ValidationError[];
 }
-
-export type Profil = typeof Profil[keyof typeof Profil];
-
-
-export const Profil = {
-  ADM: 'ADM',
-  RB: 'RB',
-  AF: 'AF',
-  GMC: 'GMC',
-  SD: 'SD',
-  REC: 'REC',
-  VAL: 'VAL',
-  ORD: 'ORD',
-  CPT: 'CPT',
-  AUD: 'AUD',
-  LEC: 'LEC',
-} as const;
 
 export interface HabilitationCreation {
   /**
@@ -575,8 +695,18 @@ export interface PageCentreSortie {
   pagination: Pagination;
 }
 
+export interface PageCircuitSortie {
+  donnees: CircuitSortie[];
+  pagination: Pagination;
+}
+
 export interface PageCompteTresorerieSortie {
   donnees: CompteTresorerieSortie[];
+  pagination: Pagination;
+}
+
+export interface PageDelegationSortie {
+  donnees: DelegationSortie[];
   pagination: Pagination;
 }
 
@@ -655,23 +785,19 @@ export const Sens = {
   DIMINUTION: 'DIMINUTION',
 } as const;
 
+/**
+ * Statuts de référence (domaine/workflow.py) ; le circuit est celui de l'établissement.
+ */
 export type StatutRevision = typeof StatutRevision[keyof typeof StatutRevision];
 
 
 export const StatutRevision = {
   SOUMISE: 'SOUMISE',
-  VISEE: 'VISEE',
+  EN_VALIDATION: 'EN_VALIDATION',
+  A_CORRIGER: 'A_CORRIGER',
   VALIDEE: 'VALIDEE',
   REJETEE: 'REJETEE',
 } as const;
-
-export interface VisaSortie {
-  etape: string;
-  decision: string;
-  motif: string | null;
-  codeAgent: string;
-  horodatage: string;
-}
 
 export interface RevisionSortie {
   id: string;
@@ -687,7 +813,7 @@ export interface RevisionSortie {
   statut: StatutRevision;
   creeParCode: string;
   creeLe: string;
-  visas: VisaSortie[];
+  version: number;
 }
 
 export interface PageRevisionSortie {
@@ -725,6 +851,37 @@ export interface PageSourceSortie {
   pagination: Pagination;
 }
 
+export interface StatutSortie {
+  id: string;
+  etablissementId: string;
+  typeObjet: string;
+  code: string;
+  libelle: string;
+  statutReference: string;
+  version: number;
+}
+
+export interface PageStatutSortie {
+  donnees: StatutSortie[];
+  pagination: Pagination;
+}
+
+export interface TransitionSortie {
+  id: string;
+  etablissementId: string;
+  typeObjet: string;
+  depuis: string;
+  action: Action;
+  vers: string;
+  profil: Profil | null;
+  version: number;
+}
+
+export interface PageTransitionSortie {
+  donnees: TransitionSortie[];
+  pagination: Pagination;
+}
+
 export interface TypeDepenseSortie {
   id: string;
   code: string;
@@ -746,6 +903,7 @@ export interface TypePieceSortie {
   actif: boolean;
   version: number;
   dureeConservationAns: number | null;
+  typesObjets: 'RevisionBudgetaire'[] | null;
 }
 
 export interface PageTypePieceSortie {
@@ -758,6 +916,17 @@ export interface ParametresCalculSchema {
   baseTauxExecution: BaseTaux;
   baseTauxConsommationMarche: BaseConsommationMarche;
   consommationDeduitAvanceRecuperee: boolean;
+}
+
+export interface PieceSortie {
+  id: string;
+  typePieceId: string;
+  nomFichier: string;
+  typeMime: string;
+  taille: number;
+  empreinteSha256: string;
+  deposeParCode: string;
+  deposeLe: string;
 }
 
 export type PreferencesLangue = typeof PreferencesLangue[keyof typeof PreferencesLangue];
@@ -822,6 +991,16 @@ export interface ReferentielCreation {
 export interface ReferentielModification {
   libelle?: string | null;
   actif?: boolean | null;
+}
+
+export interface RevisionCorrection {
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  motif: string;
 }
 
 export interface RevisionCreation {
@@ -899,6 +1078,59 @@ export interface SourceModification {
   bailleur?: string | null;
 }
 
+export interface StatutCreation {
+  etablissementId: string;
+  typeObjet: 'RevisionBudgetaire';
+  /**
+     * @minLength 1
+     * @maxLength 30
+     * @pattern ^[A-Z0-9_]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  /**
+     * @minLength 1
+     * @maxLength 30
+     */
+  statutReference: string;
+}
+
+export interface StatutModification {
+  libelle?: string | null;
+}
+
+export interface TransitionCreation {
+  etablissementId: string;
+  typeObjet: 'RevisionBudgetaire';
+  /**
+     * @minLength 1
+     * @maxLength 30
+     */
+  depuis: string;
+  action: Action;
+  /**
+     * @minLength 1
+     * @maxLength 30
+     */
+  vers: string;
+  profil?: Profil | null;
+}
+
+export interface TransitionModification {
+  vers?: string | null;
+  profil?: Profil | null;
+}
+
+export interface TransitionReference {
+  depuis: string;
+  action: Action;
+  vers: string;
+}
+
 export interface TypeDepenseCreation {
   /**
      * @minLength 1
@@ -937,12 +1169,14 @@ export interface TypePieceCreation {
      * @maximum 100
      */
   dureeConservationAns?: number;
+  typesObjets?: 'RevisionBudgetaire'[];
 }
 
 export interface TypePieceModification {
   libelle?: string | null;
   actif?: boolean | null;
   dureeConservationAns?: number | null;
+  typesObjets?: 'RevisionBudgetaire'[] | null;
 }
 
 export type Health200 = {[key: string]: string};
@@ -1212,5 +1446,57 @@ export type ListerLignesBudgetairesParams = {
   sourceId?: string | null;
   compteBudgetaireId?: string | null;
   code?: string | null;
+};
+
+export type ListerDelegationsParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
+
+export type ListerCircuitsValidationParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs libelle ; - : décroissant */
+  tri?: string | null;
+  etablissementId?: string | null;
+  typeObjet?: string | null;
+};
+
+export type ListerStatutsPersonnalisesParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code ; - : décroissant */
+  tri?: string | null;
+  etablissementId?: string | null;
+  typeObjet?: string | null;
+};
+
+export type ListerTransitionsStatutsParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs depuis ; - : décroissant */
+  tri?: string | null;
+  etablissementId?: string | null;
+  typeObjet?: string | null;
 };
 

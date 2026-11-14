@@ -1,0 +1,82 @@
+{
+  "validations": {
+    "titre": "Validation",
+    "circuit": "Circuit de validation",
+    "facultative": "facultative",
+    "aucunVisa": "Aucun visa pour l'instant.",
+    "valider": "Viser",
+    "rejeter": "Rejeter",
+    "retourner": "Retourner pour correction",
+    "motif": "Motif",
+    "visa": "Mention du visa (facultatif)",
+    "enregistree": "Décision enregistrée.",
+    "parDelegation": "par délégation de {{code}}",
+    "enAttente": "En attente de l'étape {{ordre}}",
+    "separation": "Séparation des tâches",
+    "VALIDE": "Visa favorable",
+    "REJETE": "Rejet",
+    "A_CORRIGER": "Retour pour correction"
+  },
+  "pieces": {
+    "titre": "Pièces justificatives",
+    "type": "Type de pièce",
+    "deposer": "Déposer un fichier",
+    "formats": "PDF, PNG, JPEG, Word ou Excel ; 20 Mo au plus.",
+    "nom": "Fichier",
+    "deposePar": "Déposée par",
+    "empreinte": "Empreinte SHA-256",
+    "telecharger": "Télécharger",
+    "deposee": "Pièce déposée.",
+    "aucune": "Aucune pièce."
+  },
+  "correction": {
+    "titre": "Correction",
+    "aide": "La révision vous a été retournée : corrigez-la, puis renvoyez-la au circuit.",
+    "resoumettre": "Renvoyer au circuit",
+    "resoumise": "Révision renvoyée au circuit.",
+    "detail": "Détail"
+  },
+  "delegations": {
+    "titre": "Délégations",
+    "intro": "Pendant la période, l'agent désigné vise à votre place, avec vos profils, dans les circuits de validation. Il n'obtient aucun autre droit.",
+    "delegantCode": "Délégant",
+    "delegataireCode": "Code agent du délégataire",
+    "dateDebut": "Du",
+    "dateFin": "Au",
+    "motif": "Motif",
+    "etat": "État",
+    "active": "Active",
+    "aVenir": "À venir",
+    "terminee": "Terminée",
+    "creer": "Déléguer",
+    "creee": "Délégation enregistrée.",
+    "revoquer": "Révoquer",
+    "revoquee": "Délégation révoquée."
+  },
+  "circuits": {
+    "titre": "Circuits de validation",
+    "intro": "Sans circuit pour un objet, le circuit par défaut s'applique : visa de la DAF, puis ordonnateur. Le circuit d'une opération est figé à sa soumission.",
+    "libelle": "Libellé",
+    "etablissementId": "Établissement",
+    "typeObjet": "Objet",
+    "centreId": "Service (facultatif)",
+    "seuilMin": "À partir de",
+    "seuilMax": "Jusqu'à (exclu)",
+    "separationTaches": "Séparation des tâches",
+    "actif": "Statut",
+    "etapes": "Étapes",
+    "profil": "Profil",
+    "obligatoire": "Obligatoire",
+    "ajouterEtape": "Ajouter une étape",
+    "retirer": "Retirer l'étape",
+    "creer": "Ajouter un circuit",
+    "modifier": "Modifier",
+    "enregistre": "Circuit enregistré.",
+    "aide": "La dernière étape, obligatoire, revient à l'ordonnateur (section 17, point 16).",
+    "oui": "Oui",
+    "non": "Non",
+    "types": {
+      "RevisionBudgetaire": "Révision budgétaire"
+    }
+  }
+}
