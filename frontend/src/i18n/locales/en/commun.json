@@ -9,7 +9,8 @@
     "habilitations": "User rights",
     "parametrage": "Configuration",
     "nomenclature": "Nomenclature",
-    "budgets": "Budgets"
+    "budgets": "Budgets",
+    "delegations": "Delegations"
   },
   "entete": {
     "langue": "Language",

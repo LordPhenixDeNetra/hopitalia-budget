@@ -44,6 +44,7 @@ beforeAll(async () => {
     'habilitations',
     'parametrage',
     'budget',
+    'workflow',
   ])
 })
 
@@ -290,7 +291,7 @@ describe('paramétrage et budget (lot 1)', () => {
     statut: 'SOUMISE',
     creeParCode: 'AG002',
     creeLe: '2026-03-01T10:00:00Z',
-    visas: [],
+    version: 1,
   }
 
   test('création d’un exercice : formulaire générique, clé d’idempotence (T-087)', async () => {
@@ -361,26 +362,108 @@ describe('paramétrage et budget (lot 1)', () => {
     expect(String(envoi[1]!.body)).toMatch(/^code;libelle/)
   })
 
-  test('révision : visa DAF proposé au seul profil de l’étape (T-095)', async () => {
+  const ETAT = {
+    statut: 'SOUMISE',
+    separationTaches: true,
+    etapes: [
+      { ordre: 1, libelle: 'Visa DAF', profil: 'VAL', obligatoire: true },
+      { ordre: 2, libelle: 'Ordonnateur', profil: 'ORD', obligatoire: true },
+    ],
+    visas: [],
+    etapesOuvertes: [1],
+    peutDecider: true,
+  }
+  const VISA = {
+    ordre: 1,
+    etape: 'VAL',
+    decision: 'A_CORRIGER',
+    motif: 'Montant à revoir',
+    visa: null,
+    codeAgent: 'AG003',
+    delegantCode: null,
+    horodatage: '2026-03-02T10:00:00Z',
+  }
+
+  async function ouvrirRevision(profil: string, etat: object) {
     jetons.enregistrer('acces', 'rafraichissement')
     const appel = simulerApi({
-      'GET /api/v1/moi': [
-        json({ ...MOI, habilitations: [{ profil: 'VAL', etablissementId: 'a1' }] }),
-      ],
+      'GET /api/v1/moi': [json({ ...MOI, habilitations: [{ profil, etablissementId: 'a1' }] })],
       'GET /api/v1/budgets/b1': [json(BUDGET)],
       'GET /api/v1/budgets/b1/situation': [SITUATION],
       'GET /api/v1/revisions-budgetaires': [page([REVISION])],
-      'POST /api/v1/revisions-budgetaires/r1/validations': [json({ ...REVISION, statut: 'VISEE' })],
+      'GET /api/v1/revisions-budgetaires/r1/validations': [json(etat)],
+      'GET /api/v1/revisions-budgetaires/r1/pieces': [json([])],
+      'POST /api/v1/revisions-budgetaires/r1/validations': [
+        json({ ...etat, statut: 'A_CORRIGER', visas: [VISA], peutDecider: false }, 201),
+      ],
     })
     afficher('/budgets/b1')
     await userEvent.click(await screen.findByRole('tab', { name: 'Révisions' }))
-    expect(await screen.findByText('En attente du visa DAF')).toBeTruthy()
+    await userEvent.click(await screen.findByRole('button', { name: 'Détail' }))
+    return appel
+  }
+
+  test('révision : circuit, visa et retour motivé dans la fiche (T-113, T-120)', async () => {
+    const appel = await ouvrirRevision('VAL', ETAT)
+    expect(await screen.findByText('Visa DAF')).toBeTruthy()
     // Le profil VAL ne peut pas demander de révision (réservé au RB).
     expect(screen.queryByRole('button', { name: 'Demander une révision' })).toBeNull()
-    await userEvent.click(screen.getByRole('button', { name: 'Viser' }))
+    await userEvent.click(screen.getByRole('button', { name: 'Retourner pour correction' }))
+    await userEvent.type(await screen.findByLabelText('Motif'), 'Montant à revoir')
+    const dialogue = screen.getAllByRole('dialog').at(-1)!
+    await userEvent.click(
+      within(dialogue).getByRole('button', { name: 'Retourner pour correction' }),
+    )
     expect(await screen.findByText('Décision enregistrée.')).toBeTruthy()
+    expect(await screen.findByText(/Retour pour correction — AG003/)).toBeTruthy()
 
     const envoi = appel.mock.calls.find(([, options]) => options?.method === 'POST')!
-    expect(JSON.parse(String(envoi[1]!.body))).toEqual({ decision: 'VALIDE' })
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({
+      decision: 'A_CORRIGER',
+      motif: 'Montant à revoir',
+    })
+  })
+
+  test('révision : aucun bouton de décision si le serveur le refuse (RG-13)', async () => {
+    await ouvrirRevision('ORD', { ...ETAT, peutDecider: false })
+    expect(await screen.findByText('Visa DAF')).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Viser' })).toBeNull()
+  })
+
+  test('délégation : création avec clé d’idempotence (T-115)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [
+        json({ ...MOI, habilitations: [{ profil: 'ORD', etablissementId: 'a1' }] }),
+      ],
+      'POST /api/v1/delegations': [
+        json(
+          {
+            id: 'd1',
+            delegantCode: 'AG001',
+            delegataireCode: 'AG009',
+            dateDebut: '2026-11-14',
+            dateFin: '2026-11-20',
+            motif: 'Congés',
+            version: 1,
+          },
+          201,
+        ),
+      ],
+    })
+    afficher('/delegations')
+    await userEvent.type(await screen.findByLabelText('Code agent du délégataire'), 'AG009')
+    await userEvent.type(screen.getByLabelText('Au'), '2026-11-20')
+    await userEvent.type(screen.getByLabelText('Motif'), 'Congés')
+    await userEvent.click(screen.getByRole('button', { name: 'Déléguer' }))
+    expect(await screen.findByText('Délégation enregistrée.')).toBeTruthy()
+
+    const envoi = appel.mock.calls.find(([, options]) => options?.method === 'POST')!
+    expect(JSON.parse(String(envoi[1]!.body))).toMatchObject({
+      delegataireCode: 'AG009',
+      dateFin: '2026-11-20',
+      motif: 'Congés',
+    })
+    expect(new Headers(envoi[1]!.headers).get('Idempotency-Key')).toMatch(/[0-9a-f-]{36}/)
   })
 })

@@ -1,0 +1,82 @@
+{
+  "validations": {
+    "titre": "Approval",
+    "circuit": "Approval flow",
+    "facultative": "optional",
+    "aucunVisa": "No approval yet.",
+    "valider": "Approve",
+    "rejeter": "Reject",
+    "retourner": "Return for correction",
+    "motif": "Reason",
+    "visa": "Approval note (optional)",
+    "enregistree": "Decision recorded.",
+    "parDelegation": "on behalf of {{code}}",
+    "enAttente": "Awaiting step {{ordre}}",
+    "separation": "Separation of duties",
+    "VALIDE": "Approved",
+    "REJETE": "Rejected",
+    "A_CORRIGER": "Returned for correction"
+  },
+  "pieces": {
+    "titre": "Supporting documents",
+    "type": "Document type",
+    "deposer": "Upload a file",
+    "formats": "PDF, PNG, JPEG, Word or Excel; 20 MB at most.",
+    "nom": "File",
+    "deposePar": "Uploaded by",
+    "empreinte": "SHA-256 fingerprint",
+    "telecharger": "Download",
+    "deposee": "Document uploaded.",
+    "aucune": "No documents."
+  },
+  "correction": {
+    "titre": "Correction",
+    "aide": "This revision was returned to you: correct it, then send it back into the approval flow.",
+    "resoumettre": "Send back for approval",
+    "resoumise": "Revision sent back for approval.",
+    "detail": "Details"
+  },
+  "delegations": {
+    "titre": "Delegations",
+    "intro": "During the period, the chosen agent approves on your behalf, with your profiles, in approval flows. They get no other right.",
+    "delegantCode": "Delegator",
+    "delegataireCode": "Delegate agent code",
+    "dateDebut": "From",
+    "dateFin": "To",
+    "motif": "Reason",
+    "etat": "State",
+    "active": "Active",
+    "aVenir": "Upcoming",
+    "terminee": "Ended",
+    "creer": "Delegate",
+    "creee": "Delegation recorded.",
+    "revoquer": "Revoke",
+    "revoquee": "Delegation revoked."
+  },
+  "circuits": {
+    "titre": "Approval flows",
+    "intro": "Without a flow for an object, the default flow applies: finance department approval, then the authorising officer. An operation's flow is fixed when it is submitted.",
+    "libelle": "Label",
+    "etablissementId": "Facility",
+    "typeObjet": "Object",
+    "centreId": "Department (optional)",
+    "seuilMin": "From",
+    "seuilMax": "Up to (excluded)",
+    "separationTaches": "Separation of duties",
+    "actif": "Status",
+    "etapes": "Steps",
+    "profil": "Profile",
+    "obligatoire": "Mandatory",
+    "ajouterEtape": "Add a step",
+    "retirer": "Remove the step",
+    "creer": "Add a flow",
+    "modifier": "Edit",
+    "enregistre": "Flow saved.",
+    "aide": "The last step, mandatory, belongs to the authorising officer (section 17, point 16).",
+    "oui": "Yes",
+    "non": "No",
+    "types": {
+      "RevisionBudgetaire": "Budget revision"
+    }
+  }
+}

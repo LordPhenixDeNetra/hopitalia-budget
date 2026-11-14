@@ -171,10 +171,78 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
         ),
         ("Insufficient credit", "Available {disponible}, requested {montant} on line {ligne}."),
     ),
-    "REVISION_DEJA_TRAITEE": (
+    "OPERATION_DEJA_TRAITEE": (
         409,
-        ("Révision déjà traitée", "Cette révision est déjà validée ou rejetée."),
-        ("Revision already processed", "This revision is already approved or rejected."),
+        ("Opération déjà traitée", "Cette opération n'attend aucune validation."),
+        ("Already processed", "This operation is not awaiting any approval."),
+    ),
+    "OPERATION_NON_MODIFIABLE": (
+        409,
+        (
+            "Opération non modifiable",
+            "Seule une opération retournée pour correction se modifie (statut actuel : {statut}).",
+        ),
+        (
+            "Operation cannot be changed",
+            "Only an operation returned for correction can be changed (current status: {statut}).",
+        ),
+    ),
+    "TRANSITION_NON_AUTORISEE": (
+        409,
+        (
+            "Transition non autorisée",
+            "L'action {action} n'est pas paramétrée depuis le statut {statut}.",
+        ),
+        ("Transition not allowed", "Action {action} is not configured from status {statut}."),
+    ),
+    "TRANSITION_INCOHERENTE": (
+        422,
+        (
+            "Transition incohérente",
+            "Cette transition ne correspond à aucune transition des statuts de référence.",
+        ),
+        ("Inconsistent transition", "This transition matches no reference status transition."),
+    ),
+    "CIRCUIT_INVALIDE": (
+        422,
+        (
+            "Circuit invalide",
+            "Étapes numérotées à partir de 1, profils autorisés à valider, dernière étape "
+            "obligatoire confiée à l'ordonnateur.",
+        ),
+        (
+            "Invalid approval flow",
+            "Steps numbered from 1, profiles allowed to approve, last step mandatory and "
+            "given to the authorising officer.",
+        ),
+    ),
+    "PIECES_MANQUANTES": (
+        422,
+        ("Pièces manquantes", "Une pièce obligatoire manque : la validation est impossible."),
+        ("Missing documents", "A mandatory document is missing: approval is not possible."),
+    ),
+    "PIECE_ALTEREE": (
+        409,
+        (
+            "Pièce altérée",
+            "Le fichier ne correspond plus à son empreinte : il a été modifié ou perdu.",
+        ),
+        ("Altered document", "The file no longer matches its fingerprint: changed or lost."),
+    ),
+    "PIECE_TROP_VOLUMINEUSE": (
+        413,
+        ("Fichier trop volumineux", "Un fichier ne doit pas dépasser {max} Mo."),
+        ("File too large", "A file must not exceed {max} MB."),
+    ),
+    "TYPE_FICHIER_REFUSE": (
+        415,
+        ("Type de fichier refusé", "Formats acceptés : PDF, PNG, JPEG, Word et Excel."),
+        ("File type refused", "Accepted formats: PDF, PNG, JPEG, Word and Excel."),
+    ),
+    "DELEGATION_INVALIDE": (
+        422,
+        ("Délégation invalide", "On ne se délègue pas ses propres droits."),
+        ("Invalid delegation", "You cannot delegate to yourself."),
     ),
     "ETAPE_NON_AUTORISEE": (
         403,

@@ -1,6 +1,7 @@
 /** Définitions des ressources servies par l'écran générique de paramétrage (lot 1). */
 
-export type TypeChamp = 'texte' | 'montant' | 'entier' | 'date' | 'choix' | 'reference'
+export type TypeChamp =
+  'texte' | 'montant' | 'entier' | 'date' | 'choix' | 'choixMultiple' | 'reference'
 
 export interface Champ {
   nom: string
@@ -110,7 +111,12 @@ export const RESSOURCES: Record<string, DefinitionRessource> = {
     },
     { nom: 'numero', type: 'texte' },
   ),
-  'types-pieces': simple('types-pieces', { nom: 'dureeConservationAns', type: 'entier' }),
+  'types-pieces': simple(
+    'types-pieces',
+    { nom: 'dureeConservationAns', type: 'entier' },
+    // Objets qui ne peuvent pas être validés sans une pièce de ce type (T-119).
+    { nom: 'typesObjets', type: 'choixMultiple', valeurs: ['RevisionBudgetaire'] },
+  ),
   fournisseurs: {
     chemin: 'fournisseurs',
     colonnes: ['code', 'raisonSociale', 'contact', 'codeHopitalia', 'actif'],
@@ -212,4 +218,5 @@ export const PARAMETRAGE = [
   'types-pieces',
   'fournisseurs',
   'exercices',
+  'circuits-validation',
 ]

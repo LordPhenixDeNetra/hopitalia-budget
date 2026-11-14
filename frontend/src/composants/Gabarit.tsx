@@ -6,6 +6,7 @@ import {
   SafetyOutlined,
   SettingOutlined,
   ShopOutlined,
+  SwapOutlined,
 } from '@ant-design/icons'
 import { Breadcrumb, Button, Flex, Layout, Menu, Select, Typography, theme } from 'antd'
 import { Link, Outlet, useLocation, useMatches, useNavigate } from 'react-router'
@@ -76,6 +77,11 @@ export function Gabarit() {
               key: '/nomenclature',
               icon: <ApartmentOutlined aria-hidden />,
               label: t('menu.nomenclature'),
+            },
+            {
+              key: '/delegations',
+              icon: <SwapOutlined aria-hidden />,
+              label: t('menu.delegations'),
             },
             {
               key: '/parametrage',

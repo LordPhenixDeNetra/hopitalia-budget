@@ -7,7 +7,6 @@ from enum import StrEnum
 from typing import Protocol
 from uuid import UUID
 
-from hopitalia_budget.domaine.habilitations import Profil
 from hopitalia_budget.domaine.indicateurs import IndicateursLigne
 
 
@@ -23,17 +22,13 @@ class Sens(StrEnum):
 
 
 class StatutRevision(StrEnum):
-    SOUMISE = "SOUMISE"  # en attente du visa de la DAF
-    VISEE = "VISEE"  # visée par la DAF, en attente de l'ordonnateur
+    """Statuts de référence (domaine/workflow.py) ; le circuit est celui de l'établissement."""
+
+    SOUMISE = "SOUMISE"
+    EN_VALIDATION = "EN_VALIDATION"  # au moins un visa, pas encore la dernière étape
+    A_CORRIGER = "A_CORRIGER"
     VALIDEE = "VALIDEE"  # seul statut qui modifie les crédits
     REJETEE = "REJETEE"
-
-
-# Circuit fixé par la section 17, point 16 : la DAF vise, puis l'ordonnateur valide toujours.
-ETAPES: dict[StatutRevision, Profil] = {
-    StatutRevision.SOUMISE: Profil.VAL,
-    StatutRevision.VISEE: Profil.ORD,
-}
 
 
 @dataclass(frozen=True)
@@ -58,16 +53,7 @@ class LigneRevisee:
     id: UUID
     budget_id: UUID
     code: str
-
-
-@dataclass(frozen=True)
-class Visa:
-    etape: Profil
-    decision: str
-    motif: str | None
-    utilisateur_id: int
-    code_agent: str
-    horodatage: datetime
+    centre_id: UUID
 
 
 def ligne_debitee(revision: Revision) -> UUID | None:
@@ -90,6 +76,8 @@ class DepotRevisions(Protocol):
 
     def changer_statut(self, revision_id: UUID, statut: StatutRevision) -> None: ...
 
-    def ajouter_visa(self, revision_id: UUID, visa: Visa) -> None: ...
+    def version(self, revision_id: UUID) -> int: ...
 
-    def visas(self, revision_id: UUID) -> list[Visa]: ...
+    def corriger(self, revision_id: UUID, montant: Decimal, motif: str) -> None: ...
+
+    def pieces_obligatoires_presentes(self, revision_id: UUID) -> bool: ...

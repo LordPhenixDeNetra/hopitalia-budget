@@ -1,33 +1,40 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { App, Button, Flex, Form, Input, Modal, Select, Space, Timeline, Typography } from 'antd'
+import { App, Button, Drawer, Flex, Form, Input, Modal, Select, Space, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table/interface'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAfficherErreur } from '../../api/erreurs'
 import {
-  deciderRevision,
+  corrigerRevision,
+  getLireValidationsQueryKey,
   getListerRevisionsQueryKey,
   getObtenirDisponibiliteQueryKey,
   getObtenirSituationQueryKey,
+  resoumettre,
   soumettreRevision,
   useListerRevisions,
 } from '../../api/genere/budget'
-import type { RevisionCreation, RevisionSortie } from '../../api/genere/budget.schemas'
+import type {
+  RevisionCorrection,
+  RevisionCreation,
+  RevisionSortie,
+} from '../../api/genere/budget.schemas'
 import { useAProfil } from '../../auth/session'
 import { BadgeStatut, type Ton } from '../../composants/BadgeStatut'
 import { Montant } from '../../composants/Montant'
 import { TableauServeur, type EtatTableau } from '../../composants/TableauServeur'
+import { Pieces } from '../../composants/workflow/Pieces'
+import { Validations } from '../../composants/workflow/Validations'
 import { formaterDateHeure } from '../../format/format'
 import { useOptions } from '../parametrage/PageReferentiel'
 
 const TONS: Record<string, Ton> = {
   SOUMISE: 'info',
-  VISEE: 'attention',
+  EN_VALIDATION: 'attention',
+  A_CORRIGER: 'attention',
   VALIDEE: 'succes',
   REJETEE: 'erreur',
 }
-/** Profil attendu à chaque étape (section 17, point 16 : visa DAF puis ordonnateur). */
-const ETAPES: Record<string, string> = { SOUMISE: 'VAL', VISEE: 'ORD' }
 
 function Demande({ budgetId, fermer }: { budgetId: string; fermer: () => void }) {
   const { t } = useTranslation('budget')
@@ -91,80 +98,123 @@ function Demande({ budgetId, fermer }: { budgetId: string; fermer: () => void })
   )
 }
 
-/** Révisions budgétaires d'un budget ou d'une ligne : demande, visas et décision (T-095). */
-export function Revisions({ budgetId, ligneId }: { budgetId: string; ligneId?: string }) {
-  const { t, i18n } = useTranslation('budget')
+/** Fiche d'une révision : correction après retour, circuit et visas, pièces (T-120). */
+function Detail({
+  revision,
+  fermer,
+  rafraichir,
+}: {
+  revision: RevisionSortie
+  fermer: () => void
+  rafraichir: () => void
+}) {
+  const { t } = useTranslation('budget')
+  const { t: tWorkflow } = useTranslation('workflow')
   const { t: tCommun } = useTranslation()
-  const { message, modal } = App.useApp()
+  const { message } = App.useApp()
   const afficherErreur = useAfficherErreur()
   const client = useQueryClient()
+  const [formulaire] = Form.useForm<RevisionCorrection>()
+  const estResponsable = useAProfil(['RB'])
+  const peutDeposer = useAProfil(['RB', 'VAL', 'ORD'])
+  // Le serveur vérifie en plus que l'agent est l'auteur de la révision.
+  const aCorriger = revision.statut === 'A_CORRIGER' && estResponsable
+  const requis = [{ required: true, message: tCommun('connexion.obligatoire') }]
+  const apres = (texte: string) => {
+    void message.success(texte)
+    void client.invalidateQueries({
+      queryKey: getLireValidationsQueryKey('revisions-budgetaires', revision.id),
+    })
+    rafraichir()
+  }
+  const correction = useMutation({
+    mutationFn: (v: RevisionCorrection) =>
+      corrigerRevision(revision.id, v, { headers: { 'If-Match': `"${revision.version}"` } }),
+    onSuccess: () => apres(tCommun('actions.enregistrer')),
+    onError: (erreur) => afficherErreur(erreur, formulaire),
+  })
+  const soumission = useMutation({
+    mutationFn: () => resoumettre('revisions-budgetaires', revision.id),
+    onSuccess: () => apres(tWorkflow('correction.resoumise')),
+    onError: (erreur) => afficherErreur(erreur),
+  })
+
+  return (
+    <Drawer
+      open
+      size="large"
+      title={`${t(`revisions.${revision.type}`)} — ${revision.motif}`}
+      onClose={fermer}
+    >
+      <Flex vertical gap="large">
+        <Typography.Text>
+          {t('revisions.montant')} : <Montant valeur={revision.montant} />
+        </Typography.Text>
+        {aCorriger && (
+          <Form
+            form={formulaire}
+            layout="vertical"
+            initialValues={{ montant: revision.montant, motif: revision.motif }}
+            onFinish={(v) => correction.mutate(v)}
+          >
+            <Typography.Title level={4}>{tWorkflow('correction.titre')}</Typography.Title>
+            <Typography.Paragraph>{tWorkflow('correction.aide')}</Typography.Paragraph>
+            <Form.Item name="montant" label={t('revisions.montant')} rules={requis}>
+              <Input inputMode="decimal" />
+            </Form.Item>
+            <Form.Item name="motif" label={t('revisions.motif')} rules={requis}>
+              <Input.TextArea maxLength={500} />
+            </Form.Item>
+            <Space wrap>
+              <Button htmlType="submit" loading={correction.isPending}>
+                {tCommun('actions.enregistrer')}
+              </Button>
+              <Button
+                type="primary"
+                loading={soumission.isPending}
+                onClick={() => soumission.mutate()}
+              >
+                {tWorkflow('correction.resoumettre')}
+              </Button>
+            </Space>
+          </Form>
+        )}
+        <Validations ressource="revisions-budgetaires" id={revision.id} surDecision={rafraichir} />
+        <Pieces ressource="revisions-budgetaires" id={revision.id} peutDeposer={peutDeposer} />
+      </Flex>
+    </Drawer>
+  )
+}
+
+/** Révisions budgétaires d'un budget ou d'une ligne : demande et suivi (T-095). */
+export function Revisions({ budgetId, ligneId }: { budgetId: string; ligneId?: string }) {
+  const { t, i18n } = useTranslation('budget')
+  const { t: tWorkflow } = useTranslation('workflow')
+  const client = useQueryClient()
   const peutDemander = useAProfil(['RB'])
-  const estVal = useAProfil(['VAL'])
-  const estOrd = useAProfil(['ORD'])
   const [etat, setEtat] = useState<EtatTableau>({ page: 1, taille: 25 })
   const [demande, setDemande] = useState(false)
+  const [ouverte, setOuverte] = useState<string>()
   const lignes = useOptions(`lignes-budgetaires?budgetId=${budgetId}`)
   const { data, isFetching } = useListerRevisions({
     ...(ligneId ? { ligneId } : { budgetId }),
     page: etat.page,
     taille: etat.taille,
   })
-
-  const decision = useMutation({
-    mutationFn: ({ id, valide, motif }: { id: string; valide: boolean; motif?: string }) =>
-      deciderRevision(id, { decision: valide ? 'VALIDE' : 'REJETE', motif }),
-    onSuccess: () => {
-      void client.invalidateQueries({ queryKey: getListerRevisionsQueryKey() })
-      void client.invalidateQueries({ queryKey: getObtenirSituationQueryKey(budgetId) })
-      if (ligneId)
-        void client.invalidateQueries({ queryKey: getObtenirDisponibiliteQueryKey(ligneId) })
-      void message.success(t('revisions.decision'))
-    },
-    onError: (erreur) => afficherErreur(erreur),
-  })
-  const rejeter = (id: string) => {
-    let motif = ''
-    modal.confirm({
-      title: t('revisions.motifRejet'),
-      content: (
-        <Input.TextArea
-          aria-label={t('revisions.motifRejet')}
-          onChange={(e) => (motif = e.target.value)}
-        />
-      ),
-      okText: t('revisions.rejeter'),
-      cancelText: tCommun('actions.annuler'),
-      onOk: () => decision.mutateAsync({ id, valide: false, motif }),
-    })
+  const rafraichir = () => {
+    void client.invalidateQueries({ queryKey: getListerRevisionsQueryKey() })
+    void client.invalidateQueries({ queryKey: getObtenirSituationQueryKey(budgetId) })
+    if (ligneId)
+      void client.invalidateQueries({ queryKey: getObtenirDisponibiliteQueryKey(ligneId) })
   }
+  const revision = data?.donnees.find((r) => r.id === ouverte)
 
   const ligne = (id?: string | null) => lignes.find((l) => l.value === id)?.label ?? ''
-  const peutDecider = (r: RevisionSortie) =>
-    (ETAPES[r.statut] === 'VAL' && estVal) || (ETAPES[r.statut] === 'ORD' && estOrd)
-  const actions = (r: RevisionSortie) =>
-    peutDecider(r) && (
-      <Space wrap>
-        <Button
-          size="small"
-          type="primary"
-          onClick={() => decision.mutate({ id: r.id, valide: true })}
-        >
-          {t('revisions.valider')}
-        </Button>
-        <Button size="small" danger onClick={() => rejeter(r.id)}>
-          {t('revisions.rejeter')}
-        </Button>
-      </Space>
-    )
-  const visas = (r: RevisionSortie) =>
-    r.visas.length > 0 && (
-      <Timeline
-        items={r.visas.map((v) => ({
-          key: `${v.etape}-${v.horodatage}`,
-          content: `${t(`revisions.${v.decision}`)} — ${v.codeAgent} — ${formaterDateHeure(v.horodatage, i18n.language)}${v.motif ? ` — ${v.motif}` : ''}`,
-        }))}
-      />
-    )
+  const detail = (r: RevisionSortie) => (
+    <Button size="small" onClick={() => setOuverte(r.id)}>
+      {tWorkflow('correction.detail')}
+    </Button>
+  )
   const statut = (r: RevisionSortie) => (
     <BadgeStatut ton={TONS[r.statut] ?? 'neutre'} libelle={t(`revisions.${r.statut}`)} />
   )
@@ -185,13 +235,12 @@ export function Revisions({ budgetId, ligneId }: { budgetId: string; ligneId?: s
     },
     { title: t('revisions.motif'), dataIndex: 'motif' },
     { title: t('revisions.statut'), key: 'statut', render: (_, r) => statut(r) },
-    { title: t('revisions.visas'), key: 'visas', render: (_, r) => visas(r) },
     {
       title: t('revisions.creeLe'),
       dataIndex: 'creeLe',
       render: (v: string) => formaterDateHeure(v, i18n.language),
     },
-    { key: 'actions', render: (_, r) => actions(r) },
+    { key: 'actions', render: (_, r) => detail(r) },
   ]
 
   return (
@@ -219,12 +268,14 @@ export function Revisions({ budgetId, ligneId }: { budgetId: string; ligneId?: s
               {ligne(r.ligneSourceId)} {ligne(r.ligneCibleId)}
             </Typography.Text>
             <Typography.Text>{r.motif}</Typography.Text>
-            {visas(r)}
-            {actions(r)}
+            {detail(r)}
           </Space>
         )}
       />
       {demande && <Demande budgetId={budgetId} fermer={() => setDemande(false)} />}
+      {revision && (
+        <Detail revision={revision} fermer={() => setOuverte(undefined)} rafraichir={rafraichir} />
+      )}
     </Flex>
   )
 }

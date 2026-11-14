@@ -23,7 +23,10 @@
     "tauxLiquidation": "Settlement rate",
     "tauxPaiement": "Payment rate"
   },
-  "situation": { "ligne": "Line", "total": "Budget total" },
+  "situation": {
+    "ligne": "Line",
+    "total": "Budget total"
+  },
   "import": {
     "intro": "Semicolon-separated CSV file, columns: code;libelle;compte;centre;source;programme;dotation. Valid lines are created, the others are listed as issues.",
     "choisir": "Choose a CSV file",
@@ -77,8 +80,7 @@
     "REALLOCATION": "Reallocation",
     "AUGMENTATION": "Increase",
     "DIMINUTION": "Decrease",
-    "SOUMISE": "Awaiting finance approval",
-    "VISEE": "Awaiting authorising officer",
+    "SOUMISE": "Submitted",
     "VALIDEE": "Approved",
     "REJETEE": "Rejected",
     "valider": "Approve",
@@ -88,7 +90,11 @@
     "visas": "Approvals",
     "VALIDE": "Approved",
     "REJETE": "Rejected",
-    "aide": "A revision has no effect on credits until the authorising officer decides."
+    "aide": "A revision has no effect on credits until the authorising officer decides.",
+    "EN_VALIDATION": "Being approved",
+    "A_CORRIGER": "To correct"
   },
-  "ligne": { "disponibilite": "Availability" }
+  "ligne": {
+    "disponibilite": "Availability"
+  }
 }

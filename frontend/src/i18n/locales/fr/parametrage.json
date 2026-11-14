@@ -13,7 +13,8 @@
     "fournisseurs": "Fournisseurs",
     "exercices": "Exercices budgétaires",
     "budgets": "Budgets",
-    "lignes-budgetaires": "Lignes budgétaires"
+    "lignes-budgetaires": "Lignes budgétaires",
+    "circuits-validation": "Circuits de validation"
   },
   "champs": {
     "code": "Code",
@@ -49,7 +50,8 @@
     "programmeId": "Programme",
     "natureEconomique": "Nature économique",
     "dotationInitiale": "Dotation initiale",
-    "actions": "Actions"
+    "actions": "Actions",
+    "typesObjets": "Obligatoire pour"
   },
   "valeurs": {
     "CLINIQUE": "Clinique",
@@ -67,7 +69,8 @@
     "MODIFICATIF": "Modificatif",
     "OUVERT": "Ouvert",
     "CLOTURE": "Clôturé",
-    "REOUVERT": "Réouvert"
+    "REOUVERT": "Réouvert",
+    "RevisionBudgetaire": "Révision budgétaire"
   },
   "actions": {
     "creer": "Ajouter",
@@ -76,7 +79,10 @@
     "desactiver": "Désactiver",
     "coordonnees": "Coordonnées bancaires"
   },
-  "notifications": { "cree": "Élément ajouté.", "modifie": "Élément enregistré." },
+  "notifications": {
+    "cree": "Élément ajouté.",
+    "modifie": "Élément enregistré."
+  },
   "aideMontant": "Montant en francs CFA, deux décimales au plus.",
   "coordonnees": {
     "titre": "Coordonnées bancaires",

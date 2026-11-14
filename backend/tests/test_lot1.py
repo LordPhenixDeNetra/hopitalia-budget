@@ -601,7 +601,7 @@ def test_virement_sans_effet_avant_validation(client: TestClient, socle: dict[st
     revision = _virement(client, socle, "10000000.00")
     assert revision["statut"] == "SOUMISE"
     assert disponibilite(client, socle["med"]["id"]) == avant
-    assert _decider(client, VAL_A, revision).json()["statut"] == "VISEE"
+    assert _decider(client, VAL_A, revision).json()["statut"] == "EN_VALIDATION"
     assert disponibilite(client, socle["med"]["id"]) == avant
     validee = _decider(client, ORD_A, revision).json()
     assert validee["statut"] == "VALIDEE"
@@ -620,12 +620,12 @@ def test_circuit_et_separation_des_taches(client: TestClient, socle: dict[str, A
     premier = _decider(client, ORD_A, revision)
     assert (premier.status_code, premier.json()["code"]) == (403, "ETAPE_NON_AUTORISEE")
     assert _decider(client, RB_A, revision).status_code == 403
-    assert _decider(client, VAL_ORD_A, revision).json()["statut"] == "VISEE"
+    assert _decider(client, VAL_ORD_A, revision).json()["statut"] == "EN_VALIDATION"
     meme = _decider(client, VAL_ORD_A, revision)
     assert (meme.status_code, meme.json()["code"]) == (403, "SEPARATION_DES_TACHES")
     assert _decider(client, ORD_A, revision).json()["statut"] == "VALIDEE"
     deja = _decider(client, ORD_A, revision)
-    assert (deja.status_code, deja.json()["code"]) == (409, "REVISION_DEJA_TRAITEE")
+    assert (deja.status_code, deja.json()["code"]) == (409, "OPERATION_DEJA_TRAITEE")
 
 
 def test_rejet_motive(client: TestClient, socle: dict[str, Any]) -> None:
@@ -647,7 +647,7 @@ def test_credit_insuffisant_a_la_validation(client: TestClient, socle: dict[str,
         client.get(f"/api/v1/revisions-budgetaires/{revision['id']}", headers=entetes(RB_A)).json()[
             "statut"
         ]
-        == "VISEE"
+        == "EN_VALIDATION"
     )
 
 

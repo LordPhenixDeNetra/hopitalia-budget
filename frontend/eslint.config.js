@@ -36,7 +36,8 @@ export default tseslint.config(
           'jsx-attributes': {
             include: ['aria-label', 'title', 'placeholder', 'alt', 'label', 'extra', 'subTitle'],
           },
-          callees: { exclude: ['t', 'tCommun', 'tErreur', 'i18n.t'] },
+          // t, puis tCommun, tParam, tWorkflow… : une fonction de traduction par espace de noms.
+          callees: { exclude: ['t', 't[A-Z][A-Za-z]*', 'i18n.t'] },
         },
       ],
     },

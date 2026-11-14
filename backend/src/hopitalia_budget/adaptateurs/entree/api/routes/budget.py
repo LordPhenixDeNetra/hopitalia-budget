@@ -13,13 +13,18 @@ from decimal import Decimal
 from typing import Annotated, Any, Literal
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Body, Depends, Header, Query, Request
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, Header, Query, Request, Response
 from fastapi.responses import JSONResponse
 from pydantic import Field
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
-from hopitalia_budget.adaptateurs.entree.api.crud import JournalDep, tracer
+from hopitalia_budget.adaptateurs.entree.api.crud import (
+    JournalDep,
+    etag,
+    tracer,
+    version_attendue,
+)
 from hopitalia_budget.adaptateurs.entree.api.dependances import (
     HorlogeDep,
     ParametresDep,
@@ -62,6 +67,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
     ReferentielModele,
     RevisionBudgetaireModele,
 )
+from hopitalia_budget.adaptateurs.sortie.workflow_sql import DepotWorkflowSql
 from hopitalia_budget.application import revisions
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.habilitations import Droit, Operation
@@ -863,14 +869,6 @@ class RevisionCreation(Schema):
     motif: str = Field(min_length=1, max_length=500)
 
 
-class VisaSortie(Schema):
-    etape: str
-    decision: str
-    motif: str | None
-    code_agent: str
-    horodatage: datetime
-
-
 class RevisionSortie(Schema):
     id: UUID
     budget_id: UUID
@@ -884,18 +882,18 @@ class RevisionSortie(Schema):
     statut: StatutRevision
     cree_par_code: str
     cree_le: datetime
-    visas: list[VisaSortie]
+    version: int
 
 
-class DecisionRevision(Schema):
-    decision: Literal["VALIDE", "REJETE"]
-    motif: str | None = Field(default=None, max_length=500)
+class RevisionCorrection(Schema):
+    montant: Montant
+    motif: str = Field(min_length=1, max_length=500)
 
 
 def _revision(depot: DepotRevisionsSql, r: Revision) -> RevisionSortie:
     return RevisionSortie(
         **{c: getattr(r, c) for c in RevisionSortie.model_fields if hasattr(r, c)},
-        visas=[VisaSortie.model_validate(v, from_attributes=True) for v in depot.visas(r.id)],
+        version=depot.version(r.id),
     )
 
 
@@ -920,6 +918,7 @@ def soumettre_revision(
     def action() -> tuple[int, object]:
         revision = revisions.soumettre(
             depot,
+            DepotWorkflowSql(session),
             journal,
             horloge,
             utilisateur,
@@ -999,29 +998,30 @@ def obtenir_revision(
     return _revision(depot, revisions.obtenir(depot, utilisateur, revision_id))
 
 
-@router.post(
-    "/revisions-budgetaires/{revision_id}/validations",
-    response_model=RevisionSortie,
-    tags=["révisions"],
+@router.patch(
+    "/revisions-budgetaires/{revision_id}", response_model=RevisionSortie, tags=["révisions"]
 )
-def decider_revision(
+def corriger_revision(
     revision_id: UUID,
-    corps: DecisionRevision,
+    corps: RevisionCorrection,
     session: SessionDep,
     utilisateur: UtilisateurDep,
     journal: JournalDep,
-    horloge: HorlogeDep,
+    response: Response,
+    if_match: Annotated[str | None, Header(alias="If-Match")] = None,
 ) -> RevisionSortie:
-    """Visa de la DAF, puis validation de l'ordonnateur ; rejet motivé à chaque étape."""
+    """Correction après retour (RG-18) : 409 sur une révision en circuit, validée ou rejetée."""
     depot = DepotRevisionsSql(session)
-    revision = revisions.decider(
+    revision = revisions.corriger(
         depot,
+        DepotWorkflowSql(session),
         journal,
-        horloge,
         utilisateur,
         revision_id,
-        corps.decision == "VALIDE",
+        version_attendue(if_match),
+        corps.montant,
         corps.motif,
     )
     session.commit()
+    response.headers["ETag"] = etag(depot.version(revision_id))
     return _revision(depot, revision)

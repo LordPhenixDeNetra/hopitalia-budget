@@ -24,12 +24,16 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  BodyDeposerPiece,
   BudgetCreation,
   BudgetModification,
   BudgetSortie,
   CentreCreation,
   CentreModification,
   CentreSortie,
+  CircuitCreation,
+  CircuitModification,
+  CircuitSortie,
   CompteComptableSortie,
   CompteTresorerieCreation,
   CompteTresorerieModification,
@@ -37,11 +41,15 @@ import type {
   Connexion,
   CoordonneeCreation,
   CoordonneeSortie,
-  DecisionRevision,
+  DecisionCreation,
+  DelegationCreation,
+  DelegationModification,
+  DelegationSortie,
   DisponibiliteSortie,
   EtablissementCreation,
   EtablissementModification,
   EtablissementSortie,
+  EtatValidationSortie,
   ExerciceCreation,
   ExerciceModification,
   ExerciceSortie,
@@ -59,7 +67,9 @@ import type {
   LigneSortie,
   ListerBudgetsParams,
   ListerCentresResponsabiliteParams,
+  ListerCircuitsValidationParams,
   ListerComptesTresorerieParams,
+  ListerDelegationsParams,
   ListerEtablissementsParams,
   ListerExercicesParams,
   ListerFamillesAchatsParams,
@@ -74,6 +84,8 @@ import type {
   ListerRevisionsParams,
   ListerSitesParams,
   ListerSourcesFinancementParams,
+  ListerStatutsPersonnalisesParams,
+  ListerTransitionsStatutsParams,
   ListerTypesDepensesParams,
   ListerTypesPiecesParams,
   Moi,
@@ -82,8 +94,10 @@ import type {
   NotificationSortie,
   PageBudgetSortie,
   PageCentreSortie,
+  PageCircuitSortie,
   PageCompteTresorerieSortie,
   PageCurseurEntreeJournal,
+  PageDelegationSortie,
   PageEtablissementSortie,
   PageExerciceSortie,
   PageFournisseurSortie,
@@ -95,9 +109,12 @@ import type {
   PageRevisionSortie,
   PageSiteSortie,
   PageSourceSortie,
+  PageStatutSortie,
+  PageTransitionSortie,
   PageTypeDepenseSortie,
   PageTypePieceSortie,
   ParametresCalculSchema,
+  PieceSortie,
   Preferences,
   ProgrammeCreation,
   ProgrammeModification,
@@ -107,6 +124,7 @@ import type {
   ReferentielCreation,
   ReferentielModification,
   ReferentielSortie,
+  RevisionCorrection,
   RevisionCreation,
   RevisionSortie,
   SiteCreation,
@@ -116,6 +134,13 @@ import type {
   SourceCreation,
   SourceModification,
   SourceSortie,
+  StatutCreation,
+  StatutModification,
+  StatutSortie,
+  TransitionCreation,
+  TransitionModification,
+  TransitionReference,
+  TransitionSortie,
   TypeDepenseCreation,
   TypeDepenseModification,
   TypeDepenseSortie,
@@ -3049,20 +3074,20 @@ export function useObtenirRevision<TData = Awaited<ReturnType<typeof obtenirRevi
 
 
 
-export const getDeciderRevisionUrl = (revisionId: string,) => {
+export const getCorrigerRevisionUrl = (revisionId: string,) => {
 
 
 
 
-  return `/api/v1/revisions-budgetaires/${revisionId}/validations`
+  return `/api/v1/revisions-budgetaires/${revisionId}`
 }
 
 /**
- * Visa de la DAF, puis validation de l'ordonnateur ; rejet motivé à chaque étape.
- * @summary Decider Revision
+ * Correction après retour (RG-18) : 409 sur une révision en circuit, validée ou rejetée.
+ * @summary Corriger Revision
  */
-export const deciderRevision = async (revisionId: string,
-    decisionRevision: DecisionRevision, options?: Parameters<typeof appelerApi>[1]): Promise<RevisionSortie> => {
+export const corrigerRevision = async (revisionId: string,
+    revisionCorrection: RevisionCorrection, options?: Parameters<typeof appelerApi>[1]): Promise<RevisionSortie> => {
 
     const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
     if (!h) return {};
@@ -3078,12 +3103,12 @@ export const deciderRevision = async (revisionId: string,
     }
     return headers;
   };
-return appelerApi<RevisionSortie>(getDeciderRevisionUrl(revisionId),
+return appelerApi<RevisionSortie>(getCorrigerRevisionUrl(revisionId),
   {
     ...options,
-    method: 'POST',
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
-    body: JSON.stringify(decisionRevision)
+    body: JSON.stringify(revisionCorrection)
   }
 );}
 
@@ -3091,13 +3116,13 @@ return appelerApi<RevisionSortie>(getDeciderRevisionUrl(revisionId),
 
 
 
-export const getDeciderRevisionMutationKey = () => ['deciderRevision'] as const;
+export const getCorrigerRevisionMutationKey = () => ['corrigerRevision'] as const;
 
-export const getDeciderRevisionMutationOptions = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deciderRevision>>, TError,DeciderRevisionMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
-): UseMutationOptions<Awaited<ReturnType<typeof deciderRevision>>, TError,DeciderRevisionMutationVariables, TContext> => {
+export const getCorrigerRevisionMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof corrigerRevision>>, TError,CorrigerRevisionMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof corrigerRevision>>, TError,CorrigerRevisionMutationVariables, TContext> => {
 
-const mutationKey = getDeciderRevisionMutationKey();
+const mutationKey = getCorrigerRevisionMutationKey();
 const {mutation: mutationOptions, request: requestOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -3107,10 +3132,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deciderRevision>>, DeciderRevisionMutationVariables> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof corrigerRevision>>, CorrigerRevisionMutationVariables> = (props) => {
           const {revisionId,data} = props ?? {};
 
-          return  deciderRevision(revisionId,data,requestOptions)
+          return  corrigerRevision(revisionId,data,requestOptions)
         }
 
 
@@ -3120,24 +3145,24 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type DeciderRevisionMutationResult = NonNullable<Awaited<ReturnType<typeof deciderRevision>>>
-    export type DeciderRevisionMutationBody = DecisionRevision
-    export type DeciderRevisionMutationError = HTTPValidationError
-    export type DeciderRevisionMutationVariables = {revisionId: string;data: DecisionRevision}
+    export type CorrigerRevisionMutationResult = NonNullable<Awaited<ReturnType<typeof corrigerRevision>>>
+    export type CorrigerRevisionMutationBody = RevisionCorrection
+    export type CorrigerRevisionMutationError = HTTPValidationError
+    export type CorrigerRevisionMutationVariables = {revisionId: string;data: RevisionCorrection}
 
     /**
- * Visa de la DAF, puis validation de l'ordonnateur ; rejet motivé à chaque étape.
- * @summary Decider Revision
+ * Correction après retour (RG-18) : 409 sur une révision en circuit, validée ou rejetée.
+ * @summary Corriger Revision
  */
-export const useDeciderRevision = <TError = HTTPValidationError,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deciderRevision>>, TError,DeciderRevisionMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+export const useCorrigerRevision = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof corrigerRevision>>, TError,CorrigerRevisionMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deciderRevision>>,
+        Awaited<ReturnType<typeof corrigerRevision>>,
         TError,
-        DeciderRevisionMutationVariables,
+        CorrigerRevisionMutationVariables,
         TContext
       > => {
-      return useMutation(getDeciderRevisionMutationOptions(options), queryClient);
+      return useMutation(getCorrigerRevisionMutationOptions(options), queryClient);
     }
 
 export const getListerSitesUrl = (params?: ListerSitesParams,) => {
@@ -8104,5 +8129,2237 @@ export const useModifierLigneBudgetaire = <TError = HTTPValidationError,
         TContext
       > => {
       return useMutation(getModifierLigneBudgetaireMutationOptions(options), queryClient);
+    }
+
+export const getLireValidationsUrl = (ressource: 'revisions-budgetaires',
+    identifiant: string,) => {
+
+
+
+
+  return `/api/v1/${ressource}/${identifiant}/validations`
+}
+
+/**
+ * Circuit figé, historique des visas, étapes ouvertes et droit de l'agent à décider.
+ * @summary Lire Validations
+ */
+export const lireValidations = async (ressource: 'revisions-budgetaires',
+    identifiant: string, options?: Parameters<typeof appelerApi>[1]): Promise<EtatValidationSortie> => {
+
+  return appelerApi<EtatValidationSortie>(getLireValidationsUrl(ressource,identifiant),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getLireValidationsQueryKey = (ressource: 'revisions-budgetaires',
+    identifiant: string,) => {
+    return [
+    `/api/v1/${ressource}/${identifiant}/validations`
+    ] as const;
+    }
+
+
+export const getLireValidationsQueryOptions = <TData = Awaited<ReturnType<typeof lireValidations>>, TError = HTTPValidationError>(ressource: 'revisions-budgetaires',
+    identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lireValidations>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLireValidationsQueryKey(ressource,identifiant);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof lireValidations>>> = ({ signal }) => lireValidations(ressource,identifiant, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: ressource !== null && ressource !== undefined && identifiant !== null && identifiant !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof lireValidations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type LireValidationsQueryResult = NonNullable<Awaited<ReturnType<typeof lireValidations>>>
+export type LireValidationsQueryError = HTTPValidationError
+
+
+/**
+ * Circuit figé, historique des visas, étapes ouvertes et droit de l'agent à décider.
+ * @summary Lire Validations
+ */
+export function useLireValidations<TData = Awaited<ReturnType<typeof lireValidations>>, TError = HTTPValidationError>(
+ ressource: 'revisions-budgetaires',
+    identifiant: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof lireValidations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof lireValidations>>,
+          TError,
+          Awaited<ReturnType<typeof lireValidations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Circuit figé, historique des visas, étapes ouvertes et droit de l'agent à décider.
+ * @summary Lire Validations
+ */
+export function useLireValidations<TData = Awaited<ReturnType<typeof lireValidations>>, TError = HTTPValidationError>(
+ ressource: 'revisions-budgetaires',
+    identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lireValidations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof lireValidations>>,
+          TError,
+          Awaited<ReturnType<typeof lireValidations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Circuit figé, historique des visas, étapes ouvertes et droit de l'agent à décider.
+ * @summary Lire Validations
+ */
+export function useLireValidations<TData = Awaited<ReturnType<typeof lireValidations>>, TError = HTTPValidationError>(
+ ressource: 'revisions-budgetaires',
+    identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lireValidations>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Circuit figé, historique des visas, étapes ouvertes et droit de l'agent à décider.
+ * @summary Lire Validations
+ */
+export function useLireValidations<TData = Awaited<ReturnType<typeof lireValidations>>, TError = HTTPValidationError>(
+ ressource: 'revisions-budgetaires',
+    identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lireValidations>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getLireValidationsQueryOptions(ressource,identifiant,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getDeciderUrl = (ressource: 'revisions-budgetaires',
+    identifiant: string,) => {
+
+
+
+
+  return `/api/v1/${ressource}/${identifiant}/validations`
+}
+
+/**
+ * Visa, rejet motivé ou retour pour correction à l'étape ouverte du circuit.
+ * @summary Decider
+ */
+export const decider = async (ressource: 'revisions-budgetaires',
+    identifiant: string,
+    decisionCreation: DecisionCreation, options?: Parameters<typeof appelerApi>[1]): Promise<EtatValidationSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<EtatValidationSortie>(getDeciderUrl(ressource,identifiant),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(decisionCreation)
+  }
+);}
+
+
+
+
+
+export const getDeciderMutationKey = () => ['decider'] as const;
+
+export const getDeciderMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decider>>, TError,DeciderMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof decider>>, TError,DeciderMutationVariables, TContext> => {
+
+const mutationKey = getDeciderMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof decider>>, DeciderMutationVariables> = (props) => {
+          const {ressource,identifiant,data} = props ?? {};
+
+          return  decider(ressource,identifiant,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeciderMutationResult = NonNullable<Awaited<ReturnType<typeof decider>>>
+    export type DeciderMutationBody = DecisionCreation
+    export type DeciderMutationError = HTTPValidationError
+    export type DeciderMutationVariables = {ressource: 'revisions-budgetaires';identifiant: string;data: DecisionCreation}
+
+    /**
+ * Visa, rejet motivé ou retour pour correction à l'étape ouverte du circuit.
+ * @summary Decider
+ */
+export const useDecider = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof decider>>, TError,DeciderMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof decider>>,
+        TError,
+        DeciderMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeciderMutationOptions(options), queryClient);
+    }
+
+export const getResoumettreUrl = (ressource: 'revisions-budgetaires',
+    identifiant: string,) => {
+
+
+
+
+  return `/api/v1/${ressource}/${identifiant}/soumissions`
+}
+
+/**
+ * Après correction, l'auteur renvoie l'opération au début de son circuit.
+ * @summary Resoumettre
+ */
+export const resoumettre = async (ressource: 'revisions-budgetaires',
+    identifiant: string, options?: Parameters<typeof appelerApi>[1]): Promise<EtatValidationSortie> => {
+
+  return appelerApi<EtatValidationSortie>(getResoumettreUrl(ressource,identifiant),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getResoumettreMutationKey = () => ['resoumettre'] as const;
+
+export const getResoumettreMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resoumettre>>, TError,ResoumettreMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof resoumettre>>, TError,ResoumettreMutationVariables, TContext> => {
+
+const mutationKey = getResoumettreMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof resoumettre>>, ResoumettreMutationVariables> = (props) => {
+          const {ressource,identifiant} = props ?? {};
+
+          return  resoumettre(ressource,identifiant,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ResoumettreMutationResult = NonNullable<Awaited<ReturnType<typeof resoumettre>>>
+
+    export type ResoumettreMutationError = HTTPValidationError
+    export type ResoumettreMutationVariables = {ressource: 'revisions-budgetaires';identifiant: string}
+
+    /**
+ * Après correction, l'auteur renvoie l'opération au début de son circuit.
+ * @summary Resoumettre
+ */
+export const useResoumettre = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof resoumettre>>, TError,ResoumettreMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof resoumettre>>,
+        TError,
+        ResoumettreMutationVariables,
+        TContext
+      > => {
+      return useMutation(getResoumettreMutationOptions(options), queryClient);
+    }
+
+export const getListerPiecesUrl = (ressource: 'revisions-budgetaires',
+    identifiant: string,) => {
+
+
+
+
+  return `/api/v1/${ressource}/${identifiant}/pieces`
+}
+
+/**
+ * @summary Lister Pieces
+ */
+export const listerPieces = async (ressource: 'revisions-budgetaires',
+    identifiant: string, options?: Parameters<typeof appelerApi>[1]): Promise<PieceSortie[]> => {
+
+  return appelerApi<PieceSortie[]>(getListerPiecesUrl(ressource,identifiant),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerPiecesQueryKey = (ressource: 'revisions-budgetaires',
+    identifiant: string,) => {
+    return [
+    `/api/v1/${ressource}/${identifiant}/pieces`
+    ] as const;
+    }
+
+
+export const getListerPiecesQueryOptions = <TData = Awaited<ReturnType<typeof listerPieces>>, TError = HTTPValidationError>(ressource: 'revisions-budgetaires',
+    identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerPieces>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerPiecesQueryKey(ressource,identifiant);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerPieces>>> = ({ signal }) => listerPieces(ressource,identifiant, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: ressource !== null && ressource !== undefined && identifiant !== null && identifiant !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerPieces>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerPiecesQueryResult = NonNullable<Awaited<ReturnType<typeof listerPieces>>>
+export type ListerPiecesQueryError = HTTPValidationError
+
+
+/** @summary Lister Pieces */
+export function useListerPieces<TData = Awaited<ReturnType<typeof listerPieces>>, TError = HTTPValidationError>(
+ ressource: 'revisions-budgetaires',
+    identifiant: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerPieces>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerPieces>>,
+          TError,
+          Awaited<ReturnType<typeof listerPieces>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Pieces */
+export function useListerPieces<TData = Awaited<ReturnType<typeof listerPieces>>, TError = HTTPValidationError>(
+ ressource: 'revisions-budgetaires',
+    identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerPieces>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerPieces>>,
+          TError,
+          Awaited<ReturnType<typeof listerPieces>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Pieces */
+export function useListerPieces<TData = Awaited<ReturnType<typeof listerPieces>>, TError = HTTPValidationError>(
+ ressource: 'revisions-budgetaires',
+    identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerPieces>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Pieces */
+export function useListerPieces<TData = Awaited<ReturnType<typeof listerPieces>>, TError = HTTPValidationError>(
+ ressource: 'revisions-budgetaires',
+    identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerPieces>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerPiecesQueryOptions(ressource,identifiant,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getDeposerPieceUrl = (ressource: 'revisions-budgetaires',
+    identifiant: string,) => {
+
+
+
+
+  return `/api/v1/${ressource}/${identifiant}/pieces`
+}
+
+/**
+ * Dépôt par l'auteur ou un valideur ; contenu rangé sous son empreinte SHA-256.
+ * @summary Deposer Piece
+ */
+export const deposerPiece = async (ressource: 'revisions-budgetaires',
+    identifiant: string,
+    bodyDeposerPiece: BodyDeposerPiece, options?: Parameters<typeof appelerApi>[1]): Promise<PieceSortie> => {
+    const formData = new FormData();
+formData.append(`fichier`, bodyDeposerPiece.fichier);
+formData.append(`typePieceId`, bodyDeposerPiece.typePieceId);
+
+  return appelerApi<PieceSortie>(getDeposerPieceUrl(ressource,identifiant),
+  {
+    ...options,
+    method: 'POST'
+    ,
+    body: formData
+  }
+);}
+
+
+
+
+
+export const getDeposerPieceMutationKey = () => ['deposerPiece'] as const;
+
+export const getDeposerPieceMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deposerPiece>>, TError,DeposerPieceMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof deposerPiece>>, TError,DeposerPieceMutationVariables, TContext> => {
+
+const mutationKey = getDeposerPieceMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deposerPiece>>, DeposerPieceMutationVariables> = (props) => {
+          const {ressource,identifiant,data} = props ?? {};
+
+          return  deposerPiece(ressource,identifiant,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeposerPieceMutationResult = NonNullable<Awaited<ReturnType<typeof deposerPiece>>>
+    export type DeposerPieceMutationBody = BodyDeposerPiece
+    export type DeposerPieceMutationError = HTTPValidationError
+    export type DeposerPieceMutationVariables = {ressource: 'revisions-budgetaires';identifiant: string;data: BodyDeposerPiece}
+
+    /**
+ * Dépôt par l'auteur ou un valideur ; contenu rangé sous son empreinte SHA-256.
+ * @summary Deposer Piece
+ */
+export const useDeposerPiece = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deposerPiece>>, TError,DeposerPieceMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deposerPiece>>,
+        TError,
+        DeposerPieceMutationVariables,
+        TContext
+      > => {
+      return useMutation(getDeposerPieceMutationOptions(options), queryClient);
+    }
+
+export const getTelechargerPieceUrl = (pieceId: string,) => {
+
+
+
+
+  return `/api/v1/pieces/${pieceId}/contenu`
+}
+
+/**
+ * Contenu vérifié par son empreinte : un fichier altéré est refusé (EF-DOC-02).
+ * @summary Telecharger Piece
+ */
+export const telechargerPiece = async (pieceId: string, options?: Parameters<typeof appelerApi>[1]): Promise<void> => {
+
+  return appelerApi<void>(getTelechargerPieceUrl(pieceId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getTelechargerPieceQueryKey = (pieceId: string,) => {
+    return [
+    `/api/v1/pieces/${pieceId}/contenu`
+    ] as const;
+    }
+
+
+export const getTelechargerPieceQueryOptions = <TData = Awaited<ReturnType<typeof telechargerPiece>>, TError = HTTPValidationError>(pieceId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof telechargerPiece>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTelechargerPieceQueryKey(pieceId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof telechargerPiece>>> = ({ signal }) => telechargerPiece(pieceId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: pieceId !== null && pieceId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof telechargerPiece>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TelechargerPieceQueryResult = NonNullable<Awaited<ReturnType<typeof telechargerPiece>>>
+export type TelechargerPieceQueryError = HTTPValidationError
+
+
+/**
+ * Contenu vérifié par son empreinte : un fichier altéré est refusé (EF-DOC-02).
+ * @summary Telecharger Piece
+ */
+export function useTelechargerPiece<TData = Awaited<ReturnType<typeof telechargerPiece>>, TError = HTTPValidationError>(
+ pieceId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof telechargerPiece>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof telechargerPiece>>,
+          TError,
+          Awaited<ReturnType<typeof telechargerPiece>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Contenu vérifié par son empreinte : un fichier altéré est refusé (EF-DOC-02).
+ * @summary Telecharger Piece
+ */
+export function useTelechargerPiece<TData = Awaited<ReturnType<typeof telechargerPiece>>, TError = HTTPValidationError>(
+ pieceId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof telechargerPiece>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof telechargerPiece>>,
+          TError,
+          Awaited<ReturnType<typeof telechargerPiece>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Contenu vérifié par son empreinte : un fichier altéré est refusé (EF-DOC-02).
+ * @summary Telecharger Piece
+ */
+export function useTelechargerPiece<TData = Awaited<ReturnType<typeof telechargerPiece>>, TError = HTTPValidationError>(
+ pieceId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof telechargerPiece>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Contenu vérifié par son empreinte : un fichier altéré est refusé (EF-DOC-02).
+ * @summary Telecharger Piece
+ */
+export function useTelechargerPiece<TData = Awaited<ReturnType<typeof telechargerPiece>>, TError = HTTPValidationError>(
+ pieceId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof telechargerPiece>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTelechargerPieceQueryOptions(pieceId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreerDelegationUrl = () => {
+
+
+
+
+  return `/api/v1/delegations`
+}
+
+/**
+ * L'agent délègue ses propres profils, pour une période, à un agent déjà habilité.
+ * @summary Creer Delegation
+ */
+export const creerDelegation = async (delegationCreation: DelegationCreation, options?: Parameters<typeof appelerApi>[1]): Promise<DelegationSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<DelegationSortie>(getCreerDelegationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(delegationCreation)
+  }
+);}
+
+
+
+
+
+export const getCreerDelegationMutationKey = () => ['creerDelegation'] as const;
+
+export const getCreerDelegationMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerDelegation>>, TError,CreerDelegationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof creerDelegation>>, TError,CreerDelegationMutationVariables, TContext> => {
+
+const mutationKey = getCreerDelegationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creerDelegation>>, CreerDelegationMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  creerDelegation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreerDelegationMutationResult = NonNullable<Awaited<ReturnType<typeof creerDelegation>>>
+    export type CreerDelegationMutationBody = DelegationCreation
+    export type CreerDelegationMutationError = HTTPValidationError
+    export type CreerDelegationMutationVariables = {data: DelegationCreation}
+
+    /**
+ * L'agent délègue ses propres profils, pour une période, à un agent déjà habilité.
+ * @summary Creer Delegation
+ */
+export const useCreerDelegation = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerDelegation>>, TError,CreerDelegationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creerDelegation>>,
+        TError,
+        CreerDelegationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreerDelegationMutationOptions(options), queryClient);
+    }
+
+export const getListerDelegationsUrl = (params?: ListerDelegationsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/delegations?${stringifiedParams}` : `/api/v1/delegations`
+}
+
+/**
+ * Délégations données ou reçues ; toutes pour l'administrateur et l'auditeur.
+ * @summary Lister Delegations
+ */
+export const listerDelegations = async (params?: ListerDelegationsParams, options?: Parameters<typeof appelerApi>[1]): Promise<PageDelegationSortie> => {
+
+  return appelerApi<PageDelegationSortie>(getListerDelegationsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerDelegationsQueryKey = (params?: ListerDelegationsParams,) => {
+    return [
+    `/api/v1/delegations`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListerDelegationsQueryOptions = <TData = Awaited<ReturnType<typeof listerDelegations>>, TError = HTTPValidationError>(params?: ListerDelegationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerDelegations>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerDelegationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerDelegations>>> = ({ signal }) => listerDelegations(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerDelegations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerDelegationsQueryResult = NonNullable<Awaited<ReturnType<typeof listerDelegations>>>
+export type ListerDelegationsQueryError = HTTPValidationError
+
+
+/**
+ * Délégations données ou reçues ; toutes pour l'administrateur et l'auditeur.
+ * @summary Lister Delegations
+ */
+export function useListerDelegations<TData = Awaited<ReturnType<typeof listerDelegations>>, TError = HTTPValidationError>(
+ params: undefined |  ListerDelegationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerDelegations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerDelegations>>,
+          TError,
+          Awaited<ReturnType<typeof listerDelegations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Délégations données ou reçues ; toutes pour l'administrateur et l'auditeur.
+ * @summary Lister Delegations
+ */
+export function useListerDelegations<TData = Awaited<ReturnType<typeof listerDelegations>>, TError = HTTPValidationError>(
+ params?: ListerDelegationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerDelegations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerDelegations>>,
+          TError,
+          Awaited<ReturnType<typeof listerDelegations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Délégations données ou reçues ; toutes pour l'administrateur et l'auditeur.
+ * @summary Lister Delegations
+ */
+export function useListerDelegations<TData = Awaited<ReturnType<typeof listerDelegations>>, TError = HTTPValidationError>(
+ params?: ListerDelegationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerDelegations>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Délégations données ou reçues ; toutes pour l'administrateur et l'auditeur.
+ * @summary Lister Delegations
+ */
+export function useListerDelegations<TData = Awaited<ReturnType<typeof listerDelegations>>, TError = HTTPValidationError>(
+ params?: ListerDelegationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerDelegations>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerDelegationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getModifierDelegationUrl = (delegationId: string,) => {
+
+
+
+
+  return `/api/v1/delegations/${delegationId}`
+}
+
+/**
+ * @summary Modifier Delegation
+ */
+export const modifierDelegation = async (delegationId: string,
+    delegationModification: DelegationModification, options?: Parameters<typeof appelerApi>[1]): Promise<DelegationSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<DelegationSortie>(getModifierDelegationUrl(delegationId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(delegationModification)
+  }
+);}
+
+
+
+
+
+export const getModifierDelegationMutationKey = () => ['modifierDelegation'] as const;
+
+export const getModifierDelegationMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierDelegation>>, TError,ModifierDelegationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof modifierDelegation>>, TError,ModifierDelegationMutationVariables, TContext> => {
+
+const mutationKey = getModifierDelegationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modifierDelegation>>, ModifierDelegationMutationVariables> = (props) => {
+          const {delegationId,data} = props ?? {};
+
+          return  modifierDelegation(delegationId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModifierDelegationMutationResult = NonNullable<Awaited<ReturnType<typeof modifierDelegation>>>
+    export type ModifierDelegationMutationBody = DelegationModification
+    export type ModifierDelegationMutationError = HTTPValidationError
+    export type ModifierDelegationMutationVariables = {delegationId: string;data: DelegationModification}
+
+    /** @summary Modifier Delegation */
+export const useModifierDelegation = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierDelegation>>, TError,ModifierDelegationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modifierDelegation>>,
+        TError,
+        ModifierDelegationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getModifierDelegationMutationOptions(options), queryClient);
+    }
+
+export const getSupprimerTransitionUrl = (identifiant: string,) => {
+
+
+
+
+  return `/api/v1/transitions-statuts/${identifiant}`
+}
+
+/**
+ * Paramétrage, pas une donnée financière : la suppression est tracée dans le journal.
+ * @summary Supprimer Transition
+ */
+export const supprimerTransition = async (identifiant: string, options?: Parameters<typeof appelerApi>[1]): Promise<void> => {
+
+  return appelerApi<void>(getSupprimerTransitionUrl(identifiant),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getSupprimerTransitionMutationKey = () => ['supprimerTransition'] as const;
+
+export const getSupprimerTransitionMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof supprimerTransition>>, TError,SupprimerTransitionMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof supprimerTransition>>, TError,SupprimerTransitionMutationVariables, TContext> => {
+
+const mutationKey = getSupprimerTransitionMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof supprimerTransition>>, SupprimerTransitionMutationVariables> = (props) => {
+          const {identifiant} = props ?? {};
+
+          return  supprimerTransition(identifiant,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SupprimerTransitionMutationResult = NonNullable<Awaited<ReturnType<typeof supprimerTransition>>>
+
+    export type SupprimerTransitionMutationError = HTTPValidationError
+    export type SupprimerTransitionMutationVariables = {identifiant: string}
+
+    /**
+ * Paramétrage, pas une donnée financière : la suppression est tracée dans le journal.
+ * @summary Supprimer Transition
+ */
+export const useSupprimerTransition = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof supprimerTransition>>, TError,SupprimerTransitionMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof supprimerTransition>>,
+        TError,
+        SupprimerTransitionMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSupprimerTransitionMutationOptions(options), queryClient);
+    }
+
+export const getObtenirTransitionStatutUrl = (identifiant: string,) => {
+
+
+
+
+  return `/api/v1/transitions-statuts/${identifiant}`
+}
+
+/**
+ * @summary Obtenir Transition Statut
+ */
+export const obtenirTransitionStatut = async (identifiant: string, options?: Parameters<typeof appelerApi>[1]): Promise<TransitionSortie> => {
+
+  return appelerApi<TransitionSortie>(getObtenirTransitionStatutUrl(identifiant),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenirTransitionStatutQueryKey = (identifiant: string,) => {
+    return [
+    `/api/v1/transitions-statuts/${identifiant}`
+    ] as const;
+    }
+
+
+export const getObtenirTransitionStatutQueryOptions = <TData = Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError = HTTPValidationError>(identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenirTransitionStatutQueryKey(identifiant);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenirTransitionStatut>>> = ({ signal }) => obtenirTransitionStatut(identifiant, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: identifiant !== null && identifiant !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenirTransitionStatutQueryResult = NonNullable<Awaited<ReturnType<typeof obtenirTransitionStatut>>>
+export type ObtenirTransitionStatutQueryError = HTTPValidationError
+
+
+/** @summary Obtenir Transition Statut */
+export function useObtenirTransitionStatut<TData = Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError = HTTPValidationError>(
+ identifiant: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenirTransitionStatut>>,
+          TError,
+          Awaited<ReturnType<typeof obtenirTransitionStatut>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Transition Statut */
+export function useObtenirTransitionStatut<TData = Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenirTransitionStatut>>,
+          TError,
+          Awaited<ReturnType<typeof obtenirTransitionStatut>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Transition Statut */
+export function useObtenirTransitionStatut<TData = Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Transition Statut */
+export function useObtenirTransitionStatut<TData = Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirTransitionStatut>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenirTransitionStatutQueryOptions(identifiant,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getModifierTransitionStatutUrl = (identifiant: string,) => {
+
+
+
+
+  return `/api/v1/transitions-statuts/${identifiant}`
+}
+
+/**
+ * @summary Modifier Transition Statut
+ */
+export const modifierTransitionStatut = async (identifiant: string,
+    transitionModification: TransitionModification, options?: Parameters<typeof appelerApi>[1]): Promise<TransitionSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<TransitionSortie>(getModifierTransitionStatutUrl(identifiant),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(transitionModification)
+  }
+);}
+
+
+
+
+
+export const getModifierTransitionStatutMutationKey = () => ['modifierTransitionStatut'] as const;
+
+export const getModifierTransitionStatutMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierTransitionStatut>>, TError,ModifierTransitionStatutMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof modifierTransitionStatut>>, TError,ModifierTransitionStatutMutationVariables, TContext> => {
+
+const mutationKey = getModifierTransitionStatutMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modifierTransitionStatut>>, ModifierTransitionStatutMutationVariables> = (props) => {
+          const {identifiant,data} = props ?? {};
+
+          return  modifierTransitionStatut(identifiant,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModifierTransitionStatutMutationResult = NonNullable<Awaited<ReturnType<typeof modifierTransitionStatut>>>
+    export type ModifierTransitionStatutMutationBody = TransitionModification
+    export type ModifierTransitionStatutMutationError = HTTPValidationError
+    export type ModifierTransitionStatutMutationVariables = {identifiant: string;data: TransitionModification}
+
+    /** @summary Modifier Transition Statut */
+export const useModifierTransitionStatut = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierTransitionStatut>>, TError,ModifierTransitionStatutMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modifierTransitionStatut>>,
+        TError,
+        ModifierTransitionStatutMutationVariables,
+        TContext
+      > => {
+      return useMutation(getModifierTransitionStatutMutationOptions(options), queryClient);
+    }
+
+export const getLireTransitionsReferenceUrl = (typeObjet: 'RevisionBudgetaire',) => {
+
+
+
+
+  return `/api/v1/statuts-reference/${typeObjet}`
+}
+
+/**
+ * Cycle de vie de référence, point de départ d'un paramétrage d'établissement.
+ * @summary Lire Transitions Reference
+ */
+export const lireTransitionsReference = async (typeObjet: 'RevisionBudgetaire', options?: Parameters<typeof appelerApi>[1]): Promise<TransitionReference[]> => {
+
+  return appelerApi<TransitionReference[]>(getLireTransitionsReferenceUrl(typeObjet),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getLireTransitionsReferenceQueryKey = (typeObjet: 'RevisionBudgetaire',) => {
+    return [
+    `/api/v1/statuts-reference/${typeObjet}`
+    ] as const;
+    }
+
+
+export const getLireTransitionsReferenceQueryOptions = <TData = Awaited<ReturnType<typeof lireTransitionsReference>>, TError = HTTPValidationError>(typeObjet: 'RevisionBudgetaire', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lireTransitionsReference>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLireTransitionsReferenceQueryKey(typeObjet);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof lireTransitionsReference>>> = ({ signal }) => lireTransitionsReference(typeObjet, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: typeObjet !== null && typeObjet !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof lireTransitionsReference>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type LireTransitionsReferenceQueryResult = NonNullable<Awaited<ReturnType<typeof lireTransitionsReference>>>
+export type LireTransitionsReferenceQueryError = HTTPValidationError
+
+
+/**
+ * Cycle de vie de référence, point de départ d'un paramétrage d'établissement.
+ * @summary Lire Transitions Reference
+ */
+export function useLireTransitionsReference<TData = Awaited<ReturnType<typeof lireTransitionsReference>>, TError = HTTPValidationError>(
+ typeObjet: 'RevisionBudgetaire', options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof lireTransitionsReference>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof lireTransitionsReference>>,
+          TError,
+          Awaited<ReturnType<typeof lireTransitionsReference>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Cycle de vie de référence, point de départ d'un paramétrage d'établissement.
+ * @summary Lire Transitions Reference
+ */
+export function useLireTransitionsReference<TData = Awaited<ReturnType<typeof lireTransitionsReference>>, TError = HTTPValidationError>(
+ typeObjet: 'RevisionBudgetaire', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lireTransitionsReference>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof lireTransitionsReference>>,
+          TError,
+          Awaited<ReturnType<typeof lireTransitionsReference>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Cycle de vie de référence, point de départ d'un paramétrage d'établissement.
+ * @summary Lire Transitions Reference
+ */
+export function useLireTransitionsReference<TData = Awaited<ReturnType<typeof lireTransitionsReference>>, TError = HTTPValidationError>(
+ typeObjet: 'RevisionBudgetaire', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lireTransitionsReference>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Cycle de vie de référence, point de départ d'un paramétrage d'établissement.
+ * @summary Lire Transitions Reference
+ */
+export function useLireTransitionsReference<TData = Awaited<ReturnType<typeof lireTransitionsReference>>, TError = HTTPValidationError>(
+ typeObjet: 'RevisionBudgetaire', options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof lireTransitionsReference>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getLireTransitionsReferenceQueryOptions(typeObjet,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getListerCircuitsValidationUrl = (params?: ListerCircuitsValidationParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/circuits-validation?${stringifiedParams}` : `/api/v1/circuits-validation`
+}
+
+/**
+ * @summary Lister Circuits Validation
+ */
+export const listerCircuitsValidation = async (params?: ListerCircuitsValidationParams, options?: Parameters<typeof appelerApi>[1]): Promise<PageCircuitSortie> => {
+
+  return appelerApi<PageCircuitSortie>(getListerCircuitsValidationUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerCircuitsValidationQueryKey = (params?: ListerCircuitsValidationParams,) => {
+    return [
+    `/api/v1/circuits-validation`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListerCircuitsValidationQueryOptions = <TData = Awaited<ReturnType<typeof listerCircuitsValidation>>, TError = HTTPValidationError>(params?: ListerCircuitsValidationParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerCircuitsValidation>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerCircuitsValidationQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerCircuitsValidation>>> = ({ signal }) => listerCircuitsValidation(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerCircuitsValidation>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerCircuitsValidationQueryResult = NonNullable<Awaited<ReturnType<typeof listerCircuitsValidation>>>
+export type ListerCircuitsValidationQueryError = HTTPValidationError
+
+
+/** @summary Lister Circuits Validation */
+export function useListerCircuitsValidation<TData = Awaited<ReturnType<typeof listerCircuitsValidation>>, TError = HTTPValidationError>(
+ params: undefined |  ListerCircuitsValidationParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerCircuitsValidation>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerCircuitsValidation>>,
+          TError,
+          Awaited<ReturnType<typeof listerCircuitsValidation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Circuits Validation */
+export function useListerCircuitsValidation<TData = Awaited<ReturnType<typeof listerCircuitsValidation>>, TError = HTTPValidationError>(
+ params?: ListerCircuitsValidationParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerCircuitsValidation>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerCircuitsValidation>>,
+          TError,
+          Awaited<ReturnType<typeof listerCircuitsValidation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Circuits Validation */
+export function useListerCircuitsValidation<TData = Awaited<ReturnType<typeof listerCircuitsValidation>>, TError = HTTPValidationError>(
+ params?: ListerCircuitsValidationParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerCircuitsValidation>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Circuits Validation */
+export function useListerCircuitsValidation<TData = Awaited<ReturnType<typeof listerCircuitsValidation>>, TError = HTTPValidationError>(
+ params?: ListerCircuitsValidationParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerCircuitsValidation>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerCircuitsValidationQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreerCircuitValidationUrl = () => {
+
+
+
+
+  return `/api/v1/circuits-validation`
+}
+
+/**
+ * @summary Creer Circuit Validation
+ */
+export const creerCircuitValidation = async (circuitCreation: CircuitCreation, options?: Parameters<typeof appelerApi>[1]): Promise<CircuitSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<CircuitSortie>(getCreerCircuitValidationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(circuitCreation)
+  }
+);}
+
+
+
+
+
+export const getCreerCircuitValidationMutationKey = () => ['creerCircuitValidation'] as const;
+
+export const getCreerCircuitValidationMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerCircuitValidation>>, TError,CreerCircuitValidationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof creerCircuitValidation>>, TError,CreerCircuitValidationMutationVariables, TContext> => {
+
+const mutationKey = getCreerCircuitValidationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creerCircuitValidation>>, CreerCircuitValidationMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  creerCircuitValidation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreerCircuitValidationMutationResult = NonNullable<Awaited<ReturnType<typeof creerCircuitValidation>>>
+    export type CreerCircuitValidationMutationBody = CircuitCreation
+    export type CreerCircuitValidationMutationError = HTTPValidationError
+    export type CreerCircuitValidationMutationVariables = {data: CircuitCreation}
+
+    /** @summary Creer Circuit Validation */
+export const useCreerCircuitValidation = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerCircuitValidation>>, TError,CreerCircuitValidationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creerCircuitValidation>>,
+        TError,
+        CreerCircuitValidationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreerCircuitValidationMutationOptions(options), queryClient);
+    }
+
+export const getObtenirCircuitValidationUrl = (identifiant: string,) => {
+
+
+
+
+  return `/api/v1/circuits-validation/${identifiant}`
+}
+
+/**
+ * @summary Obtenir Circuit Validation
+ */
+export const obtenirCircuitValidation = async (identifiant: string, options?: Parameters<typeof appelerApi>[1]): Promise<CircuitSortie> => {
+
+  return appelerApi<CircuitSortie>(getObtenirCircuitValidationUrl(identifiant),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenirCircuitValidationQueryKey = (identifiant: string,) => {
+    return [
+    `/api/v1/circuits-validation/${identifiant}`
+    ] as const;
+    }
+
+
+export const getObtenirCircuitValidationQueryOptions = <TData = Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError = HTTPValidationError>(identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenirCircuitValidationQueryKey(identifiant);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenirCircuitValidation>>> = ({ signal }) => obtenirCircuitValidation(identifiant, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: identifiant !== null && identifiant !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenirCircuitValidationQueryResult = NonNullable<Awaited<ReturnType<typeof obtenirCircuitValidation>>>
+export type ObtenirCircuitValidationQueryError = HTTPValidationError
+
+
+/** @summary Obtenir Circuit Validation */
+export function useObtenirCircuitValidation<TData = Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError = HTTPValidationError>(
+ identifiant: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenirCircuitValidation>>,
+          TError,
+          Awaited<ReturnType<typeof obtenirCircuitValidation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Circuit Validation */
+export function useObtenirCircuitValidation<TData = Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenirCircuitValidation>>,
+          TError,
+          Awaited<ReturnType<typeof obtenirCircuitValidation>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Circuit Validation */
+export function useObtenirCircuitValidation<TData = Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Circuit Validation */
+export function useObtenirCircuitValidation<TData = Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirCircuitValidation>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenirCircuitValidationQueryOptions(identifiant,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getModifierCircuitValidationUrl = (identifiant: string,) => {
+
+
+
+
+  return `/api/v1/circuits-validation/${identifiant}`
+}
+
+/**
+ * @summary Modifier Circuit Validation
+ */
+export const modifierCircuitValidation = async (identifiant: string,
+    circuitModification: CircuitModification, options?: Parameters<typeof appelerApi>[1]): Promise<CircuitSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<CircuitSortie>(getModifierCircuitValidationUrl(identifiant),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(circuitModification)
+  }
+);}
+
+
+
+
+
+export const getModifierCircuitValidationMutationKey = () => ['modifierCircuitValidation'] as const;
+
+export const getModifierCircuitValidationMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierCircuitValidation>>, TError,ModifierCircuitValidationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof modifierCircuitValidation>>, TError,ModifierCircuitValidationMutationVariables, TContext> => {
+
+const mutationKey = getModifierCircuitValidationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modifierCircuitValidation>>, ModifierCircuitValidationMutationVariables> = (props) => {
+          const {identifiant,data} = props ?? {};
+
+          return  modifierCircuitValidation(identifiant,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModifierCircuitValidationMutationResult = NonNullable<Awaited<ReturnType<typeof modifierCircuitValidation>>>
+    export type ModifierCircuitValidationMutationBody = CircuitModification
+    export type ModifierCircuitValidationMutationError = HTTPValidationError
+    export type ModifierCircuitValidationMutationVariables = {identifiant: string;data: CircuitModification}
+
+    /** @summary Modifier Circuit Validation */
+export const useModifierCircuitValidation = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierCircuitValidation>>, TError,ModifierCircuitValidationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modifierCircuitValidation>>,
+        TError,
+        ModifierCircuitValidationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getModifierCircuitValidationMutationOptions(options), queryClient);
+    }
+
+export const getListerStatutsPersonnalisesUrl = (params?: ListerStatutsPersonnalisesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/statuts-personnalises?${stringifiedParams}` : `/api/v1/statuts-personnalises`
+}
+
+/**
+ * @summary Lister Statuts Personnalises
+ */
+export const listerStatutsPersonnalises = async (params?: ListerStatutsPersonnalisesParams, options?: Parameters<typeof appelerApi>[1]): Promise<PageStatutSortie> => {
+
+  return appelerApi<PageStatutSortie>(getListerStatutsPersonnalisesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerStatutsPersonnalisesQueryKey = (params?: ListerStatutsPersonnalisesParams,) => {
+    return [
+    `/api/v1/statuts-personnalises`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListerStatutsPersonnalisesQueryOptions = <TData = Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError = HTTPValidationError>(params?: ListerStatutsPersonnalisesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerStatutsPersonnalisesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerStatutsPersonnalises>>> = ({ signal }) => listerStatutsPersonnalises(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerStatutsPersonnalisesQueryResult = NonNullable<Awaited<ReturnType<typeof listerStatutsPersonnalises>>>
+export type ListerStatutsPersonnalisesQueryError = HTTPValidationError
+
+
+/** @summary Lister Statuts Personnalises */
+export function useListerStatutsPersonnalises<TData = Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError = HTTPValidationError>(
+ params: undefined |  ListerStatutsPersonnalisesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerStatutsPersonnalises>>,
+          TError,
+          Awaited<ReturnType<typeof listerStatutsPersonnalises>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Statuts Personnalises */
+export function useListerStatutsPersonnalises<TData = Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError = HTTPValidationError>(
+ params?: ListerStatutsPersonnalisesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerStatutsPersonnalises>>,
+          TError,
+          Awaited<ReturnType<typeof listerStatutsPersonnalises>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Statuts Personnalises */
+export function useListerStatutsPersonnalises<TData = Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError = HTTPValidationError>(
+ params?: ListerStatutsPersonnalisesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Statuts Personnalises */
+export function useListerStatutsPersonnalises<TData = Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError = HTTPValidationError>(
+ params?: ListerStatutsPersonnalisesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerStatutsPersonnalises>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerStatutsPersonnalisesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreerStatutPersonnaliseUrl = () => {
+
+
+
+
+  return `/api/v1/statuts-personnalises`
+}
+
+/**
+ * @summary Creer Statut Personnalise
+ */
+export const creerStatutPersonnalise = async (statutCreation: StatutCreation, options?: Parameters<typeof appelerApi>[1]): Promise<StatutSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<StatutSortie>(getCreerStatutPersonnaliseUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(statutCreation)
+  }
+);}
+
+
+
+
+
+export const getCreerStatutPersonnaliseMutationKey = () => ['creerStatutPersonnalise'] as const;
+
+export const getCreerStatutPersonnaliseMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerStatutPersonnalise>>, TError,CreerStatutPersonnaliseMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof creerStatutPersonnalise>>, TError,CreerStatutPersonnaliseMutationVariables, TContext> => {
+
+const mutationKey = getCreerStatutPersonnaliseMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creerStatutPersonnalise>>, CreerStatutPersonnaliseMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  creerStatutPersonnalise(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreerStatutPersonnaliseMutationResult = NonNullable<Awaited<ReturnType<typeof creerStatutPersonnalise>>>
+    export type CreerStatutPersonnaliseMutationBody = StatutCreation
+    export type CreerStatutPersonnaliseMutationError = HTTPValidationError
+    export type CreerStatutPersonnaliseMutationVariables = {data: StatutCreation}
+
+    /** @summary Creer Statut Personnalise */
+export const useCreerStatutPersonnalise = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerStatutPersonnalise>>, TError,CreerStatutPersonnaliseMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creerStatutPersonnalise>>,
+        TError,
+        CreerStatutPersonnaliseMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreerStatutPersonnaliseMutationOptions(options), queryClient);
+    }
+
+export const getObtenirStatutPersonnaliseUrl = (identifiant: string,) => {
+
+
+
+
+  return `/api/v1/statuts-personnalises/${identifiant}`
+}
+
+/**
+ * @summary Obtenir Statut Personnalise
+ */
+export const obtenirStatutPersonnalise = async (identifiant: string, options?: Parameters<typeof appelerApi>[1]): Promise<StatutSortie> => {
+
+  return appelerApi<StatutSortie>(getObtenirStatutPersonnaliseUrl(identifiant),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenirStatutPersonnaliseQueryKey = (identifiant: string,) => {
+    return [
+    `/api/v1/statuts-personnalises/${identifiant}`
+    ] as const;
+    }
+
+
+export const getObtenirStatutPersonnaliseQueryOptions = <TData = Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError = HTTPValidationError>(identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenirStatutPersonnaliseQueryKey(identifiant);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenirStatutPersonnalise>>> = ({ signal }) => obtenirStatutPersonnalise(identifiant, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: identifiant !== null && identifiant !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenirStatutPersonnaliseQueryResult = NonNullable<Awaited<ReturnType<typeof obtenirStatutPersonnalise>>>
+export type ObtenirStatutPersonnaliseQueryError = HTTPValidationError
+
+
+/** @summary Obtenir Statut Personnalise */
+export function useObtenirStatutPersonnalise<TData = Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError = HTTPValidationError>(
+ identifiant: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenirStatutPersonnalise>>,
+          TError,
+          Awaited<ReturnType<typeof obtenirStatutPersonnalise>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Statut Personnalise */
+export function useObtenirStatutPersonnalise<TData = Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenirStatutPersonnalise>>,
+          TError,
+          Awaited<ReturnType<typeof obtenirStatutPersonnalise>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Statut Personnalise */
+export function useObtenirStatutPersonnalise<TData = Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Statut Personnalise */
+export function useObtenirStatutPersonnalise<TData = Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirStatutPersonnalise>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenirStatutPersonnaliseQueryOptions(identifiant,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getModifierStatutPersonnaliseUrl = (identifiant: string,) => {
+
+
+
+
+  return `/api/v1/statuts-personnalises/${identifiant}`
+}
+
+/**
+ * @summary Modifier Statut Personnalise
+ */
+export const modifierStatutPersonnalise = async (identifiant: string,
+    statutModification: StatutModification, options?: Parameters<typeof appelerApi>[1]): Promise<StatutSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<StatutSortie>(getModifierStatutPersonnaliseUrl(identifiant),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(statutModification)
+  }
+);}
+
+
+
+
+
+export const getModifierStatutPersonnaliseMutationKey = () => ['modifierStatutPersonnalise'] as const;
+
+export const getModifierStatutPersonnaliseMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierStatutPersonnalise>>, TError,ModifierStatutPersonnaliseMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof modifierStatutPersonnalise>>, TError,ModifierStatutPersonnaliseMutationVariables, TContext> => {
+
+const mutationKey = getModifierStatutPersonnaliseMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modifierStatutPersonnalise>>, ModifierStatutPersonnaliseMutationVariables> = (props) => {
+          const {identifiant,data} = props ?? {};
+
+          return  modifierStatutPersonnalise(identifiant,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModifierStatutPersonnaliseMutationResult = NonNullable<Awaited<ReturnType<typeof modifierStatutPersonnalise>>>
+    export type ModifierStatutPersonnaliseMutationBody = StatutModification
+    export type ModifierStatutPersonnaliseMutationError = HTTPValidationError
+    export type ModifierStatutPersonnaliseMutationVariables = {identifiant: string;data: StatutModification}
+
+    /** @summary Modifier Statut Personnalise */
+export const useModifierStatutPersonnalise = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierStatutPersonnalise>>, TError,ModifierStatutPersonnaliseMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modifierStatutPersonnalise>>,
+        TError,
+        ModifierStatutPersonnaliseMutationVariables,
+        TContext
+      > => {
+      return useMutation(getModifierStatutPersonnaliseMutationOptions(options), queryClient);
+    }
+
+export const getListerTransitionsStatutsUrl = (params?: ListerTransitionsStatutsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/transitions-statuts?${stringifiedParams}` : `/api/v1/transitions-statuts`
+}
+
+/**
+ * @summary Lister Transitions Statuts
+ */
+export const listerTransitionsStatuts = async (params?: ListerTransitionsStatutsParams, options?: Parameters<typeof appelerApi>[1]): Promise<PageTransitionSortie> => {
+
+  return appelerApi<PageTransitionSortie>(getListerTransitionsStatutsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerTransitionsStatutsQueryKey = (params?: ListerTransitionsStatutsParams,) => {
+    return [
+    `/api/v1/transitions-statuts`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListerTransitionsStatutsQueryOptions = <TData = Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError = HTTPValidationError>(params?: ListerTransitionsStatutsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerTransitionsStatutsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerTransitionsStatuts>>> = ({ signal }) => listerTransitionsStatuts(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerTransitionsStatutsQueryResult = NonNullable<Awaited<ReturnType<typeof listerTransitionsStatuts>>>
+export type ListerTransitionsStatutsQueryError = HTTPValidationError
+
+
+/** @summary Lister Transitions Statuts */
+export function useListerTransitionsStatuts<TData = Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError = HTTPValidationError>(
+ params: undefined |  ListerTransitionsStatutsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerTransitionsStatuts>>,
+          TError,
+          Awaited<ReturnType<typeof listerTransitionsStatuts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Transitions Statuts */
+export function useListerTransitionsStatuts<TData = Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError = HTTPValidationError>(
+ params?: ListerTransitionsStatutsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerTransitionsStatuts>>,
+          TError,
+          Awaited<ReturnType<typeof listerTransitionsStatuts>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Transitions Statuts */
+export function useListerTransitionsStatuts<TData = Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError = HTTPValidationError>(
+ params?: ListerTransitionsStatutsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Transitions Statuts */
+export function useListerTransitionsStatuts<TData = Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError = HTTPValidationError>(
+ params?: ListerTransitionsStatutsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerTransitionsStatuts>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerTransitionsStatutsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreerTransitionStatutUrl = () => {
+
+
+
+
+  return `/api/v1/transitions-statuts`
+}
+
+/**
+ * @summary Creer Transition Statut
+ */
+export const creerTransitionStatut = async (transitionCreation: TransitionCreation, options?: Parameters<typeof appelerApi>[1]): Promise<TransitionSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<TransitionSortie>(getCreerTransitionStatutUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(transitionCreation)
+  }
+);}
+
+
+
+
+
+export const getCreerTransitionStatutMutationKey = () => ['creerTransitionStatut'] as const;
+
+export const getCreerTransitionStatutMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerTransitionStatut>>, TError,CreerTransitionStatutMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof creerTransitionStatut>>, TError,CreerTransitionStatutMutationVariables, TContext> => {
+
+const mutationKey = getCreerTransitionStatutMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creerTransitionStatut>>, CreerTransitionStatutMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  creerTransitionStatut(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreerTransitionStatutMutationResult = NonNullable<Awaited<ReturnType<typeof creerTransitionStatut>>>
+    export type CreerTransitionStatutMutationBody = TransitionCreation
+    export type CreerTransitionStatutMutationError = HTTPValidationError
+    export type CreerTransitionStatutMutationVariables = {data: TransitionCreation}
+
+    /** @summary Creer Transition Statut */
+export const useCreerTransitionStatut = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerTransitionStatut>>, TError,CreerTransitionStatutMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creerTransitionStatut>>,
+        TError,
+        CreerTransitionStatutMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreerTransitionStatutMutationOptions(options), queryClient);
     }
 

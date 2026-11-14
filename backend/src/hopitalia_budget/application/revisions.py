@@ -1,28 +1,30 @@
-"""Soumission et validation des révisions budgétaires (T-095).
+"""Révisions budgétaires (T-095) : saisie, correction et validation par le workflow transverse.
 
-Règles : saisie par le responsable budgétaire (DEMANDER_REVISION) ; visa de la DAF (profil VAL)
-puis validation de l'ordonnateur (profil ORD) ; trois personnes distinctes (RG-13) ; contrôle du
-crédit de la ligne débitée au moment où la révision prend effet (RG-02, RG-20) ; rejet motivé.
+Règles propres : saisie par le responsable budgétaire (DEMANDER_REVISION) ; contrôle du crédit de la
+ligne débitée au moment où la révision prend effet (RG-02, RG-20). Circuit, visas, séparation des
+tâches et rejet motivé : application/workflow.py.
 """
 
 import uuid
 from decimal import Decimal
 from uuid import UUID
 
+from hopitalia_budget.application import workflow
 from hopitalia_budget.domaine.erreurs import ErreurMetier
-from hopitalia_budget.domaine.habilitations import Droit, Operation, Profil
+from hopitalia_budget.domaine.habilitations import Droit, Operation
 from hopitalia_budget.domaine.ports import EvenementAudit, Horloge, JournaliseurAudit
 from hopitalia_budget.domaine.revisions import (
-    ETAPES,
     DepotRevisions,
     Revision,
     Sens,
     StatutRevision,
     TypeRevision,
-    Visa,
     ligne_debitee,
 )
 from hopitalia_budget.domaine.utilisateur import Utilisateur
+from hopitalia_budget.domaine.workflow import DepotWorkflow, ObjetValidable
+
+TYPE_OBJET = "RevisionBudgetaire"
 
 
 def _etat(revision: Revision) -> dict[str, object]:
@@ -39,6 +41,7 @@ def _etat(revision: Revision) -> dict[str, object]:
 
 def soumettre(
     depot: DepotRevisions,
+    depot_workflow: DepotWorkflow,
     journal: JournaliseurAudit,
     horloge: Horloge,
     utilisateur: Utilisateur,
@@ -84,6 +87,7 @@ def soumettre(
         cree_le=horloge.maintenant(),
     )
     depot.ajouter(revision)
+    workflow.engager(depot_workflow, RevisionValidable(depot, revision).objet())
     journal.tracer(
         EvenementAudit(
             action="CREATION",
@@ -107,76 +111,85 @@ def obtenir(depot: DepotRevisions, utilisateur: Utilisateur, revision_id: UUID) 
     return revision
 
 
-def _a_le_profil(utilisateur: Utilisateur, profil: Profil, etablissement_id: UUID) -> bool:
-    return any(
-        h.profil is profil and h.etablissement_id in (None, etablissement_id)
-        for h in utilisateur.habilitations
-    )
+class RevisionValidable:
+    """Une révision est validable (circuit) et justifiable (pièces), ni annulable ni dérogeable."""
+
+    def __init__(self, depot: DepotRevisions, revision: Revision) -> None:
+        self.depot = depot
+        self.revision = revision
+
+    def objet(self) -> ObjetValidable:
+        r = self.revision
+        ligne = self.depot.ligne(r.ligne_cible_id)
+        return ObjetValidable(
+            type_objet=TYPE_OBJET,
+            id=r.id,
+            etablissement_id=r.etablissement_id,
+            createur_id=r.cree_par_id,
+            statut_reference=r.statut.value,
+            montant=r.montant,
+            centre_id=ligne.centre_id if ligne else None,
+        )
+
+    def controler_validation_finale(self) -> None:
+        debitee = ligne_debitee(self.revision)
+        if debitee is None:
+            return
+        # Ligne verrouillée : deux révisions validées en même temps ne consomment pas le même
+        # crédit (RG-20).
+        disponible = self.depot.indicateurs(debitee, verrouiller=True).disponible_apres_engagements
+        if disponible < self.revision.montant:
+            ligne = self.depot.ligne(debitee)
+            raise ErreurMetier(
+                "CREDIT_INSUFFISANT",
+                disponible=format(disponible, "f"),
+                montant=format(self.revision.montant, "f"),
+                ligne=ligne.code if ligne else debitee,
+            )
+
+    def changer_statut(self, statut_reference: str) -> None:
+        self.depot.changer_statut(self.revision.id, StatutRevision(statut_reference))
+
+    def pieces_obligatoires_presentes(self) -> bool:
+        return self.depot.pieces_obligatoires_presentes(self.revision.id)
 
 
-def decider(
+def validable(
+    depot: DepotRevisions, utilisateur: Utilisateur, revision_id: UUID
+) -> RevisionValidable:
+    return RevisionValidable(depot, obtenir(depot, utilisateur, revision_id))
+
+
+def corriger(
     depot: DepotRevisions,
+    depot_workflow: DepotWorkflow,
     journal: JournaliseurAudit,
-    horloge: Horloge,
     utilisateur: Utilisateur,
     revision_id: UUID,
-    validee: bool,
-    motif: str | None,
+    version: int,
+    montant: Decimal,
+    motif: str,
 ) -> Revision:
+    """Correction après retour (RG-18) : par son auteur, montant et motif seulement."""
     revision = obtenir(depot, utilisateur, revision_id)
-    etape = ETAPES.get(revision.statut)
-    if etape is None:
-        raise ErreurMetier("REVISION_DEJA_TRAITEE")
-    if not _a_le_profil(utilisateur, etape, revision.etablissement_id):
-        raise ErreurMetier("ETAPE_NON_AUTORISEE", profil=etape.value)
-    intervenants = {revision.cree_par_id} | {v.utilisateur_id for v in depot.visas(revision.id)}
-    if utilisateur.id_hopitalia in intervenants:
-        raise ErreurMetier("SEPARATION_DES_TACHES")
-    if not validee and not (motif and motif.strip()):
-        raise ErreurMetier("MOTIF_OBLIGATOIRE")
-
-    if not validee:
-        nouveau = StatutRevision.REJETEE
-    elif etape is Profil.ORD:
-        debitee = ligne_debitee(revision)
-        if debitee is not None:
-            # Ligne verrouillée : deux révisions validées en même temps ne consomment pas le
-            # même crédit (RG-20).
-            disponible = depot.indicateurs(debitee, verrouiller=True).disponible_apres_engagements
-            if disponible < revision.montant:
-                ligne = depot.ligne(debitee)
-                raise ErreurMetier(
-                    "CREDIT_INSUFFISANT",
-                    disponible=format(disponible, "f"),
-                    montant=format(revision.montant, "f"),
-                    ligne=ligne.code if ligne else debitee,
-                )
-        nouveau = StatutRevision.VALIDEE
-    else:
-        nouveau = StatutRevision.VISEE
-
-    depot.ajouter_visa(
-        revision.id,
-        Visa(
-            etape=etape,
-            decision="VALIDE" if validee else "REJETE",
-            motif=motif,
-            utilisateur_id=utilisateur.id_hopitalia,
-            code_agent=utilisateur.code_agent,
-            horodatage=horloge.maintenant(),
-        ),
-    )
-    depot.changer_statut(revision.id, nouveau)
+    workflow.exiger_modifiable(depot_workflow, RevisionValidable(depot, revision).objet())
+    if utilisateur.id_hopitalia != revision.cree_par_id:
+        raise ErreurMetier("ACCES_REFUSE")
+    if montant <= 0:
+        raise ErreurMetier("REFERENCE_INVALIDE", champ="montant")
+    if depot.version(revision_id) != version:
+        raise ErreurMetier("PRECONDITION_ECHOUEE")
+    depot.corriger(revision_id, montant, motif)
     journal.tracer(
         EvenementAudit(
-            action="VALIDATION" if validee else "REJET",
-            type_objet="RevisionBudgetaire",
-            id_objet=str(revision.id),
-            ancienne_valeur={"statut": revision.statut.value},
-            nouvelle_valeur={"statut": nouveau.value, "etape": etape.value, "motif": motif},
+            action="MODIFICATION",
+            type_objet=TYPE_OBJET,
+            id_objet=str(revision_id),
+            ancienne_valeur=_etat(revision),
+            nouvelle_valeur=_etat(obtenir(depot, utilisateur, revision_id)),
             utilisateur_id=utilisateur.id_hopitalia,
             code_agent=utilisateur.code_agent,
             etablissement_id=revision.etablissement_id,
         )
     )
-    return obtenir(depot, utilisateur, revision.id)
+    return obtenir(depot, utilisateur, revision_id)

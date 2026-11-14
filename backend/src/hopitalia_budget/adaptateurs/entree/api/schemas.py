@@ -1,5 +1,5 @@
 from decimal import Decimal
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, BeforeValidator, ConfigDict, PlainSerializer, WithJsonSchema
 from pydantic.alias_generators import to_camel
@@ -32,3 +32,7 @@ Montant = Annotated[
         {"type": "string", "pattern": r"^-?\d{1,16}(\.\d{1,2})?$", "examples": ["45000000.00"]}
     ),
 ]
+
+
+# Types d'objets validables (clés de domaine/workflow.TRANSITIONS_REFERENCE ; un test les compare).
+TypeObjet = Literal["RevisionBudgetaire"]

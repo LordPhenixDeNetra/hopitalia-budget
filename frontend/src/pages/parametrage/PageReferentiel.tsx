@@ -63,6 +63,7 @@ function useRendu() {
     if (champ?.type === 'reference' && champ.reference) {
       return <Reference chemin={champ.reference} valeur={valeur} />
     }
+    if (Array.isArray(valeur)) return valeur.map((v) => t(`valeurs.${String(v)}`)).join(', ')
     if (champ?.type === 'choix' || nom === 'statut') return t(`valeurs.${String(valeur)}`)
     return String(valeur)
   }
@@ -74,6 +75,14 @@ function ChampFormulaire({ champ, ...controle }: { champ: Champ } & Record<strin
   const { t } = useTranslation('parametrage')
   const options = useOptions(champ.type === 'reference' ? champ.reference : undefined)
   switch (champ.type) {
+    case 'choixMultiple':
+      return (
+        <Select
+          {...controle}
+          mode="multiple"
+          options={(champ.valeurs ?? []).map((v) => ({ value: v, label: t(`valeurs.${v}`) }))}
+        />
+      )
     case 'choix':
       return (
         <Select

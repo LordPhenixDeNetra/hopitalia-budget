@@ -150,6 +150,8 @@ class ReferentielModele(Base):
     bailleur: Mapped[str | None] = mapped_column(String(200))
     date_debut: Mapped[date | None]
     date_fin: Mapped[date | None]
+    # Types de pièces : objets pour lesquels la pièce est obligatoire avant validation.
+    types_objets: Mapped[list[str] | None] = mapped_column(JSONB)
 
     __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
 
@@ -332,7 +334,7 @@ class RevisionBudgetaireModele(Base):
     ligne_cible_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("ligne_budgetaire.id"), index=True)
     montant: Mapped[Decimal] = mapped_column(MONTANT)
     motif: Mapped[str] = mapped_column(String(500))
-    statut: Mapped[str] = mapped_column(String(10), index=True)
+    statut: Mapped[str] = mapped_column(String(20), index=True)
     cree_par_id: Mapped[int] = mapped_column(BigInteger)
     cree_par_code: Mapped[str] = mapped_column(String(20))
     cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
@@ -358,6 +360,112 @@ class ValidationModele(Base):
     horodatage: Mapped[datetime] = mapped_column(DateTime(timezone=True))
     # Ordre d'enregistrement : départage deux visas de même horodatage.
     rang: Mapped[int] = mapped_column(BigInteger, Identity())
+    ordre: Mapped[int | None]
+    visa: Mapped[str | None] = mapped_column(String(200))
+    # Visa donné par délégation : code agent du délégant.
+    delegant_code: Mapped[str | None] = mapped_column(String(20))
+
+
+class WorkflowObjetModele(Base):
+    """État de workflow d'un objet validable : circuit figé à la soumission, statut personnalisé."""
+
+    __tablename__ = "workflow_objet"
+
+    type_objet: Mapped[str] = mapped_column(String(60), primary_key=True)
+    id_objet: Mapped[uuid.UUID] = mapped_column(primary_key=True)
+    statut: Mapped[str] = mapped_column(String(30))
+    circuit: Mapped[dict[str, Any]] = mapped_column(JSONB)
+
+
+class CircuitValidationModele(Base):
+    """Circuit de validation d'un type d'objet, par établissement, service et tranche de montant."""
+
+    __tablename__ = "circuit_validation"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    type_objet: Mapped[str] = mapped_column(String(60))
+    libelle: Mapped[str] = mapped_column(String(200))
+    centre_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("centre_responsabilite.id"))
+    seuil_min: Mapped[Decimal] = mapped_column(MONTANT, default=Decimal("0"))
+    seuil_max: Mapped[Decimal | None] = mapped_column(MONTANT)
+    separation_taches: Mapped[bool] = mapped_column(default=True)
+    actif: Mapped[bool] = mapped_column(default=True)
+    # Étapes [{ordre, libelle, profil, obligatoire}] : lues et remplacées ensemble.
+    etapes: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class StatutPersonnaliseModele(Base):
+    __tablename__ = "statut_personnalise"
+    __table_args__ = (UniqueConstraint("etablissement_id", "type_objet", "code"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"))
+    type_objet: Mapped[str] = mapped_column(String(60))
+    code: Mapped[str] = mapped_column(String(30))
+    libelle: Mapped[str] = mapped_column(String(200))
+    statut_reference: Mapped[str] = mapped_column(String(30))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class TransitionStatutModele(Base):
+    __tablename__ = "transition_statut"
+    __table_args__ = (UniqueConstraint("etablissement_id", "type_objet", "depuis", "action"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"))
+    type_objet: Mapped[str] = mapped_column(String(60))
+    depuis: Mapped[str] = mapped_column(String(30))
+    action: Mapped[str] = mapped_column(String(20))
+    vers: Mapped[str] = mapped_column(String(30))
+    profil: Mapped[str | None] = mapped_column(String(10))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class DelegationModele(Base):
+    """Délégation temporaire : le délégataire vise avec les profils du délégant, dans ses dates."""
+
+    __tablename__ = "delegation"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    delegant_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    delegant_code: Mapped[str] = mapped_column(String(20))
+    delegataire_id: Mapped[int] = mapped_column(BigInteger, index=True)
+    delegataire_code: Mapped[str] = mapped_column(String(20))
+    date_debut: Mapped[date]
+    date_fin: Mapped[date]
+    motif: Mapped[str] = mapped_column(String(500))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class PieceJustificativeModele(Base):
+    """Pièce jointe à une opération (EF-DOC-01) ; contenu rangé par empreinte SHA-256."""
+
+    __tablename__ = "piece_justificative"
+    __table_args__ = (Index("ix_piece_objet", "type_objet", "id_objet"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    type_objet: Mapped[str] = mapped_column(String(60))
+    id_objet: Mapped[uuid.UUID]
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"))
+    type_piece_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("referentiel.id"))
+    nom_fichier: Mapped[str] = mapped_column(String(255))
+    type_mime: Mapped[str] = mapped_column(String(100))
+    taille: Mapped[int] = mapped_column(BigInteger)
+    empreinte_sha256: Mapped[str] = mapped_column(String(64))
+    depose_par_id: Mapped[int] = mapped_column(BigInteger)
+    depose_par_code: Mapped[str] = mapped_column(String(20))
+    depose_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
 
 class ParametreCalculModele(Base):

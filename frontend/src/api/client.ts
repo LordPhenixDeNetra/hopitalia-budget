@@ -47,8 +47,7 @@ async function rafraichir(): Promise<boolean> {
   return true
 }
 
-/** Client utilisé par le code généré (orval) : langue, jeton, rafraîchissement, erreurs. */
-export async function appelerApi<T>(url: string, options: RequestInit = {}): Promise<T> {
+async function envoyer(url: string, options: RequestInit): Promise<Response> {
   const executer = (): Promise<Response> => {
     const entetes = new Headers(options.headers)
     entetes.set('Accept-Language', i18n.language)
@@ -69,8 +68,24 @@ export async function appelerApi<T>(url: string, options: RequestInit = {}): Pro
     window.dispatchEvent(new Event(EVENEMENT_SESSION_EXPIREE))
   }
   if (!reponse.ok) throw new ErreurApi(await lireProbleme(reponse))
+  return reponse
+}
+
+/** Client utilisé par le code généré (orval) : langue, jeton, rafraîchissement, erreurs. */
+export async function appelerApi<T>(url: string, options: RequestInit = {}): Promise<T> {
+  const reponse = await envoyer(url, options)
   if (reponse.status === 204) return undefined as T
   return (await reponse.json()) as T
+}
+
+/** Télécharge un fichier protégé (pièce justificative) et le propose à l'enregistrement. */
+export async function telechargerFichier(url: string, nom: string): Promise<void> {
+  const contenu = await (await envoyer(url, {})).blob()
+  const lien = document.createElement('a')
+  lien.href = URL.createObjectURL(contenu)
+  lien.download = nom
+  lien.click()
+  URL.revokeObjectURL(lien.href)
 }
 
 export default appelerApi

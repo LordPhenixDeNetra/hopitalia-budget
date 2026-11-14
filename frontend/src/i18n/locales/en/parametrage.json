@@ -13,7 +13,8 @@
     "fournisseurs": "Suppliers",
     "exercices": "Fiscal years",
     "budgets": "Budgets",
-    "lignes-budgetaires": "Budget lines"
+    "lignes-budgetaires": "Budget lines",
+    "circuits-validation": "Approval flows"
   },
   "champs": {
     "code": "Code",
@@ -49,7 +50,8 @@
     "programmeId": "Programme",
     "natureEconomique": "Economic nature",
     "dotationInitiale": "Initial allocation",
-    "actions": "Actions"
+    "actions": "Actions",
+    "typesObjets": "Mandatory for"
   },
   "valeurs": {
     "CLINIQUE": "Clinical",
@@ -67,7 +69,8 @@
     "MODIFICATIF": "Amending",
     "OUVERT": "Open",
     "CLOTURE": "Closed",
-    "REOUVERT": "Reopened"
+    "REOUVERT": "Reopened",
+    "RevisionBudgetaire": "Budget revision"
   },
   "actions": {
     "creer": "Add",
@@ -76,7 +79,10 @@
     "desactiver": "Deactivate",
     "coordonnees": "Bank details"
   },
-  "notifications": { "cree": "Item added.", "modifie": "Item saved." },
+  "notifications": {
+    "cree": "Item added.",
+    "modifie": "Item saved."
+  },
   "aideMontant": "Amount in CFA francs, at most two decimals.",
   "coordonnees": {
     "titre": "Bank details",

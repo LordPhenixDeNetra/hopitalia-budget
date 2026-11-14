@@ -28,6 +28,7 @@ import {
 import type { CoordonneeCreation, ParametresCalculSchema } from '../../api/genere/budget.schemas'
 import { useAProfil } from '../../auth/session'
 import { PageReferentiel, useOptions, type Enregistrement } from './PageReferentiel'
+import { Circuits } from './Circuits'
 import { PARAMETRAGE, RESSOURCES } from './ressources'
 
 /** Coordonnées bancaires d'un fournisseur : numéro chiffré, affiché masqué (T-083). */
@@ -190,19 +191,23 @@ export function Parametrage() {
         onChange={(r) => naviguer(`/parametrage/${r}`)}
         options={PARAMETRAGE.map((r) => ({ value: r, label: t(`ressources.${r}`) }))}
       />
-      <PageReferentiel
-        key={ressource}
-        definition={RESSOURCES[ressource]!}
-        actionsLigne={
-          ressource === 'fournisseurs'
-            ? (f) => (
-                <Button size="small" onClick={() => setFournisseur(f)}>
-                  {t('actions.coordonnees')}
-                </Button>
-              )
-            : undefined
-        }
-      />
+      {ressource === 'circuits-validation' ? (
+        <Circuits />
+      ) : (
+        <PageReferentiel
+          key={ressource}
+          definition={RESSOURCES[ressource]!}
+          actionsLigne={
+            ressource === 'fournisseurs'
+              ? (f) => (
+                  <Button size="small" onClick={() => setFournisseur(f)}>
+                    {t('actions.coordonnees')}
+                  </Button>
+                )
+              : undefined
+          }
+        />
+      )}
       {fournisseur && <Coordonnees fournisseur={fournisseur} fermer={() => setFournisseur(null)} />}
     </Flex>
   )

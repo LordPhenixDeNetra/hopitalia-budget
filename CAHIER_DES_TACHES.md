@@ -32,12 +32,12 @@
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
-| P1 | 18 | 0 | 64 | 0 | 0 | 0 | 82 |
+| P1 | 25 | 2 | 55 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **87** | **2** | **118** | **0** | **0** | **2** | **209** |
+| **Total** | **94** | **4** | **109** | **0** | **0** | **2** | **209** |
 
-Avancement : 87 / 207 tâches actives terminées (42 %), hors 2 abandonnées.
+Avancement : 94 / 207 tâches actives terminées (45 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -187,17 +187,17 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-110 | Interfaces `Validable`, `Justifiable`, `Annulable`, `Derogeable`. | §7.6, ARC-I | T-040 | À faire | Aucune implémentation par exception « non supporté ». |
-| T-111 | Statuts de référence, statuts personnalisés et transitions configurables. | §7.6 | T-110 | À faire | Une transition non paramétrée est refusée. |
-| T-112 | Circuits de validation (étapes, profils, seuils, service). | EF-ENG-04 | T-111, T-053 | À faire | Un circuit à 2 étapes s'exécute dans l'ordre. |
-| T-113 | Ressource `POST /{ressource}/{id}/validations` (visa, motif, décision). | §11.1 | T-112 | À faire | Validation, rejet et retour pour correction testés. |
-| T-114 | Séparation des tâches : créateur ≠ valideur ≠ payeur selon le circuit. | RG-13, REC-13 | T-113 | À faire | Test REC-13 vert. |
-| T-115 | Délégations temporaires. | §7.6 | T-112 | À faire | Une délégation expirée n'autorise plus rien. |
-| T-116 | Immuabilité des objets validés (`409` sur `PUT`, `PATCH`, `DELETE`). | RG-18, API-04 | T-113 | À faire | Test API-04 vert. |
-| T-117 | Annulations et contre-opérations tracées. | RG-09, RG-18 | T-116 | À faire | L'opération initiale reste visible avec son annulation. |
-| T-118 | Dérogations par nature et montant. | RG-19 | T-113 | À faire | Une dérogation ne couvre que son objet et son montant. |
-| T-119 | Pièces justificatives : dépôt, empreinte SHA-256, type, contrôle des pièces obligatoires. | EF-DOC-01, 02 | T-056 | À faire | Fichier altéré détecté par l'empreinte. |
-| T-120 | Composants frontend : historique de validation (`Timeline`), boutons valider / rejeter, dépôt de pièces. | IHM-07 | T-113, T-119 | À faire | Réutilisés par toutes les fiches. |
+| T-110 | Interfaces `Validable`, `Justifiable`, `Annulable`, `Derogeable`. | §7.6, ARC-I | T-040 | Fait | Aucune implémentation par exception « non supporté ». `domaine/workflow.py` ; la révision implémente `Validable` et `Justifiable`, rien d'autre (aucune méthode « non supportée »). |
+| T-111 | Statuts de référence, statuts personnalisés et transitions configurables. | §7.6 | T-110 | Fait | Une transition non paramétrée est refusée. Statuts personnalisés rattachés à un statut de référence ; transition incohérente refusée ; transition non paramétrée refusée (`test_transition_non_parametree_refusee`). |
+| T-112 | Circuits de validation (étapes, profils, seuils, service). | EF-ENG-04 | T-111, T-053 | Fait | Un circuit à 2 étapes s'exécute dans l'ordre. Circuits par établissement, service et tranche de montant, figés à la soumission ; ordonnateur en dernière étape ; testé (`test_circuit_a_deux_etapes_s_execute_dans_l_ordre`) ; écran dans Paramétrage. |
+| T-113 | Ressource `POST /{ressource}/{id}/validations` (visa, motif, décision). | §11.1 | T-112 | Fait | Validation, rejet et retour pour correction testés. Route générique ; visa, rejet, retour pour correction, correction et renvoi au circuit testés (`test_retour_pour_correction_puis_validation`). |
+| T-114 | Séparation des tâches : créateur ≠ valideur ≠ payeur selon le circuit. | RG-13, REC-13 | T-113 | En cours | Test REC-13 vert. Créateur ≠ valideur et un visa par agent et par cycle, selon le circuit : fait et testé (`test_rg13_...`). Reste le payeur, avec les paiements (lot 5) : REC-13 complet à ce moment. |
+| T-115 | Délégations temporaires. | §7.6 | T-112 | Fait | Une délégation expirée n'autorise plus rien. Délégation datée, visa au nom du délégant, révocation ; une délégation expirée n'autorise plus rien (`test_delegation_active_puis_expiree`) ; écran Délégations. |
+| T-116 | Immuabilité des objets validés (`409` sur `PUT`, `PATCH`, `DELETE`). | RG-18, API-04 | T-113 | En cours | Test API-04 vert. Mécanisme commun (`exiger_modifiable`) : `PATCH` d'une révision en circuit, validée ou rejetée → `409` (testé). API-04 porte sur l'engagement : vérifié avec T-140. |
+| T-117 | Annulations et contre-opérations tracées. | RG-09, RG-18 | T-116, T-140 | À faire | L'opération initiale reste visible avec son annulation. |
+| T-118 | Dérogations par nature et montant. | RG-19 | T-113, T-140 | À faire | Une dérogation ne couvre que son objet et son montant. |
+| T-119 | Pièces justificatives : dépôt, empreinte SHA-256, type, contrôle des pièces obligatoires. | EF-DOC-01, 02 | T-056 | Fait | Fichier altéré détecté par l'empreinte. Dépôt multipart, empreinte SHA-256, types de fichiers limités, pièces obligatoires par type d'objet ; fichier altéré détecté (`test_pieces_empreinte_et_pieces_obligatoires`). |
+| T-120 | Composants frontend : historique de validation (`Timeline`), boutons valider / rejeter, dépôt de pièces. | IHM-07 | T-113, T-119 | Fait | Réutilisés par toutes les fiches. `Validations` (circuit, `Timeline`, valider, rejeter, retourner) et `Pieces` (dépôt, téléchargement) prennent la ressource en paramètre ; utilisés par la fiche révision, à réutiliser par les fiches suivantes. |
 | T-121 | Gestion des habilitations dans le module : attribuer et retirer les profils budgétaires des agents Hopitalia, par établissement (API et écran). | §3, RG-13 | T-053 | Fait | Un administrateur attribue un profil sans ligne de commande ; chaque changement est tracé dans le journal d'audit (10 tests ; vérifié avec une instance Hopitalia réelle). Pas d'auto-attribution ; dépendance à T-110 levée : aucun circuit de validation ici. |
 
 ### P1.C — Lot 2 : contrats, marchés, avenants
@@ -421,3 +421,6 @@ flowchart LR
 | 14/11/2026 | T-075 | En cours | Fait | CI verte sur la demande n° 8 (Vitest, Playwright, backend sur PostgreSQL). P0.C et P0.D terminés. |
 | 14/11/2026 | T-121 | À faire | Fait | Écran et API « Habilitations » : attribution par code agent Hopitalia, retrait, liste cloisonnée, journal d'audit, pas d'auto-attribution ; migration 0002. |
 | 14/11/2026 | T-080 à T-096 (P1.A) | À faire | Fait | Lot 1 : référentiels, nomenclature, exercices, budgets, lignes, import des dotations, notifications, paramètres et service de calcul, révisions avec visas ; migration 0003 ; 106 tests backend, 27 tests Vitest, parcours REC-01. T-095 suit le circuit fixe en attendant T-110 à T-112. |
+| 14/11/2026 | T-110 à T-113, T-115, T-119, T-120 | À faire | Fait | Workflow transverse : circuits paramétrés, visas, retour pour correction, délégations, statuts personnalisés, pièces avec empreinte ; migration 0004 ; 121 tests backend, 30 tests Vitest. Révisions passées sur ce workflow. |
+| 14/11/2026 | T-114, T-116 | À faire | En cours | Fait et testé sur les révisions ; le payeur (REC-13) et l'engagement validé (API-04) arrivent avec les lots 2 et 5. |
+| 14/11/2026 | T-117, T-118 | À faire | À faire | Dépendance à T-140 ajoutée : aucun objet annulable ni dérogeable n'existe avant les engagements. |
