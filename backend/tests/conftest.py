@@ -80,13 +80,14 @@ def horloge() -> HorlogeFixe:
 
 
 @pytest.fixture
-def parametres() -> Parametres:
+def parametres(tmp_path: Path) -> Parametres:
     return Parametres(
         database_url="postgresql+psycopg://inutilisee@localhost/inutilisee",
         hopitalia_api_url="http://hopitalia.test",
         hopitalia_jwt_cle=SecretStr(CLE_TEST),
         coordonnees_cle=SecretStr(Fernet.generate_key().decode()),
         limite_requetes_par_minute=10_000,
+        dossier_pieces=tmp_path / "pieces",
     )
 
 
