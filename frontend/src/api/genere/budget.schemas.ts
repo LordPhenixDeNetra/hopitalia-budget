@@ -4,9 +4,258 @@
  * Hopitalia Budget
  * OpenAPI spec version: 0.1.0
  */
+export interface Anomalie {
+  ligne: number;
+  code: string;
+  valeur?: string;
+}
+
+export type BaseConsommationMarche = typeof BaseConsommationMarche[keyof typeof BaseConsommationMarche];
+
+
+export const BaseConsommationMarche = {
+  ENGAGE: 'ENGAGE',
+  LIQUIDE: 'LIQUIDE',
+} as const;
+
+export type BaseTaux = typeof BaseTaux[keyof typeof BaseTaux];
+
+
+export const BaseTaux = {
+  BUDGET_REVISE: 'BUDGET_REVISE',
+  BUDGET_INITIAL: 'BUDGET_INITIAL',
+} as const;
+
+export type BudgetCreationType = typeof BudgetCreationType[keyof typeof BudgetCreationType];
+
+
+export const BudgetCreationType = {
+  PRIMITIF: 'PRIMITIF',
+  MODIFICATIF: 'MODIFICATIF',
+} as const;
+
+export interface BudgetCreation {
+  exerciceId: string;
+  etablissementId: string;
+  /**
+     * @minLength 1
+     * @maxLength 50
+     */
+  reference: string;
+  type?: BudgetCreationType;
+}
+
+export interface BudgetModification {
+  reference?: string | null;
+}
+
+export interface BudgetSortie {
+  id: string;
+  exerciceId: string;
+  etablissementId: string;
+  reference: string;
+  type: string;
+  version: number;
+}
+
+export type CentreCreationType = typeof CentreCreationType[keyof typeof CentreCreationType];
+
+
+export const CentreCreationType = {
+  CLINIQUE: 'CLINIQUE',
+  MEDICO_TECHNIQUE: 'MEDICO_TECHNIQUE',
+  ADMINISTRATIF: 'ADMINISTRATIF',
+  LOGISTIQUE: 'LOGISTIQUE',
+  AUTRE: 'AUTRE',
+} as const;
+
+export interface CentreCreation {
+  etablissementId: string;
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  type: CentreCreationType;
+  parentId?: string | null;
+  siteId?: string | null;
+  codeResponsable?: string | null;
+  codeHopitalia?: string | null;
+}
+
+export type CentreModificationType = typeof CentreModificationType[keyof typeof CentreModificationType] | null;
+
+
+export const CentreModificationType = {
+  CLINIQUE: 'CLINIQUE',
+  MEDICO_TECHNIQUE: 'MEDICO_TECHNIQUE',
+  ADMINISTRATIF: 'ADMINISTRATIF',
+  LOGISTIQUE: 'LOGISTIQUE',
+  AUTRE: 'AUTRE',
+} as const;
+
+export interface CentreModification {
+  libelle?: string | null;
+  type?: CentreModificationType;
+  parentId?: string | null;
+  siteId?: string | null;
+  codeResponsable?: string | null;
+  actif?: boolean | null;
+}
+
+export interface CentreSortie {
+  id: string;
+  etablissementId: string;
+  code: string;
+  libelle: string;
+  type: string;
+  parentId: string | null;
+  siteId: string | null;
+  codeResponsable: string | null;
+  codeHopitalia: string | null;
+  actif: boolean;
+  version: number;
+}
+
+export interface NoeudSortie {
+  id: string;
+  niveau: string;
+  code: string;
+  libelle: string;
+  parentId: string | null;
+  compteComptableCode: string | null;
+}
+
+export interface CompteComptableSortie {
+  code: string;
+  libelle: string;
+  comptesBudgetaires: NoeudSortie[];
+}
+
+export type CompteTresorerieCreationTypeCompte = typeof CompteTresorerieCreationTypeCompte[keyof typeof CompteTresorerieCreationTypeCompte];
+
+
+export const CompteTresorerieCreationTypeCompte = {
+  BANQUE: 'BANQUE',
+  CAISSE: 'CAISSE',
+  TRESOR: 'TRESOR',
+} as const;
+
+export interface CompteTresorerieCreation {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  typeCompte: CompteTresorerieCreationTypeCompte;
+  numero?: string | null;
+}
+
+export interface CompteTresorerieModification {
+  libelle?: string | null;
+  actif?: boolean | null;
+  numero?: string | null;
+}
+
+export interface CompteTresorerieSortie {
+  id: string;
+  code: string;
+  libelle: string;
+  actif: boolean;
+  version: number;
+  typeCompte: string | null;
+  numero: string | null;
+}
+
 export interface Connexion {
   identifiant: string;
   motDePasse: string;
+}
+
+export interface CoordonneeCreation {
+  etablissementId: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  banque: string;
+  /**
+     * @minLength 4
+     * @maxLength 64
+     * @pattern ^[A-Za-z0-9 -]+$
+     */
+  numeroCompte: string;
+  parDefaut?: boolean;
+}
+
+export interface CoordonneeSortie {
+  id: string;
+  etablissementId: string;
+  banque: string;
+  numeroMasque: string;
+  parDefaut: boolean;
+}
+
+export type DecisionRevisionDecision = typeof DecisionRevisionDecision[keyof typeof DecisionRevisionDecision];
+
+
+export const DecisionRevisionDecision = {
+  VALIDE: 'VALIDE',
+  REJETE: 'REJETE',
+} as const;
+
+export interface DecisionRevision {
+  decision: DecisionRevisionDecision;
+  motif?: string | null;
+}
+
+export interface IndicateursSortie {
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  budgetInitial: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  modificationsPositives: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  modificationsNegatives: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  budgetRevise: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  engage: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  enCoursValidation: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  disponibleApresEngagements: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  disponiblePrevisionnel: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  liquide: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  paye: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  engageRestantALiquider: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteAPayer: string;
+  tauxEngagement: string | null;
+  tauxLiquidation: string | null;
+  tauxPaiement: string | null;
+}
+
+export interface DisponibiliteSortie {
+  ligneId: string;
+  code: string;
+  libelle: string;
+  indicateurs: IndicateursSortie;
 }
 
 export type EntreeJournalAncienneValeur = { [key: string]: unknown } | null;
@@ -50,6 +299,67 @@ export interface EtablissementSortie {
   id: string;
   code: string;
   nom: string;
+  actif: boolean;
+  version: number;
+}
+
+export interface ExerciceCreation {
+  /**
+     * @minLength 4
+     * @maxLength 10
+     */
+  code: string;
+  dateOuverture: string;
+  dateCloture: string;
+}
+
+export interface ExerciceModification {
+  dateCloture?: string | null;
+}
+
+export interface ExerciceSortie {
+  id: string;
+  code: string;
+  dateOuverture: string;
+  dateCloture: string;
+  statut: string;
+  version: number;
+}
+
+export interface FournisseurCreation {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  raisonSociale: string;
+  identifiantsAdministratifs?: string | null;
+  adresse?: string | null;
+  contact?: string | null;
+  codeHopitalia?: string | null;
+}
+
+export interface FournisseurModification {
+  raisonSociale?: string | null;
+  identifiantsAdministratifs?: string | null;
+  adresse?: string | null;
+  contact?: string | null;
+  actif?: boolean | null;
+}
+
+export interface FournisseurSortie {
+  id: string;
+  code: string;
+  raisonSociale: string;
+  identifiantsAdministratifs: string | null;
+  adresse: string | null;
+  contact: string | null;
+  codeHopitalia: string | null;
   actif: boolean;
   version: number;
 }
@@ -105,10 +415,68 @@ export interface HabilitationSortie {
   etablissementId: string | null;
 }
 
+export interface ImportSortie {
+  id: string;
+  budgetId: string;
+  statut: string;
+  lignesImportees: number;
+  anomalies: Anomalie[];
+  creeLe: string;
+  termineLe: string | null;
+}
+
 export interface Jetons {
   jetonAcces: string;
   jetonRafraichissement: string;
   expireDans: number;
+}
+
+export interface LigneCreation {
+  budgetId: string;
+  /**
+     * @minLength 1
+     * @maxLength 30
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  compteBudgetaireId: string;
+  centreId: string;
+  sourceId: string;
+  programmeId?: string | null;
+  periodeId?: string | null;
+  natureEconomique?: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  dotationInitiale?: string;
+}
+
+/**
+ * La dotation ne change plus après création : on passe par une révision (EF-BUD-04).
+ */
+export interface LigneModification {
+  libelle?: string | null;
+  natureEconomique?: string | null;
+}
+
+export interface LigneSortie {
+  id: string;
+  budgetId: string;
+  etablissementId: string;
+  code: string;
+  libelle: string;
+  compteBudgetaireId: string;
+  centreId: string;
+  sourceId: string;
+  programmeId: string | null;
+  periodeId: string | null;
+  natureEconomique: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  dotationInitiale: string;
+  version: number;
 }
 
 export type MoiLangue = typeof MoiLangue[keyof typeof MoiLangue] | null;
@@ -133,6 +501,53 @@ export interface Moi {
   langue: MoiLangue;
 }
 
+export interface NotificationLigne {
+  ligneId: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+}
+
+export interface NotificationCreation {
+  budgetId: string;
+  /**
+     * @minLength 1
+     * @maxLength 50
+     */
+  reference: string;
+  dateNotification: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  objet: string;
+  sourceId: string;
+  /** @minItems 1 */
+  lignes: NotificationLigne[];
+}
+
+export interface NotificationSortie {
+  budgetId: string;
+  /**
+     * @minLength 1
+     * @maxLength 50
+     */
+  reference: string;
+  dateNotification: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  objet: string;
+  sourceId: string;
+  /** @minItems 1 */
+  lignes: NotificationLigne[];
+  id: string;
+}
+
 export interface PaginationCurseur {
   taille: number;
   suivant: string | null;
@@ -150,14 +565,199 @@ export interface Pagination {
   suivant: string | null;
 }
 
+export interface PageBudgetSortie {
+  donnees: BudgetSortie[];
+  pagination: Pagination;
+}
+
+export interface PageCentreSortie {
+  donnees: CentreSortie[];
+  pagination: Pagination;
+}
+
+export interface PageCompteTresorerieSortie {
+  donnees: CompteTresorerieSortie[];
+  pagination: Pagination;
+}
+
 export interface PageEtablissementSortie {
   donnees: EtablissementSortie[];
+  pagination: Pagination;
+}
+
+export interface PageExerciceSortie {
+  donnees: ExerciceSortie[];
+  pagination: Pagination;
+}
+
+export interface PageFournisseurSortie {
+  donnees: FournisseurSortie[];
   pagination: Pagination;
 }
 
 export interface PageHabilitationSortie {
   donnees: HabilitationSortie[];
   pagination: Pagination;
+}
+
+export interface PageLigneSortie {
+  donnees: LigneSortie[];
+  pagination: Pagination;
+}
+
+export interface PageNotificationSortie {
+  donnees: NotificationSortie[];
+  pagination: Pagination;
+}
+
+export interface ProgrammeSortie {
+  id: string;
+  code: string;
+  libelle: string;
+  actif: boolean;
+  version: number;
+  dateDebut: string | null;
+  dateFin: string | null;
+}
+
+export interface PageProgrammeSortie {
+  donnees: ProgrammeSortie[];
+  pagination: Pagination;
+}
+
+export interface ReferentielSortie {
+  id: string;
+  code: string;
+  libelle: string;
+  actif: boolean;
+  version: number;
+}
+
+export interface PageReferentielSortie {
+  donnees: ReferentielSortie[];
+  pagination: Pagination;
+}
+
+export type TypeRevision = typeof TypeRevision[keyof typeof TypeRevision];
+
+
+export const TypeRevision = {
+  BUDGET_MODIFICATIF: 'BUDGET_MODIFICATIF',
+  VIREMENT: 'VIREMENT',
+  REALLOCATION: 'REALLOCATION',
+} as const;
+
+export type Sens = typeof Sens[keyof typeof Sens];
+
+
+export const Sens = {
+  AUGMENTATION: 'AUGMENTATION',
+  DIMINUTION: 'DIMINUTION',
+} as const;
+
+export type StatutRevision = typeof StatutRevision[keyof typeof StatutRevision];
+
+
+export const StatutRevision = {
+  SOUMISE: 'SOUMISE',
+  VISEE: 'VISEE',
+  VALIDEE: 'VALIDEE',
+  REJETEE: 'REJETEE',
+} as const;
+
+export interface VisaSortie {
+  etape: string;
+  decision: string;
+  motif: string | null;
+  codeAgent: string;
+  horodatage: string;
+}
+
+export interface RevisionSortie {
+  id: string;
+  budgetId: string;
+  etablissementId: string;
+  type: TypeRevision;
+  sens: Sens | null;
+  ligneSourceId: string | null;
+  ligneCibleId: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  motif: string;
+  statut: StatutRevision;
+  creeParCode: string;
+  creeLe: string;
+  visas: VisaSortie[];
+}
+
+export interface PageRevisionSortie {
+  donnees: RevisionSortie[];
+  pagination: Pagination;
+}
+
+export interface SiteSortie {
+  id: string;
+  etablissementId: string;
+  code: string;
+  libelle: string;
+  adresse: string | null;
+  actif: boolean;
+  version: number;
+}
+
+export interface PageSiteSortie {
+  donnees: SiteSortie[];
+  pagination: Pagination;
+}
+
+export interface SourceSortie {
+  id: string;
+  code: string;
+  libelle: string;
+  actif: boolean;
+  version: number;
+  typeFinancement: string | null;
+  bailleur: string | null;
+}
+
+export interface PageSourceSortie {
+  donnees: SourceSortie[];
+  pagination: Pagination;
+}
+
+export interface TypeDepenseSortie {
+  id: string;
+  code: string;
+  libelle: string;
+  actif: boolean;
+  version: number;
+  seuilHorsMarche: string | null;
+}
+
+export interface PageTypeDepenseSortie {
+  donnees: TypeDepenseSortie[];
+  pagination: Pagination;
+}
+
+export interface TypePieceSortie {
+  id: string;
+  code: string;
+  libelle: string;
+  actif: boolean;
+  version: number;
+  dureeConservationAns: number | null;
+}
+
+export interface PageTypePieceSortie {
+  donnees: TypePieceSortie[];
+  pagination: Pagination;
+}
+
+export interface ParametresCalculSchema {
+  disponiblePrevisionnelDeduitEnCours: boolean;
+  baseTauxExecution: BaseTaux;
+  baseTauxConsommationMarche: BaseConsommationMarche;
+  consommationDeduitAvanceRecuperee: boolean;
 }
 
 export type PreferencesLangue = typeof PreferencesLangue[keyof typeof PreferencesLangue];
@@ -172,8 +772,177 @@ export interface Preferences {
   langue: PreferencesLangue;
 }
 
+export interface ProgrammeCreation {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  dateDebut?: string | null;
+  dateFin?: string | null;
+}
+
+export interface ProgrammeModification {
+  libelle?: string | null;
+  actif?: boolean | null;
+  dateDebut?: string | null;
+  dateFin?: string | null;
+}
+
 export interface Rafraichissement {
   jetonRafraichissement: string;
+}
+
+export interface RapportImport {
+  crees: number;
+  misAJour: number;
+  anomalies: Anomalie[];
+}
+
+export interface ReferentielCreation {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+}
+
+export interface ReferentielModification {
+  libelle?: string | null;
+  actif?: boolean | null;
+}
+
+export interface RevisionCreation {
+  budgetId: string;
+  type: TypeRevision;
+  sens?: Sens | null;
+  ligneSourceId?: string | null;
+  ligneCibleId: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  motif: string;
+}
+
+export interface SiteCreation {
+  etablissementId: string;
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  adresse?: string | null;
+}
+
+export interface SiteModification {
+  libelle?: string | null;
+  adresse?: string | null;
+  actif?: boolean | null;
+}
+
+export interface SituationSortie {
+  budgetId: string;
+  lignes: DisponibiliteSortie[];
+  totaux: IndicateursSortie;
+}
+
+export type SourceCreationTypeFinancement = typeof SourceCreationTypeFinancement[keyof typeof SourceCreationTypeFinancement];
+
+
+export const SourceCreationTypeFinancement = {
+  BUDGET_ETAT: 'BUDGET_ETAT',
+  RESSOURCES_PROPRES: 'RESSOURCES_PROPRES',
+  BAILLEUR: 'BAILLEUR',
+  AUTRE: 'AUTRE',
+} as const;
+
+export interface SourceCreation {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  typeFinancement: SourceCreationTypeFinancement;
+  bailleur?: string | null;
+}
+
+export interface SourceModification {
+  libelle?: string | null;
+  actif?: boolean | null;
+  bailleur?: string | null;
+}
+
+export interface TypeDepenseCreation {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  seuilHorsMarche?: string | null;
+}
+
+export interface TypeDepenseModification {
+  libelle?: string | null;
+  actif?: boolean | null;
+  seuilHorsMarche?: string | null;
+}
+
+export interface TypePieceCreation {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  /**
+     * @minimum 1
+     * @maximum 100
+     */
+  dureeConservationAns?: number;
+}
+
+export interface TypePieceModification {
+  libelle?: string | null;
+  actif?: boolean | null;
+  dureeConservationAns?: number | null;
 }
 
 export type Health200 = {[key: string]: string};
@@ -217,5 +986,231 @@ export type ListerJournalAuditParams = {
   typeObjet?: string | null;
   idObjet?: string | null;
   action?: string | null;
+};
+
+export type ListerNomenclatureParams = {
+  niveau?: ListerNomenclatureNiveau;
+  compteComptable?: string | null;
+};
+
+export type ListerNomenclatureNiveau = typeof ListerNomenclatureNiveau[keyof typeof ListerNomenclatureNiveau] | null;
+
+
+export const ListerNomenclatureNiveau = {
+  SECTION: 'SECTION',
+  CHAPITRE: 'CHAPITRE',
+  ARTICLE: 'ARTICLE',
+  PARAGRAPHE: 'PARAGRAPHE',
+} as const;
+
+export type ListerNotificationsCreditsParams = {
+  budgetId: string;
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
+
+export type ListerRevisionsParams = {
+  budgetId?: string | null;
+  statut?: StatutRevision | null;
+  ligneId?: string | null;
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
+
+export type ListerSitesParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, libelle ; - : décroissant */
+  tri?: string | null;
+  etablissementId?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerCentresResponsabiliteParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, libelle ; - : décroissant */
+  tri?: string | null;
+  etablissementId?: string | null;
+  parentId?: string | null;
+  code?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerSourcesFinancementParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, libelle ; - : décroissant */
+  tri?: string | null;
+  code?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerProgrammesParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, libelle ; - : décroissant */
+  tri?: string | null;
+  code?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerFamillesAchatsParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, libelle ; - : décroissant */
+  tri?: string | null;
+  code?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerTypesDepensesParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, libelle ; - : décroissant */
+  tri?: string | null;
+  code?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerModesReglementParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, libelle ; - : décroissant */
+  tri?: string | null;
+  code?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerComptesTresorerieParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, libelle ; - : décroissant */
+  tri?: string | null;
+  code?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerTypesPiecesParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, libelle ; - : décroissant */
+  tri?: string | null;
+  code?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerFournisseursParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, raisonSociale ; - : décroissant */
+  tri?: string | null;
+  code?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerExercicesParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code ; - : décroissant */
+  tri?: string | null;
+  statut?: string | null;
+};
+
+export type ListerBudgetsParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs reference ; - : décroissant */
+  tri?: string | null;
+  exerciceId?: string | null;
+  etablissementId?: string | null;
+  type?: string | null;
+};
+
+export type ListerLignesBudgetairesParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, libelle ; - : décroissant */
+  tri?: string | null;
+  budgetId?: string | null;
+  centreId?: string | null;
+  sourceId?: string | null;
+  compteBudgetaireId?: string | null;
+  code?: string | null;
 };
 

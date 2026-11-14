@@ -6,7 +6,10 @@
     "accueil": "Home",
     "etablissements": "Facilities",
     "navigation": "Main navigation",
-    "habilitations": "User rights"
+    "habilitations": "User rights",
+    "parametrage": "Configuration",
+    "nomenclature": "Nomenclature",
+    "budgets": "Budgets"
   },
   "entete": {
     "langue": "Language",

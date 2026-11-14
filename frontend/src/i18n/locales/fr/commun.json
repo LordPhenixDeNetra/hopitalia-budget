@@ -6,7 +6,10 @@
     "accueil": "Accueil",
     "etablissements": "Établissements",
     "navigation": "Navigation principale",
-    "habilitations": "Habilitations"
+    "habilitations": "Habilitations",
+    "parametrage": "Paramétrage",
+    "nomenclature": "Nomenclature",
+    "budgets": "Budgets"
   },
   "entete": {
     "langue": "Langue",

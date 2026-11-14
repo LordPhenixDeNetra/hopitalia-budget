@@ -21,6 +21,10 @@ function RouteProtegee({ children }: { children: ReactNode }) {
 
 const fil = (cle: string): Poignee => ({ fil: cle })
 
+// Écrans métier chargés à la demande : le paquet initial reste léger.
+const budget = () => import('./pages/budget/FicheBudget')
+const parametrage = () => import('./pages/parametrage/Parametrage')
+
 export const routes: RouteObject[] = [
   { path: '/connexion', element: <Connexion /> },
   {
@@ -42,6 +46,36 @@ export const routes: RouteObject[] = [
         ],
       },
       { path: 'habilitations', element: <Habilitations />, handle: fil('menu.habilitations') },
+      {
+        path: 'parametrage',
+        handle: fil('menu.parametrage'),
+        children: [
+          { index: true, lazy: () => parametrage().then((m) => ({ Component: m.Parametrage })) },
+          {
+            path: ':ressource',
+            lazy: () => parametrage().then((m) => ({ Component: m.Parametrage })),
+          },
+        ],
+      },
+      {
+        path: 'nomenclature',
+        lazy: () =>
+          import('./pages/parametrage/Nomenclature').then((m) => ({ Component: m.Nomenclature })),
+        handle: fil('menu.nomenclature'),
+      },
+      {
+        path: 'budgets',
+        handle: fil('menu.budgets'),
+        children: [
+          { index: true, lazy: () => budget().then((m) => ({ Component: m.Budgets })) },
+          { path: ':id', lazy: () => budget().then((m) => ({ Component: m.FicheBudget })) },
+        ],
+      },
+      {
+        path: 'lignes-budgetaires/:id',
+        lazy: () => import('./pages/budget/FicheLigne').then((m) => ({ Component: m.FicheLigne })),
+        handle: fil('menu.budgets'),
+      },
       { path: '*', element: <PageIntrouvable /> },
     ],
   },
