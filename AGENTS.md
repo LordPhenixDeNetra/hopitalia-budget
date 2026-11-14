@@ -19,7 +19,7 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 | [POINTS_REPORTES.md](POINTS_REPORTES.md) | Ce qui a été volontairement remis à plus tard. |
 | [docs/cadrage/](docs/cadrage/) | Questionnaires (DAF, équipe Hopitalia), matrice des habilitations, jeu d'essai de référence. |
 
-**État actuel :** cadrage, dépôt et socles backend et frontend terminés (priorité P0). Suite : lot 1 (P1.A) du cahier des tâches. La ressource « établissements » sert de modèle : chaque nouvelle ressource reprend son schéma (domaine, cas d'utilisation, dépôt, routes, écrans, tests).
+**État actuel :** priorité P0 et lot 1 (P1.A : référentiels, budgets, crédits, révisions) terminés. Suite : workflow transverse (P1.B), puis lot 2. Une ressource avec règles métier reprend le schéma des révisions (domaine, cas d'utilisation, dépôt, routes, écrans, tests) ; un référentiel simple passe par les routes communes (voir Architecture).
 
 ## Pile technique
 
@@ -46,6 +46,8 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 - Couches : `domaine` (entités, règles, ports), `application` (cas d'utilisation), `adaptateurs` (API, base, systèmes externes). Le domaine n'importe ni FastAPI ni SQLAlchemy.
 - SOLID appliqué comme décrit en section 10 du cahier des charges, **sans excès** : une abstraction n'est créée que si elle a au moins deux implémentations (réelle et de test comptent) ou un point d'extension prévu par le cahier des charges.
 - Nouveau contrôle automatique = nouvelle classe `RegleControle`, sans modifier le moteur.
+- Référentiel sans règle métier : routes communes de `adaptateurs/entree/api/crud.py` (liste, fiche, création, modification, audit). Dès qu'une règle métier apparaît, elle va dans `application/`.
+- Côté interface, un référentiel simple se déclare dans `frontend/src/pages/parametrage/ressources.ts` ; pas de nouvel écran.
 
 ## Conventions de code
 
