@@ -1,0 +1,29 @@
+{
+  "RESSOURCE_INTROUVABLE": "La ressource demandée n'existe pas ou n'est pas accessible.",
+  "METHODE_NON_AUTORISEE": "Cette opération n'est pas acceptée.",
+  "AUTHENTIFICATION_REQUISE": "Veuillez vous connecter.",
+  "JETON_INVALIDE": "Votre session n'est plus valide. Reconnectez-vous.",
+  "IDENTIFIANTS_INVALIDES": "Identifiant ou mot de passe incorrect.",
+  "AUCUN_PROFIL": "Aucun profil budgétaire n'est attribué à votre compte. Contactez l'administrateur du module.",
+  "ACCES_REFUSE": "Vous n'avez pas le droit d'effectuer cette opération.",
+  "VALIDATION": "Certains champs sont invalides.",
+  "MONTANT_INVALIDE": "Montant invalide : deux décimales au plus.",
+  "PARAMETRE_INCONNU": "Paramètre de recherche non pris en charge.",
+  "TRI_INVALIDE": "Tri non pris en charge.",
+  "CURSEUR_INVALIDE": "Position de pagination invalide ; rechargez la liste.",
+  "IDEMPOTENCE_CLE_MANQUANTE": "Opération impossible : identifiant de requête manquant.",
+  "IDEMPOTENCE_CONFLIT": "Cette opération a déjà été envoyée avec d'autres données. Rechargez le formulaire.",
+  "IDEMPOTENCE_EN_COURS": "Cette opération est encore en cours de traitement. Patientez quelques secondes.",
+  "PRECONDITION_REQUISE": "Rechargez la fiche avant de la modifier.",
+  "PRECONDITION_ECHOUEE": "La fiche a été modifiée par quelqu'un d'autre depuis votre lecture. Elle a été rechargée : vérifiez puis recommencez.",
+  "CODE_DEJA_UTILISE": "Ce code est déjà utilisé.",
+  "LIMITE_DEBIT": "Trop de requêtes. Réessayez dans un instant.",
+  "HOPITALIA_INDISPONIBLE": "Le service de connexion Hopitalia ne répond pas. Réessayez plus tard.",
+  "ERREUR_INTERNE": "Une erreur inattendue s'est produite.",
+  "champ": {
+    "missing": "Ce champ est obligatoire.",
+    "string_too_short": "Ce champ est trop court.",
+    "string_too_long": "Ce champ est trop long.",
+    "string_pattern_mismatch": "Format invalide."
+  }
+}

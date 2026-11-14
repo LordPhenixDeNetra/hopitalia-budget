@@ -1,0 +1,4 @@
+# Fins de ligne LF pour tous les fichiers texte, quelle que soit la configuration du poste
+# (Prettier, ruff et les conteneurs Linux attendent LF).
+* text=auto eol=lf
+*.png binary

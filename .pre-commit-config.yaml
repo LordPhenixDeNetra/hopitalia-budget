@@ -1,4 +1,6 @@
 # Installer une fois : pre-commit install
+# Fichiers générés (client d'API, OpenAPI) : jamais retouchés, la CI vérifie qu'ils sont à jour.
+exclude: ^frontend/(src/api/genere/|openapi\.json$)
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0

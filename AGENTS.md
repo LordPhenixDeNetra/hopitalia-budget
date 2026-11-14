@@ -19,12 +19,12 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 | [POINTS_REPORTES.md](POINTS_REPORTES.md) | Ce qui a été volontairement remis à plus tard. |
 | [docs/cadrage/](docs/cadrage/) | Questionnaires (DAF, équipe Hopitalia), matrice des habilitations, jeu d'essai de référence. |
 
-**État actuel :** cadrage terminé, socle du dépôt en place (squelettes backend et frontend, CI, hooks). Suite : tâches P0.C et P0.D du cahier des tâches.
+**État actuel :** cadrage, dépôt et socles backend et frontend terminés (priorité P0). Suite : lot 1 (P1.A) du cahier des tâches. La ressource « établissements » sert de modèle : chaque nouvelle ressource reprend son schéma (domaine, cas d'utilisation, dépôt, routes, écrans, tests).
 
 ## Pile technique
 
 - **Backend :** Python, FastAPI, SQLAlchemy 2, Alembic, Pydantic. Base de données : PostgreSQL.
-- **Frontend :** React, TypeScript, Vite, Ant Design 5, TanStack Query, `react-i18next`, client d'API généré par `orval` depuis l'OpenAPI de FastAPI.
+- **Frontend :** React, TypeScript, Vite, Ant Design 6, TanStack Query, `react-i18next`, client d'API généré par `orval` depuis l'OpenAPI de FastAPI.
 - **Tests :** `pytest` ; Vitest et Playwright.
 - **Déploiement et Hopitalia :** application séparée (lien depuis Hopitalia), hébergée sur les serveurs de l'hôpital. La connexion des agents passe par Hopitalia (jetons vérifiés localement) ; les droits budgétaires sont propres au module. Fournisseurs, services et achats pharmaceutiques sont importés d'Hopitalia, jamais ressaisis. Comptes comptables du plan SYSCOHADA révisé. Détails : section 17 du cahier des charges et [note d'intégration](docs/cadrage/integration-hopitalia.md).
 - **Secrets :** la clé de vérification des jetons Hopitalia et le compte technique Hopitalia sont des secrets de production, en variables d'environnement, jamais dans le dépôt.
@@ -55,7 +55,11 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 - **Frontend :**
   - aucun texte en dur : tout passe par une clé de traduction (I18N-02) ;
   - aucune couleur en dur : tout passe par le thème Ant Design (IHM-03) ;
-  - un statut n'est jamais signalé par la seule couleur (IHM-06).
+  - un statut n'est jamais signalé par la seule couleur (IHM-06) : composant `BadgeStatut` ;
+  - composants déclarés avec `function` : la règle de lint des textes en dur ne voit pas ceux écrits en fonction fléchée à retour implicite, ni les attributs comme `aria-label` (à vérifier en revue) ;
+  - montants affichés avec le composant `Montant` (chaîne décimale formatée sans passer par un nombre flottant).
+- **Fichiers générés, jamais modifiés à la main :** `frontend/openapi.json` (`python -m hopitalia_budget.outils.exporter_openapi`) et `frontend/src/api/genere/` (`npm run api`). La CI vérifie qu'ils sont à jour.
+- **Écriture d'une opération :** `POST` avec en-tête `Idempotency-Key` (une clé par ouverture de formulaire), modification avec `If-Match` (version lue), trace dans le journal d'audit dans la même transaction, `session.commit()` explicite dans la route.
 
 ## Tests
 
@@ -89,8 +93,8 @@ Détail et installation : [README.md](README.md).
 
 | Où | Vérifications avant de proposer une modification |
 |---|---|
-| `backend/` | `ruff check .` · `ruff format --check .` · `mypy` · `pytest` |
-| `frontend/` | `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm test` · `npm run build` |
+| `backend/` | `ruff check .` · `ruff format --check .` · `mypy` · `pytest` (base de test : `TEST_DATABASE_URL`) |
+| `frontend/` | `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm test` · `npm run e2e` |
 | Racine | `pre-commit run --files <fichiers modifiés>` · `docker compose up -d --build` pour l'ensemble |
 
 La CI (`.github/workflows/ci.yml`) relance ces vérifications ; seul le job `ci-ok` est exigé pour fusionner.

@@ -1,3 +1,8 @@
 dist
 coverage
 package-lock.json
+# Fichiers générés : jamais reformatés, pour que la CI puisse vérifier qu'ils sont à jour.
+openapi.json
+src/api/genere
+playwright-report
+test-results

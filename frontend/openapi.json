@@ -1,0 +1,1096 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Hopitalia Budget",
+    "version": "0.1.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "tags": [
+          "exploitation"
+        ],
+        "summary": "Health",
+        "operationId": "health",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "type": "object",
+                  "title": "Response Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/connexion": {
+      "post": {
+        "tags": [
+          "authentification"
+        ],
+        "summary": "Connexion",
+        "operationId": "connexion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Connexion"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Jetons"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/rafraichissement": {
+      "post": {
+        "tags": [
+          "authentification"
+        ],
+        "summary": "Rafraichissement",
+        "operationId": "rafraichissement",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Rafraichissement"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Jetons"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/deconnexion": {
+      "post": {
+        "tags": [
+          "authentification"
+        ],
+        "summary": "Deconnexion",
+        "operationId": "deconnexion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Rafraichissement"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/moi": {
+      "get": {
+        "tags": [
+          "utilisateur connecté"
+        ],
+        "summary": "Lire Moi",
+        "operationId": "lire_moi",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Moi"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/moi/preferences": {
+      "put": {
+        "tags": [
+          "utilisateur connecté"
+        ],
+        "summary": "Modifier Preferences",
+        "operationId": "modifier_preferences",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Preferences"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Moi"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/etablissements": {
+      "get": {
+        "tags": [
+          "établissements"
+        ],
+        "summary": "Lister Etablissements",
+        "operationId": "lister_etablissements",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          },
+          {
+            "name": "tri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Champs code, nom, actif ; - : décroissant",
+              "title": "Tri"
+            },
+            "description": "Champs code, nom, actif ; - : décroissant"
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code"
+            }
+          },
+          {
+            "name": "actif",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actif"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_EtablissementSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "établissements"
+        ],
+        "summary": "Creer Etablissement",
+        "operationId": "creer_etablissement",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EtablissementCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EtablissementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/etablissements/{id_etablissement}": {
+      "get": {
+        "tags": [
+          "établissements"
+        ],
+        "summary": "Obtenir Etablissement",
+        "operationId": "obtenir_etablissement",
+        "parameters": [
+          {
+            "name": "id_etablissement",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Etablissement"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EtablissementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "établissements"
+        ],
+        "summary": "Modifier Etablissement",
+        "operationId": "modifier_etablissement",
+        "parameters": [
+          {
+            "name": "id_etablissement",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Etablissement"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EtablissementModification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EtablissementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/journal-audit": {
+      "get": {
+        "tags": [
+          "journal d'audit"
+        ],
+        "summary": "Lister Journal Audit",
+        "operationId": "lister_journal_audit",
+        "parameters": [
+          {
+            "name": "apres",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Apres"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Taille"
+            }
+          },
+          {
+            "name": "typeObjet",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Typeobjet"
+            }
+          },
+          {
+            "name": "idObjet",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idobjet"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageCurseur_EntreeJournal_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Connexion": {
+        "properties": {
+          "identifiant": {
+            "type": "string",
+            "title": "Identifiant"
+          },
+          "motDePasse": {
+            "type": "string",
+            "title": "Motdepasse"
+          }
+        },
+        "type": "object",
+        "required": [
+          "identifiant",
+          "motDePasse"
+        ],
+        "title": "Connexion"
+      },
+      "EntreeJournal": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "horodatage": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Horodatage"
+          },
+          "utilisateurId": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Utilisateurid"
+          },
+          "codeAgent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Codeagent"
+          },
+          "etablissementId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etablissementid"
+          },
+          "action": {
+            "type": "string",
+            "title": "Action"
+          },
+          "typeObjet": {
+            "type": "string",
+            "title": "Typeobjet"
+          },
+          "idObjet": {
+            "type": "string",
+            "title": "Idobjet"
+          },
+          "ancienneValeur": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Anciennevaleur"
+          },
+          "nouvelleValeur": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nouvellevaleur"
+          },
+          "adresseIp": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Adresseip"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "horodatage",
+          "utilisateurId",
+          "codeAgent",
+          "etablissementId",
+          "action",
+          "typeObjet",
+          "idObjet",
+          "ancienneValeur",
+          "nouvelleValeur",
+          "adresseIp"
+        ],
+        "title": "EntreeJournal"
+      },
+      "EtablissementCreation": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "pattern": "^[A-Z0-9-]+$",
+            "title": "Code"
+          },
+          "nom": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Nom"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "nom"
+        ],
+        "title": "EtablissementCreation"
+      },
+      "EtablissementModification": {
+        "properties": {
+          "nom": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nom"
+          },
+          "actif": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actif"
+          }
+        },
+        "type": "object",
+        "title": "EtablissementModification"
+      },
+      "EtablissementSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "nom": {
+            "type": "string",
+            "title": "Nom"
+          },
+          "actif": {
+            "type": "boolean",
+            "title": "Actif"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "nom",
+          "actif",
+          "version"
+        ],
+        "title": "EtablissementSortie"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HabilitationSortie": {
+        "properties": {
+          "profil": {
+            "type": "string",
+            "title": "Profil"
+          },
+          "etablissementId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etablissementid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "profil",
+          "etablissementId"
+        ],
+        "title": "HabilitationSortie"
+      },
+      "Jetons": {
+        "properties": {
+          "jetonAcces": {
+            "type": "string",
+            "title": "Jetonacces"
+          },
+          "jetonRafraichissement": {
+            "type": "string",
+            "title": "Jetonrafraichissement"
+          },
+          "expireDans": {
+            "type": "integer",
+            "title": "Expiredans"
+          }
+        },
+        "type": "object",
+        "required": [
+          "jetonAcces",
+          "jetonRafraichissement",
+          "expireDans"
+        ],
+        "title": "Jetons"
+      },
+      "Moi": {
+        "properties": {
+          "idHopitalia": {
+            "type": "integer",
+            "title": "Idhopitalia"
+          },
+          "codeAgent": {
+            "type": "string",
+            "title": "Codeagent"
+          },
+          "nom": {
+            "type": "string",
+            "title": "Nom"
+          },
+          "service": {
+            "type": "string",
+            "title": "Service"
+          },
+          "habilitations": {
+            "items": {
+              "$ref": "#/components/schemas/HabilitationSortie"
+            },
+            "type": "array",
+            "title": "Habilitations"
+          },
+          "langue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "fr",
+                  "en"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Langue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "idHopitalia",
+          "codeAgent",
+          "nom",
+          "service",
+          "habilitations",
+          "langue"
+        ],
+        "title": "Moi"
+      },
+      "PageCurseur_EntreeJournal_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/EntreeJournal"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationCurseur"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "PageCurseur[EntreeJournal]"
+      },
+      "Page_EtablissementSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/EtablissementSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[EtablissementSortie]"
+      },
+      "Pagination": {
+        "properties": {
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "taille": {
+            "type": "integer",
+            "title": "Taille"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "suivant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suivant"
+          }
+        },
+        "type": "object",
+        "required": [
+          "page",
+          "taille",
+          "total",
+          "suivant"
+        ],
+        "title": "Pagination"
+      },
+      "PaginationCurseur": {
+        "properties": {
+          "taille": {
+            "type": "integer",
+            "title": "Taille"
+          },
+          "suivant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suivant"
+          }
+        },
+        "type": "object",
+        "required": [
+          "taille",
+          "suivant"
+        ],
+        "title": "PaginationCurseur"
+      },
+      "Preferences": {
+        "properties": {
+          "langue": {
+            "type": "string",
+            "enum": [
+              "fr",
+              "en"
+            ],
+            "title": "Langue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "langue"
+        ],
+        "title": "Preferences"
+      },
+      "Rafraichissement": {
+        "properties": {
+          "jetonRafraichissement": {
+            "type": "string",
+            "title": "Jetonrafraichissement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "jetonRafraichissement"
+        ],
+        "title": "Rafraichissement"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}

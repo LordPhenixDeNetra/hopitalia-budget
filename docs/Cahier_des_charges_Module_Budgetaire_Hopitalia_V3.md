@@ -1594,7 +1594,7 @@ Règle d'usage : **un seul niveau d'imbrication**. Au-delà, on repart de la res
 
 ### 12.1. Interface utilisateur
 
-**Pile :** React, TypeScript et Vite ; composants Ant Design 5 ; client d'API généré depuis l'OpenAPI de FastAPI.
+**Pile :** React, TypeScript et Vite ; composants Ant Design 6 (version courante au démarrage du développement) ; client d'API généré depuis l'OpenAPI de FastAPI.
 
 | Réf. | Exigence |
 |---|---|
