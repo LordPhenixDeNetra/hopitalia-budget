@@ -86,8 +86,28 @@ def parametres() -> Parametres:
     )
 
 
+# Agents de l'annuaire Hopitalia simulé : code → (id, prénom, nom).
+AGENTS_HOPITALIA = {
+    "AG001": (1, "Awa", "Diop"),
+    "AG002": (2, "Moussa", "Ndiaye"),
+    "AG003": (3, "Fatou", "Sarr"),
+    "AG010": (10, "Ibrahima", "Fall"),
+}
+
+
 def hopitalia_simule(requete: httpx.Request) -> httpx.Response:
     """Hopitalia de test : « agent » / « secret » est le seul compte valide ; « panne » échoue."""
+    if requete.url.path.startswith("/api/agents/code/"):
+        if not requete.headers.get("authorization", "").startswith("Bearer "):
+            return httpx.Response(401)
+        agent = AGENTS_HOPITALIA.get(requete.url.path.rsplit("/", 1)[1])
+        if agent is None:
+            return httpx.Response(404)
+        code = requete.url.path.rsplit("/", 1)[1]
+        identifiant, prenom, nom = agent
+        return httpx.Response(
+            200, json={"id": identifiant, "codeAgent": code, "prenom": prenom, "nom": nom}
+        )
     corps = requete.content
     if b"panne" in corps:
         raise httpx.ConnectError("Hopitalia injoignable", request=requete)
