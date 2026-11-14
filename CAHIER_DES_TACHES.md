@@ -1,6 +1,6 @@
 # Cahier des tâches — Module de suivi budgétaire Hopitalia
 
-**Projet :** `hopitalia-budget` · **Dépôt :** https://github.com/LordPhenixDeNetra/hopitalia-budget · **Référence :** [cahier des charges V3](Backend/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) · **Pile :** FastAPI, PostgreSQL (à confirmer), React, TypeScript, Ant Design · **Mise à jour :** 13/11/2026
+**Projet :** `hopitalia-budget` · **Dépôt :** https://github.com/LordPhenixDeNetra/hopitalia-budget · **Référence :** [cahier des charges V3](docs/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) · **Pile :** FastAPI, PostgreSQL (à confirmer), React, TypeScript, Ant Design · **Mise à jour :** 13/11/2026
 
 ## Légende
 
@@ -31,13 +31,13 @@
 
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P0 | 18 | 3 | 50 | 0 | 0 | 1 | 72 |
+| P0 | 24 | 8 | 39 | 0 | 0 | 1 | 72 |
 | P1 | 0 | 0 | 81 | 0 | 0 | 0 | 81 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **18** | **3** | **185** | **0** | **0** | **2** | **208** |
+| **Total** | **24** | **8** | **174** | **0** | **0** | **2** | **208** |
 
-Avancement : 18 / 206 tâches actives terminées (9 %), hors 2 abandonnées.
+Avancement : 24 / 206 tâches actives terminées (12 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -93,18 +93,18 @@ flowchart LR
 |---|---|---|---|---|---|
 | T-020 | Initialiser le dépôt git et la branche `main`. | — | T-007 | Fait | `git log` montre le premier commit. |
 | T-021 | Créer le dépôt distant et y pousser `main`. | — | T-020 | Fait | `gh repo view` fonctionne. |
-| T-022 | Créer la structure `backend/`, `frontend/`, `docs/` ; déplacer le cahier des charges et les images dans `docs/`. | — | T-020 | À faire | Arborescence en place, liens internes à jour. |
-| T-023 | Écrire `.gitignore` (Python, Node, environnements, `CLAUDE.local.md`). | — | T-020 | En cours | `git status` propre après installation. |
+| T-022 | Créer la structure `backend/`, `frontend/`, `docs/` ; déplacer le cahier des charges et les images dans `docs/`. | — | T-020 | Fait | Arborescence en place, liens internes à jour. |
+| T-023 | Écrire `.gitignore` (Python, Node, environnements, `CLAUDE.local.md`). | — | T-020 | Fait | `git status` propre après installation (vérifié : aucun `.venv`, `node_modules`, `dist`, cache ni `.env` visible). |
 | T-033 | Écrire `AGENTS.md` (règles du projet) et `CLAUDE.md` qui l'importe. | — | — | Fait | `CLAUDE.md` importe `AGENTS.md` ; liens vérifiés. |
-| T-024 | Écrire le modèle de demande de fusion `.github/pull_request_template.md`. | — | T-020 | À faire | Modèle proposé à l'ouverture d'une demande de fusion. |
-| T-025 | Protéger `main` : demande de fusion obligatoire, CI verte, signature DCO. | — | T-021, T-028 | À faire | Un push direct sur `main` est refusé. |
-| T-026 | Écrire le `README.md` : installation, lancement, tests, conventions. | — | T-022 | À faire | Un nouveau développeur lance le projet en suivant le README. |
-| T-027 | Écrire `docker-compose.yml` : PostgreSQL, backend, frontend. | ENF-01 | T-012, T-022 | À faire | `docker compose up` démarre les trois services. |
-| T-028 | CI backend (`.github/workflows/backend.yml`), déclenchée par `backend/**` : lint, typage, tests. | ENF-11 | T-030 | À faire | CI verte sur une demande de fusion. |
-| T-029 | CI frontend (`.github/workflows/frontend.yml`), déclenchée par `frontend/**` : lint, typage, tests, build. | ENF-11 | T-060 | À faire | CI verte sur une demande de fusion. |
-| T-030 | Outils qualité backend : `ruff`, `mypy`, `pytest`, configurés dans `pyproject.toml`. | — | T-022 | À faire | Commandes lancées en local et en CI. |
-| T-031 | Outils qualité frontend : ESLint (dont `jsx-a11y`), Prettier, `tsc --noEmit`. | IHM-07 | T-060 | À faire | Commandes lancées en local et en CI. |
-| T-032 | Hooks `pre-commit` pour les deux sous-projets. | — | T-030, T-031 | À faire | Un commit mal formaté est refusé. |
+| T-024 | Écrire le modèle de demande de fusion `.github/pull_request_template.md`. | — | T-020 | En cours | Modèle proposé à l'ouverture d'une demande de fusion. *Reste : vérifier sur la première demande de fusion.* |
+| T-025 | Protéger `main` : demande de fusion obligatoire, CI verte, signature DCO. | — | T-021, T-028 | En cours | Un push direct sur `main` est refusé. *Règle appliquée et relue via l'API GitHub (demande de fusion, `ci-ok`, administrateurs inclus) ; reste à constater sur la première demande de fusion.* |
+| T-026 | Écrire le `README.md` : installation, lancement, tests, conventions. | — | T-022 | Fait | Un nouveau développeur lance le projet en suivant le README (commandes du README exécutées : Docker, backend, frontend, hooks). |
+| T-027 | Écrire `docker-compose.yml` : PostgreSQL, backend, frontend. | ENF-01 | T-012, T-022 | Fait | `docker compose up` démarre les trois services (vérifié : base saine, `/health` et interface répondent). |
+| T-028 | CI backend dans `.github/workflows/ci.yml` (job `backend`, lancé si `backend/**` ou le workflow change) : lint, format, typage, tests ; job de synthèse `ci-ok` et job `dco`. | ENF-11 | T-030 | En cours | CI verte sur une demande de fusion. *Reste : vérifier sur la première demande de fusion.* |
+| T-029 | CI frontend dans `.github/workflows/ci.yml` (job `frontend`, lancé si `frontend/**` ou le workflow change) : format, lint, typage, tests, build. | ENF-11 | T-060 | En cours | CI verte sur une demande de fusion. *Reste : vérifier sur la première demande de fusion.* |
+| T-030 | Outils qualité backend : `ruff`, `mypy`, `pytest`, configurés dans `pyproject.toml`. | — | T-022 | En cours | Commandes lancées en local et en CI. *Local : ruff, ruff format, mypy strict et pytest verts ; CI : à constater.* |
+| T-031 | Outils qualité frontend : ESLint (dont `jsx-a11y`), Prettier, `tsc --noEmit`. | IHM-07 | T-060 | En cours | Commandes lancées en local et en CI. *Local : Prettier, ESLint (règle `jsx-a11y` vérifiée), `tsc` verts ; CI : à constater.* |
+| T-032 | Hooks `pre-commit` pour les deux sous-projets. | — | T-030, T-031 | Fait | Un commit mal formaté est refusé (vérifié dans une copie jetable du dépôt : fichier Python indexé rejeté par ruff, clé privée et fichier frontend rejetés). |
 
 ### P0.C — Socle backend (lot 0)
 
@@ -136,7 +136,7 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-060 | Projet Vite + React + TypeScript. | §12.1 | T-022, T-010 | À faire | `npm run build` sans erreur. |
+| T-060 | Projet Vite + React + TypeScript. | §12.1 | T-022, T-010 | Fait | `npm run build` sans erreur (vérifié). |
 | T-061 | Thème Ant Design centralisé dans `ConfigProvider` (palette, mode compact). | IHM-01 à 03 | T-060 | À faire | Aucune couleur en dur dans les composants (vérifié par lint ou revue). |
 | T-062 | Polices Lexend et Source Sans 3 hébergées avec l'application. | IHM-04 | T-060 | À faire | Aucune requête vers Google au chargement. |
 | T-063 | Mettre en place `react-i18next` : langues `fr` (défaut) et `en`, fichiers JSON par domaine chargés à la demande, langue de repli. | I18N-01, 03 | T-060 | À faire | Changement de langue sans rechargement ; clé manquante signalée en test. |
@@ -410,3 +410,5 @@ flowchart LR
 | 13/11/2026 | T-017 | — | À faire | Ajout : compte technique et clé Hopitalia, points de sécurité. |
 | 13/11/2026 | T-017 | À faire | En cours | Note de sécurité Hopitalia et besoins du module (compte technique, clé, variables) rédigés ; transmission à faire. |
 | 13/11/2026 | T-011 | En cours | Fait | Instance Hopitalia de test montée en local (Docker) ; routes de la note vérifiées ; chemin OpenAPI et formats de date corrigés dans la note. |
+| 14/11/2026 | T-022, T-023, T-026, T-027, T-032, T-060 | À faire, En cours | Fait | Structure `backend/`, `frontend/`, `docs/` ; squelettes backend (FastAPI, `/health`) et frontend (Vite) ; `docker-compose.yml` vérifié ; README ; hooks `pre-commit` vérifiés. |
+| 14/11/2026 | T-024, T-025, T-028, T-029, T-030, T-031 | À faire | En cours | Modèle de demande de fusion, protection de `main` appliquée, CI unique `ci.yml` (backend, frontend, dco, ci-ok) ; vérifications locales vertes, à constater sur GitHub. |
