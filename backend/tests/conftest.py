@@ -8,6 +8,7 @@ Variable requise pour les tests avec base : TEST_DATABASE_URL, adresse de la bas
 import os
 import uuid
 from collections.abc import Iterator
+from contextlib import nullcontext
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -16,6 +17,7 @@ import jwt
 import pytest
 from alembic import command
 from alembic.config import Config
+from cryptography.fernet import Fernet
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
@@ -24,6 +26,7 @@ from sqlalchemy.orm import Session
 
 from hopitalia_budget.adaptateurs.entree.api.application import creer_application
 from hopitalia_budget.adaptateurs.entree.api.dependances import obtenir_session
+from hopitalia_budget.adaptateurs.entree.api.routes.budget import obtenir_fabrique_traitement
 from hopitalia_budget.adaptateurs.sortie.hopitalia import ClientHopitalia
 from hopitalia_budget.adaptateurs.sortie.modeles import EtablissementModele, HabilitationModele
 from hopitalia_budget.config import Parametres
@@ -82,6 +85,7 @@ def parametres() -> Parametres:
         database_url="postgresql+psycopg://inutilisee@localhost/inutilisee",
         hopitalia_api_url="http://hopitalia.test",
         hopitalia_jwt_cle=SecretStr(CLE_TEST),
+        coordonnees_cle=SecretStr(Fernet.generate_key().decode()),
         limite_requetes_par_minute=10_000,
     )
 
@@ -137,6 +141,10 @@ def application(session: Session, parametres: Parametres, horloge: HorlogeFixe) 
             raise
 
     application.dependency_overrides[obtenir_session] = session_de_test
+    # Les traitements en arrière-plan (imports) utilisent la même session de test.
+    application.dependency_overrides[obtenir_fabrique_traitement] = lambda: (
+        lambda: nullcontext(session)
+    )
     return application
 
 
