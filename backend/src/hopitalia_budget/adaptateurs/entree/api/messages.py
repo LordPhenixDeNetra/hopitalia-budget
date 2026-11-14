@@ -135,6 +135,87 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
         ),
         ("Changing your own rights", "Administrators cannot change their own profiles."),
     ),
+    "REFERENCE_INVALIDE": (
+        422,
+        ("Référence invalide", "Le champ {champ} désigne un élément inexistant ou incompatible."),
+        ("Invalid reference", "The field {champ} refers to a missing or incompatible item."),
+    ),
+    "HIERARCHIE_INVALIDE": (
+        422,
+        ("Hiérarchie invalide", "Un élément ne peut pas être rattaché à l'un de ses descendants."),
+        ("Invalid hierarchy", "An item cannot be attached to one of its descendants."),
+    ),
+    "DATES_INCOHERENTES": (
+        422,
+        ("Dates incohérentes", "La date de fin doit suivre la date de début."),
+        ("Inconsistent dates", "The end date must come after the start date."),
+    ),
+    "EXERCICE_NON_OUVERT": (
+        409,
+        ("Exercice non ouvert", "Cette opération exige un exercice ouvert."),
+        ("Fiscal year not open", "This operation requires an open fiscal year."),
+    ),
+    "BUDGET_PRIMITIF_EXISTANT": (
+        409,
+        (
+            "Budget primitif existant",
+            "Cet établissement a déjà un budget primitif pour cet exercice.",
+        ),
+        ("Initial budget exists", "This facility already has an initial budget for this year."),
+    ),
+    "CREDIT_INSUFFISANT": (
+        422,
+        (
+            "Crédit insuffisant",
+            "Disponible {disponible}, demandé {montant} sur la ligne {ligne}.",
+        ),
+        ("Insufficient credit", "Available {disponible}, requested {montant} on line {ligne}."),
+    ),
+    "REVISION_DEJA_TRAITEE": (
+        409,
+        ("Révision déjà traitée", "Cette révision est déjà validée ou rejetée."),
+        ("Revision already processed", "This revision is already approved or rejected."),
+    ),
+    "ETAPE_NON_AUTORISEE": (
+        403,
+        (
+            "Étape non autorisée",
+            "Cette étape de validation revient au profil {profil}.",
+        ),
+        ("Step not allowed", "This approval step belongs to the {profil} profile."),
+    ),
+    "SEPARATION_DES_TACHES": (
+        403,
+        (
+            "Séparation des tâches",
+            "Vous avez déjà saisi ou visé cette opération : une autre personne doit la valider.",
+        ),
+        (
+            "Segregation of duties",
+            "You already entered or approved this operation: someone else must approve it.",
+        ),
+    ),
+    "MOTIF_OBLIGATOIRE": (
+        422,
+        ("Motif obligatoire", "Un rejet doit être motivé."),
+        ("Reason required", "A rejection must state a reason."),
+    ),
+    "NOTIFICATION_INCOHERENTE": (
+        422,
+        (
+            "Notification incohérente",
+            "La somme des montants par ligne doit égaler le montant notifié.",
+        ),
+        ("Inconsistent notification", "The amounts per line must add up to the notified amount."),
+    ),
+    "CONFIGURATION_INCOMPLETE": (
+        503,
+        (
+            "Configuration incomplète",
+            "Le module n'est pas configuré pour cette opération ({parametre}).",
+        ),
+        ("Incomplete configuration", "The module is not configured for this ({parametre})."),
+    ),
     "HOPITALIA_INDISPONIBLE": (
         502,
         ("Hopitalia indisponible", "Le service de connexion Hopitalia ne répond pas."),

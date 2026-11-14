@@ -11,9 +11,11 @@ from hopitalia_budget.adaptateurs.entree.api.problemes import installer_gestionn
 from hopitalia_budget.adaptateurs.entree.api.routes import (
     audit,
     auth,
+    budget,
     etablissements,
     habilitations,
     moi,
+    parametrage,
 )
 from hopitalia_budget.adaptateurs.sortie.base import creer_fabrique_sessions
 from hopitalia_budget.adaptateurs.sortie.hopitalia import ClientHopitalia
@@ -78,7 +80,9 @@ def creer_application(
         return {"statut": "ok"}
 
     v1 = APIRouter(prefix="/api/v1")
-    for module in (auth, moi, etablissements, habilitations, audit):
+    for module in (auth, moi, etablissements, habilitations, audit, budget):
         v1.include_router(module.router)
+    for routeur in parametrage.routeurs():
+        v1.include_router(routeur)
     application.include_router(v1)
     return application
