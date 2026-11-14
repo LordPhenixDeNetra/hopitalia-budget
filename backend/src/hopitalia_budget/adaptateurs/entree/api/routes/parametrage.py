@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from hopitalia_budget.adaptateurs.entree.api.crud import DefinitionCrud, Filtre, creer_routeur
-from hopitalia_budget.adaptateurs.entree.api.schemas import Montant, Schema
+from hopitalia_budget.adaptateurs.entree.api.schemas import Montant, Schema, TypeObjet
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     BudgetModele,
     CentreResponsabiliteModele,
@@ -225,15 +225,19 @@ class CompteTresorerieModification(ReferentielModification):
 
 class TypePieceSortie(ReferentielSortie):
     duree_conservation_ans: int | None
+    # Objets qui ne peuvent pas être validés sans une pièce de ce type (EF-DOC-02, T-119).
+    types_objets: list[TypeObjet] | None
 
 
 class TypePieceCreation(ReferentielCreation):
     # 10 ans par défaut (section 17, point 8).
     duree_conservation_ans: int = Field(default=10, ge=1, le=100)
+    types_objets: list[TypeObjet] = Field(default_factory=list)
 
 
 class TypePieceModification(ReferentielModification):
     duree_conservation_ans: int | None = Field(default=None, ge=1, le=100)
+    types_objets: list[TypeObjet] | None = None
 
 
 def _verifier_dates(session: Session, donnees: dict[str, Any], _: Utilisateur) -> dict[str, Any]:

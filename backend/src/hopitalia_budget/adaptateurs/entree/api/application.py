@@ -16,10 +16,11 @@ from hopitalia_budget.adaptateurs.entree.api.routes import (
     habilitations,
     moi,
     parametrage,
+    workflow,
 )
 from hopitalia_budget.adaptateurs.sortie.base import creer_fabrique_sessions
 from hopitalia_budget.adaptateurs.sortie.hopitalia import ClientHopitalia
-from hopitalia_budget.adaptateurs.sortie.systeme import HorlogeSysteme
+from hopitalia_budget.adaptateurs.sortie.systeme import HorlogeSysteme, StockagePiecesLocal
 from hopitalia_budget.config import Parametres
 from hopitalia_budget.domaine.ports import Horloge
 
@@ -46,6 +47,7 @@ def creer_application(
         parametres.database_url
     )
     application.state.horloge = horloge or HorlogeSysteme()
+    application.state.stockage_pieces = StockagePiecesLocal(parametres.dossier_pieces)
     application.state.client_hopitalia = client_hopitalia or ClientHopitalia(
         parametres.hopitalia_api_url, parametres.hopitalia_delai_secondes
     )
@@ -82,7 +84,7 @@ def creer_application(
     v1 = APIRouter(prefix="/api/v1")
     for module in (auth, moi, etablissements, habilitations, audit, budget):
         v1.include_router(module.router)
-    for routeur in parametrage.routeurs():
+    for routeur in [*parametrage.routeurs(), *workflow.routeurs()]:
         v1.include_router(routeur)
     application.include_router(v1)
     return application

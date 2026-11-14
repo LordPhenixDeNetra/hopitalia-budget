@@ -12,9 +12,8 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
     LigneBudgetaireModele,
     ParametreCalculModele,
     RevisionBudgetaireModele,
-    ValidationModele,
 )
-from hopitalia_budget.domaine.habilitations import Profil
+from hopitalia_budget.adaptateurs.sortie.workflow_sql import pieces_obligatoires_presentes
 from hopitalia_budget.domaine.indicateurs import (
     ZERO,
     IndicateursLigne,
@@ -29,7 +28,6 @@ from hopitalia_budget.domaine.revisions import (
     Sens,
     StatutRevision,
     TypeRevision,
-    Visa,
 )
 
 R = RevisionBudgetaireModele
@@ -145,7 +143,7 @@ class DepotRevisionsSql:
 
     def ligne(self, ligne_id: UUID) -> LigneRevisee | None:
         m = self.session.get(LigneBudgetaireModele, ligne_id)
-        return LigneRevisee(m.id, m.budget_id, m.code) if m else None
+        return LigneRevisee(m.id, m.budget_id, m.code, m.centre_id) if m else None
 
     def budget_etablissement(self, budget_id: UUID) -> UUID | None:
         budget = self.session.get(BudgetModele, budget_id)
@@ -188,38 +186,13 @@ class DepotRevisionsSql:
         self.session.get_one(R, revision_id).statut = statut
         self.session.flush()
 
-    def ajouter_visa(self, revision_id: UUID, visa: Visa) -> None:
-        self.session.add(
-            ValidationModele(
-                type_objet="RevisionBudgetaire",
-                id_objet=revision_id,
-                etape=visa.etape,
-                decision=visa.decision,
-                motif=visa.motif,
-                utilisateur_id=visa.utilisateur_id,
-                code_agent=visa.code_agent,
-                horodatage=visa.horodatage,
-            )
-        )
+    def version(self, revision_id: UUID) -> int:
+        return self.session.get_one(R, revision_id).version
+
+    def corriger(self, revision_id: UUID, montant: Decimal, motif: str) -> None:
+        m = self.session.get_one(R, revision_id)
+        m.montant, m.motif = montant, motif
         self.session.flush()
 
-    def visas(self, revision_id: UUID) -> list[Visa]:
-        lignes = self.session.scalars(
-            select(ValidationModele)
-            .where(
-                ValidationModele.type_objet == "RevisionBudgetaire",
-                ValidationModele.id_objet == revision_id,
-            )
-            .order_by(ValidationModele.horodatage, ValidationModele.rang)
-        )
-        return [
-            Visa(
-                etape=Profil(v.etape),
-                decision=v.decision,
-                motif=v.motif,
-                utilisateur_id=v.utilisateur_id,
-                code_agent=v.code_agent,
-                horodatage=v.horodatage,
-            )
-            for v in lignes
-        ]
+    def pieces_obligatoires_presentes(self, revision_id: UUID) -> bool:
+        return pieces_obligatoires_presentes(self.session, "RevisionBudgetaire", revision_id)
