@@ -31,13 +31,13 @@
 
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P0 | 68 | 3 | 0 | 0 | 0 | 1 | 72 |
+| P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 0 | 0 | 82 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **68** | **3** | **136** | **0** | **0** | **2** | **209** |
+| **Total** | **69** | **2** | **136** | **0** | **0** | **2** | **209** |
 
-Avancement : 68 / 207 tâches actives terminées (33 %), hors 2 abandonnées.
+Avancement : 69 / 207 tâches actives terminées (33 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -155,7 +155,7 @@ flowchart LR
 | T-072 | Badges de statut avec libellé et icône (jamais la couleur seule). | IHM-06 | T-061 | Fait | Composant `BadgeStatut` unique, libellé et icône (test). |
 | T-073 | Affichage adaptatif des listes sur petit écran (cartes ou défilement horizontal). | IHM-08 | T-070 | Fait | Cartes sous 768 px ; aucun débordement à 375 px (parcours Playwright). |
 | T-074 | Respect de la préférence « mouvement réduit ». | IHM-11 | T-061 | Fait | Animations coupées dans le thème quand la préférence est active (test) et par CSS. |
-| T-075 | Tests : Vitest pour les composants, Playwright pour les parcours. | ENF-11 | T-060 | En cours | Un test de chaque type passe en CI. *Local : 20 tests Vitest et 3 parcours Playwright verts ; CI : à constater sur la demande de fusion.* |
+| T-075 | Tests : Vitest pour les composants, Playwright pour les parcours. | ENF-11 | T-060 | Fait | Un test de chaque type passe en CI (demande n° 8 : 20 tests Vitest et 3 parcours Playwright verts ; 67 tests backend sur PostgreSQL). |
 
 ---
 
@@ -418,3 +418,4 @@ flowchart LR
 | 14/11/2026 | T-061 à T-079 (P0.D) | À faire | Fait | Socle frontend : thème, polices, i18n, client généré, session, gabarit, routage, tableau serveur, formats, badges, mouvement réduit. 20 tests Vitest, 3 parcours Playwright. |
 | 14/11/2026 | T-075 | À faire | En cours | Vert en local ; à constater en CI. |
 | 14/11/2026 | T-121 | — | À faire | Ajout : gestion des habilitations dans le module (la connexion passe par Hopitalia). |
+| 14/11/2026 | T-075 | En cours | Fait | CI verte sur la demande n° 8 (Vitest, Playwright, backend sur PostgreSQL). P0.C et P0.D terminés. |
