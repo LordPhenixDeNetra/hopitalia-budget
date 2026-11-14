@@ -49,6 +49,14 @@ def decoder_jeton(jeton: str, cle: str) -> dict[str, object]:
     return revendications
 
 
+def jeton_courant(request: Request) -> str:
+    """Jeton d'accès Hopitalia de la requête (vérifié par utilisateur_courant)."""
+    entete = request.headers.get("authorization", "")
+    if not entete.lower().startswith("bearer "):
+        raise ErreurMetier("AUTHENTIFICATION_REQUISE")
+    return entete[7:]
+
+
 def utilisateur_courant(
     request: Request,
     session: Annotated[Session, Depends(obtenir_session)],
@@ -75,6 +83,8 @@ def utilisateur_courant(
 
 
 SessionDep = Annotated[Session, Depends(obtenir_session)]
+JetonDep = Annotated[str, Depends(jeton_courant)]
+ClientHopitaliaDep = Annotated[ClientHopitalia, Depends(obtenir_client_hopitalia)]
 UtilisateurDep = Annotated[Utilisateur, Depends(utilisateur_courant)]
 HorlogeDep = Annotated[Horloge, Depends(obtenir_horloge)]
 ParametresDep = Annotated[Parametres, Depends(obtenir_parametres)]

@@ -8,7 +8,13 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from hopitalia_budget.adaptateurs.entree.api.limitation import LimitationDebit
 from hopitalia_budget.adaptateurs.entree.api.problemes import installer_gestionnaires
-from hopitalia_budget.adaptateurs.entree.api.routes import audit, auth, etablissements, moi
+from hopitalia_budget.adaptateurs.entree.api.routes import (
+    audit,
+    auth,
+    etablissements,
+    habilitations,
+    moi,
+)
 from hopitalia_budget.adaptateurs.sortie.base import creer_fabrique_sessions
 from hopitalia_budget.adaptateurs.sortie.hopitalia import ClientHopitalia
 from hopitalia_budget.adaptateurs.sortie.systeme import HorlogeSysteme
@@ -72,7 +78,7 @@ def creer_application(
         return {"statut": "ok"}
 
     v1 = APIRouter(prefix="/api/v1")
-    for module in (auth, moi, etablissements, audit):
+    for module in (auth, moi, etablissements, habilitations, audit):
         v1.include_router(module.router)
     application.include_router(v1)
     return application

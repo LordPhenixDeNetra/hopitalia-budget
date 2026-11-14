@@ -36,6 +36,7 @@ class HabilitationModele(Base):
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     utilisateur_id: Mapped[int] = mapped_column(BigInteger, index=True)
     code_agent: Mapped[str] = mapped_column(String(20))
+    nom_agent: Mapped[str] = mapped_column(String(200), default="", server_default="")
     profil: Mapped[str] = mapped_column(String(3))
     etablissement_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("etablissement.id"))
 
