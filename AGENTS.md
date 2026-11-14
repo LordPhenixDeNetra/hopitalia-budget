@@ -14,12 +14,12 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 
 | Document | Rôle |
 |---|---|
-| [Cahier des charges V3](Backend/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) | **Source de vérité** : exigences, règles de gestion, formules, modèle de données, conventions d'API. En cas de doute, il prime sur ce fichier. |
+| [Cahier des charges V3](docs/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) | **Source de vérité** : exigences, règles de gestion, formules, modèle de données, conventions d'API. En cas de doute, il prime sur ce fichier. |
 | [CAHIER_DES_TACHES.md](CAHIER_DES_TACHES.md) | Tâches par priorité, statuts, dépendances, critères de fin. |
 | [POINTS_REPORTES.md](POINTS_REPORTES.md) | Ce qui a été volontairement remis à plus tard. |
 | [docs/cadrage/](docs/cadrage/) | Questionnaires (DAF, équipe Hopitalia), matrice des habilitations, jeu d'essai de référence. |
 
-**État actuel :** phase de cadrage, aucun code encore. Commencer par les tâches P0 du cahier des tâches.
+**État actuel :** cadrage terminé, socle du dépôt en place (squelettes backend et frontend, CI, hooks). Suite : tâches P0.C et P0.D du cahier des tâches.
 
 ## Pile technique
 
@@ -28,7 +28,7 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 - **Tests :** `pytest` ; Vitest et Playwright.
 - **Déploiement et Hopitalia :** application séparée (lien depuis Hopitalia), hébergée sur les serveurs de l'hôpital. La connexion des agents passe par Hopitalia (jetons vérifiés localement) ; les droits budgétaires sont propres au module. Fournisseurs, services et achats pharmaceutiques sont importés d'Hopitalia, jamais ressaisis. Comptes comptables du plan SYSCOHADA révisé. Détails : section 17 du cahier des charges et [note d'intégration](docs/cadrage/integration-hopitalia.md).
 - **Secrets :** la clé de vérification des jetons Hopitalia et le compte technique Hopitalia sont des secrets de production, en variables d'environnement, jamais dans le dépôt.
-- **Organisation :** dépôt unique avec `backend/`, `frontend/` et `docs/` (structure à créer : T-022).
+- **Organisation :** dépôt unique avec `backend/`, `frontend/` et `docs/`.
 - **Noms techniques :** paquet Python `hopitalia_budget`, paquet npm `@hopitalia/budget-web`, base `hopitalia_budget`, images `hopitalia-budget-api` et `hopitalia-budget-web`.
 
 ## Règles métier à ne jamais enfreindre
@@ -85,4 +85,12 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 
 ## Commandes
 
-À compléter avec la tâche T-026 (README), une fois les projets backend et frontend créés.
+Détail et installation : [README.md](README.md).
+
+| Où | Vérifications avant de proposer une modification |
+|---|---|
+| `backend/` | `ruff check .` · `ruff format --check .` · `mypy` · `pytest` |
+| `frontend/` | `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm test` · `npm run build` |
+| Racine | `pre-commit run --files <fichiers modifiés>` · `docker compose up -d --build` pour l'ensemble |
+
+La CI (`.github/workflows/ci.yml`) relance ces vérifications ; seul le job `ci-ok` est exigé pour fusionner.
