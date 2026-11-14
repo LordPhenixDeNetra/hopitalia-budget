@@ -40,8 +40,11 @@ Les migrations de la base s'appliquent au démarrage de l'API.
 **Premier administrateur.** La connexion passe par Hopitalia, mais les droits budgétaires sont propres au module : un agent sans profil est refusé. Attribuer le premier profil d'administrateur avec l'identifiant Hopitalia de l'agent (`userId`) :
 
 ```bash
-docker compose exec api python -m hopitalia_budget.outils.habiliter   --utilisateur-id 42 --code-agent AG042 --profil ADM
+docker compose exec api python -m hopitalia_budget.outils.habiliter \
+  --utilisateur-id 42 --code-agent AG042 --profil ADM
 ```
+
+Ensuite, les administrateurs attribuent et retirent les profils dans l'écran **Habilitations** de l'interface, avec le seul code agent Hopitalia ; chaque changement est tracé dans le journal d'audit. Un administrateur ne peut pas modifier ses propres profils.
 
 | Service | Adresse |
 |---|---|
@@ -70,7 +73,8 @@ Documentation interactive de l'API : http://127.0.0.1:8000/api/v1/docs
 **Base de test.** Les tests créent une base temporaire sur un serveur PostgreSQL de test, puis la suppriment :
 
 ```bash
-docker run -d --name hb-budget-test-db -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test   -p 127.0.0.1:55433:5432 postgres:16-alpine
+docker run -d --name hb-budget-test-db -e POSTGRES_USER=test -e POSTGRES_PASSWORD=test \
+  -p 127.0.0.1:55433:5432 postgres:16-alpine
 export TEST_DATABASE_URL=postgresql+psycopg://test:test@127.0.0.1:55433/postgres
 pytest
 ```

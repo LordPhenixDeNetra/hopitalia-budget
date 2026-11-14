@@ -1,4 +1,4 @@
-import { HomeOutlined, LogoutOutlined, ShopOutlined } from '@ant-design/icons'
+import { HomeOutlined, LogoutOutlined, SafetyOutlined, ShopOutlined } from '@ant-design/icons'
 import { Breadcrumb, Button, Flex, Layout, Menu, Select, Typography, theme } from 'antd'
 import { Link, Outlet, useLocation, useMatches, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
@@ -21,6 +21,10 @@ export function Gabarit() {
   const correspondances = useMatches()
   const preferences = useModifierPreferences()
   const { etablissements, courant, choisir } = useEtablissementCourant()
+  // Consulter les habilitations : profils ayant « Paramétrer » dans la matrice validée.
+  const voitHabilitations = (moi?.habilitations ?? []).some((h) =>
+    ['ADM', 'RB', 'AUD'].includes(h.profil),
+  )
 
   const changerLangue = (langue: Langue) => {
     memoriserLangue(langue)
@@ -55,6 +59,15 @@ export function Gabarit() {
               icon: <ShopOutlined aria-hidden />,
               label: t('menu.etablissements'),
             },
+            ...(voitHabilitations
+              ? [
+                  {
+                    key: '/habilitations',
+                    icon: <SafetyOutlined aria-hidden />,
+                    label: t('menu.habilitations'),
+                  },
+                ]
+              : []),
           ]}
         />
       </Layout.Sider>

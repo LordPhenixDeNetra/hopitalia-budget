@@ -117,6 +117,24 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
         ("Trop de requêtes", "Limite de requêtes atteinte ; réessayez dans {secondes} secondes."),
         ("Too many requests", "Request limit reached; retry in {secondes} seconds."),
     ),
+    "AGENT_INTROUVABLE": (
+        422,
+        ("Agent introuvable", "Aucun agent Hopitalia ne porte le code « {code} »."),
+        ("Agent not found", 'No Hopitalia agent has the code "{code}".'),
+    ),
+    "HABILITATION_EXISTANTE": (
+        409,
+        ("Profil déjà attribué", "Cet agent a déjà ce profil pour cet établissement."),
+        ("Profile already assigned", "This agent already has this profile for this facility."),
+    ),
+    "AUTO_HABILITATION": (
+        403,
+        (
+            "Modification de ses propres droits",
+            "Un administrateur ne peut pas modifier ses propres habilitations.",
+        ),
+        ("Changing your own rights", "Administrators cannot change their own profiles."),
+    ),
     "HOPITALIA_INDISPONIBLE": (
         502,
         ("Hopitalia indisponible", "Le service de connexion Hopitalia ne répond pas."),

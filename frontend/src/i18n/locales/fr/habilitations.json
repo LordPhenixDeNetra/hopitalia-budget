@@ -1,0 +1,44 @@
+{
+  "titre": "Habilitations",
+  "intro": "Profils budgétaires des agents Hopitalia. La connexion passe par Hopitalia ; les droits dans le module sont attribués ici.",
+  "colonnes": {
+    "codeAgent": "Code agent",
+    "nomAgent": "Agent",
+    "profil": "Profil",
+    "etablissement": "Établissement",
+    "actions": "Actions"
+  },
+  "tousEtablissements": "Tous les établissements",
+  "filtres": { "profil": "Profil", "etablissement": "Établissement", "tous": "Tous" },
+  "actions": {
+    "attribuer": "Attribuer un profil",
+    "retirer": "Retirer",
+    "confirmerRetrait": "Retirer le profil {{profil}} à {{agent}} ?",
+    "vosDroits": "Vos propres droits ne sont modifiables que par un autre administrateur."
+  },
+  "formulaire": {
+    "titre": "Attribuer un profil",
+    "codeAgent": "Code agent Hopitalia",
+    "aideCode": "Le code de l'agent dans Hopitalia, par exemple AG042.",
+    "profil": "Profil",
+    "etablissement": "Établissement",
+    "aideEtablissement": "« Tous les établissements » est réservé aux administrateurs globaux."
+  },
+  "notifications": {
+    "attribue": "Profil {{profil}} attribué à {{agent}}.",
+    "retire": "Profil retiré."
+  },
+  "profils": {
+    "ADM": "Administrateur fonctionnel",
+    "RB": "Responsable budgétaire",
+    "AF": "Agent financier",
+    "GMC": "Gestionnaire de marchés et contrats",
+    "SD": "Service demandeur",
+    "REC": "Réceptionnaire",
+    "VAL": "Valideur (responsable de service, DAF)",
+    "ORD": "Ordonnateur",
+    "CPT": "Comptable, agent de paiement",
+    "AUD": "Auditeur",
+    "LEC": "Lecteur de tableaux de bord"
+  }
+}

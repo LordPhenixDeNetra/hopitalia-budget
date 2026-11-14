@@ -20,6 +20,9 @@
   "LIMITE_DEBIT": "Trop de requêtes. Réessayez dans un instant.",
   "HOPITALIA_INDISPONIBLE": "Le service de connexion Hopitalia ne répond pas. Réessayez plus tard.",
   "ERREUR_INTERNE": "Une erreur inattendue s'est produite.",
+  "AGENT_INTROUVABLE": "Aucun agent Hopitalia ne porte ce code. Vérifiez le code agent.",
+  "HABILITATION_EXISTANTE": "Cet agent a déjà ce profil pour cet établissement.",
+  "AUTO_HABILITATION": "Vous ne pouvez pas modifier vos propres habilitations ; demandez à un autre administrateur.",
   "champ": {
     "missing": "Ce champ est obligatoire.",
     "string_too_short": "Ce champ est trop court.",

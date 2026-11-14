@@ -1,0 +1,44 @@
+{
+  "titre": "User rights",
+  "intro": "Budget profiles of Hopitalia agents. Sign-in goes through Hopitalia; rights in this module are assigned here.",
+  "colonnes": {
+    "codeAgent": "Agent code",
+    "nomAgent": "Agent",
+    "profil": "Profile",
+    "etablissement": "Facility",
+    "actions": "Actions"
+  },
+  "tousEtablissements": "All facilities",
+  "filtres": { "profil": "Profile", "etablissement": "Facility", "tous": "All" },
+  "actions": {
+    "attribuer": "Assign a profile",
+    "retirer": "Remove",
+    "confirmerRetrait": "Remove the {{profil}} profile from {{agent}}?",
+    "vosDroits": "Your own rights can only be changed by another administrator."
+  },
+  "formulaire": {
+    "titre": "Assign a profile",
+    "codeAgent": "Hopitalia agent code",
+    "aideCode": "The agent's code in Hopitalia, for example AG042.",
+    "profil": "Profile",
+    "etablissement": "Facility",
+    "aideEtablissement": "\"All facilities\" is reserved for global administrators."
+  },
+  "notifications": {
+    "attribue": "{{profil}} profile assigned to {{agent}}.",
+    "retire": "Profile removed."
+  },
+  "profils": {
+    "ADM": "Functional administrator",
+    "RB": "Budget manager",
+    "AF": "Finance officer",
+    "GMC": "Contracts manager",
+    "SD": "Requesting department",
+    "REC": "Receiving officer",
+    "VAL": "Approver (department head, finance director)",
+    "ORD": "Authorising officer",
+    "CPT": "Accountant, paying officer",
+    "AUD": "Auditor",
+    "LEC": "Dashboard reader"
+  }
+}

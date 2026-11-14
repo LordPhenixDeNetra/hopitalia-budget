@@ -12,7 +12,7 @@ router = APIRouter(prefix="/moi", tags=["utilisateur connecté"])
 Langue = Literal["fr", "en"]
 
 
-class HabilitationSortie(Schema):
+class ProfilBudgetaire(Schema):
     profil: str
     etablissement_id: UUID | None
 
@@ -22,7 +22,7 @@ class Moi(Schema):
     code_agent: str
     nom: str
     service: str
-    habilitations: list[HabilitationSortie]
+    habilitations: list[ProfilBudgetaire]
     # Langue choisie par l'utilisateur ; absente tant qu'il n'en a pas choisi (I18N-04).
     langue: Langue | None
 
@@ -38,7 +38,7 @@ def _moi(utilisateur: Utilisateur, langue: Langue | None) -> Moi:
         nom=utilisateur.nom,
         service=utilisateur.service,
         habilitations=[
-            HabilitationSortie(profil=h.profil, etablissement_id=h.etablissement_id)
+            ProfilBudgetaire(profil=h.profil, etablissement_id=h.etablissement_id)
             for h in utilisateur.habilitations
         ],
         langue=langue,

@@ -481,6 +481,222 @@
         }
       }
     },
+    "/api/v1/habilitations": {
+      "get": {
+        "tags": [
+          "habilitations"
+        ],
+        "summary": "Lister Habilitations",
+        "operationId": "lister_habilitations",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          },
+          {
+            "name": "tri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Champs codeAgent, nomAgent, profil ; - : décroissant",
+              "title": "Tri"
+            },
+            "description": "Champs codeAgent, nomAgent, profil ; - : décroissant"
+          },
+          {
+            "name": "codeAgent",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Codeagent"
+            }
+          },
+          {
+            "name": "profil",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Profil"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Profil"
+            }
+          },
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_HabilitationSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "habilitations"
+        ],
+        "summary": "Attribuer Habilitation",
+        "operationId": "attribuer_habilitation",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/HabilitationCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HabilitationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/habilitations/{id_habilitation}": {
+      "delete": {
+        "tags": [
+          "habilitations"
+        ],
+        "summary": "Retirer Habilitation",
+        "operationId": "retirer_habilitation",
+        "parameters": [
+          {
+            "name": "id_habilitation",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Id Habilitation"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/journal-audit": {
       "get": {
         "tags": [
@@ -820,11 +1036,17 @@
         "type": "object",
         "title": "HTTPValidationError"
       },
-      "HabilitationSortie": {
+      "HabilitationCreation": {
         "properties": {
-          "profil": {
+          "codeAgent": {
             "type": "string",
-            "title": "Profil"
+            "maxLength": 20,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Codeagent"
+          },
+          "profil": {
+            "$ref": "#/components/schemas/Profil"
           },
           "etablissementId": {
             "anyOf": [
@@ -841,6 +1063,52 @@
         },
         "type": "object",
         "required": [
+          "codeAgent",
+          "profil"
+        ],
+        "title": "HabilitationCreation"
+      },
+      "HabilitationSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "utilisateurId": {
+            "type": "integer",
+            "title": "Utilisateurid"
+          },
+          "codeAgent": {
+            "type": "string",
+            "title": "Codeagent"
+          },
+          "nomAgent": {
+            "type": "string",
+            "title": "Nomagent"
+          },
+          "profil": {
+            "$ref": "#/components/schemas/Profil"
+          },
+          "etablissementId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etablissementid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "utilisateurId",
+          "codeAgent",
+          "nomAgent",
           "profil",
           "etablissementId"
         ],
@@ -889,7 +1157,7 @@
           },
           "habilitations": {
             "items": {
-              "$ref": "#/components/schemas/HabilitationSortie"
+              "$ref": "#/components/schemas/ProfilBudgetaire"
             },
             "type": "array",
             "title": "Habilitations"
@@ -960,6 +1228,26 @@
           "pagination"
         ],
         "title": "Page[EtablissementSortie]"
+      },
+      "Page_HabilitationSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/HabilitationSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[HabilitationSortie]"
       },
       "Pagination": {
         "properties": {
@@ -1037,6 +1325,49 @@
           "langue"
         ],
         "title": "Preferences"
+      },
+      "Profil": {
+        "type": "string",
+        "enum": [
+          "ADM",
+          "RB",
+          "AF",
+          "GMC",
+          "SD",
+          "REC",
+          "VAL",
+          "ORD",
+          "CPT",
+          "AUD",
+          "LEC"
+        ],
+        "title": "Profil"
+      },
+      "ProfilBudgetaire": {
+        "properties": {
+          "profil": {
+            "type": "string",
+            "title": "Profil"
+          },
+          "etablissementId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etablissementid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "profil",
+          "etablissementId"
+        ],
+        "title": "ProfilBudgetaire"
       },
       "Rafraichissement": {
         "properties": {

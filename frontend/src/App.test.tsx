@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
@@ -37,7 +37,7 @@ function afficher(adresse: string) {
 
 beforeAll(async () => {
   await i18n.changeLanguage('fr')
-  await i18n.loadNamespaces(['commun', 'erreurs', 'etablissements'])
+  await i18n.loadNamespaces(['commun', 'erreurs', 'etablissements', 'habilitations'])
 })
 
 afterEach(async () => {
@@ -171,5 +171,72 @@ describe('erreurs affichées dans la fiche (T-067, T-068)', () => {
     expect(await screen.findByText('Ce champ est trop court.')).toBeTruthy()
     await userEvent.click(enregistrer)
     expect(await screen.findByText(/modifiée par quelqu'un d'autre/)).toBeTruthy()
+  })
+})
+
+describe('gestion des habilitations (T-121)', () => {
+  const HABILITATIONS = {
+    donnees: [
+      {
+        id: 'h1',
+        utilisateurId: 1,
+        codeAgent: 'AG001',
+        nomAgent: 'Awa Diop',
+        profil: 'ADM',
+        etablissementId: null,
+      },
+      {
+        id: 'h2',
+        utilisateurId: 10,
+        codeAgent: 'AG010',
+        nomAgent: 'Ibrahima Fall',
+        profil: 'AF',
+        etablissementId: null,
+      },
+    ],
+    pagination: { page: 1, taille: 25, total: 2, suivant: null },
+  }
+
+  test('liste, ses propres droits protégés, attribution avec clé d’idempotence', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(MOI)],
+      'GET /api/v1/habilitations': [json(HABILITATIONS)],
+      'POST /api/v1/habilitations': [
+        json(
+          {
+            id: 'h3',
+            utilisateurId: 3,
+            codeAgent: 'AG003',
+            nomAgent: 'Fatou Sarr',
+            profil: 'REC',
+            etablissementId: null,
+          },
+          201,
+        ),
+      ],
+    })
+    afficher('/habilitations')
+    expect(await screen.findByText(/Ibrahima Fall/)).toBeTruthy()
+    // Sa propre ligne n'a pas de bouton « Retirer » ; celle d'un autre agent en a un.
+    expect(
+      screen.getByText('Vos propres droits ne sont modifiables que par un autre administrateur.'),
+    ).toBeTruthy()
+    expect(screen.getAllByRole('button', { name: 'Retirer' })).toHaveLength(1)
+
+    await userEvent.click(screen.getByRole('button', { name: /Attribuer un profil/ }))
+    await userEvent.type(await screen.findByLabelText('Code agent Hopitalia'), 'AG003')
+    await userEvent.click(within(screen.getByRole('dialog')).getByLabelText('Profil'))
+    await userEvent.click(await screen.findByTitle('REC — Réceptionnaire'))
+    await userEvent.click(screen.getByRole('button', { name: 'Enregistrer' }))
+    expect(await screen.findByText('Profil Réceptionnaire attribué à Fatou Sarr.')).toBeTruthy()
+
+    const envoi = appel.mock.calls.find(([, options]) => options?.method === 'POST')!
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({
+      codeAgent: 'AG003',
+      profil: 'REC',
+      etablissementId: null,
+    })
+    expect(new Headers(envoi[1]!.headers).get('Idempotency-Key')).toMatch(/[0-9a-f-]{36}/)
   })
 })

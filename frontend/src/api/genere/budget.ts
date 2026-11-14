@@ -29,13 +29,17 @@ import type {
   EtablissementModification,
   EtablissementSortie,
   HTTPValidationError,
+  HabilitationCreation,
+  HabilitationSortie,
   Health200,
   Jetons,
   ListerEtablissementsParams,
+  ListerHabilitationsParams,
   ListerJournalAuditParams,
   Moi,
   PageCurseurEntreeJournal,
   PageEtablissementSortie,
+  PageHabilitationSortie,
   Preferences,
   Rafraichissement
 } from './budget.schemas';
@@ -988,6 +992,272 @@ export const useModifierEtablissement = <TError = HTTPValidationError,
         TContext
       > => {
       return useMutation(getModifierEtablissementMutationOptions(options), queryClient);
+    }
+
+export const getListerHabilitationsUrl = (params?: ListerHabilitationsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/habilitations?${stringifiedParams}` : `/api/v1/habilitations`
+}
+
+/**
+ * @summary Lister Habilitations
+ */
+export const listerHabilitations = async (params?: ListerHabilitationsParams, options?: Parameters<typeof appelerApi>[1]): Promise<PageHabilitationSortie> => {
+
+  return appelerApi<PageHabilitationSortie>(getListerHabilitationsUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerHabilitationsQueryKey = (params?: ListerHabilitationsParams,) => {
+    return [
+    `/api/v1/habilitations`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListerHabilitationsQueryOptions = <TData = Awaited<ReturnType<typeof listerHabilitations>>, TError = HTTPValidationError>(params?: ListerHabilitationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerHabilitations>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerHabilitationsQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerHabilitations>>> = ({ signal }) => listerHabilitations(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerHabilitations>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerHabilitationsQueryResult = NonNullable<Awaited<ReturnType<typeof listerHabilitations>>>
+export type ListerHabilitationsQueryError = HTTPValidationError
+
+
+/** @summary Lister Habilitations */
+export function useListerHabilitations<TData = Awaited<ReturnType<typeof listerHabilitations>>, TError = HTTPValidationError>(
+ params: undefined |  ListerHabilitationsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerHabilitations>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerHabilitations>>,
+          TError,
+          Awaited<ReturnType<typeof listerHabilitations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Habilitations */
+export function useListerHabilitations<TData = Awaited<ReturnType<typeof listerHabilitations>>, TError = HTTPValidationError>(
+ params?: ListerHabilitationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerHabilitations>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerHabilitations>>,
+          TError,
+          Awaited<ReturnType<typeof listerHabilitations>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Habilitations */
+export function useListerHabilitations<TData = Awaited<ReturnType<typeof listerHabilitations>>, TError = HTTPValidationError>(
+ params?: ListerHabilitationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerHabilitations>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Habilitations */
+export function useListerHabilitations<TData = Awaited<ReturnType<typeof listerHabilitations>>, TError = HTTPValidationError>(
+ params?: ListerHabilitationsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerHabilitations>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerHabilitationsQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getAttribuerHabilitationUrl = () => {
+
+
+
+
+  return `/api/v1/habilitations`
+}
+
+/**
+ * @summary Attribuer Habilitation
+ */
+export const attribuerHabilitation = async (habilitationCreation: HabilitationCreation, options?: Parameters<typeof appelerApi>[1]): Promise<HabilitationSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<HabilitationSortie>(getAttribuerHabilitationUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(habilitationCreation)
+  }
+);}
+
+
+
+
+
+export const getAttribuerHabilitationMutationKey = () => ['attribuerHabilitation'] as const;
+
+export const getAttribuerHabilitationMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof attribuerHabilitation>>, TError,AttribuerHabilitationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof attribuerHabilitation>>, TError,AttribuerHabilitationMutationVariables, TContext> => {
+
+const mutationKey = getAttribuerHabilitationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof attribuerHabilitation>>, AttribuerHabilitationMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  attribuerHabilitation(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AttribuerHabilitationMutationResult = NonNullable<Awaited<ReturnType<typeof attribuerHabilitation>>>
+    export type AttribuerHabilitationMutationBody = HabilitationCreation
+    export type AttribuerHabilitationMutationError = HTTPValidationError
+    export type AttribuerHabilitationMutationVariables = {data: HabilitationCreation}
+
+    /** @summary Attribuer Habilitation */
+export const useAttribuerHabilitation = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof attribuerHabilitation>>, TError,AttribuerHabilitationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof attribuerHabilitation>>,
+        TError,
+        AttribuerHabilitationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getAttribuerHabilitationMutationOptions(options), queryClient);
+    }
+
+export const getRetirerHabilitationUrl = (idHabilitation: string,) => {
+
+
+
+
+  return `/api/v1/habilitations/${idHabilitation}`
+}
+
+/**
+ * @summary Retirer Habilitation
+ */
+export const retirerHabilitation = async (idHabilitation: string, options?: Parameters<typeof appelerApi>[1]): Promise<void> => {
+
+  return appelerApi<void>(getRetirerHabilitationUrl(idHabilitation),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+);}
+
+
+
+
+
+export const getRetirerHabilitationMutationKey = () => ['retirerHabilitation'] as const;
+
+export const getRetirerHabilitationMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retirerHabilitation>>, TError,RetirerHabilitationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof retirerHabilitation>>, TError,RetirerHabilitationMutationVariables, TContext> => {
+
+const mutationKey = getRetirerHabilitationMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof retirerHabilitation>>, RetirerHabilitationMutationVariables> = (props) => {
+          const {idHabilitation} = props ?? {};
+
+          return  retirerHabilitation(idHabilitation,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RetirerHabilitationMutationResult = NonNullable<Awaited<ReturnType<typeof retirerHabilitation>>>
+
+    export type RetirerHabilitationMutationError = HTTPValidationError
+    export type RetirerHabilitationMutationVariables = {idHabilitation: string}
+
+    /** @summary Retirer Habilitation */
+export const useRetirerHabilitation = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof retirerHabilitation>>, TError,RetirerHabilitationMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof retirerHabilitation>>,
+        TError,
+        RetirerHabilitationMutationVariables,
+        TContext
+      > => {
+      return useMutation(getRetirerHabilitationMutationOptions(options), queryClient);
     }
 
 export const getListerJournalAuditUrl = (params?: ListerJournalAuditParams,) => {
