@@ -2,7 +2,7 @@
 
 **Projet :** Hopitalia Budget, module de suivi budgétaire · **Date :** 13/11/2026
 
-Ce questionnaire accompagne le [cahier des charges V3](../../Backend/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md). Il sert à valider le document et à recueillir les informations propres à l'établissement. **Réponses reçues le 13/11/2026** pour les questions marquées ; les autres restent à compléter. Merci de compléter les zones « Réponse » et de joindre les documents demandés.
+Ce questionnaire accompagne le [cahier des charges V3](../Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md). Il sert à valider le document et à recueillir les informations propres à l'établissement. **Réponses reçues le 13/11/2026** pour les questions marquées ; les autres restent à compléter. Merci de compléter les zones « Réponse » et de joindre les documents demandés.
 
 ## 1. Validation du cahier des charges
 
