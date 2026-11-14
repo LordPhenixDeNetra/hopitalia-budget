@@ -32,12 +32,12 @@
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
-| P1 | 0 | 0 | 82 | 0 | 0 | 0 | 82 |
+| P1 | 1 | 0 | 81 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **69** | **2** | **136** | **0** | **0** | **2** | **209** |
+| **Total** | **70** | **2** | **135** | **0** | **0** | **2** | **209** |
 
-Avancement : 69 / 207 tâches actives terminées (33 %), hors 2 abandonnées.
+Avancement : 70 / 207 tâches actives terminées (34 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -198,7 +198,7 @@ flowchart LR
 | T-118 | Dérogations par nature et montant. | RG-19 | T-113 | À faire | Une dérogation ne couvre que son objet et son montant. |
 | T-119 | Pièces justificatives : dépôt, empreinte SHA-256, type, contrôle des pièces obligatoires. | EF-DOC-01, 02 | T-056 | À faire | Fichier altéré détecté par l'empreinte. |
 | T-120 | Composants frontend : historique de validation (`Timeline`), boutons valider / rejeter, dépôt de pièces. | IHM-07 | T-113, T-119 | À faire | Réutilisés par toutes les fiches. |
-| T-121 | Gestion des habilitations dans le module : attribuer et retirer les profils budgétaires des agents Hopitalia, par établissement (API et écran). | §3, RG-13 | T-053, T-110 | À faire | Un administrateur attribue un profil sans ligne de commande ; chaque changement est tracé dans le journal d'audit. |
+| T-121 | Gestion des habilitations dans le module : attribuer et retirer les profils budgétaires des agents Hopitalia, par établissement (API et écran). | §3, RG-13 | T-053 | Fait | Un administrateur attribue un profil sans ligne de commande ; chaque changement est tracé dans le journal d'audit (10 tests ; vérifié avec une instance Hopitalia réelle). Pas d'auto-attribution ; dépendance à T-110 levée : aucun circuit de validation ici. |
 
 ### P1.C — Lot 2 : contrats, marchés, avenants
 
@@ -419,3 +419,4 @@ flowchart LR
 | 14/11/2026 | T-075 | À faire | En cours | Vert en local ; à constater en CI. |
 | 14/11/2026 | T-121 | — | À faire | Ajout : gestion des habilitations dans le module (la connexion passe par Hopitalia). |
 | 14/11/2026 | T-075 | En cours | Fait | CI verte sur la demande n° 8 (Vitest, Playwright, backend sur PostgreSQL). P0.C et P0.D terminés. |
+| 14/11/2026 | T-121 | À faire | Fait | Écran et API « Habilitations » : attribution par code agent Hopitalia, retrait, liste cloisonnée, journal d'audit, pas d'auto-attribution ; migration 0002. |
