@@ -4,13 +4,18 @@ version = "0.1.0"
 description = "Module de suivi budgétaire hospitalier Hopitalia"
 requires-python = ">=3.12"
 dependencies = [
+    "alembic>=1.14",
     "fastapi>=0.115",
+    "httpx>=0.27",
+    "psycopg[binary]>=3.2",
+    "pydantic-settings>=2.6",
+    "pyjwt>=2.10",
+    "sqlalchemy>=2.0.36",
     "uvicorn[standard]>=0.30",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "httpx>=0.27",
     "mypy>=1.11",
     "pytest>=8.3",
     "ruff>=0.8",
@@ -29,6 +34,8 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP", "N", "S", "SIM", "RUF"]
+# N818 : les exceptions portent des noms métier en français (ErreurMetier).
+ignore = ["N818"]
 
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["S101"]
