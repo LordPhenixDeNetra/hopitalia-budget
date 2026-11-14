@@ -6,6 +6,7 @@ import { Accueil } from './pages/Accueil'
 import { Connexion } from './pages/Connexion'
 import { Etablissements } from './pages/Etablissements'
 import { FicheEtablissement } from './pages/FicheEtablissement'
+import { Habilitations } from './pages/Habilitations'
 import { PageIntrouvable } from './pages/PageIntrouvable'
 
 /** Sans session, renvoie vers la connexion en gardant l'adresse demandée (lien profond). */
@@ -40,6 +41,7 @@ export const routes: RouteObject[] = [
           { path: ':id', element: <FicheEtablissement /> },
         ],
       },
+      { path: 'habilitations', element: <Habilitations />, handle: fil('menu.habilitations') },
       { path: '*', element: <PageIntrouvable /> },
     ],
   },

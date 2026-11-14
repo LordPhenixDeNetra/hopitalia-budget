@@ -1,9 +1,12 @@
 {
-  "application": { "nom": "Hopitalia Budget" },
+  "application": {
+    "nom": "Hopitalia Budget"
+  },
   "menu": {
     "accueil": "Home",
     "etablissements": "Facilities",
-    "navigation": "Main navigation"
+    "navigation": "Main navigation",
+    "habilitations": "User rights"
   },
   "entete": {
     "langue": "Language",
@@ -12,7 +15,10 @@
     "tousEtablissements": "All facilities",
     "ouvrirMenu": "Open the menu"
   },
-  "langues": { "fr": "Français", "en": "English" },
+  "langues": {
+    "fr": "Français",
+    "en": "English"
+  },
   "connexion": {
     "titre": "Sign in",
     "sousTitre": "Use your Hopitalia account.",
@@ -35,8 +41,15 @@
     "total": "{{count}} in total",
     "chargement": "Loading…"
   },
-  "statut": { "actif": "Active", "inactif": "Inactive" },
-  "actions": { "annuler": "Cancel", "enregistrer": "Save", "recharger": "Reload" },
+  "statut": {
+    "actif": "Active",
+    "inactif": "Inactive"
+  },
+  "actions": {
+    "annuler": "Cancel",
+    "enregistrer": "Save",
+    "recharger": "Reload"
+  },
   "introuvable": {
     "titre": "Page not found",
     "detail": "This page does not exist or is not accessible.",

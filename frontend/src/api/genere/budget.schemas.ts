@@ -68,8 +68,40 @@ export interface HTTPValidationError {
   detail?: ValidationError[];
 }
 
+export type Profil = typeof Profil[keyof typeof Profil];
+
+
+export const Profil = {
+  ADM: 'ADM',
+  RB: 'RB',
+  AF: 'AF',
+  GMC: 'GMC',
+  SD: 'SD',
+  REC: 'REC',
+  VAL: 'VAL',
+  ORD: 'ORD',
+  CPT: 'CPT',
+  AUD: 'AUD',
+  LEC: 'LEC',
+} as const;
+
+export interface HabilitationCreation {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_-]+$
+     */
+  codeAgent: string;
+  profil: Profil;
+  etablissementId?: string | null;
+}
+
 export interface HabilitationSortie {
-  profil: string;
+  id: string;
+  utilisateurId: number;
+  codeAgent: string;
+  nomAgent: string;
+  profil: Profil;
   etablissementId: string | null;
 }
 
@@ -87,12 +119,17 @@ export const MoiLangue = {
   en: 'en',
 } as const;
 
+export interface ProfilBudgetaire {
+  profil: string;
+  etablissementId: string | null;
+}
+
 export interface Moi {
   idHopitalia: number;
   codeAgent: string;
   nom: string;
   service: string;
-  habilitations: HabilitationSortie[];
+  habilitations: ProfilBudgetaire[];
   langue: MoiLangue;
 }
 
@@ -115,6 +152,11 @@ export interface Pagination {
 
 export interface PageEtablissementSortie {
   donnees: EtablissementSortie[];
+  pagination: Pagination;
+}
+
+export interface PageHabilitationSortie {
+  donnees: HabilitationSortie[];
   pagination: Pagination;
 }
 
@@ -148,6 +190,21 @@ export type ListerEtablissementsParams = {
   tri?: string | null;
   code?: string | null;
   actif?: boolean | null;
+};
+
+export type ListerHabilitationsParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs codeAgent, nomAgent, profil ; - : décroissant */
+  tri?: string | null;
+  codeAgent?: string | null;
+  profil?: Profil | null;
+  etablissementId?: string | null;
 };
 
 export type ListerJournalAuditParams = {
