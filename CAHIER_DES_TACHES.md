@@ -31,13 +31,13 @@
 
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
-| P0 | 30 | 2 | 39 | 0 | 0 | 1 | 72 |
-| P1 | 0 | 0 | 81 | 0 | 0 | 0 | 81 |
+| P0 | 68 | 3 | 0 | 0 | 0 | 1 | 72 |
+| P1 | 0 | 0 | 82 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **30** | **2** | **174** | **0** | **0** | **2** | **208** |
+| **Total** | **68** | **3** | **136** | **0** | **0** | **2** | **209** |
 
-Avancement : 30 / 206 tâches actives terminées (15 %), hors 2 abandonnées.
+Avancement : 68 / 207 tâches actives terminées (33 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -110,52 +110,52 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-040 | Squelette FastAPI en couches : `domaine/`, `application/`, `adaptateurs/entree/`, `adaptateurs/sortie/`. | §10.1, ARC-D | T-022 | À faire | Le domaine n'importe ni FastAPI ni SQLAlchemy (vérifié par un test d'import). |
-| T-041 | Configuration par variables d'environnement (`pydantic-settings`). | — | T-040 | À faire | Aucun secret dans le code. |
-| T-042 | Accès base : SQLAlchemy 2, sessions, transactions. | — | T-012, T-040 | À faire | Test de connexion vert. |
-| T-043 | Migrations Alembic et première migration. | — | T-042 | À faire | `alembic upgrade head` sur une base vide. |
-| T-044 | Convention monétaire : `Numeric(18,2)` en base, `Decimal` en Python, chaîne décimale en JSON. | §11.1 | T-040 | À faire | Test : aller-retour JSON sans perte, aucun `float`. |
-| T-045 | Préfixe de version `/api/v1` et publication OpenAPI. | §11.8, API-11 | T-040 | À faire | `/api/v1/openapi.json` accessible. |
-| T-046 | Format d'erreur `application/problem+json` avec code métier. | §11.9 | T-040 | À faire | Test : une erreur métier renvoie le bon format et le code RG. |
-| T-047 | Pagination par décalage (`page`, `taille`, max 100) et par curseur (`apres`). | §11.4, API-06 | T-040 | À faire | Tests des deux modes, curseur stable pendant des insertions. |
-| T-048 | Tri et filtres sur liste blanche de champs. | §11.5, API-07 | T-047 | À faire | Champ inconnu donne `400`. |
-| T-049 | Idempotence : en-tête `Idempotency-Key`, table `CleIdempotence`, rejeu de la réponse. | §11.3, API-01 à 03 | T-042 | À faire | Tests API-01, API-02, API-03 verts. |
-| T-050 | Concurrence optimiste : `ETag`, `If-Match`, réponses `412` et `428`. | §11.3, API-05 | T-042 | À faire | Test API-05 vert. |
-| T-051 | Limitation de débit par utilisateur et par client, en-têtes `RateLimit-*`, `429`. | §11.7, API-08 | T-040 | À faire | Test API-08 vert. |
-| T-052 | Connexion relayée vers Hopitalia (connexion, rafraîchissement, déconnexion) et vérification locale des jetons Hopitalia (HS512, clé en variable d'environnement). | ENF-02 | T-008, T-017 | À faire | Jeton Hopitalia valide accepté ; jeton expiré ou mal signé refusé (`401`) ; agent sans profil budgétaire refusé (`403`). |
+| T-040 | Squelette FastAPI en couches : `domaine/`, `application/`, `adaptateurs/entree/`, `adaptateurs/sortie/`. | §10.1, ARC-D | T-022 | Fait | Le domaine et la couche application n'importent ni FastAPI ni SQLAlchemy (test `test_architecture.py`). |
+| T-041 | Configuration par variables d'environnement (`pydantic-settings`). | — | T-040 | Fait | Aucun secret dans le code ; clé Hopitalia en `SecretStr`, absente de l'affichage (test). |
+| T-042 | Accès base : SQLAlchemy 2, sessions, transactions. | — | T-012, T-040 | Fait | Tests sur PostgreSQL verts ; `Numeric(18, 2)` relu en `Decimal` exact. |
+| T-043 | Migrations Alembic et première migration. | — | T-042 | Fait | `alembic upgrade head` sur une base vide, puis retour arrière complet (vérifié) ; migrations appliquées au démarrage du conteneur. |
+| T-044 | Convention monétaire : `Numeric(18,2)` en base, `Decimal` en Python, chaîne décimale en JSON. | §11.1 | T-040 | Fait | Aller-retour JSON sans perte jusqu'à 9 999 999 999 999 999,99 ; nombres JSON et trois décimales refusés (tests). |
+| T-045 | Préfixe de version `/api/v1` et publication OpenAPI. | §11.8, API-11 | T-040 | Fait | `/api/v1/openapi.json` publié ; toutes les routes métier sous `/api/v1` (test). |
+| T-046 | Format d'erreur `application/problem+json` avec code métier. | §11.9 | T-040 | Fait | Erreurs métier et techniques en `problem+json` avec code stable (tests). |
+| T-047 | Pagination par décalage (`page`, `taille`, max 100) et par curseur (`apres`). | §11.4, API-06 | T-040 | Fait | Pagination par décalage et par curseur testées ; curseur stable pendant des insertions (API-06). |
+| T-048 | Tri et filtres sur liste blanche de champs. | §11.5, API-07 | T-047 | Fait | Paramètre ou champ de tri inconnu : `400` (tests). |
+| T-049 | Idempotence : en-tête `Idempotency-Key`, table `CleIdempotence`, rejeu de la réponse. | §11.3, API-01 à 03 | T-042 | Fait | Tests API-01, API-02, API-03 verts, plus clé en cours (`409`), clé expirée et clé libérée après échec. |
+| T-050 | Concurrence optimiste : `ETag`, `If-Match`, réponses `412` et `428`. | §11.3, API-05 | T-042 | Fait | Test API-05 vert (`428` sans `If-Match`, `412` si périmé). |
+| T-051 | Limitation de débit par utilisateur et par client, en-têtes `RateLimit-*`, `429`. | §11.7, API-08 | T-040 | Fait | Test API-08 vert (`429`, `Retry-After`, en-têtes `RateLimit-*`, compteur par utilisateur). |
+| T-052 | Connexion relayée vers Hopitalia (connexion, rafraîchissement, déconnexion) et vérification locale des jetons Hopitalia (HS512, clé en variable d'environnement). | ENF-02 | T-008, T-017 | Fait | Jeton valide accepté ; jeton absent, expiré ou mal signé refusé (`401`) ; agent sans profil refusé (`403`). Vérifié aussi contre une instance Hopitalia réelle. |
 | T-039 | Gestion des comptes utilisateurs : création par l'administrateur, mot de passe haché (Argon2), réinitialisation, verrouillage après échecs répétés, désactivation, expiration des accès. | ENF-02, §17.2 | T-052 | Abandonné | *Abandonné : la connexion Hopitalia est réutilisée ; seuls les droits budgétaires sont gérés dans le module (T-053).* |
-| T-053 | Habilitations : profils, permissions, seuils de montant. | §3, ENF-02 | T-052, T-016 | À faire | Appel non autorisé donne `403`. |
-| T-054 | Cloisonnement par établissement, appliqué côté serveur à chaque requête. | ENF-04, REC-17 | T-053 | À faire | Tests REC-17 et API-10 verts (`404` hors établissement). |
-| T-055 | Journal d'audit en ajout seul (ancienne et nouvelle valeur, IP), protégé en base contre la modification. | EF-AUD-01, ENF-05 | T-042 | À faire | Un `UPDATE` ou `DELETE` sur la table d'audit échoue. |
-| T-056 | Ports transverses : `Horloge`, `JournaliseurAudit`, `StockagePieces`, `Notificateur`, avec implémentations de test. | §10.2 D | T-040 | À faire | Le domaine se teste sans base ni réseau. |
-| T-057 | Journalisation technique structurée et point de santé `/health`. | — | T-040 | À faire | `/health` répond, journaux au format JSON. |
-| T-058 | Base de test isolée et fabriques de données pour les tests. | ENF-11 | T-043 | À faire | Tests rejouables en CI. |
-| T-059 | Langue côté backend : lecture de `Accept-Language`, catalogues de messages `fr` et `en` pour `title` et `detail` des erreurs. | I18N-07 | T-046 | À faire | Même erreur testée en `fr` et en `en`, code identique. |
+| T-053 | Habilitations : profils, permissions, seuils de montant. | §3, ENF-02 | T-052, T-016 | Fait | Appel non autorisé : `403` (test) ; matrice du code identique au document validé (test). Pas de seuil de montant : l'ordonnateur valide toujours (§17, point 16). |
+| T-054 | Cloisonnement par établissement, appliqué côté serveur à chaque requête. | ENF-04, REC-17 | T-053 | Fait | Tests REC-17 et API-10 verts : un lecteur ne voit que son établissement, un autre établissement répond `404`. |
+| T-055 | Journal d'audit en ajout seul (ancienne et nouvelle valeur, IP), protégé en base contre la modification. | EF-AUD-01, ENF-05 | T-042 | Fait | `UPDATE`, `DELETE` et `TRUNCATE` sur le journal échouent (déclencheurs PostgreSQL, tests). |
+| T-056 | Ports transverses : `Horloge`, `JournaliseurAudit`, `StockagePieces`, `Notificateur`, avec implémentations de test. | §10.2 D | T-040 | Fait | Domaine et cas d'utilisation testés avec les doubles des ports, sans base ni réseau. |
+| T-057 | Journalisation technique structurée et point de santé `/health`. | — | T-040 | Fait | `/health` répond ; journaux JSON avec identifiant de requête (tests et conteneur). |
+| T-058 | Base de test isolée et fabriques de données pour les tests. | ENF-11 | T-043 | Fait | Base de test créée puis supprimée à chaque exécution ; transaction annulée après chaque test ; fabriques de données. |
+| T-059 | Langue côté backend : lecture de `Accept-Language`, catalogues de messages `fr` et `en` pour `title` et `detail` des erreurs. | I18N-07 | T-046 | Fait | Même erreur en `fr` et en `en`, code identique (tests) ; chaque code traduit dans les deux langues. |
 
 ### P0.D — Socle frontend (lot 0)
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
 | T-060 | Projet Vite + React + TypeScript. | §12.1 | T-022, T-010 | Fait | `npm run build` sans erreur (vérifié). |
-| T-061 | Thème Ant Design centralisé dans `ConfigProvider` (palette, mode compact). | IHM-01 à 03 | T-060 | À faire | Aucune couleur en dur dans les composants (vérifié par lint ou revue). |
-| T-062 | Polices Lexend et Source Sans 3 hébergées avec l'application. | IHM-04 | T-060 | À faire | Aucune requête vers Google au chargement. |
-| T-063 | Mettre en place `react-i18next` : langues `fr` (défaut) et `en`, fichiers JSON par domaine chargés à la demande, langue de repli. | I18N-01, 03 | T-060 | À faire | Changement de langue sans rechargement ; clé manquante signalée en test. |
-| T-076 | Règle de lint interdisant les textes en dur dans les composants. | I18N-02 | T-031, T-063 | À faire | Un texte en dur fait échouer la CI. |
-| T-077 | Choix de la langue : profil utilisateur, puis navigateur, puis français ; sélecteur dans l'en-tête. | I18N-04 | T-063, T-064 | À faire | Langue conservée à la reconnexion. |
-| T-078 | Formats selon la langue (`Intl`) : montants, nombres, dates, pluriels ; Ant Design dans la langue choisie. | I18N-05, 06 | T-063, T-071 | À faire | Tests de formatage en `fr` et en `en`. |
-| T-079 | Traduction des codes d'erreur de l'API côté frontend. | I18N-07 | T-063, T-068 | À faire | Chaque code d'erreur documenté a sa traduction dans les deux langues. |
-| T-064 | Gabarit de l'application : menu, fil d'Ariane, en-tête utilisateur et établissement. | IHM-08 | T-061 | À faire | Navigation utilisable de 375 à 1440 px. |
-| T-065 | Routage avec liens profonds vers chaque fiche. | — | T-064 | À faire | Une URL de fiche s'ouvre directement après connexion. |
-| T-066 | Génération du client d'API avec `orval` depuis l'OpenAPI FastAPI. | §12.1 | T-045, T-060 | À faire | Client régénéré en une commande, typé. |
-| T-067 | TanStack Query : cache, invalidation après validation, gestion de `409` et `412`. | §11.3 | T-066 | À faire | Message clair à l'utilisateur sur conflit. |
-| T-068 | Affichage des erreurs `problem+json` : près du champ, ou en notification. | IHM-07 | T-067 | À faire | Erreur de champ affichée sous le champ. |
-| T-069 | Connexion, déconnexion, expiration de session. | ENF-02 | T-052 | À faire | Session expirée renvoie à la connexion sans perte silencieuse. |
-| T-070 | Composant de tableau serveur : pagination, tri, filtres, sélection multiple, actions groupées. | IHM-09 | T-067 | À faire | Utilisé par une première liste. |
-| T-071 | Formatage des montants (`tabular-nums`, alignement à droite, `XOF`). | IHM-05 | T-060 | À faire | Test unitaire du formatage. |
-| T-072 | Badges de statut avec libellé et icône (jamais la couleur seule). | IHM-06 | T-061 | À faire | Composant unique réutilisé. |
-| T-073 | Affichage adaptatif des listes sur petit écran (cartes ou défilement horizontal). | IHM-08 | T-070 | À faire | Aucun débordement de page à 375 px. |
-| T-074 | Respect de la préférence « mouvement réduit ». | IHM-11 | T-061 | À faire | Animations coupées quand la préférence est active. |
-| T-075 | Tests : Vitest pour les composants, Playwright pour les parcours. | ENF-11 | T-060 | À faire | Un test de chaque type passe en CI. |
+| T-061 | Thème Ant Design centralisé dans `ConfigProvider` (palette, mode compact). | IHM-01 à 03 | T-060 | Fait | Aucune couleur en dur hors de `src/theme/theme.ts` (recherche dans le code) ; thème compact. |
+| T-062 | Polices Lexend et Source Sans 3 hébergées avec l'application. | IHM-04 | T-060 | Fait | Aucune requête hors du serveur au chargement (parcours Playwright). |
+| T-063 | Mettre en place `react-i18next` : langues `fr` (défaut) et `en`, fichiers JSON par domaine chargés à la demande, langue de repli. | I18N-01, 03 | T-060 | Fait | Changement de langue sans rechargement (parcours Playwright) ; mêmes clés en `fr` et en `en` (test) ; clé manquante signalée en développement. |
+| T-076 | Règle de lint interdisant les textes en dur dans les composants. | I18N-02 | T-031, T-063 | Fait | Un texte en dur entre balises fait échouer le lint, donc la CI (vérifié). Limites notées dans POINTS_REPORTES.md. |
+| T-077 | Choix de la langue : profil utilisateur, puis navigateur, puis français ; sélecteur dans l'en-tête. | I18N-04 | T-063, T-064 | Fait | Langue du profil appliquée à la connexion et conservée côté serveur (tests) ; sélecteur dans l'en-tête. |
+| T-078 | Formats selon la langue (`Intl`) : montants, nombres, dates, pluriels ; Ant Design dans la langue choisie. | I18N-05, 06 | T-063, T-071 | Fait | Tests de formatage en `fr` et en `en` (montants, nombres, dates) ; Ant Design dans la langue choisie. |
+| T-079 | Traduction des codes d'erreur de l'API côté frontend. | I18N-07 | T-063, T-068 | Fait | Chaque code d'erreur de l'API a sa traduction `fr` et `en` (test côté backend qui lit les fichiers du frontend). |
+| T-064 | Gabarit de l'application : menu, fil d'Ariane, en-tête utilisateur et établissement. | IHM-08 | T-061 | Fait | Navigation utilisable sur ordinateur et à 375 px sans défilement horizontal (parcours Playwright). |
+| T-065 | Routage avec liens profonds vers chaque fiche. | — | T-064 | Fait | Une adresse de fiche s'ouvre directement après connexion (test) ; nginx renvoie l'application pour toute adresse. |
+| T-066 | Génération du client d'API avec `orval` depuis l'OpenAPI FastAPI. | §12.1 | T-045, T-060 | Fait | Client régénéré en une commande (`npm run api`), typé ; la CI vérifie qu'il est à jour. |
+| T-067 | TanStack Query : cache, invalidation après validation, gestion de `409` et `412`. | §11.3 | T-066 | Fait | Conflit `412` : fiche rechargée et message clair (test) ; pas de nouvel essai automatique sur les erreurs 4xx. |
+| T-068 | Affichage des erreurs `problem+json` : près du champ, ou en notification. | IHM-07 | T-067 | Fait | Erreur de champ affichée sous le champ (test). |
+| T-069 | Connexion, déconnexion, expiration de session. | ENF-02 | T-052 | Fait | Session expirée : retour à la connexion avec un message (test) ; rafraîchissement automatique du jeton (test). |
+| T-070 | Composant de tableau serveur : pagination, tri, filtres, sélection multiple, actions groupées. | IHM-09 | T-067 | Fait | Utilisé par la liste des établissements (pagination, tri, filtre de statut, désactivation groupée). |
+| T-071 | Formatage des montants (`tabular-nums`, alignement à droite, `XOF`). | IHM-05 | T-060 | Fait | Tests de formatage ; montants formatés depuis la chaîne exacte, sans nombre flottant. |
+| T-072 | Badges de statut avec libellé et icône (jamais la couleur seule). | IHM-06 | T-061 | Fait | Composant `BadgeStatut` unique, libellé et icône (test). |
+| T-073 | Affichage adaptatif des listes sur petit écran (cartes ou défilement horizontal). | IHM-08 | T-070 | Fait | Cartes sous 768 px ; aucun débordement à 375 px (parcours Playwright). |
+| T-074 | Respect de la préférence « mouvement réduit ». | IHM-11 | T-061 | Fait | Animations coupées dans le thème quand la préférence est active (test) et par CSS. |
+| T-075 | Tests : Vitest pour les composants, Playwright pour les parcours. | ENF-11 | T-060 | En cours | Un test de chaque type passe en CI. *Local : 20 tests Vitest et 3 parcours Playwright verts ; CI : à constater sur la demande de fusion.* |
 
 ---
 
@@ -198,6 +198,7 @@ flowchart LR
 | T-118 | Dérogations par nature et montant. | RG-19 | T-113 | À faire | Une dérogation ne couvre que son objet et son montant. |
 | T-119 | Pièces justificatives : dépôt, empreinte SHA-256, type, contrôle des pièces obligatoires. | EF-DOC-01, 02 | T-056 | À faire | Fichier altéré détecté par l'empreinte. |
 | T-120 | Composants frontend : historique de validation (`Timeline`), boutons valider / rejeter, dépôt de pièces. | IHM-07 | T-113, T-119 | À faire | Réutilisés par toutes les fiches. |
+| T-121 | Gestion des habilitations dans le module : attribuer et retirer les profils budgétaires des agents Hopitalia, par établissement (API et écran). | §3, RG-13 | T-053, T-110 | À faire | Un administrateur attribue un profil sans ligne de commande ; chaque changement est tracé dans le journal d'audit. |
 
 ### P1.C — Lot 2 : contrats, marchés, avenants
 
@@ -413,3 +414,7 @@ flowchart LR
 | 14/11/2026 | T-022, T-023, T-026, T-027, T-032, T-060 | À faire, En cours | Fait | Structure `backend/`, `frontend/`, `docs/` ; squelettes backend (FastAPI, `/health`) et frontend (Vite) ; `docker-compose.yml` vérifié ; README ; hooks `pre-commit` vérifiés. |
 | 14/11/2026 | T-024, T-025, T-028, T-029, T-030, T-031 | À faire | En cours | Modèle de demande de fusion, protection de `main` appliquée, CI unique `ci.yml` (backend, frontend, dco, ci-ok) ; vérifications locales vertes, à constater sur GitHub. |
 | 14/11/2026 | T-024, T-025, T-028, T-029, T-030, T-031 | En cours | Fait | Demande n° 6 fusionnée : CI verte (5 jobs), `ci-ok` exigé par la protection de `main`, modèle présent sur `main`. P0.B terminé. |
+| 14/11/2026 | T-040 à T-059 | À faire | Fait | Socle backend : couches, configuration, PostgreSQL et Alembic, montants, erreurs, pagination, idempotence, ETag, limitation de débit, connexion Hopitalia, habilitations, cloisonnement, journal d'audit, ports, journalisation, base de test, langue. 67 tests verts ; connexion vérifiée contre Hopitalia réel. |
+| 14/11/2026 | T-061 à T-079 (P0.D) | À faire | Fait | Socle frontend : thème, polices, i18n, client généré, session, gabarit, routage, tableau serveur, formats, badges, mouvement réduit. 20 tests Vitest, 3 parcours Playwright. |
+| 14/11/2026 | T-075 | À faire | En cours | Vert en local ; à constater en CI. |
+| 14/11/2026 | T-121 | — | À faire | Ajout : gestion des habilitations dans le module (la connexion passe par Hopitalia). |
