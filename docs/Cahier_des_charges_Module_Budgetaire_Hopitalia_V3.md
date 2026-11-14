@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.2 · 13 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.3 · 14 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -9,6 +9,7 @@
 | 3.0 | 13/11/2026 | Fusion du cahier des charges V2 et du diagramme de classes V2, corrections du modèle, ajout des principes d'architecture (SOLID) et des conventions d'API. |
 | 3.1 | 13/11/2026 | Validation ; intégration des réponses de cadrage (authentification propre, application séparée, référentiels gérés dans le module, plan SYSCOHADA, circuits avec ordonnateur, échanges par fichiers) ; section 17 mise à jour. |
 | 3.2 | 13/11/2026 | Lecture du code `hopitalia-backend` : connexion Hopitalia réutilisée, fournisseurs et services importés, achats pharmaceutiques repris d'Hopitalia ; note d'intégration `docs/cadrage/integration-hopitalia.md`. |
+| 3.3 | 14/11/2026 | Workflow transverse (lot P1.B) : cycle de vie de la révision budgétaire (8.4), règles des circuits, statuts personnalisés et délégations (7.6), révision justifiable (10.2), ressources d'API ajoutées (11.2). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -979,6 +980,7 @@ Validable <|.. Ordonnancement
 Validable <|.. Paiement
 Validable <|.. Rapprochement
 Justifiable <|.. Engagement
+Justifiable <|.. RevisionBudgetaire
 Justifiable <|.. Contrat
 Justifiable <|.. Avenant
 Justifiable <|.. Reception
@@ -1161,6 +1163,17 @@ CleIdempotence "*" --> "1" Utilisateur
 
 **Statuts configurables (§7.3 du cahier des charges V2).** Chaque objet a un **statut de référence** fixe (énumération, utilisé par les calculs de la section 6). Chaque établissement définit ses **statuts personnalisés** (libellés, étapes intermédiaires) rattachés à un statut de référence, et les **transitions** autorisées entre eux, avec le profil habilité. Les calculs restent stables quel que soit le paramétrage.
 
+**Règles du workflow (P1.B).**
+
+- **Circuit figé à la soumission.** Le circuit applicable est choisi à la soumission puis conservé avec l'objet : un changement de paramétrage ne touche pas une opération en cours.
+- **Choix du circuit.** Parmi les circuits actifs de l'établissement pour ce type d'objet, ceux dont la tranche `[seuilMin, seuilMax[` contient le montant ; celui du service (`centreId`) prime sur celui de l'établissement, puis le seuil minimal le plus élevé. Sans circuit, le circuit par défaut s'applique : visa de la DAF (profil VAL), puis ordonnateur (section 17, point 16).
+- **Étapes.** Numérotées à partir de 1. Chaque profil d'étape a le droit « Valider » sur ce type d'objet dans la matrice des habilitations. La dernière étape est obligatoire et revient à l'ordonnateur. Une étape facultative peut être sautée : l'agent de l'étape obligatoire suivante peut viser directement.
+- **Décisions.** Visa favorable, rejet (définitif) ou retour pour correction ; motif obligatoire pour le rejet et le retour. Après correction, l'auteur renvoie l'opération au début du même circuit ; la séparation des tâches se juge sur le cycle en cours.
+- **Séparation des tâches** (RG-13, si le circuit l'exige) : l'auteur ne vise pas sa propre opération et un agent ne vise qu'une étape par cycle.
+- **Délégations.** Pendant sa période, le délégataire vise avec les profils du délégant, dans les circuits seulement ; il n'obtient aucun autre droit. Le visa garde le code du délégant. Une délégation se raccourcit ou se révoque, elle ne se prolonge pas.
+- **Statuts personnalisés et transitions.** Un statut personnalisé se rattache à un statut de référence. Une transition paramétrée doit correspondre à une transition de référence (même action, mêmes statuts de référence). Dès qu'un établissement paramètre une transition pour un type d'objet, seules ses transitions s'appliquent : une transition non paramétrée est refusée (`409 TRANSITION_NON_AUTORISEE`).
+- **Pièces obligatoires.** Un type de pièce désigne les objets pour lesquels il est obligatoire ; un visa favorable est refusé tant qu'il manque (`PIECES_MANQUANTES`). Le contenu est rangé sous son empreinte SHA-256 et vérifié à chaque lecture.
+
 ## 8. Cycles de vie
 
 Les diagrammes montrent les statuts de référence. Les étapes intermédiaires propres à un établissement s'insèrent par paramétrage (7.6).
@@ -1220,6 +1233,26 @@ stateDiagram-v2
   TRANSMIS --> PRIS_EN_CHARGE : prise en charge comptable
   REJETE --> [*]
   PRIS_EN_CHARGE --> [*]
+```
+
+### 8.4. Révision budgétaire
+
+Une révision (budget modificatif, virement, réallocation) n'a d'effet sur les crédits qu'au statut `VALIDEE` (EF-BUD-04).
+
+```mermaid
+stateDiagram-v2
+  [*] --> SOUMISE : soumettre
+  SOUMISE --> EN_VALIDATION : viser (etape intermediaire)
+  EN_VALIDATION --> EN_VALIDATION : viser
+  SOUMISE --> VALIDEE : valider (derniere etape, credit controle)
+  EN_VALIDATION --> VALIDEE : valider (derniere etape, credit controle)
+  SOUMISE --> A_CORRIGER : retourner (motif)
+  EN_VALIDATION --> A_CORRIGER : retourner (motif)
+  A_CORRIGER --> SOUMISE : resoumettre
+  SOUMISE --> REJETEE : rejeter (motif)
+  EN_VALIDATION --> REJETEE : rejeter (motif)
+  VALIDEE --> [*]
+  REJETEE --> [*]
 ```
 
 ## 9. Processus
@@ -1395,7 +1428,8 @@ Un objet n'implémente que les capacités qu'il possède. Le `Validable` unique 
 |---|:-:|:-:|:-:|:-:|
 | Engagement | Oui | Oui | Oui | Oui |
 | Contrat, Avenant | Oui | Oui | | |
-| Révision budgétaire, Bon de commande | Oui | | | |
+| Révision budgétaire | Oui | Oui | | |
+| Bon de commande | Oui | | | |
 | Réception | Oui | Oui | | |
 | Facture | Oui | Oui | Oui | |
 | Liquidation | Oui | | Oui | Oui |
@@ -1495,7 +1529,11 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/ordonnancements` | GET, POST | |
 | `/paiements` | GET, POST | Allocations dans le corps de la requête. |
 | `/rapprochements` | GET, POST | |
-| `/{ressource}/{id}/validations`, `/annulations`, `/derogations`, `/pieces` | GET, POST | Sur les ressources qui implémentent l'interface correspondante. |
+| `/{ressource}/{id}/validations`, `/annulations`, `/derogations`, `/pieces` | GET, POST | Sur les ressources qui implémentent l'interface correspondante. `GET .../validations` donne le circuit figé, les visas, les étapes ouvertes et si l'agent peut décider. |
+| `/{ressource}/{id}/soumissions` | POST | Renvoi au circuit après un retour pour correction. |
+| `/pieces/{id}/contenu` | GET | Fichier vérifié par son empreinte ; `409 PIECE_ALTEREE` sinon. |
+| `/circuits-validation`, `/statuts-personnalises`, `/transitions-statuts` | GET, POST, PATCH | Paramétrage du workflow par établissement ; `DELETE` sur les transitions. `GET /statuts-reference/{typeObjet}` donne le cycle de référence. |
+| `/delegations` | GET, POST, PATCH | `PATCH` raccourcit ou révoque. |
 | `/alertes` | GET, PATCH | `PATCH` pour marquer comme lue. |
 | `/journal-audit` | GET | Lecture seule, pagination par curseur. |
 | `/tableaux-de-bord/{code}` | GET | |
