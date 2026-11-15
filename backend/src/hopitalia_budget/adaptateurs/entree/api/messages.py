@@ -332,6 +332,71 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
             "The reconciliation shows a gap: it is validated only with its reason.",
         ),
     ),
+    "LIQUIDATION_NON_ORDONNANCABLE": (
+        409,
+        (
+            "Liquidation non ordonnançable",
+            "La liquidation {liquidation} ne peut pas être ordonnancée : sa facture n'est pas "
+            "entièrement liquidée, ou elle est déjà dans un ordonnancement en cours.",
+        ),
+        (
+            "Settlement cannot be ordered for payment",
+            "Settlement {liquidation} cannot be sent for payment: its invoice is not fully "
+            "settled, or it is already in an active payment order.",
+        ),
+    ),
+    "LIQUIDATION_NON_PAYABLE": (
+        409,
+        (
+            "Liquidation non payable",
+            "La liquidation {liquidation} n'est pas dans un ordonnancement pris en charge par "
+            "le comptable.",
+        ),
+        (
+            "Settlement cannot be paid",
+            "Settlement {liquidation} is not in a payment order taken over by the accountant.",
+        ),
+    ),
+    "VENTILATION_PAIEMENT": (
+        422,
+        (
+            "Ventilation du paiement incorrecte",
+            "Chaque part doit être positive et leur somme ({ventile}) égaler le montant du "
+            "paiement ({montant}).",
+        ),
+        (
+            "Incorrect payment breakdown",
+            "Each share must be positive and their sum ({ventile}) must equal the payment amount "
+            "({montant}).",
+        ),
+    ),
+    "PAIEMENT_SUP_SOLDE": (
+        422,
+        (
+            "Paiement supérieur au solde dû",
+            "La part de la liquidation {liquidation} dépasse son solde dû ({resteDu}) (RG-07).",
+        ),
+        (
+            "Payment above the balance due",
+            "The share of settlement {liquidation} exceeds its balance due ({resteDu}) (RG-07).",
+        ),
+    ),
+    "SEPARATION_PAIEMENT": (
+        403,
+        (
+            "Séparation des tâches",
+            "Vous avez validé ou ordonnancé cette liquidation : une autre personne doit la payer.",
+        ),
+        (
+            "Segregation of duties",
+            "You approved or ordered this settlement for payment: someone else must pay it.",
+        ),
+    ),
+    "PAIEMENT_DEJA_ANNULE": (
+        409,
+        ("Paiement déjà annulé", "Ce paiement est déjà annulé."),
+        ("Payment already cancelled", "This payment is already cancelled."),
+    ),
     "OPERATION_DEJA_TRAITEE": (
         409,
         ("Opération déjà traitée", "Cette opération n'attend aucune validation."),

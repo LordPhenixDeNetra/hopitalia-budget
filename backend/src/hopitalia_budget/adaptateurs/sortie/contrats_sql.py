@@ -16,6 +16,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
     ContratModele,
     ImputationContratModele,
 )
+from hopitalia_budget.adaptateurs.sortie.paiements_sql import transmis_et_paye_par_contrat
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import pieces_obligatoires_presentes
 from hopitalia_budget.domaine.contrats import (
     Avenant,
@@ -52,8 +53,8 @@ def vers_contrat(m: ContratModele) -> Contrat:
 def mouvements_contrats(
     session: Session, contrats: list[ContratModele]
 ) -> dict[UUID, MouvementsContrat]:
-    """Avenants validés, engagements, commandes, réceptions validées, factures et liquidations ;
-    transmis et payé restent à zéro jusqu'au lot 5 (ordonnancement et paiements)."""
+    """Avenants validés, engagements, commandes, réceptions validées, factures, liquidations,
+    ordonnancements et paiements."""
     a = AvenantModele
     variations = {
         contrat_id: (positifs, negatifs)
@@ -70,6 +71,7 @@ def mouvements_contrats(
     engage = engage_par_contrat(session, [c.id for c in contrats])
     commande, receptionne = commande_et_receptionne_par_contrat(session, [c.id for c in contrats])
     facture, liquide, net = factures_par_contrat(session, [c.id for c in contrats])
+    transmis, paye = transmis_et_paye_par_contrat(session, [c.id for c in contrats])
     resultat = {}
     for c in contrats:
         positifs, negatifs = variations.get(c.id, (ZERO, ZERO))
@@ -83,6 +85,8 @@ def mouvements_contrats(
             facture=facture.get(c.id, ZERO),
             liquide=liquide.get(c.id, ZERO),
             net_a_payer=net.get(c.id, ZERO),
+            transmis=transmis.get(c.id, ZERO),
+            paye=paye.get(c.id, ZERO),
         )
     return resultat
 

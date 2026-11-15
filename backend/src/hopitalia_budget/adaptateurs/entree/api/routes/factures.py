@@ -62,6 +62,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
     RapprochementModele,
     ReceptionModele,
 )
+from hopitalia_budget.adaptateurs.sortie.paiements_sql import paye_par_liquidation
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import DepotWorkflowSql
 from hopitalia_budget.application import derogations, engagements, factures, workflow
 from hopitalia_budget.domaine.commandes import montant_ttc
@@ -84,6 +85,7 @@ from hopitalia_budget.domaine.factures import (
 )
 from hopitalia_budget.domaine.habilitations import Operation
 from hopitalia_budget.domaine.indicateurs import reste_a_payer_facture
+from hopitalia_budget.domaine.paiements import PHASE_PAIEMENT
 from hopitalia_budget.domaine.utilisateur import Utilisateur
 
 router = APIRouter(tags=["factures"])
@@ -173,8 +175,10 @@ def _sortie_facture(session: Session, m: FactureModele) -> dict[str, Any]:
         **{c: getattr(m, c) for c in FactureSortie.model_fields if hasattr(m, c)},
         montant_cumule_decomptes=cumul,
         liquide_valide=sum((c.montant_liquide for c in calcul.values()), ZERO),
-        # Paiements au lot 5 : aucune allocation reçue pour l'instant.
-        reste_a_payer=reste_a_payer_facture([c.net_a_payer for c in calcul.values()], []),
+        reste_a_payer=reste_a_payer_facture(
+            [c.net_a_payer for c in calcul.values()],
+            list(paye_par_liquidation(session, list(calcul)).values()),
+        ),
     ).model_dump(mode="json", by_alias=True)
     return donnees
 
@@ -802,7 +806,7 @@ class RapprochementSortie(Schema):
 def _ecarts(session: Session, m: FactureModele) -> EcartsSortie:
     """Commande, réception validée, facture (nette des avoirs) et paiement, pour la commande de
     la facture, ou pour son engagement sans commande. Le paiement n'est rapproché qu'une fois la
-    facture mise en paiement (lot 5)."""
+    facture mise en paiement : avant, il n'y a rien à rapprocher."""
     if m.bon_commande_id:
         commandes = [m.bon_commande_id]
         filtre = F.bon_commande_id == m.bon_commande_id
@@ -837,12 +841,20 @@ def _ecarts(session: Session, m: FactureModele) -> EcartsSortie:
             )
     else:
         commande = receptionne = facture  # dépense sans commande : rien à rapprocher en amont
-    paye = ZERO
-    en_paiement = m.statut in (
-        StatutFacture.MISE_EN_PAIEMENT,
-        StatutFacture.PARTIELLEMENT_PAYEE,
-        StatutFacture.PAYEE,
+    paye = sum(
+        paye_par_liquidation(
+            session,
+            list(
+                session.scalars(
+                    select(L.id)
+                    .join(F, F.id == L.facture_id)
+                    .where(filtre, F.statut != StatutFacture.REJETEE)
+                )
+            ),
+        ).values(),
+        ZERO,
     )
+    en_paiement = m.statut in PHASE_PAIEMENT and m.statut != StatutFacture.LIQUIDEE
     e = ecarts(commande, receptionne, facture, paye if en_paiement else facture)
     return EcartsSortie(
         commande=commande,
