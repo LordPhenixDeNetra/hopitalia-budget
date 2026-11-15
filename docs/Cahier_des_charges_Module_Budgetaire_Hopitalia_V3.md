@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.3 · 14 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.4 · 15 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -10,6 +10,7 @@
 | 3.1 | 13/11/2026 | Validation ; intégration des réponses de cadrage (authentification propre, application séparée, référentiels gérés dans le module, plan SYSCOHADA, circuits avec ordonnateur, échanges par fichiers) ; section 17 mise à jour. |
 | 3.2 | 13/11/2026 | Lecture du code `hopitalia-backend` : connexion Hopitalia réutilisée, fournisseurs et services importés, achats pharmaceutiques repris d'Hopitalia ; note d'intégration `docs/cadrage/integration-hopitalia.md`. |
 | 3.3 | 14/11/2026 | Workflow transverse (lot P1.B) : cycle de vie de la révision budgétaire (8.4), règles des circuits, statuts personnalisés et délégations (7.6), révision justifiable (10.2), ressources d'API ajoutées (11.2). |
+| 3.4 | 15/11/2026 | Contrats et avenants (lot P1.C) : cycles de vie (8.5), règles de saisie et de calcul du contrat, ressources d'API précisées (11.2). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1255,6 +1256,37 @@ stateDiagram-v2
   REJETEE --> [*]
 ```
 
+### 8.5. Contrat et avenant
+
+Un contrat entre **signé ou notifié** (RG-03) et se prépare en brouillon : fiche, ventilation, pièces. Il n'entre dans le circuit qu'à sa soumission ; il ne sert de référence (plafond, avenants, engagements) qu'au statut `VALIDE`. Un avenant naît soumis, sur un contrat validé.
+
+```mermaid
+stateDiagram-v2
+  [*] --> BROUILLON : enregistrer (contrat)
+  BROUILLON --> SOUMIS : soumettre (ventilation controlee)
+  [*] --> SOUMIS : enregistrer (avenant)
+  SOUMIS --> EN_VALIDATION : viser
+  EN_VALIDATION --> EN_VALIDATION : viser
+  SOUMIS --> VALIDE : valider (derniere etape)
+  EN_VALIDATION --> VALIDE : valider (derniere etape)
+  SOUMIS --> A_CORRIGER : retourner (motif)
+  EN_VALIDATION --> A_CORRIGER : retourner (motif)
+  A_CORRIGER --> SOUMIS : resoumettre
+  SOUMIS --> REJETE : rejeter (motif)
+  EN_VALIDATION --> REJETE : rejeter (motif)
+  VALIDE --> [*]
+  REJETE --> [*]
+```
+
+**Règles de saisie et de calcul.**
+
+- Montant du contrat : le TTC, calculé à l'enregistrement depuis le HT et le taux de taxe ; c'est lui que la ventilation doit égaler (RG-15), contrôle fait à la soumission et à la validation finale.
+- Nature et numéro de lot : réservés au type `MARCHE`. Un marché est un contrat (ARC-L) : mêmes règles, mêmes écrans.
+- Lots et tranches : leur total ne dépasse pas le montant du contrat ; ils se modifient tant que le contrat est en brouillon ou à corriger. Échéancier, ordres de service et révisions de prix s'ajoutent pendant l'exécution.
+- Avenant : variation positive ou négative, non nulle. À la validation finale, le contrat doit être validé et le nouveau plafond rester positif et au moins égal au cumul engagé (RG-04) ; le montant avant et le nouveau plafond sont alors relevés sur l'avenant pour l'historique (REC-04). Le montant actualisé, lui, se recalcule toujours depuis les avenants validés (RG-14).
+- Révisions de prix : leur incidence est suivie à part ; elle n'entre pas dans le montant actualisé (6.2).
+- Avance et retenue de garantie : le contrat porte les taux et les conditions ; montant d'avance, avance récupérée, retenue opérée et libérée se calculent depuis le montant actualisé et les déductions des liquidations (6.3).
+
 ## 9. Processus
 
 ### 9.1. Chaîne de rapprochement obligatoire
@@ -1518,8 +1550,9 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/lignes-budgetaires/{id}/disponibilite` | GET | Indicateurs 6.1 calculés. |
 | `/notifications-credits` | GET, POST | |
 | `/fournisseurs` | GET, POST, PUT | Synchronisés avec le référentiel Hopitalia. |
-| `/contrats` | GET, POST, PATCH | Filtre `type=MARCHE` pour les marchés. |
-| `/contrats/{id}/avenants`, `/imputations`, `/echeances` | GET, POST | |
+| `/contrats` | GET, POST, PATCH | Filtres `type` (`MARCHE` pour les marchés), `statut`, `fournisseurId`, `centreId`, `consommationMin`. La ventilation (`imputations`) est dans le corps du contrat, remplacée en bloc tant qu'il est modifiable. |
+| `/contrats/{id}/avenants` | GET, POST | `PATCH /avenants/{id}` pour la correction après retour. |
+| `/contrats/{id}/echeances`, `/lots`, `/ordres-service`, `/revisions-prix` | GET, POST | `DELETE` sur les échéances et les lots. |
 | `/contrats/{id}/synthese` | GET | Fiche de synthèse (annexe 18.1). |
 | `/engagements` | GET, POST, PATCH, DELETE | |
 | `/engagements/{id}/bons-commande` | GET, POST | |
