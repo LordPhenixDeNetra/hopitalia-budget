@@ -32,12 +32,12 @@
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
-| P1 | 68 | 1 | 13 | 0 | 0 | 0 | 82 |
+| P1 | 77 | 1 | 4 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **137** | **3** | **67** | **0** | **0** | **2** | **209** |
+| **Total** | **146** | **3** | **58** | **0** | **0** | **2** | **209** |
 
-Avancement : 137 / 207 tâches actives terminées (66 %), hors 2 abandonnées.
+Avancement : 146 / 207 tâches actives terminées (71 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -264,15 +264,15 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-185 | Ordonnancements et lignes d'ordonnancement. | EF-ORD-01, 02 | T-174 | À faire | Une liquidation dans un seul ordonnancement actif. |
-| T-186 | Statuts : transmis, complément demandé, suspendu, rejeté (liquidations libérées), pris en charge. | EF-ORD-03 | T-185, T-111 | À faire | Liquidation rejetée retransmissible, historique conservé. |
-| T-187 | Paiements et allocations par liquidation. | EF-PAI-01, 02 | T-185 | À faire | Somme des allocations = montant du paiement. |
-| T-188 | Paiement groupé ventilé. | EF-PAI-02, REC-10 | T-187 | À faire | Test REC-10 vert. |
-| T-189 | Interdiction de payer au-delà du solde dû. | RG-07 | T-187, T-141 | À faire | Dépassement bloqué sans dérogation. |
-| T-190 | Statut de la facture recalculé (partiellement payée, payée). | RG-08, EF-PAI-03 | T-187 | À faire | Tests REC-08 et REC-09 verts. |
-| T-191 | Idempotence obligatoire de `POST /paiements`. | §9.2, API-01 | T-049, T-187 | À faire | Test API-01 vert sur les paiements. |
-| T-192 | Annulation de paiement par contre-opération. | RG-18 | T-117, T-187 | À faire | Paiement annulé visible, soldes recalculés. |
-| T-193 | Écrans : ordonnancement, saisie de paiement, ventilation. | — | T-190, T-120 | À faire | Parcours Playwright REC-08 à REC-10 verts. |
+| T-185 | Ordonnancements et lignes d'ordonnancement. | EF-ORD-01, 02 | T-174 | Fait | Une liquidation dans un seul ordonnancement actif. Ordonnancement préparé par l'ordonnateur avec ses lignes ; une liquidation déjà dans un ordonnancement actif est refusée (`test_ordonnancement_une_liquidation_active`). |
+| T-186 | Statuts : transmis, complément demandé, suspendu, rejeté (liquidations libérées), pris en charge. | EF-ORD-03 | T-185, T-111 | Fait | Liquidation rejetée retransmissible, historique conservé. Cycle de la section 8.3, réponses du comptable motivées ; liquidation rejetée retransmise, ancien ordonnancement consultable (`test_cycle_de_l_ordonnancement`, `test_ordonnancement_une_liquidation_active`). |
+| T-187 | Paiements et allocations par liquidation. | EF-PAI-01, 02 | T-185 | Fait | Somme des allocations = montant du paiement. Paiement ventilé par liquidation ; somme des allocations différente du montant refusée (`test_ventilation_solde_et_statut_de_la_facture`, `test_rec08_rec09_paiements_partiels_et_solde`). |
+| T-188 | Paiement groupé ventilé. | EF-PAI-02, REC-10 | T-187 | Fait | Test REC-10 vert. Paiement groupé de deux factures, ventilé facture par facture ; test REC-10 vert (`test_rec10_paiement_groupe_ventile`). |
+| T-189 | Interdiction de payer au-delà du solde dû. | RG-07 | T-187, T-141 | Fait | Dépassement bloqué sans dérogation. Paiement au-delà du solde dû refusé (`PAIEMENT_SUP_SOLDE`) ; pas de dérogation de paiement, le paiement n'ayant pas de circuit (point reporté). |
+| T-190 | Statut de la facture recalculé (partiellement payée, payée). | RG-08, EF-PAI-03 | T-187 | Fait | Tests REC-08 et REC-09 verts. Facture partiellement payée puis payée, solde recalculé ; tests REC-08 et REC-09 verts (`test_rec08_rec09_paiements_partiels_et_solde`). |
+| T-191 | Idempotence obligatoire de `POST /paiements`. | §9.2, API-01 | T-049, T-187 | Fait | Test API-01 vert sur les paiements. Rejeu avec la même clé : même réponse, un seul paiement ; corps différent : 422 ; sans clé : 400 (`test_api01_idempotence_du_paiement`). |
+| T-192 | Annulation de paiement par contre-opération. | RG-18 | T-117, T-187 | Fait | Paiement annulé visible, soldes recalculés. Paiement annulé, motivé et tracé, toujours visible ; soldes et statut de la facture recalculés (`test_rg18_annulation_du_paiement`). |
+| T-193 | Écrans : ordonnancement, saisie de paiement, ventilation. | — | T-190, T-120 | Fait | Parcours Playwright REC-08 à REC-10 verts. Page Ordonnancement et paiements (préparation, décisions, saisie ventilée, annulation) ; parcours Playwright REC-08, REC-09 et REC-10 verts sur ordinateur et téléphone, et à 300 px. |
 
 ### P1.H — Recette de la chaîne de dépense
 
@@ -432,3 +432,4 @@ flowchart LR
 | 15/11/2026 | T-160 à T-167 (P1.E) | À faire | Fait | Commandes, réceptions, réserves, attestation et service fait ; migration 0007 ; 165 tests backend, 37 tests Vitest, parcours REC-05. |
 | 15/11/2026 | T-170 à T-181 (P1.F) | À faire | Fait | Factures, avoirs, décomptes, liquidations par imputation, déductions, contrôles (RG-05, RG-06, REC-07), rapprochement, écrans ; dérogations communes à l'engagement et à la liquidation ; migration 0008 ; 178 tests backend, 40 tests Vitest, parcours REC-06 et REC-12. |
 | 15/11/2026 | T-148 | En cours | Fait | Clôture d'un engagement partiellement exécuté vérifiée avec les liquidations. |
+| 15/11/2026 | T-185 à T-193 (P1.G) | À faire | Fait | Ordonnancements, décisions du comptable, paiements partiels et groupés ventilés, solde dû (RG-07), statut de la facture (RG-08), payeur (RG-13), idempotence, annulation, écrans ; migration 0009 ; 186 tests backend, 44 tests Vitest, parcours REC-08 à REC-10. |
