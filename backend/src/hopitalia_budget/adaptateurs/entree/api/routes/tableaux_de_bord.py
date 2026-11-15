@@ -330,7 +330,6 @@ def _chaine_par_engagement(
     session: Session, imputations: list[tuple[ImputationEngagementModele, EngagementModele]]
 ) -> dict[UUID, ChaineDepense]:
     ids_imp = [i.id for i, _ in imputations]
-    engagement_de = {i.id: e.id for i, e in imputations}
     annule = dict(
         session.execute(
             select(AnnulationLigneModele.imputation_id, func.sum(AnnulationLigneModele.montant))
@@ -339,7 +338,12 @@ def _chaine_par_engagement(
         ).all()
     )
     liquide = liquide_par_imputation(session, ids_imp)
-    transmis, paye = transmis_et_paye_par_groupe(session, engagement_de)
+    transmis, paye = transmis_et_paye_par_groupe(
+        session,
+        select(Imp.id.label("imputation"), Imp.engagement_id.label("groupe")).where(
+            Imp.id.in_(ids_imp)
+        ),
+    )
     engagements = sorted({e.id for _, e in imputations})
     commande, receptionne = commande_et_receptionne_par_engagement(session, engagements)
     facture = dict(
