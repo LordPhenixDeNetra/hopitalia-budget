@@ -78,7 +78,9 @@
     "types": {
       "RevisionBudgetaire": "Révision budgétaire",
       "Contrat": "Contrat",
-      "Avenant": "Avenant"
+      "Avenant": "Avenant",
+      "Engagement": "Engagement",
+      "Derogation": "Dérogation"
     }
   }
 }

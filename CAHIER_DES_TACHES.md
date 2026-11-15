@@ -32,12 +32,12 @@
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
-| P1 | 34 | 2 | 46 | 0 | 0 | 0 | 82 |
+| P1 | 47 | 2 | 33 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **103** | **4** | **100** | **0** | **0** | **2** | **209** |
+| **Total** | **116** | **4** | **87** | **0** | **0** | **2** | **209** |
 
-Avancement : 103 / 207 tâches actives terminées (50 %), hors 2 abandonnées.
+Avancement : 116 / 207 tâches actives terminées (56 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -193,9 +193,9 @@ flowchart LR
 | T-113 | Ressource `POST /{ressource}/{id}/validations` (visa, motif, décision). | §11.1 | T-112 | Fait | Validation, rejet et retour pour correction testés. Route générique ; visa, rejet, retour pour correction, correction et renvoi au circuit testés (`test_retour_pour_correction_puis_validation`). |
 | T-114 | Séparation des tâches : créateur ≠ valideur ≠ payeur selon le circuit. | RG-13, REC-13 | T-113 | En cours | Test REC-13 vert. Créateur ≠ valideur et un visa par agent et par cycle, selon le circuit : fait et testé (`test_rg13_...`). Reste le payeur, avec les paiements (lot 5) : REC-13 complet à ce moment. |
 | T-115 | Délégations temporaires. | §7.6 | T-112 | Fait | Une délégation expirée n'autorise plus rien. Délégation datée, visa au nom du délégant, révocation ; une délégation expirée n'autorise plus rien (`test_delegation_active_puis_expiree`) ; écran Délégations. |
-| T-116 | Immuabilité des objets validés (`409` sur `PUT`, `PATCH`, `DELETE`). | RG-18, API-04 | T-113 | En cours | Test API-04 vert. Mécanisme commun (`exiger_modifiable`) : `PATCH` d'une révision en circuit, validée ou rejetée → `409` (testé). API-04 porte sur l'engagement : vérifié avec T-140. |
-| T-117 | Annulations et contre-opérations tracées. | RG-09, RG-18 | T-116, T-140 | À faire | L'opération initiale reste visible avec son annulation. |
-| T-118 | Dérogations par nature et montant. | RG-19 | T-113, T-140 | À faire | Une dérogation ne couvre que son objet et son montant. |
+| T-116 | Immuabilité des objets validés (`409` sur `PUT`, `PATCH`, `DELETE`). | RG-18, API-04 | T-113 | Fait | Test API-04 vert. Mécanisme commun (`exiger_modifiable`) : `PATCH` d'une révision en circuit, validée ou rejetée → `409` (testé). API-04 porte sur l'engagement : vérifié avec T-140. API-04 vérifié : `PATCH` d'un engagement validé répond 409 (`test_circuit_engage_et_immuabilite`). |
+| T-117 | Annulations et contre-opérations tracées. | RG-09, RG-18 | T-116, T-140 | Fait | L'opération initiale reste visible avec son annulation. Annulation : contre-opération par imputation ; l'engagement initial reste visible avec ses annulations (`test_annulation_partielle_puis_totale`). |
+| T-118 | Dérogations par nature et montant. | RG-19 | T-113, T-140 | Fait | Une dérogation ne couvre que son objet et son montant. Dérogation validée par le circuit ; elle ne couvre que sa nature, son objet et son montant (tests moteur et API). |
 | T-119 | Pièces justificatives : dépôt, empreinte SHA-256, type, contrôle des pièces obligatoires. | EF-DOC-01, 02 | T-056 | Fait | Fichier altéré détecté par l'empreinte. Dépôt multipart, empreinte SHA-256, types de fichiers limités, pièces obligatoires par type d'objet ; fichier altéré détecté (`test_pieces_empreinte_et_pieces_obligatoires`). |
 | T-120 | Composants frontend : historique de validation (`Timeline`), boutons valider / rejeter, dépôt de pièces. | IHM-07 | T-113, T-119 | Fait | Réutilisés par toutes les fiches. `Validations` (circuit, `Timeline`, valider, rejeter, retourner) et `Pieces` (dépôt, téléchargement) prennent la ressource en paramètre ; utilisés par la fiche révision, à réutiliser par les fiches suivantes. |
 | T-121 | Gestion des habilitations dans le module : attribuer et retirer les profils budgétaires des agents Hopitalia, par établissement (API et écran). | §3, RG-13 | T-053 | Fait | Un administrateur attribue un profil sans ligne de commande ; chaque changement est tracé dans le journal d'audit (10 tests ; vérifié avec une instance Hopitalia réelle). Pas d'auto-attribution ; dépendance à T-110 levée : aucun circuit de validation ici. |
@@ -218,17 +218,17 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-140 | Engagements et imputations (somme des imputations = montant). | EF-ENG-01, 02, RG-01, RG-15 | T-089, T-110 | À faire | Engagement incohérent refusé. |
-| T-141 | Moteur de contrôles extensible (`RegleControle`, `MoteurControles`). | §10.2 O, ARC-O | T-040 | À faire | Ajouter un contrôle ne modifie pas le moteur (démontré par un contrôle de test). |
-| T-142 | Contrôle de disponibilité des crédits. | RG-02, EF-ENG-03 | T-141, T-093 | À faire | Dépassement bloqué sans dérogation. |
-| T-143 | Contrôle atomique du crédit (verrou de ligne ou transaction sérialisée). | RG-20, ENF-08, REC-16 | T-142 | À faire | Test de concurrence REC-16 : un seul engagement passe. |
-| T-144 | Contrôle du plafond contractuel. | RG-04 | T-141, T-135 | À faire | Dépassement bloqué sans avenant ni dérogation. |
-| T-145 | Contrôle de cohérence engagement / contrat / fournisseur. | EF-ENG-03 | T-141 | À faire | Fournisseur différent du titulaire refusé. |
-| T-146 | Détection des doublons d'engagement. | EF-ENG-03 | T-141 | À faire | Doublon signalé. |
-| T-147 | Dépenses hors marché et contrôle de seuil. | EF-DHM-01 | T-140, T-141 | À faire | Seuil dépassé bloqué ; tests `Engagement` verts avec `DepenseHorsMarche` (ARC-L). |
-| T-148 | Annulation partielle et clôture avec désengagement automatique du reliquat. | EF-ENG-05 | T-117, T-140 | À faire | Disponible recrédité du reliquat, trace d'annulation créée. |
-| T-149 | Idempotence de la création d'engagement. | §11.3 | T-049, T-140 | À faire | Rejeu sans doublon. |
-| T-150 | Écrans : demande d'engagement, contrôle, validation, liste. | — | T-140, T-120 | À faire | Parcours Playwright REC-03 vert. |
+| T-140 | Engagements et imputations (somme des imputations = montant). | EF-ENG-01, 02, RG-01, RG-15 | T-089, T-110 | Fait | Engagement incohérent refusé. Engagement en brouillon, imputations, exercice tiré des lignes ; engagement incohérent refusé (`test_rg15_engagement_incoherent_refuse`). |
+| T-141 | Moteur de contrôles extensible (`RegleControle`, `MoteurControles`). | §10.2 O, ARC-O | T-040 | Fait | Ajouter un contrôle ne modifie pas le moteur (démontré par un contrôle de test). `domaine/controles.py` : un contrôle de test ajouté sans toucher au moteur (`test_moteur_extensible_et_derogation_limitee`). |
+| T-142 | Contrôle de disponibilité des crédits. | RG-02, EF-ENG-03 | T-141, T-093 | Fait | Dépassement bloqué sans dérogation. `ControleCredits` ; dépassement bloqué sans dérogation (`test_rg02_credit_insuffisant_et_derogation_limitee`). |
+| T-143 | Contrôle atomique du crédit (verrou de ligne ou transaction sérialisée). | RG-20, ENF-08, REC-16 | T-142 | Fait | Test de concurrence REC-16 : un seul engagement passe. Lignes et contrat verrouillés à la validation finale ; test de concurrence REC-16 sur deux connexions réelles : un seul passe ; le test échoue si le verrou est retiré. |
+| T-144 | Contrôle du plafond contractuel. | RG-04 | T-141, T-135 | Fait | Dépassement bloqué sans avenant ni dérogation. `ControlePlafondContrat` ; dépassement bloqué sans avenant ni dérogation (`test_rec03_plafond_du_marche`). |
+| T-145 | Contrôle de cohérence engagement / contrat / fournisseur. | EF-ENG-03 | T-141 | Fait | Fournisseur différent du titulaire refusé. `ControleCoherenceContrat` ; bénéficiaire différent du titulaire refusé, non dérogeable. |
+| T-146 | Détection des doublons d'engagement. | EF-ENG-03 | T-141 | Fait | Doublon signalé. `DetectionDoublonEngagement` ; doublon signalé (`test_doublon_signale`). |
+| T-147 | Dépenses hors marché et contrôle de seuil. | EF-DHM-01 | T-140, T-141 | Fait | Seuil dépassé bloqué ; tests `Engagement` verts avec `DepenseHorsMarche` (ARC-L). `DepenseHorsMarche` et `ControleSeuilHorsMarche` ; seuil dépassé ou absent bloqué ; tests d'API paramétrés décision et hors marché (ARC-L). |
+| T-148 | Annulation partielle et clôture avec désengagement automatique du reliquat. | EF-ENG-05 | T-117, T-140 | En cours | Disponible recrédité du reliquat, trace d'annulation créée. Annulation partielle et totale faites (disponible recrédité, trace créée). La clôture d'un engagement exécuté est en place mais se vérifiera de bout en bout avec les liquidations (lot 4). |
+| T-149 | Idempotence de la création d'engagement. | §11.3 | T-049, T-140 | Fait | Rejeu sans doublon. Rejeu avec la même clé : même engagement, aucun doublon (`test_idempotence_de_la_creation`). |
+| T-150 | Écrans : demande d'engagement, contrôle, validation, liste. | — | T-140, T-120 | Fait | Parcours Playwright REC-03 vert. Liste, demande, fiche (contrôles, dérogations, validation, pièces, annulations) ; parcours Playwright REC-03 vert sur ordinateur et téléphone. |
 
 ### P1.E — Lot 3 : commandes, réceptions et service fait
 
@@ -425,3 +425,7 @@ flowchart LR
 | 14/11/2026 | T-114, T-116 | À faire | En cours | Fait et testé sur les révisions ; le payeur (REC-13) et l'engagement validé (API-04) arrivent avec les lots 2 et 5. |
 | 14/11/2026 | T-117, T-118 | À faire | À faire | Dépendance à T-140 ajoutée : aucun objet annulable ni dérogeable n'existe avant les engagements. |
 | 15/11/2026 | T-130 à T-138 (P1.C) | À faire | Fait | Contrats et marchés : fiche, ventilation, avenants, échéancier, lots, ordres de service, révisions de prix, synthèse 18.1, écrans ; migration 0005 ; 138 tests backend, 33 tests Vitest, parcours REC-02. |
+| 15/11/2026 | T-140 à T-147, T-149, T-150 | À faire | Fait | Engagements, moteur de contrôles et cinq contrôles, verrou de crédit (REC-16), écrans et parcours REC-03 ; migration 0006 ; 157 tests backend, 35 tests Vitest. |
+| 15/11/2026 | T-117, T-118 | À faire | Fait | Annulations (contre-opérations par imputation) et dérogations validées par le circuit. |
+| 15/11/2026 | T-116 | En cours | Fait | API-04 vérifié sur l'engagement validé. |
+| 15/11/2026 | T-148 | À faire | En cours | Annulation partielle et totale faites ; clôture à vérifier avec les liquidations (lot 4). |

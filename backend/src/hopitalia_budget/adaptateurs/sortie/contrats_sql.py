@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import case, func, select
 from sqlalchemy.orm import Session
 
+from hopitalia_budget.adaptateurs.sortie.engagements_sql import engage_par_contrat
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     AvenantModele,
     ContratModele,
@@ -49,8 +50,8 @@ def vers_contrat(m: ContratModele) -> Contrat:
 def mouvements_contrats(
     session: Session, contrats: list[ContratModele]
 ) -> dict[UUID, MouvementsContrat]:
-    """Avenants validés ; engagé, commandé, réceptionné, facturé, liquidé, transmis et payé
-    restent à zéro jusqu'aux lots qui créent ces pièces."""
+    """Avenants validés et engagements ; commandé, réceptionné, facturé, liquidé, transmis et
+    payé restent à zéro jusqu'aux lots qui créent ces pièces."""
     a = AvenantModele
     variations = {
         contrat_id: (positifs, negatifs)
@@ -64,6 +65,7 @@ def mouvements_contrats(
             .group_by(a.contrat_id)
         ).all()
     }
+    engage = engage_par_contrat(session, [c.id for c in contrats])
     resultat = {}
     for c in contrats:
         positifs, negatifs = variations.get(c.id, (ZERO, ZERO))
@@ -71,6 +73,7 @@ def mouvements_contrats(
             montant_initial=c.montant_initial_ttc,
             avenants_positifs=Decimal(positifs),
             avenants_negatifs=Decimal(negatifs),
+            engage=engage.get(c.id, ZERO),
         )
     return resultat
 
@@ -126,8 +129,7 @@ class DepotContratsSql:
         return calculer_indicateurs_contrat(mouvements).montant_actualise
 
     def engage(self, contrat_id: UUID) -> Decimal:
-        # ponytail: zéro tant que les engagements n'existent pas (T-140 le calculera ici).
-        return ZERO
+        return engage_par_contrat(self.session, [contrat_id])[contrat_id]
 
     def changer_statut_avenant(
         self,

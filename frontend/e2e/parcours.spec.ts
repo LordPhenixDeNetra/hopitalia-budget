@@ -317,3 +317,119 @@ test('REC-02 : enregistrer un marché avec ventilation, échéance et pièce', a
     'multipart/form-data',
   )
 })
+
+test('REC-03 : engagement lié au marché, crédits et plafond contrôlés', async ({ page }) => {
+  const page1 = (donnees: unknown[]) => ({
+    donnees,
+    pagination: { page: 1, taille: 100, total: donnees.length, suivant: null },
+  })
+  const engagement = {
+    id: 'e1',
+    etablissementId: 'a1',
+    exerciceId: 'x1',
+    numero: 'ENG-2026-00002',
+    dateEngagement: '2026-04-01',
+    objet: 'Médicaments T2',
+    origine: 'CONTRAT',
+    montant: '30000000.00',
+    montantAnnule: '0.00',
+    contratId: 'c1',
+    fournisseurId: 'f1',
+    centreId: 'ce1',
+    statut: 'BROUILLON',
+    creeParCode: 'AG011',
+    creeLe: '2026-04-01T10:00:00Z',
+    version: 1,
+    imputations: [{ id: 'i1', ligneId: 'l1', montant: '30000000.00', annule: '0.00' }],
+  }
+  const envois: { chemin: string; corps: string }[] = []
+  await page.route('**/api/v1/**', async (route) => {
+    const requete = route.request()
+    const chemin = new URL(requete.url()).pathname
+    if (requete.method() === 'POST') envois.push({ chemin, corps: requete.postData() ?? '' })
+    if (chemin === '/api/v1/engagements/e1/soumissions') {
+      await route.fulfill({
+        status: 422,
+        contentType: 'application/problem+json',
+        body: JSON.stringify({ code: 'CONTROLE_BLOQUANT', status: 422, ecarts: [] }),
+      })
+      return
+    }
+    const reponses: Record<string, unknown> = {
+      '/api/v1/auth/connexion': { jetonAcces: 'a', jetonRafraichissement: 'r', expireDans: 900 },
+      '/api/v1/moi': { ...MOI, habilitations: [{ profil: 'GMC', etablissementId: 'a1' }] },
+      '/api/v1/etablissements': page1([{ id: 'a1', code: 'CHU-A', nom: 'CHU A' }]),
+      '/api/v1/contrats': page1([
+        { id: 'c1', numero: 'M-2026-001', intitule: 'Fournitures médicales' },
+      ]),
+      '/api/v1/fournisseurs': page1([
+        { id: 'f1', code: 'PHARMA', raisonSociale: 'Pharma Test SA' },
+      ]),
+      '/api/v1/centres-responsabilite': page1([
+        { id: 'ce1', code: 'PHARMA', libelle: 'Pharmacie' },
+      ]),
+      '/api/v1/lignes-budgetaires': page1([{ id: 'l1', code: '604-CMD', libelle: 'Consommables' }]),
+      '/api/v1/engagements': requete.method() === 'POST' ? engagement : page1([]),
+      '/api/v1/engagements/e1': engagement,
+      '/api/v1/engagements/e1/controles': [
+        {
+          code: 'CREDIT_INSUFFISANT',
+          nature: 'CREDIT',
+          depassement: '20000000.00',
+          details: { ligne: '604-CMD', disponible: '10000000.00' },
+          leve: false,
+        },
+        {
+          code: 'PLAFOND_DEPASSE',
+          nature: 'PLAFOND_CONTRAT',
+          depassement: '10000000.00',
+          details: { resteAEngager: '20000000.00' },
+          leve: false,
+        },
+      ],
+      '/api/v1/engagements/e1/derogations': [],
+    }
+    await route.fulfill({
+      status: requete.method() === 'POST' ? 201 : 200,
+      json: reponses[chemin] ?? page1([]),
+    })
+  })
+
+  await page.goto('/connexion?retour=/engagements')
+  await page.getByLabel('Identifiant').fill('agent')
+  await page.getByLabel('Mot de passe').fill('secret')
+  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await page.getByRole('button', { name: 'Demander un engagement' }).click()
+
+  const tiroir = page.getByRole('dialog')
+  const choisir = async (libelle: string, option: string) => {
+    await tiroir.getByLabel(libelle, { exact: true }).click()
+    await page.getByTitle(option).click()
+  }
+  await choisir('Établissement', 'CHU-A — CHU A')
+  await choisir('Marché ou contrat', 'M-2026-001 — Fournitures médicales')
+  await tiroir.getByLabel('Date', { exact: true }).fill('2026-04-01')
+  await tiroir.getByLabel('Objet').fill('Médicaments T2')
+  await tiroir.getByLabel('Montant', { exact: true }).first().fill('30000000.00')
+  await choisir('Service demandeur', 'PHARMA — Pharmacie')
+  await choisir('Bénéficiaire', 'PHARMA — Pharma Test SA')
+  await choisir('Ligne budgétaire', '604-CMD — Consommables')
+  await tiroir.getByLabel('Montant', { exact: true }).last().fill('30000000.00')
+  await tiroir.getByRole('button', { name: 'Enregistrer' }).click()
+
+  await expect(page.getByRole('heading', { name: 'ENG-2026-00002 — Médicaments T2' })).toBeVisible()
+  await ouvrirOnglet(page, 'Contrôles')
+  await expect(page.getByText('Crédit insuffisant')).toBeVisible()
+  await expect(page.getByText('Plafond du marché dépassé')).toBeVisible()
+  await page.getByRole('button', { name: 'Soumettre au circuit' }).click()
+  await expect(page.getByText(/Un contrôle automatique a relevé un écart/)).toBeVisible()
+
+  const creation = JSON.parse(envois.find((e) => e.chemin === '/api/v1/engagements')!.corps)
+  expect(creation).toMatchObject({
+    etablissementId: 'a1',
+    origine: 'CONTRAT',
+    contratId: 'c1',
+    montant: '30000000.00',
+    imputations: [{ ligneId: 'l1', montant: '30000000.00' }],
+  })
+})

@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.4 · 15 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.5 · 15 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -11,6 +11,7 @@
 | 3.2 | 13/11/2026 | Lecture du code `hopitalia-backend` : connexion Hopitalia réutilisée, fournisseurs et services importés, achats pharmaceutiques repris d'Hopitalia ; note d'intégration `docs/cadrage/integration-hopitalia.md`. |
 | 3.3 | 14/11/2026 | Workflow transverse (lot P1.B) : cycle de vie de la révision budgétaire (8.4), règles des circuits, statuts personnalisés et délégations (7.6), révision justifiable (10.2), ressources d'API ajoutées (11.2). |
 | 3.4 | 15/11/2026 | Contrats et avenants (lot P1.C) : cycles de vie (8.5), règles de saisie et de calcul du contrat, ressources d'API précisées (11.2). |
+| 3.5 | 15/11/2026 | Engagements et contrôles (lot P1.D) : règles de l'engagement, des contrôles, des dérogations et des annulations (8.1), nature de dérogation `SEUIL_HORS_MARCHE` (18.4), ressources d'API précisées (11.2). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1201,6 +1202,15 @@ stateDiagram-v2
   CLOTURE --> [*]
 ```
 
+**Règles de l'engagement (lot P1.D).**
+
+- Saisie en brouillon ; montant égal à la somme des imputations, toutes positives (RG-15) ; lignes d'un même exercice ouvert, de l'établissement de l'engagement (RG-01). Origine `CONTRAT` : contrat obligatoire ; `HORS_MARCHE` : type de dépense et nature obligatoires ; sinon, pas de contrat. Numéro attribué par établissement et exercice (`ENG-2026-00001`).
+- Circuit par défaut : contrôle financier (profil AF, « prise en charge » : `EN_CONTROLE`), visa de la DAF, puis ordonnateur (section 17, point 16). Un établissement peut paramétrer d'autres circuits (7.6).
+- Contrôles automatiques, à la soumission puis à la validation finale : crédits de chaque ligne (RG-02), plafond du contrat (RG-04), contrat validé et bénéficiaire égal au titulaire, doublon probable (même bénéficiaire, même montant, même objet, à moins de 30 jours), seuil hors marché (point 9 : sans seuil renseigné, la dérogation est exigée). À la validation finale, les lignes et le contrat sont verrouillés jusqu'à la fin de la transaction (RG-20).
+- Un écart bloquant se corrige, ou se couvre par une dérogation de même nature, validée (visa DAF puis ordonnateur), d'un montant au moins égal au dépassement, sur cet engagement seulement (RG-19). Le contrat non validé et le bénéficiaire incohérent ne se couvrent pas.
+- L'engagé d'une ligne ou d'un contrat compte les engagements validés, moins leurs annulations et clôtures ; l'en-cours compte les engagements soumis ou en contrôle (6.1, 6.2).
+- Annulation partielle ou totale du reliquat d'un engagement validé, par imputation : l'engagement reste intact, l'annulation s'y ajoute (RG-18). Le reliquat entièrement annulé, sans rien de liquidé, fait passer l'engagement à `ANNULE`. La clôture d'un engagement exécuté désengage le reliquat non liquidé et le fait passer à `CLOTURE`.
+
 ### 8.2. Facture
 
 ```mermaid
@@ -1554,7 +1564,8 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/contrats/{id}/avenants` | GET, POST | `PATCH /avenants/{id}` pour la correction après retour. |
 | `/contrats/{id}/echeances`, `/lots`, `/ordres-service`, `/revisions-prix` | GET, POST | `DELETE` sur les échéances et les lots. |
 | `/contrats/{id}/synthese` | GET | Fiche de synthèse (annexe 18.1). |
-| `/engagements` | GET, POST, PATCH, DELETE | |
+| `/engagements` | GET, POST, PATCH | Filtres `statut`, `origine`, `contratId`, `fournisseurId`, `centreId`. `GET /engagements/{id}/controles` donne les écarts à l'instant. |
+| `/engagements/{id}/derogations`, `/annulations`, `/clotures` | GET, POST | Dérogations validées par le circuit (`/derogations/{id}/validations`). |
 | `/engagements/{id}/bons-commande` | GET, POST | |
 | `/bons-commande/{id}/receptions` | GET, POST | |
 | `/factures` | GET, POST | Détection de doublon à la création (`409` + référence du doublon). |
@@ -1924,7 +1935,7 @@ Le tableau de bord doit faire ressortir les 15 000 000 liquidés non payés, sig
 | `TypeDeduction` | AVANCE_RECUPEREE, RETENUE_GARANTIE, PENALITE, REFACTION, RETENUE_SOURCE, AUTRE |
 | `StatutOrdonnancement` | PREPARE, TRANSMIS, COMPLEMENT_DEMANDE, SUSPENDU, REJETE, PRIS_EN_CHARGE |
 | `StatutPaiement` | ENREGISTRE, EXECUTE, ANNULE |
-| `NatureDerogation` | CREDIT, PLAFOND_CONTRAT, LIQUIDATION_SUP_DU, PAIEMENT_SUP_SOLDE, DOUBLON |
+| `NatureDerogation` | CREDIT, PLAFOND_CONTRAT, SEUIL_HORS_MARCHE, LIQUIDATION_SUP_DU, PAIEMENT_SUP_SOLDE, DOUBLON |
 | `TypeRecette` | SUBVENTION_DOTATION, RECETTE_PROPRE, REMBOURSEMENT_ASSURANCE, PRESTATION_HOSPITALIERE, AUTRE |
 | `TypeAlerte` | voir 14.3 |
 

@@ -609,3 +609,99 @@ class RevisionPrixModele(Base):
     indice: Mapped[str | None] = mapped_column(String(100))
     date: Mapped[date]
     incidence: Mapped[Decimal] = mapped_column(MONTANT)
+
+
+class EngagementModele(Base):
+    """Engagement (section 7.4) ; une dépense hors marché en est un, d'origine HORS_MARCHE."""
+
+    __tablename__ = "engagement"
+    __table_args__ = (UniqueConstraint("etablissement_id", "numero"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    exercice_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("exercice.id"), index=True)
+    numero: Mapped[str] = mapped_column(String(30))
+    date_engagement: Mapped[date]
+    objet: Mapped[str] = mapped_column(String(500))
+    origine: Mapped[str] = mapped_column(String(20))
+    montant: Mapped[Decimal] = mapped_column(MONTANT)
+    contrat_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("contrat.id"), index=True)
+    fournisseur_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("fournisseur.id"), index=True
+    )
+    centre_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("centre_responsabilite.id"))
+    type_depense_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("referentiel.id"))
+    nature_hors_marche: Mapped[str | None] = mapped_column(String(30))
+    justification: Mapped[str | None] = mapped_column(String(1000))
+    reference_decision: Mapped[str | None] = mapped_column(String(100))
+    statut: Mapped[str] = mapped_column(String(30), index=True)
+    # Renseignée à la validation finale : l'engagement compte alors dans l'engagé (6.1).
+    date_validation: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class ImputationEngagementModele(Base):
+    __tablename__ = "imputation_engagement"
+    __table_args__ = (UniqueConstraint("engagement_id", "ligne_id"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    engagement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("engagement.id"), index=True)
+    ligne_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("ligne_budgetaire.id"), index=True)
+    montant: Mapped[Decimal] = mapped_column(MONTANT)
+
+
+class DerogationModele(Base):
+    """Dérogation (RG-19) : couvre un dépassement d'une nature, sur un objet, jusqu'à un montant."""
+
+    __tablename__ = "derogation"
+    __table_args__ = (Index("ix_derogation_objet", "type_objet", "id_objet"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    type_objet: Mapped[str] = mapped_column(String(60))
+    id_objet: Mapped[uuid.UUID]
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"))
+    nature: Mapped[str] = mapped_column(String(30))
+    montant_depassement: Mapped[Decimal] = mapped_column(MONTANT)
+    motif: Mapped[str] = mapped_column(String(500))
+    statut: Mapped[str] = mapped_column(String(20))
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class AnnulationModele(Base):
+    """Annulation (totale ou partielle) ou clôture d'une opération validée (RG-09, RG-18) :
+    l'opération initiale reste intacte ; l'annulation est une contre-opération tracée."""
+
+    __tablename__ = "annulation"
+    __table_args__ = (Index("ix_annulation_objet", "type_objet", "id_objet"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    type_objet: Mapped[str] = mapped_column(String(60))
+    id_objet: Mapped[uuid.UUID]
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"))
+    type: Mapped[str] = mapped_column(String(20))  # ANNULATION ou CLOTURE
+    montant: Mapped[Decimal] = mapped_column(MONTANT)
+    motif: Mapped[str] = mapped_column(String(500))
+    utilisateur_id: Mapped[int] = mapped_column(BigInteger)
+    code_agent: Mapped[str] = mapped_column(String(20))
+    horodatage: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class AnnulationLigneModele(Base):
+    __tablename__ = "annulation_ligne"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    annulation_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("annulation.id"), index=True)
+    imputation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("imputation_engagement.id"), index=True
+    )
+    montant: Mapped[Decimal] = mapped_column(MONTANT)

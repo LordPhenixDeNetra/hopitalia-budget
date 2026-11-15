@@ -72,7 +72,9 @@
     "REOUVERT": "Reopened",
     "RevisionBudgetaire": "Budget revision",
     "Contrat": "Contract",
-    "Avenant": "Amendment"
+    "Avenant": "Amendment",
+    "Engagement": "Commitment",
+    "Derogation": "Derogation"
   },
   "actions": {
     "creer": "Add",

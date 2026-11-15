@@ -63,6 +63,26 @@ export const routes: RouteObject[] = [
         ],
       },
       {
+        path: 'engagements',
+        handle: fil('menu.engagements'),
+        children: [
+          {
+            index: true,
+            lazy: () =>
+              import('./pages/engagements/Engagements').then((m) => ({
+                Component: m.Engagements,
+              })),
+          },
+          {
+            path: ':id',
+            lazy: () =>
+              import('./pages/engagements/FicheEngagement').then((m) => ({
+                Component: m.FicheEngagement,
+              })),
+          },
+        ],
+      },
+      {
         path: 'delegations',
         lazy: () => import('./pages/Delegations').then((m) => ({ Component: m.Delegations })),
         handle: fil('menu.delegations'),

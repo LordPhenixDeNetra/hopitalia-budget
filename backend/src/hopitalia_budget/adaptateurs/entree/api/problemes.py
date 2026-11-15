@@ -30,7 +30,12 @@ def reponse_probleme(
         "code": code,
         "detail": detail,
     }
-    corps |= {cle: str(valeur) for cle, valeur in contexte.items() if cle not in corps}
+    # Listes et objets (écarts d'un contrôle) restent structurés ; le reste est écrit en texte.
+    corps |= {
+        cle: valeur if isinstance(valeur, list | dict) else str(valeur)
+        for cle, valeur in contexte.items()
+        if cle not in corps
+    }
     if erreurs:
         corps["erreurs"] = erreurs
     return JSONResponse(

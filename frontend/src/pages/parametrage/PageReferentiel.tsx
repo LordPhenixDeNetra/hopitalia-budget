@@ -22,7 +22,9 @@ interface PageApi {
 }
 
 const libelle = (e: Enregistrement) =>
-  [e.code, e.libelle ?? e.raisonSociale ?? e.reference ?? e.nom].filter(Boolean).join(' — ')
+  [e.code ?? e.numero, e.libelle ?? e.raisonSociale ?? e.intitule ?? e.reference ?? e.nom]
+    .filter(Boolean)
+    .join(' — ')
 
 /** Options d'un champ référence : liste paginée ou tableau (nomenclature). */
 export function useOptions(chemin?: string) {
