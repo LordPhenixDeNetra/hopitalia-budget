@@ -13,7 +13,8 @@
     "delegations": "Delegations",
     "contrats": "Contracts",
     "engagements": "Commitments",
-    "commandes": "Orders"
+    "commandes": "Orders",
+    "factures": "Invoices"
   },
   "entete": {
     "langue": "Language",

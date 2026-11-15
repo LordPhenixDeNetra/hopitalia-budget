@@ -22,7 +22,10 @@ interface PageApi {
 }
 
 const libelle = (e: Enregistrement) =>
-  [e.code ?? e.numero, e.libelle ?? e.raisonSociale ?? e.intitule ?? e.reference ?? e.nom]
+  [
+    e.code ?? e.numero,
+    e.libelle ?? e.raisonSociale ?? e.intitule ?? e.reference ?? e.nom ?? e.objet,
+  ]
     .filter(Boolean)
     .join(' — ')
 

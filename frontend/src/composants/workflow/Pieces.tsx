@@ -13,7 +13,8 @@ import {
   useListerTypesPieces,
 } from '../../api/genere/budget'
 import { formaterDateHeure } from '../../format/format'
-import type { RessourceValidable } from './Validations'
+
+export type RessourcePieces = Parameters<typeof deposerPiece>[0]
 
 /** Pièces justificatives d'une ressource : liste, dépôt et téléchargement vérifié (T-120). */
 export function Pieces({
@@ -21,7 +22,7 @@ export function Pieces({
   id,
   peutDeposer,
 }: {
-  ressource: RessourceValidable
+  ressource: RessourcePieces
   id: string
   peutDeposer: boolean
 }) {

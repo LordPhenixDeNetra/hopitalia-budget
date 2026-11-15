@@ -3188,7 +3188,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ResultatSortie"
+                    "$ref": "#/components/schemas/ResultatControleSortie"
                   },
                   "title": "Response Lire Controles"
                 }
@@ -4092,6 +4092,879 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/AttestationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/factures": {
+      "post": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Enregistrer Facture",
+        "description": "Facture rattachée à un engagement validé, au fournisseur de l'engagement (RG-05) ; un\ndoublon répond 409 avec la référence de l'existante, sauf levée motivée (RG-16).",
+        "operationId": "enregistrer_facture",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FactureCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FactureSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Lister Factures",
+        "operationId": "lister_factures",
+        "parameters": [
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "engagementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Engagementid"
+            }
+          },
+          {
+            "name": "statut",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/StatutFacture"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Statut"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TypeFacture"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_FactureSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/factures/{facture_id}": {
+      "get": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Obtenir Facture",
+        "operationId": "obtenir_facture",
+        "parameters": [
+          {
+            "name": "facture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Facture Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FactureSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Corriger Facture",
+        "description": "Correction d'une facture reçue ou retournée ; une facture retournée repart en contrôle.",
+        "operationId": "corriger_facture",
+        "parameters": [
+          {
+            "name": "facture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Facture Id"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FactureChamps"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FactureSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/factures/{facture_id}/retours": {
+      "post": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Retourner Facture",
+        "description": "Retour pour correction au fournisseur, motivé (section 8.2).",
+        "operationId": "retourner_facture",
+        "parameters": [
+          {
+            "name": "facture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Facture Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MotifSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FactureSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/factures/{facture_id}/rejets": {
+      "post": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Rejeter Facture",
+        "description": "Rejet motivé, définitif, d'une facture sans liquidation (REC-12).",
+        "operationId": "rejeter_facture",
+        "parameters": [
+          {
+            "name": "facture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Facture Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MotifSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FactureSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/factures/{facture_id}/liquidations": {
+      "post": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Liquider",
+        "description": "Liquidation d'une facture sur une imputation de son engagement (RG-17), en brouillon.",
+        "operationId": "liquider",
+        "parameters": [
+          {
+            "name": "facture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Facture Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiquidationCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiquidationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Lister Liquidations",
+        "operationId": "lister_liquidations",
+        "parameters": [
+          {
+            "name": "facture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Facture Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LiquidationSortie"
+                  },
+                  "title": "Response Lister Liquidations"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/liquidations/{liquidation_id}": {
+      "get": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Obtenir Liquidation",
+        "operationId": "obtenir_liquidation",
+        "parameters": [
+          {
+            "name": "liquidation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Liquidation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiquidationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Corriger Liquidation",
+        "description": "Brouillon ou retour pour correction seulement (RG-18).",
+        "operationId": "corriger_liquidation",
+        "parameters": [
+          {
+            "name": "liquidation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Liquidation Id"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LiquidationChamps"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LiquidationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/liquidations/{liquidation_id}/controles": {
+      "get": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Lire Controles Liquidation",
+        "description": "Contrôles à l'instant, alertes comprises (REC-07 : facturé au-delà du réceptionné).",
+        "operationId": "lire_controles_liquidation",
+        "parameters": [
+          {
+            "name": "liquidation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Liquidation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResultatControleSortie"
+                  },
+                  "title": "Response Lire Controles Liquidation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/liquidations/{liquidation_id}/derogations": {
+      "post": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Demander Derogation Liquidation",
+        "description": "EF-LIQ-05 : liquidation au-delà du reste dû, par dérogation validée (RG-19).",
+        "operationId": "demander_derogation_liquidation",
+        "parameters": [
+          {
+            "name": "liquidation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Liquidation Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DerogationCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Demander Derogation Liquidation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/factures/{facture_id}/rapprochement": {
+      "get": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Lire Rapprochement",
+        "operationId": "lire_rapprochement",
+        "parameters": [
+          {
+            "name": "facture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Facture Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcartsSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/factures/{facture_id}/rapprochements": {
+      "post": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Valider Rapprochement",
+        "description": "Rapprochement enregistré ; un écart sans explication n'est pas validable (T-180).",
+        "operationId": "valider_rapprochement",
+        "parameters": [
+          {
+            "name": "facture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Facture Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RapprochementCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RapprochementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "factures"
+        ],
+        "summary": "Lister Rapprochements",
+        "operationId": "lister_rapprochements",
+        "parameters": [
+          {
+            "name": "facture_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Facture Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RapprochementSortie"
+                  },
+                  "title": "Response Lister Rapprochements"
                 }
               }
             }
@@ -7767,7 +8640,8 @@
                 "avenants",
                 "engagements",
                 "derogations",
-                "receptions"
+                "receptions",
+                "liquidations"
               ],
               "type": "string",
               "title": "Ressource"
@@ -7826,7 +8700,8 @@
                 "avenants",
                 "engagements",
                 "derogations",
-                "receptions"
+                "receptions",
+                "liquidations"
               ],
               "type": "string",
               "title": "Ressource"
@@ -7897,7 +8772,8 @@
                 "avenants",
                 "engagements",
                 "derogations",
-                "receptions"
+                "receptions",
+                "liquidations"
               ],
               "type": "string",
               "title": "Ressource"
@@ -7957,7 +8833,9 @@
                 "avenants",
                 "engagements",
                 "derogations",
-                "receptions"
+                "receptions",
+                "liquidations",
+                "factures"
               ],
               "type": "string",
               "title": "Ressource"
@@ -8020,7 +8898,9 @@
                 "avenants",
                 "engagements",
                 "derogations",
-                "receptions"
+                "receptions",
+                "liquidations",
+                "factures"
               ],
               "type": "string",
               "title": "Ressource"
@@ -8462,7 +9342,9 @@
                 "Avenant",
                 "Engagement",
                 "Derogation",
-                "Reception"
+                "Reception",
+                "Liquidation",
+                "Facture"
               ],
               "type": "string",
               "title": "Type Objet"
@@ -10156,7 +11038,9 @@
               "Avenant",
               "Engagement",
               "Derogation",
-              "Reception"
+              "Reception",
+              "Liquidation",
+              "Facture"
             ],
             "title": "Typeobjet"
           },
@@ -11898,6 +12782,128 @@
         ],
         "title": "DecisionCreation"
       },
+      "DeductionSchema": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TypeDeduction"
+          },
+          "montant": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montant"
+          },
+          "taux": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taux"
+          },
+          "motif": {
+            "type": "string",
+            "maxLength": 500,
+            "title": "Motif",
+            "default": ""
+          },
+          "baseCalcul": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Basecalcul"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "title": "DeductionSchema"
+      },
+      "DeductionSortie": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TypeDeduction"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "taux": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Taux"
+          },
+          "motif": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motif"
+          },
+          "baseCalcul": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Basecalcul"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "montant",
+          "taux",
+          "motif",
+          "baseCalcul"
+        ],
+        "title": "DeductionSortie"
+      },
       "DelegationCreation": {
         "properties": {
           "delegataireCode": {
@@ -12106,6 +13112,82 @@
           "indicateurs"
         ],
         "title": "DisponibiliteSortie"
+      },
+      "EcartsSortie": {
+        "properties": {
+          "commande": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Commande",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "receptionne": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Receptionne",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "facture": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Facture",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "paye": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Paye",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "ecartCommandeReception": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Ecartcommandereception",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "ecartReceptionFacture": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Ecartreceptionfacture",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "ecartFacturePaiement": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Ecartfacturepaiement",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "sansEcart": {
+            "type": "boolean",
+            "title": "Sansecart"
+          }
+        },
+        "type": "object",
+        "required": [
+          "commande",
+          "receptionne",
+          "facture",
+          "paye",
+          "ecartCommandeReception",
+          "ecartReceptionFacture",
+          "ecartFacturePaiement",
+          "sansEcart"
+        ],
+        "title": "EcartsSortie"
       },
       "EcheanceSchema": {
         "properties": {
@@ -12972,6 +14054,549 @@
           "version"
         ],
         "title": "ExerciceSortie"
+      },
+      "FactureChamps": {
+        "properties": {
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "objet": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objet"
+          },
+          "dateEmission": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateemission"
+          },
+          "dateReception": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datereception"
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "dateLimiteTraitement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datelimitetraitement"
+          },
+          "periodeRattachement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Perioderattachement"
+          },
+          "montantHt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montantht"
+          },
+          "montantTaxes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montanttaxes"
+          },
+          "montantTtc": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montantttc"
+          },
+          "motifLeveeDoublon": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motifleveedoublon"
+          }
+        },
+        "type": "object",
+        "title": "FactureChamps"
+      },
+      "FactureCreation": {
+        "properties": {
+          "numero": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Numero"
+          },
+          "objet": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Objet"
+          },
+          "dateEmission": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateemission"
+          },
+          "dateReception": {
+            "type": "string",
+            "format": "date",
+            "title": "Datereception"
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "dateLimiteTraitement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datelimitetraitement"
+          },
+          "periodeRattachement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Perioderattachement"
+          },
+          "montantHt": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantht",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "montantTaxes": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montanttaxes",
+            "default": "0",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "montantTtc": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantttc",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "motifLeveeDoublon": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motifleveedoublon"
+          },
+          "engagementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Engagementid"
+          },
+          "bonCommandeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boncommandeid"
+          },
+          "factureOrigineId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factureorigineid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeFacture"
+          },
+          "numeroDecompte": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numerodecompte"
+          }
+        },
+        "type": "object",
+        "required": [
+          "numero",
+          "objet",
+          "dateEmission",
+          "dateReception",
+          "montantHt",
+          "montantTtc",
+          "engagementId",
+          "type"
+        ],
+        "title": "FactureCreation"
+      },
+      "FactureSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "engagementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Engagementid"
+          },
+          "fournisseurId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Fournisseurid"
+          },
+          "bonCommandeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boncommandeid"
+          },
+          "factureOrigineId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Factureorigineid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeFacture"
+          },
+          "objet": {
+            "type": "string",
+            "title": "Objet"
+          },
+          "dateEmission": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateemission"
+          },
+          "dateReception": {
+            "type": "string",
+            "format": "date",
+            "title": "Datereception"
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "dateLimiteTraitement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datelimitetraitement"
+          },
+          "periodeRattachement": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Perioderattachement"
+          },
+          "montantHt": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantht",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "montantTaxes": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montanttaxes",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "montantTtc": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantttc",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "numeroDecompte": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numerodecompte"
+          },
+          "montantCumuleDecomptes": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montantcumuledecomptes"
+          },
+          "liquideValide": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Liquidevalide",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteAPayer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Resteapayer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "statut": {
+            "$ref": "#/components/schemas/StatutFacture"
+          },
+          "motifStatut": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motifstatut"
+          },
+          "motifLeveeDoublon": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motifleveedoublon"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "engagementId",
+          "fournisseurId",
+          "bonCommandeId",
+          "factureOrigineId",
+          "numero",
+          "type",
+          "objet",
+          "dateEmission",
+          "dateReception",
+          "dateEcheance",
+          "dateLimiteTraitement",
+          "periodeRattachement",
+          "montantHt",
+          "montantTaxes",
+          "montantTtc",
+          "numeroDecompte",
+          "montantCumuleDecomptes",
+          "liquideValide",
+          "resteAPayer",
+          "statut",
+          "motifStatut",
+          "motifLeveeDoublon",
+          "creeParCode",
+          "creeLe",
+          "version"
+        ],
+        "title": "FactureSortie"
       },
       "FournisseurCreation": {
         "properties": {
@@ -13977,6 +15602,267 @@
         ],
         "title": "LigneSortie"
       },
+      "LiquidationChamps": {
+        "properties": {
+          "dateLiquidation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateliquidation"
+          },
+          "montantBase": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montantbase"
+          },
+          "observations": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observations"
+          },
+          "receptionIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Receptionids"
+          },
+          "deductions": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/DeductionSchema"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Deductions"
+          }
+        },
+        "type": "object",
+        "title": "LiquidationChamps"
+      },
+      "LiquidationCreation": {
+        "properties": {
+          "dateLiquidation": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateliquidation"
+          },
+          "montantBase": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantbase",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "observations": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observations"
+          },
+          "receptionIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Receptionids"
+          },
+          "deductions": {
+            "items": {
+              "$ref": "#/components/schemas/DeductionSchema"
+            },
+            "type": "array",
+            "title": "Deductions"
+          },
+          "imputationId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Imputationid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dateLiquidation",
+          "montantBase",
+          "imputationId"
+        ],
+        "title": "LiquidationCreation"
+      },
+      "LiquidationSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "factureId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Factureid"
+          },
+          "imputationId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Imputationid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "dateLiquidation": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateliquidation"
+          },
+          "montantBase": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantbase",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "montantLiquide": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantliquide",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "deductionsTotal": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Deductionstotal",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "netAPayer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Netapayer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "consommationBudgetaire": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Consommationbudgetaire",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "observations": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observations"
+          },
+          "statut": {
+            "$ref": "#/components/schemas/StatutLiquidation"
+          },
+          "receptionIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "title": "Receptionids"
+          },
+          "deductions": {
+            "items": {
+              "$ref": "#/components/schemas/DeductionSortie"
+            },
+            "type": "array",
+            "title": "Deductions"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "factureId",
+          "imputationId",
+          "numero",
+          "dateLiquidation",
+          "montantBase",
+          "montantLiquide",
+          "deductionsTotal",
+          "netAPayer",
+          "consommationBudgetaire",
+          "observations",
+          "statut",
+          "receptionIds",
+          "deductions",
+          "creeParCode",
+          "creeLe",
+          "version"
+        ],
+        "title": "LiquidationSortie"
+      },
       "LotSchema": {
         "properties": {
           "code": {
@@ -14096,6 +15982,21 @@
           "langue"
         ],
         "title": "Moi"
+      },
+      "MotifSchema": {
+        "properties": {
+          "motif": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Motif"
+          }
+        },
+        "type": "object",
+        "required": [
+          "motif"
+        ],
+        "title": "MotifSchema"
       },
       "NatureDerogation": {
         "type": "string",
@@ -14642,6 +16543,26 @@
           "pagination"
         ],
         "title": "Page[ExerciceSortie]"
+      },
+      "Page_FactureSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/FactureSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[FactureSortie]"
       },
       "Page_FournisseurSortie_": {
         "properties": {
@@ -15312,6 +17233,88 @@
         ],
         "title": "RapportImport"
       },
+      "RapprochementCreation": {
+        "properties": {
+          "explication": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explication"
+          }
+        },
+        "type": "object",
+        "title": "RapprochementCreation"
+      },
+      "RapprochementSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "dateRapprochement": {
+            "type": "string",
+            "format": "date",
+            "title": "Daterapprochement"
+          },
+          "ecartCommandeReception": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Ecartcommandereception",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "ecartReceptionFacture": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Ecartreceptionfacture",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "ecartFacturePaiement": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Ecartfacturepaiement",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "explication": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Explication"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "dateRapprochement",
+          "ecartCommandeReception",
+          "ecartReceptionFacture",
+          "ecartFacturePaiement",
+          "explication",
+          "creeParCode"
+        ],
+        "title": "RapprochementSortie"
+      },
       "ReceptionChamps": {
         "properties": {
           "dateReception": {
@@ -15718,7 +17721,7 @@
         ],
         "title": "ReserveSortie"
       },
-      "ResultatSortie": {
+      "ResultatControleSortie": {
         "properties": {
           "code": {
             "type": "string",
@@ -15727,12 +17730,13 @@
           "nature": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/NatureDerogation"
+                "type": "string"
               },
               {
                 "type": "null"
               }
-            ]
+            ],
+            "title": "Nature"
           },
           "depassement": {
             "type": "string",
@@ -15752,6 +17756,10 @@
           "leve": {
             "type": "boolean",
             "title": "Leve"
+          },
+          "bloquant": {
+            "type": "boolean",
+            "title": "Bloquant"
           }
         },
         "type": "object",
@@ -15760,9 +17768,11 @@
           "nature",
           "depassement",
           "details",
-          "leve"
+          "leve",
+          "bloquant"
         ],
-        "title": "ResultatSortie"
+        "title": "ResultatControleSortie",
+        "description": "Écart d'un contrôle automatique : levé par dérogation, ou alerte s'il ne bloque pas."
       },
       "RevisionCorrection": {
         "properties": {
@@ -16377,7 +18387,9 @@
               "Avenant",
               "Engagement",
               "Derogation",
-              "Reception"
+              "Reception",
+              "Liquidation",
+              "Facture"
             ],
             "title": "Typeobjet"
           },
@@ -16426,6 +18438,32 @@
           "ANNULE"
         ],
         "title": "StatutEngagement"
+      },
+      "StatutFacture": {
+        "type": "string",
+        "enum": [
+          "RECUE",
+          "EN_CONTROLE",
+          "RETOURNEE",
+          "REJETEE",
+          "LIQUIDEE",
+          "MISE_EN_PAIEMENT",
+          "PARTIELLEMENT_PAYEE",
+          "PAYEE"
+        ],
+        "title": "StatutFacture"
+      },
+      "StatutLiquidation": {
+        "type": "string",
+        "enum": [
+          "BROUILLON",
+          "SOUMIS",
+          "EN_VALIDATION",
+          "A_CORRIGER",
+          "VALIDE",
+          "REJETE"
+        ],
+        "title": "StatutLiquidation"
       },
       "StatutModification": {
         "properties": {
@@ -16763,7 +18801,9 @@
               "Avenant",
               "Engagement",
               "Derogation",
-              "Reception"
+              "Reception",
+              "Liquidation",
+              "Facture"
             ],
             "title": "Typeobjet"
           },
@@ -16920,6 +18960,18 @@
         ],
         "title": "TypeContrat"
       },
+      "TypeDeduction": {
+        "type": "string",
+        "enum": [
+          "AVANCE_RECUPEREE",
+          "RETENUE_GARANTIE",
+          "PENALITE",
+          "REFACTION",
+          "RETENUE_SOURCE",
+          "AUTRE"
+        ],
+        "title": "TypeDeduction"
+      },
       "TypeDepenseCreation": {
         "properties": {
           "code": {
@@ -17053,6 +19105,18 @@
         ],
         "title": "TypeDepenseSortie"
       },
+      "TypeFacture": {
+        "type": "string",
+        "enum": [
+          "AVANCE",
+          "ACOMPTE",
+          "PARTIELLE",
+          "DEFINITIVE",
+          "DECOMPTE",
+          "AVOIR"
+        ],
+        "title": "TypeFacture"
+      },
       "TypeOrdre": {
         "type": "string",
         "enum": [
@@ -17093,7 +19157,9 @@
                 "Avenant",
                 "Engagement",
                 "Derogation",
-                "Reception"
+                "Reception",
+                "Liquidation",
+                "Facture"
               ]
             },
             "type": "array",
@@ -17157,7 +19223,9 @@
                     "Avenant",
                     "Engagement",
                     "Derogation",
-                    "Reception"
+                    "Reception",
+                    "Liquidation",
+                    "Facture"
                   ]
                 },
                 "type": "array"
@@ -17217,7 +19285,9 @@
                     "Avenant",
                     "Engagement",
                     "Derogation",
-                    "Reception"
+                    "Reception",
+                    "Liquidation",
+                    "Facture"
                   ]
                 },
                 "type": "array"

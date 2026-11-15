@@ -588,3 +588,244 @@ test('REC-05 : livraison partielle enregistrée avec son procès-verbal', async 
     'multipart/form-data',
   )
 })
+
+const FACTURE = {
+  id: 'f1',
+  etablissementId: 'a1',
+  engagementId: 'e1',
+  fournisseurId: 'fo1',
+  bonCommandeId: null,
+  factureOrigineId: null,
+  numero: 'FA-778',
+  type: 'PARTIELLE',
+  objet: 'Livraison de mars',
+  dateEmission: '2026-04-01',
+  dateReception: '2026-04-03',
+  dateEcheance: null,
+  dateLimiteTraitement: null,
+  periodeRattachement: null,
+  montantHt: '6000000.00',
+  montantTaxes: '0.00',
+  montantTtc: '6000000.00',
+  numeroDecompte: null,
+  montantCumuleDecomptes: null,
+  liquideValide: '0.00',
+  resteAPayer: '6000000.00',
+  statut: 'RECUE',
+  motifStatut: null as string | null,
+  motifLeveeDoublon: null,
+  creeParCode: 'AG020',
+  creeLe: '2026-04-03T10:00:00Z',
+  version: 1,
+}
+const CIRCUIT_VIDE = {
+  statut: 'BROUILLON',
+  separationTaches: true,
+  etapes: [],
+  visas: [],
+  etapesOuvertes: [],
+  peutDecider: false,
+}
+const pageDe = (donnees: unknown[]) => ({
+  donnees,
+  pagination: { page: 1, taille: 100, total: donnees.length, suivant: null },
+})
+
+async function connecterAgentFinancier(page: Page, retour: string) {
+  await page.goto(`/connexion?retour=${retour}`)
+  await page.getByLabel('Identifiant').fill('agent')
+  await page.getByLabel('Mot de passe').fill('secret')
+  await page.getByRole('button', { name: 'Se connecter' }).click()
+}
+
+test('REC-06 : facture partielle enregistrée, contrôlée et liquidée', async ({ page }) => {
+  let facture: typeof FACTURE | null = null
+  let liquidations: unknown[] = []
+  const envois: { chemin: string; corps: string; cle: string | null }[] = []
+  const liquidation = {
+    id: 'l1',
+    factureId: 'f1',
+    imputationId: 'i1',
+    numero: 'LIQ-2026-00001',
+    dateLiquidation: '2026-04-05',
+    montantBase: '6000000.00',
+    montantLiquide: '6000000.00',
+    deductionsTotal: '300000.00',
+    netAPayer: '5700000.00',
+    consommationBudgetaire: '6000000.00',
+    observations: null,
+    statut: 'BROUILLON',
+    receptionIds: [],
+    deductions: [
+      { type: 'RETENUE_GARANTIE', montant: '300000.00', taux: '5', motif: null, baseCalcul: null },
+    ],
+    creeParCode: 'AG020',
+    creeLe: '2026-04-05T10:00:00Z',
+    version: 1,
+  }
+  await page.route('**/api/v1/**', async (route) => {
+    const requete = route.request()
+    const chemin = new URL(requete.url()).pathname
+    const methode = requete.method()
+    if (methode === 'POST') {
+      envois.push({
+        chemin,
+        corps: requete.postData() ?? '',
+        cle: await requete.headerValue('idempotency-key'),
+      })
+    }
+    if (chemin === '/api/v1/factures' && methode === 'POST') {
+      facture = FACTURE
+      await route.fulfill({ status: 201, json: facture })
+      return
+    }
+    if (chemin === '/api/v1/factures/f1/liquidations' && methode === 'POST') {
+      liquidations = [liquidation]
+      facture = { ...FACTURE, statut: 'EN_CONTROLE' }
+      await route.fulfill({ status: 201, json: liquidation })
+      return
+    }
+    if (chemin === '/api/v1/liquidations/l1/soumissions') {
+      liquidations = [{ ...liquidation, statut: 'SOUMIS' }]
+      await route.fulfill({ status: 201, json: { ...CIRCUIT_VIDE, statut: 'SOUMIS' } })
+      return
+    }
+    const reponses: Record<string, unknown> = {
+      '/api/v1/auth/connexion': { jetonAcces: 'a', jetonRafraichissement: 'r', expireDans: 900 },
+      '/api/v1/moi': { ...MOI, habilitations: [{ profil: 'AF', etablissementId: 'a1' }] },
+      '/api/v1/engagements': pageDe([{ id: 'e1', numero: 'ENG-2026-00001', objet: 'Médicaments' }]),
+      '/api/v1/engagements/e1': {
+        id: 'e1',
+        imputations: [{ id: 'i1', ligneId: 'lb1', montant: '9000000.00', annule: '0.00' }],
+      },
+      '/api/v1/lignes-budgetaires': pageDe([{ id: 'lb1', code: '6011', libelle: 'Médicaments' }]),
+      '/api/v1/factures': pageDe(facture ? [facture] : []),
+      '/api/v1/factures/f1': facture,
+      '/api/v1/factures/f1/liquidations': liquidations,
+      '/api/v1/liquidations/l1/controles': [],
+      '/api/v1/liquidations/l1/validations': CIRCUIT_VIDE,
+      '/api/v1/liquidations/l1/pieces': [],
+    }
+    await route.fulfill({ json: reponses[chemin] ?? pageDe([]) })
+  })
+
+  await connecterAgentFinancier(page, '/factures')
+  await page.getByRole('button', { name: 'Enregistrer une facture' }).click()
+  const tiroir = page.getByRole('dialog')
+  await tiroir.getByLabel('Engagement').click()
+  await page.getByTitle('ENG-2026-00001 — Médicaments').click()
+  await tiroir.getByLabel('Numéro du fournisseur').fill('FA-778')
+  await tiroir.getByLabel('Objet').fill('Livraison de mars')
+  await tiroir.getByLabel('Émise le').fill('2026-04-01')
+  await tiroir.getByLabel('Reçue le').fill('2026-04-03')
+  await tiroir.getByLabel('Montant HT').fill('6000000')
+  await tiroir.getByLabel('Montant TTC').fill('6000000')
+  await tiroir.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page.getByText('Facture enregistrée.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'FA-778 — Livraison de mars' })).toBeVisible()
+
+  await ouvrirOnglet(page, 'Liquidations')
+  await page.getByRole('button', { name: 'Liquider' }).click()
+  const saisie = page.getByRole('dialog')
+  // Une seule imputation : proposée d'office, libellée par sa ligne budgétaire.
+  await expect(saisie.getByText('6011 — Médicaments')).toBeVisible()
+  await saisie.getByLabel('Date', { exact: true }).fill('2026-04-05')
+  await saisie.getByRole('button', { name: 'Ajouter une déduction' }).click()
+  await saisie.getByLabel('Taux (%)').fill('5')
+  await saisie.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page.getByText('Liquidation enregistrée en brouillon.')).toBeVisible()
+
+  // Montants de la formule 6.3 et contrôles, puis soumission au circuit.
+  const detail = page.getByRole('dialog', { name: 'LIQ-2026-00001' })
+  await expect(detail.getByText('Aucun écart.')).toBeVisible()
+  await expect(detail.getByText('Net à payer')).toBeVisible()
+  await detail.getByRole('button', { name: 'Soumettre au circuit' }).click()
+  await expect(page.getByText('Liquidation soumise.')).toBeVisible()
+
+  const facturee = JSON.parse(envois.find((e) => e.chemin === '/api/v1/factures')!.corps)
+  expect(facturee).toMatchObject({
+    engagementId: 'e1',
+    type: 'PARTIELLE',
+    numero: 'FA-778',
+    montantHt: '6000000',
+    montantTtc: '6000000',
+  })
+  const liquidee = envois.find((e) => e.chemin === '/api/v1/factures/f1/liquidations')!
+  expect(liquidee.cle).toBeTruthy()
+  expect(JSON.parse(liquidee.corps)).toMatchObject({
+    imputationId: 'i1',
+    dateLiquidation: '2026-04-05',
+    montantBase: '6000000.00',
+    deductions: [{ type: 'RETENUE_GARANTIE', montant: null, taux: '5' }],
+  })
+})
+
+test('REC-12 : facture retournée, corrigée puis rejetée avec motif', async ({ page }) => {
+  let facture = { ...FACTURE }
+  const ecritures: { chemin: string; methode: string; corps: string; version: string | null }[] = []
+  await page.route('**/api/v1/**', async (route) => {
+    const requete = route.request()
+    const chemin = new URL(requete.url()).pathname
+    const methode = requete.method()
+    if (methode !== 'GET' && chemin.startsWith('/api/v1/factures')) {
+      ecritures.push({
+        chemin,
+        methode,
+        corps: requete.postData() ?? '',
+        version: await requete.headerValue('if-match'),
+      })
+    }
+    if (chemin === '/api/v1/factures/f1/retours') {
+      facture = { ...facture, statut: 'RETOURNEE', motifStatut: 'Numéro illisible' }
+      await route.fulfill({ status: 201, json: facture })
+      return
+    }
+    if (chemin === '/api/v1/factures/f1' && methode === 'PATCH') {
+      facture = { ...facture, numero: 'FA-779', statut: 'RECUE', version: 2 }
+      await route.fulfill({ json: facture })
+      return
+    }
+    if (chemin === '/api/v1/factures/f1/rejets') {
+      facture = { ...facture, statut: 'REJETEE', motifStatut: 'Prix non conformes' }
+      await route.fulfill({ status: 201, json: facture })
+      return
+    }
+    const reponses: Record<string, unknown> = {
+      '/api/v1/auth/connexion': { jetonAcces: 'a', jetonRafraichissement: 'r', expireDans: 900 },
+      '/api/v1/moi': { ...MOI, habilitations: [{ profil: 'AF', etablissementId: 'a1' }] },
+      '/api/v1/factures/f1': facture,
+    }
+    await route.fulfill({ json: reponses[chemin] ?? pageDe([]) })
+  })
+
+  await connecterAgentFinancier(page, '/factures/f1')
+  await page.getByRole('button', { name: 'Retourner pour correction' }).click()
+  await page.getByRole('dialog').getByLabel('Motif').fill('Numéro illisible')
+  await page.getByRole('dialog').getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page.getByText('Facture retournée.')).toBeVisible()
+  await expect(page.getByText('Retournée', { exact: true })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Corriger' }).click()
+  const tiroir = page.getByRole('dialog')
+  await tiroir.getByLabel('Numéro du fournisseur').fill('FA-779')
+  await tiroir.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page.getByText('Facture corrigée.')).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'FA-779 — Livraison de mars' })).toBeVisible()
+
+  await page.getByRole('button', { name: 'Rejeter' }).click()
+  await page.getByRole('dialog').getByLabel('Motif').fill('Prix non conformes')
+  await page.getByRole('dialog').getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page.getByText('Facture rejetée.')).toBeVisible()
+  await expect(page.getByText('Rejetée', { exact: true })).toBeVisible()
+  // Facture rejetée : plus aucune action de traitement.
+  await expect(page.getByRole('button', { name: 'Rejeter' })).toHaveCount(0)
+
+  expect(ecritures.map((e) => `${e.methode} ${e.chemin}`)).toEqual([
+    'POST /api/v1/factures/f1/retours',
+    'PATCH /api/v1/factures/f1',
+    'POST /api/v1/factures/f1/rejets',
+  ])
+  expect(ecritures[1].version).toBe('"1"')
+  expect(JSON.parse(ecritures[1].corps)).toMatchObject({ numero: 'FA-779' })
+  expect(JSON.parse(ecritures[2].corps)).toEqual({ motif: 'Prix non conformes' })
+})

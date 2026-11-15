@@ -55,6 +55,10 @@
   "COMMANDE_SUPERIEURE_ENGAGEMENT": "Orders would exceed the commitment's net amount.",
   "QUANTITES_INCOHERENTES": "Positive quantities, and accepted plus rejected at most equal to received.",
   "RECEPTION_SUPERIEURE_COMMANDE": "The cumulative accepted quantity would exceed the ordered one.",
+  "FACTURE_DOUBLON": "Duplicate invoice: same supplier and number, or same date and amount. Give a release reason if it is really distinct.",
+  "FACTURE_NON_TRAITABLE": "This action is not possible on the invoice in its current state.",
+  "DEDUCTION_INCALCULABLE": "Give the amount or rate of the deduction: the contract does not provide it.",
+  "ECART_NON_EXPLIQUE": "The reconciliation shows a gap: explain it to validate it.",
   "champ": {
     "missing": "This field is required.",
     "string_too_short": "This field is too short.",

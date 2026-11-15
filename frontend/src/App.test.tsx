@@ -48,6 +48,7 @@ beforeAll(async () => {
     'contrats',
     'engagements',
     'commandes',
+    'factures',
   ])
 })
 
@@ -686,5 +687,145 @@ describe('commandes et réceptions (lot 3)', () => {
       urls.some((u) => u.startsWith('/api/v1/bons-commande') && u.includes('enRetard=true')),
     ).toBe(true)
     expect(urls.some((u) => u.includes('/api/v1/reserves?nonLevees=true'))).toBe(true)
+  })
+})
+
+describe('factures et liquidations (lot 4)', () => {
+  const AF = { ...MOI, habilitations: [{ profil: 'AF', etablissementId: 'a1' }] }
+  const FACTURE = {
+    id: 'f1',
+    etablissementId: 'a1',
+    engagementId: 'e1',
+    fournisseurId: 'fo1',
+    bonCommandeId: null,
+    factureOrigineId: null,
+    numero: 'FA-778',
+    type: 'PARTIELLE',
+    objet: 'Livraison de mars',
+    dateEmission: '2026-04-01',
+    dateReception: '2026-04-03',
+    dateEcheance: null,
+    dateLimiteTraitement: null,
+    periodeRattachement: null,
+    montantHt: '6000000.00',
+    montantTaxes: '0.00',
+    montantTtc: '6000000.00',
+    numeroDecompte: null,
+    montantCumuleDecomptes: null,
+    liquideValide: '0.00',
+    resteAPayer: '6000000.00',
+    statut: 'EN_CONTROLE',
+    motifStatut: null,
+    motifLeveeDoublon: null,
+    creeParCode: 'AG020',
+    creeLe: '2026-04-03T10:00:00Z',
+    version: 1,
+  }
+  const LIQUIDATION = {
+    id: 'l1',
+    factureId: 'f1',
+    imputationId: 'i1',
+    numero: 'LIQ-2026-00001',
+    dateLiquidation: '2026-04-05',
+    montantBase: '6000000.00',
+    montantLiquide: '6000000.00',
+    deductionsTotal: '300000.00',
+    netAPayer: '5700000.00',
+    consommationBudgetaire: '6000000.00',
+    observations: null,
+    statut: 'BROUILLON',
+    receptionIds: [],
+    deductions: [
+      { type: 'RETENUE_GARANTIE', montant: '300000.00', taux: '5', motif: null, baseCalcul: null },
+    ],
+    creeParCode: 'AG020',
+    creeLe: '2026-04-05T10:00:00Z',
+    version: 1,
+  }
+
+  test('liquidation : alerte et écart bloquant distingués, dérogation demandée (T-177, T-178)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(AF)],
+      'GET /api/v1/factures/f1': [json(FACTURE)],
+      'GET /api/v1/factures/f1/liquidations': [json([LIQUIDATION])],
+      'GET /api/v1/engagements/e1': [
+        json({ imputations: [{ id: 'i1', ligneId: 'l1', montant: '9000000.00', annule: '0.00' }] }),
+      ],
+      'GET /api/v1/liquidations/l1/controles': [
+        json([
+          {
+            code: 'LIQUIDATION_SUP_DU',
+            nature: 'LIQUIDATION_SUP_DU',
+            depassement: '1000000.00',
+            details: { resteDu: '5000000.00' },
+            leve: false,
+            bloquant: true,
+          },
+          {
+            code: 'FACTURE_SUP_RECEPTION',
+            nature: null,
+            depassement: '500000.00',
+            details: {},
+            leve: false,
+            bloquant: false,
+          },
+        ]),
+      ],
+      'GET /api/v1/liquidations/l1/validations': [
+        json({
+          statut: 'BROUILLON',
+          separationTaches: true,
+          etapes: [],
+          visas: [],
+          etapesOuvertes: [],
+          peutDecider: false,
+        }),
+      ],
+      'GET /api/v1/liquidations/l1/pieces': [json([])],
+      'POST /api/v1/liquidations/l1/derogations': [json({ id: 'd1' }, 201)],
+    })
+    afficher('/factures/f1')
+    await userEvent.click(await screen.findByRole('tab', { name: 'Liquidations' }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Détail' }))
+    // Montants de la formule 6.3 et états écrits en clair (IHM-06).
+    expect(await screen.findByText('Au-delà du reste dû')).toBeTruthy()
+    expect(screen.getByText('Bloquant')).toBeTruthy()
+    expect(screen.getByText('Alerte')).toBeTruthy()
+    expect(screen.getByText('Reste dû : 5000000.00')).toBeTruthy()
+    await userEvent.click(screen.getByRole('button', { name: 'Demander une dérogation' }))
+    // La demande s'ouvre par-dessus le tiroir de la liquidation : dernier dialogue.
+    const dialogue = (await screen.findAllByRole('dialog')).at(-1)!
+    expect(within(dialogue).getByText(/Liquidation supérieure au dû/)).toBeTruthy()
+    await userEvent.type(within(dialogue).getByLabelText('Motif'), 'Révision de prix')
+    await userEvent.click(within(dialogue).getByRole('button', { name: 'Enregistrer' }))
+    expect(await screen.findByText('Dérogation demandée et soumise au circuit.')).toBeTruthy()
+
+    const envoi = appel.mock.calls.find(([, o]) => o?.method === 'POST')!
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({
+      montantDepassement: '1000000.00',
+      motif: 'Révision de prix',
+      nature: 'LIQUIDATION_SUP_DU',
+    })
+  })
+
+  test('rejet motivé d’une facture (REC-12)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(AF)],
+      'GET /api/v1/factures/f1': [json(FACTURE)],
+      'POST /api/v1/factures/f1/rejets': [
+        json({ ...FACTURE, statut: 'REJETEE', motifStatut: 'Prix non conformes' }, 201),
+      ],
+    })
+    afficher('/factures/f1')
+    await userEvent.click(await screen.findByRole('button', { name: 'Rejeter' }))
+    const dialogue = await screen.findByRole('dialog')
+    await userEvent.type(within(dialogue).getByLabelText('Motif'), 'Prix non conformes')
+    await userEvent.click(within(dialogue).getByRole('button', { name: 'Enregistrer' }))
+    expect(await screen.findByText('Facture rejetée.')).toBeTruthy()
+    expect(await screen.findByText('Rejetée')).toBeTruthy()
+    const envoi = appel.mock.calls.find(([, o]) => o?.method === 'POST')!
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({ motif: 'Prix non conformes' })
   })
 })
