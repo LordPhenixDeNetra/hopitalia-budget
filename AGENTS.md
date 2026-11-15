@@ -19,7 +19,7 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 | [POINTS_REPORTES.md](POINTS_REPORTES.md) | Ce qui a été volontairement remis à plus tard. |
 | [docs/cadrage/](docs/cadrage/) | Questionnaires (DAF, équipe Hopitalia), matrice des habilitations, jeu d'essai de référence. |
 
-**État actuel :** priorité P0, lot 1 (P1.A), workflow transverse (P1.B, sauf annulations et dérogations qui attendent les engagements) contrats (P1.C), engagements (P1.D), commandes, réceptions et service fait (P1.E), factures, liquidations et rapprochement (P1.F), ordonnancement et paiements (P1.G) terminés ; recette de la chaîne de dépense (P1.H) faite, sauf la recette utilisateur avec la DAF (T-198, support dans `docs/recette/`). Tableaux de bord (P2.A) et alertes (P2.B, sauf courriels : T-225 bloqué) terminés. États, audit, recherche et clôture d'exercice (P2.C) terminés. Suite : qualité, sécurité et exploitation (P2.D). Une ressource avec règles métier reprend le schéma des révisions (domaine, cas d'utilisation, dépôt, routes, écrans, tests) ; un référentiel simple passe par les routes communes (voir Architecture).
+**État actuel :** priorité P0, lot 1 (P1.A), workflow transverse (P1.B, sauf annulations et dérogations qui attendent les engagements) contrats (P1.C), engagements (P1.D), commandes, réceptions et service fait (P1.E), factures, liquidations et rapprochement (P1.F), ordonnancement et paiements (P1.G) terminés ; recette de la chaîne de dépense (P1.H) faite, sauf la recette utilisateur avec la DAF (T-198, support dans `docs/recette/`). Tableaux de bord (P2.A) et alertes (P2.B, sauf courriels : T-225 bloqué) terminés. États, audit, recherche et clôture d'exercice (P2.C) terminés ; P2.D en cours (traçabilité des tests et contrat d'API faits). Suite : accessibilité, responsive et performance (T-249 à T-251). Une ressource avec règles métier reprend le schéma des révisions (domaine, cas d'utilisation, dépôt, routes, écrans, tests) ; un référentiel simple passe par les routes communes (voir Architecture).
 
 ## Pile technique
 
@@ -69,6 +69,7 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 - Chaque règle de gestion RG-01 à RG-20 a au moins un test qui la nomme.
 - Chaque formule de la section 6 a ses tests unitaires.
 - Un bug corrigé arrive avec le test qui le reproduit.
+- Un test nomme dans son nom ou sa docstring (ou son titre côté frontend) les exigences qu'il couvre (`RG-xx`, `REC-xx`, `API-xx`) ; après tout ajout ou renommage, régénérer `docs/recette/tracabilite-tests.md` par `python -m tests.test_tracabilite` (depuis `backend/`).
 
 ## Documentation
 
