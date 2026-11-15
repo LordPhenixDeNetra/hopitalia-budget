@@ -32,12 +32,12 @@
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
-| P1 | 77 | 1 | 4 | 0 | 0 | 0 | 82 |
+| P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **146** | **3** | **58** | **0** | **0** | **2** | **209** |
+| **Total** | **149** | **4** | **54** | **0** | **0** | **2** | **209** |
 
-Avancement : 146 / 207 tâches actives terminées (71 %), hors 2 abandonnées.
+Avancement : 149 / 207 tâches actives terminées (72 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -278,10 +278,10 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-195 | Scénario de bout en bout de l'annexe 18.2 (marché de 100 M XOF). | REC-14, §18.2 | T-193, T-015 | À faire | Tous les montants de l'annexe retrouvés. |
-| T-196 | Test d'absence de fonction de passation dans l'API et les écrans. | RG-12, REC-15 | T-193 | À faire | Aucun point d'API ni écran de passation. |
-| T-197 | Revue d'architecture ARC-S, ARC-O, ARC-L, ARC-I, ARC-D. | §15.3 | T-193 | À faire | Grille de revue complétée, écarts corrigés. |
-| T-198 | Recette utilisateur des lots 1 à 5 avec la DAF. | §15.4 | T-195 | À faire | Procès-verbal de recette partiel signé. |
+| T-195 | Scénario de bout en bout de l'annexe 18.2 (marché de 100 M XOF). | REC-14, §18.2 | T-193, T-015 | Fait | Tous les montants de l'annexe retrouvés. Toutes les pièces du jeu d'essai saisies par l'API ; montants de la synthèse du marché, des lignes et des liquidations, statuts et contrôles de la section 4 retrouvés (`test_rec14_jeu_d_essai_de_l_annexe_18_2`). Les alertes du jeu se vérifieront avec T-222. |
+| T-196 | Test d'absence de fonction de passation dans l'API et les écrans. | RG-12, REC-15 | T-193 | Fait | Aucun point d'API ni écran de passation. Aucun point d'API (chemins, résumés, identifiants d'opération du schéma OpenAPI) ni route ou menu de l'interface au vocabulaire de la passation (`test_rec15_aucune_fonction_de_passation_dans_l_api`, test d'interface REC-15). |
+| T-197 | Revue d'architecture ARC-S, ARC-O, ARC-L, ARC-I, ARC-D. | §15.3 | T-193 | Fait | Grille de revue complétée, écarts corrigés. Grille complétée (`docs/recette/revue-architecture.md`) ; trois formules recalculées hors du service unique ramenées dans `domaine/indicateurs.py` (ARC-S) ; test ARC-I ajouté. |
+| T-198 | Recette utilisateur des lots 1 à 5 avec la DAF. | §15.4 | T-195 | En cours | Procès-verbal de recette partiel signé. Support de recette prêt (`docs/recette/recette-lots-1-a-5.md`). En attente de la séance avec la DAF et de la signature du procès-verbal ; c'est la DAF qui peut la terminer. |
 
 ---
 
@@ -433,3 +433,5 @@ flowchart LR
 | 15/11/2026 | T-170 à T-181 (P1.F) | À faire | Fait | Factures, avoirs, décomptes, liquidations par imputation, déductions, contrôles (RG-05, RG-06, REC-07), rapprochement, écrans ; dérogations communes à l'engagement et à la liquidation ; migration 0008 ; 178 tests backend, 40 tests Vitest, parcours REC-06 et REC-12. |
 | 15/11/2026 | T-148 | En cours | Fait | Clôture d'un engagement partiellement exécuté vérifiée avec les liquidations. |
 | 15/11/2026 | T-185 à T-193 (P1.G) | À faire | Fait | Ordonnancements, décisions du comptable, paiements partiels et groupés ventilés, solde dû (RG-07), statut de la facture (RG-08), payeur (RG-13), idempotence, annulation, écrans ; migration 0009 ; 186 tests backend, 44 tests Vitest, parcours REC-08 à REC-10. |
+| 15/11/2026 | T-195 à T-197 (P1.H) | À faire | Fait | Jeu d'essai de l'annexe 18.2 rejoué de bout en bout (REC-14), absence de passation vérifiée (REC-15), revue d'architecture et trois écarts ARC-S corrigés. |
+| 15/11/2026 | T-198 | À faire | En cours | Support de recette prêt ; séance et procès-verbal avec la DAF à venir. |
