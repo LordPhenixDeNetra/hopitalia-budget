@@ -62,7 +62,8 @@
     "informations": "Informations",
     "controles": "Contrôles",
     "validation": "Validation et pièces",
-    "annulations": "Annulations"
+    "annulations": "Annulations",
+    "commandes": "Commandes"
   },
   "controles": {
     "intro": "Contrôles relancés à chaque lecture. Un écart bloquant se corrige, ou se couvre par une dérogation validée de même nature et d'un montant au moins égal.",

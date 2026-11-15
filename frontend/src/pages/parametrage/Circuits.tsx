@@ -29,6 +29,7 @@ import { BadgeStatut } from '../../composants/BadgeStatut'
 import { Montant } from '../../composants/Montant'
 import { TableauServeur, type EtatTableau } from '../../composants/TableauServeur'
 import { useOptions } from './PageReferentiel'
+import { TYPES_OBJETS } from './ressources'
 
 // Profils qui valident un objet dans la matrice (le contrôle financier pour les engagements) ;
 // le serveur refuse un profil sans droit sur le type d'objet choisi.
@@ -108,13 +109,7 @@ function Formulaire({ circuit, fermer }: { circuit?: CircuitSortie; fermer: () =
             </Form.Item>
             <Form.Item name="typeObjet" label={t('circuits.typeObjet')} rules={requis}>
               <Select
-                options={[
-                  'RevisionBudgetaire',
-                  'Contrat',
-                  'Avenant',
-                  'Engagement',
-                  'Derogation',
-                ].map((v) => ({
+                options={TYPES_OBJETS.map((v) => ({
                   value: v,
                   label: t(`circuits.types.${v}`),
                 }))}

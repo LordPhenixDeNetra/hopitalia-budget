@@ -433,3 +433,158 @@ test('REC-03 : engagement lié au marché, crédits et plafond contrôlés', asy
     imputations: [{ ligneId: 'l1', montant: '30000000.00' }],
   })
 })
+
+test('REC-05 : livraison partielle enregistrée avec son procès-verbal', async ({ page }) => {
+  const page1 = (donnees: unknown[]) => ({
+    donnees,
+    pagination: { page: 1, taille: 100, total: donnees.length, suivant: null },
+  })
+  const commande = {
+    id: 'b1',
+    etablissementId: 'a1',
+    engagementId: 'e1',
+    fournisseurId: 'f1',
+    numero: 'BC-2026-00001',
+    type: 'BON_COMMANDE',
+    dateEmission: '2026-03-05',
+    lieuLivraison: 'Pharmacie centrale',
+    dateLivraisonPrevue: '2026-04-30',
+    montantTtc: '10000000.00',
+    enRetard: false,
+    creeParCode: 'AG011',
+    creeLe: '2026-03-05T10:00:00Z',
+    lignes: [
+      {
+        id: 'lc1',
+        rang: 1,
+        designation: "Gants d'examen",
+        quantite: '100.000',
+        prixUnitaire: '100000.00',
+        tauxTaxe: '0.00',
+        montantTtc: '10000000.00',
+        quantiteAcceptee: '0.000',
+        resteARecevoir: '100.000',
+      },
+    ],
+  }
+  const reception = {
+    id: 'r1',
+    etablissementId: 'a1',
+    bonCommandeId: 'b1',
+    numero: 'REC-2026-00001',
+    dateReception: '2026-04-10',
+    type: 'PARTIELLE',
+    centreId: 'ce1',
+    agentResponsableCode: 'AG013',
+    observations: null,
+    statut: 'BROUILLON',
+    creeParCode: 'AG013',
+    creeLe: '2026-04-10T10:00:00Z',
+    version: 1,
+    lignes: [
+      {
+        ligneCommandeId: 'lc1',
+        quantiteRecue: '40.000',
+        quantiteAcceptee: '35.000',
+        quantiteRejetee: '5.000',
+      },
+    ],
+    reserves: [],
+    attestation: null,
+  }
+  let receptions: unknown[] = []
+  const envois: { chemin: string; corps: string; type: string | null }[] = []
+  await page.route('**/api/v1/**', async (route) => {
+    const requete = route.request()
+    const chemin = new URL(requete.url()).pathname
+    if (requete.method() === 'POST') {
+      envois.push({
+        chemin,
+        corps: requete.postData() ?? '',
+        type: await requete.headerValue('content-type'),
+      })
+    }
+    if (chemin === '/api/v1/bons-commande/b1/receptions' && requete.method() === 'POST') {
+      receptions = [reception]
+      await route.fulfill({ status: 201, json: reception })
+      return
+    }
+    const reponses: Record<string, unknown> = {
+      '/api/v1/auth/connexion': { jetonAcces: 'a', jetonRafraichissement: 'r', expireDans: 900 },
+      '/api/v1/moi': { ...MOI, habilitations: [{ profil: 'REC', etablissementId: 'a1' }] },
+      '/api/v1/centres-responsabilite': page1([
+        { id: 'ce1', code: 'PHARMA', libelle: 'Pharmacie' },
+      ]),
+      '/api/v1/types-pieces': page1([{ id: 'pv', code: 'PV', libelle: 'Procès-verbal' }]),
+      '/api/v1/bons-commande/b1': commande,
+      '/api/v1/bons-commande/b1/receptions': receptions,
+      '/api/v1/receptions/r1/validations': {
+        statut: 'BROUILLON',
+        separationTaches: true,
+        etapes: [{ ordre: 1, libelle: 'Service fait', profil: 'VAL', obligatoire: true }],
+        visas: [],
+        etapesOuvertes: [],
+        peutDecider: false,
+      },
+      '/api/v1/receptions/r1/pieces':
+        requete.method() === 'POST'
+          ? {
+              id: 'p1',
+              typePieceId: 'pv',
+              nomFichier: 'pv.pdf',
+              typeMime: 'application/pdf',
+              taille: 10,
+              empreinteSha256: 'b'.repeat(64),
+              deposeParCode: 'AG013',
+              deposeLe: '2026-04-10T10:00:00Z',
+            }
+          : [],
+    }
+    await route.fulfill({
+      status: requete.method() === 'POST' ? 201 : 200,
+      json: reponses[chemin] ?? page1([]),
+    })
+  })
+
+  await page.goto('/connexion?retour=/bons-commande/b1')
+  await page.getByLabel('Identifiant').fill('agent')
+  await page.getByLabel('Mot de passe').fill('secret')
+  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await page.getByRole('button', { name: 'Enregistrer une réception' }).click()
+
+  const tiroir = page.getByRole('dialog')
+  await tiroir.getByLabel('Date de réception').fill('2026-04-10')
+  await tiroir.getByLabel('Service réceptionnaire').click()
+  await page.getByTitle('PHARMA — Pharmacie').click()
+  await tiroir.getByLabel('Code agent responsable').fill('AG013')
+  await tiroir.getByLabel("Reçue — Gants d'examen").fill('40')
+  await tiroir.getByLabel("Acceptée — Gants d'examen").fill('35')
+  await tiroir.getByLabel("Rejetée — Gants d'examen").fill('5')
+  await tiroir.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page.getByText('Réception enregistrée en brouillon.')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Détail' }).click()
+  await page.getByLabel('Type de pièce').click()
+  await page.getByTitle('Procès-verbal').click()
+  await page.locator('input[type=file]').setInputFiles({
+    name: 'pv.pdf',
+    mimeType: 'application/pdf',
+    buffer: Buffer.from('%PDF-1.4 pv'),
+  })
+  await expect(page.getByText('Pièce déposée.')).toBeVisible()
+
+  const saisie = JSON.parse(
+    envois.find((e) => e.chemin === '/api/v1/bons-commande/b1/receptions')!.corps,
+  )
+  expect(saisie).toMatchObject({
+    dateReception: '2026-04-10',
+    centreId: 'ce1',
+    agentResponsableCode: 'AG013',
+    lignes: [
+      { ligneCommandeId: 'lc1', quantiteRecue: '40', quantiteAcceptee: '35', quantiteRejetee: '5' },
+    ],
+  })
+  expect(envois.find((e) => e.chemin === '/api/v1/receptions/r1/pieces')!.type).toContain(
+    'multipart/form-data',
+  )
+})

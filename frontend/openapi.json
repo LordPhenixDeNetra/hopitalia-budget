@@ -3460,6 +3460,655 @@
         }
       }
     },
+    "/api/v1/engagements/{engagement_id}/bons-commande": {
+      "post": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Emettre Commande",
+        "description": "Commande émise sur un engagement validé, dans la limite de son montant net (EF-CMD-01).",
+        "operationId": "emettre_commande",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BonCommandeCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BonCommandeSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bons-commande": {
+      "get": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Lister Bons Commande",
+        "description": "Commandes ; `enRetard=true` : date de livraison dépassée et reste à recevoir (EF-REC-06).",
+        "operationId": "lister_bons_commande",
+        "parameters": [
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "engagementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Engagementid"
+            }
+          },
+          {
+            "name": "enRetard",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Enretard"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_BonCommandeSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bons-commande/{bon_commande_id}": {
+      "get": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Obtenir Bon Commande",
+        "operationId": "obtenir_bon_commande",
+        "parameters": [
+          {
+            "name": "bon_commande_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Bon Commande Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BonCommandeSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bons-commande/{bon_commande_id}/receptions": {
+      "post": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Enregistrer Reception",
+        "description": "Réception en brouillon : une commande en reçoit autant que nécessaire (EF-REC-01).",
+        "operationId": "enregistrer_reception",
+        "parameters": [
+          {
+            "name": "bon_commande_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Bon Commande Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceptionCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceptionSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Lister Receptions",
+        "operationId": "lister_receptions",
+        "parameters": [
+          {
+            "name": "bon_commande_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Bon Commande Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReceptionSortie"
+                  },
+                  "title": "Response Lister Receptions"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/receptions/{reception_id}": {
+      "get": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Obtenir Reception",
+        "operationId": "obtenir_reception",
+        "parameters": [
+          {
+            "name": "reception_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Reception Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceptionSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Modifier Reception",
+        "description": "Brouillon ou retour pour correction seulement (RG-18).",
+        "operationId": "modifier_reception",
+        "parameters": [
+          {
+            "name": "reception_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Reception Id"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReceptionChamps"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceptionSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/receptions/{reception_id}/reserves": {
+      "post": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Emettre Reserve",
+        "description": "Réserve constatée à la réception, levée plus tard (EF-REC-03).",
+        "operationId": "emettre_reserve",
+        "parameters": [
+          {
+            "name": "reception_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Reception Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReserveCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReserveSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reserves/{reserve_id}": {
+      "patch": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Lever Reserve",
+        "operationId": "lever_reserve",
+        "parameters": [
+          {
+            "name": "reserve_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Reserve Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReserveLevee"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReserveSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/reserves": {
+      "get": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Lister Reserves",
+        "description": "Réserves, dont celles qui restent à lever (EF-REC-06).",
+        "operationId": "lister_reserves",
+        "parameters": [
+          {
+            "name": "nonLevees",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Nonlevees"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ReserveSortie"
+                  },
+                  "title": "Response Lister Reserves"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/receptions/{reception_id}/attestations": {
+      "post": {
+        "tags": [
+          "commandes"
+        ],
+        "summary": "Attester Service Fait",
+        "description": "Attestation de service fait (EF-REC-04) : une par réception, avant sa validation.",
+        "operationId": "attester_service_fait",
+        "parameters": [
+          {
+            "name": "reception_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Reception Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AttestationCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttestationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sites": {
       "get": {
         "tags": [
@@ -7117,7 +7766,8 @@
                 "contrats",
                 "avenants",
                 "engagements",
-                "derogations"
+                "derogations",
+                "receptions"
               ],
               "type": "string",
               "title": "Ressource"
@@ -7175,7 +7825,8 @@
                 "contrats",
                 "avenants",
                 "engagements",
-                "derogations"
+                "derogations",
+                "receptions"
               ],
               "type": "string",
               "title": "Ressource"
@@ -7245,7 +7896,8 @@
                 "contrats",
                 "avenants",
                 "engagements",
-                "derogations"
+                "derogations",
+                "receptions"
               ],
               "type": "string",
               "title": "Ressource"
@@ -7304,7 +7956,8 @@
                 "contrats",
                 "avenants",
                 "engagements",
-                "derogations"
+                "derogations",
+                "receptions"
               ],
               "type": "string",
               "title": "Ressource"
@@ -7366,7 +8019,8 @@
                 "contrats",
                 "avenants",
                 "engagements",
-                "derogations"
+                "derogations",
+                "receptions"
               ],
               "type": "string",
               "title": "Ressource"
@@ -7807,7 +8461,8 @@
                 "Contrat",
                 "Avenant",
                 "Engagement",
-                "Derogation"
+                "Derogation",
+                "Reception"
               ],
               "type": "string",
               "title": "Type Objet"
@@ -8695,6 +9350,61 @@
         ],
         "title": "Anomalie"
       },
+      "AttestationCreation": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "livrable": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Livrable"
+          },
+          "conforme": {
+            "type": "boolean",
+            "title": "Conforme"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "livrable",
+          "conforme"
+        ],
+        "title": "AttestationCreation"
+      },
+      "AttestationSortie": {
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "livrable": {
+            "type": "string",
+            "title": "Livrable"
+          },
+          "conforme": {
+            "type": "boolean",
+            "title": "Conforme"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "date",
+          "livrable",
+          "conforme",
+          "creeParCode"
+        ],
+        "title": "AttestationSortie"
+      },
       "AvenantCorrection": {
         "properties": {
           "objet": {
@@ -8903,6 +9613,169 @@
           "typePieceId"
         ],
         "title": "Body_deposer_piece"
+      },
+      "BonCommandeCreation": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TypeOrdre",
+            "default": "BON_COMMANDE"
+          },
+          "dateEmission": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateemission"
+          },
+          "lieuLivraison": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieulivraison"
+          },
+          "dateLivraisonPrevue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datelivraisonprevue"
+          },
+          "lignes": {
+            "items": {
+              "$ref": "#/components/schemas/LigneCommandeSchema"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Lignes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dateEmission",
+          "lignes"
+        ],
+        "title": "BonCommandeCreation"
+      },
+      "BonCommandeSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "engagementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Engagementid"
+          },
+          "fournisseurId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fournisseurid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeOrdre"
+          },
+          "dateEmission": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateemission"
+          },
+          "lieuLivraison": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lieulivraison"
+          },
+          "dateLivraisonPrevue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datelivraisonprevue"
+          },
+          "montantTtc": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantttc",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "enRetard": {
+            "type": "boolean",
+            "title": "Enretard"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "lignes": {
+            "items": {
+              "$ref": "#/components/schemas/LigneCommandeSortie"
+            },
+            "type": "array",
+            "title": "Lignes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "engagementId",
+          "fournisseurId",
+          "numero",
+          "type",
+          "dateEmission",
+          "lieuLivraison",
+          "dateLivraisonPrevue",
+          "montantTtc",
+          "enRetard",
+          "creeParCode",
+          "creeLe",
+          "lignes"
+        ],
+        "title": "BonCommandeSortie"
       },
       "BudgetCreation": {
         "properties": {
@@ -9282,7 +10155,8 @@
               "Contrat",
               "Avenant",
               "Engagement",
-              "Derogation"
+              "Derogation",
+              "Reception"
             ],
             "title": "Typeobjet"
           },
@@ -12676,6 +13550,121 @@
         ],
         "title": "Jetons"
       },
+      "LigneCommandeSchema": {
+        "properties": {
+          "designation": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Designation"
+          },
+          "quantite": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Quantite"
+          },
+          "prixUnitaire": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Prixunitaire",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "tauxTaxe": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Tauxtaxe",
+            "default": "0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "designation",
+          "quantite",
+          "prixUnitaire"
+        ],
+        "title": "LigneCommandeSchema"
+      },
+      "LigneCommandeSortie": {
+        "properties": {
+          "designation": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Designation"
+          },
+          "quantite": {
+            "type": "string",
+            "title": "Quantite"
+          },
+          "prixUnitaire": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Prixunitaire",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "tauxTaxe": {
+            "type": "string",
+            "title": "Tauxtaxe",
+            "default": "0"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "rang": {
+            "type": "integer",
+            "title": "Rang"
+          },
+          "montantTtc": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantttc",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "quantiteAcceptee": {
+            "type": "string",
+            "title": "Quantiteacceptee"
+          },
+          "resteARecevoir": {
+            "type": "string",
+            "title": "Restearecevoir"
+          }
+        },
+        "type": "object",
+        "required": [
+          "designation",
+          "quantite",
+          "prixUnitaire",
+          "id",
+          "rang",
+          "montantTtc",
+          "quantiteAcceptee",
+          "resteARecevoir"
+        ],
+        "title": "LigneCommandeSortie"
+      },
       "LigneCreation": {
         "properties": {
           "budgetId": {
@@ -12799,6 +13788,88 @@
         "type": "object",
         "title": "LigneModification",
         "description": "La dotation ne change plus après création : on passe par une révision (EF-BUD-04)."
+      },
+      "LigneReceptionSchema-Input": {
+        "properties": {
+          "ligneCommandeId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lignecommandeid"
+          },
+          "quantiteRecue": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Quantiterecue"
+          },
+          "quantiteAcceptee": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Quantiteacceptee"
+          },
+          "quantiteRejetee": {
+            "anyOf": [
+              {
+                "type": "number",
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Quantiterejetee",
+            "default": "0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ligneCommandeId",
+          "quantiteRecue",
+          "quantiteAcceptee"
+        ],
+        "title": "LigneReceptionSchema"
+      },
+      "LigneReceptionSchema-Output": {
+        "properties": {
+          "ligneCommandeId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Lignecommandeid"
+          },
+          "quantiteRecue": {
+            "type": "string",
+            "title": "Quantiterecue"
+          },
+          "quantiteAcceptee": {
+            "type": "string",
+            "title": "Quantiteacceptee"
+          },
+          "quantiteRejetee": {
+            "type": "string",
+            "title": "Quantiterejetee",
+            "default": "0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ligneCommandeId",
+          "quantiteRecue",
+          "quantiteAcceptee"
+        ],
+        "title": "LigneReceptionSchema"
       },
       "LigneSortie": {
         "properties": {
@@ -13371,6 +14442,26 @@
           "pagination"
         ],
         "title": "PageCurseur[EntreeJournal]"
+      },
+      "Page_BonCommandeSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/BonCommandeSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[BonCommandeSortie]"
       },
       "Page_BudgetSortie_": {
         "properties": {
@@ -14221,6 +15312,234 @@
         ],
         "title": "RapportImport"
       },
+      "ReceptionChamps": {
+        "properties": {
+          "dateReception": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datereception"
+          },
+          "centreId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Centreid"
+          },
+          "agentResponsableCode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agentresponsablecode"
+          },
+          "observations": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observations"
+          },
+          "lignes": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/LigneReceptionSchema-Input"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lignes"
+          }
+        },
+        "type": "object",
+        "title": "ReceptionChamps"
+      },
+      "ReceptionCreation": {
+        "properties": {
+          "dateReception": {
+            "type": "string",
+            "format": "date",
+            "title": "Datereception"
+          },
+          "centreId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Centreid"
+          },
+          "agentResponsableCode": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "title": "Agentresponsablecode"
+          },
+          "observations": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observations"
+          },
+          "lignes": {
+            "items": {
+              "$ref": "#/components/schemas/LigneReceptionSchema-Input"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Lignes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dateReception",
+          "centreId",
+          "agentResponsableCode",
+          "lignes"
+        ],
+        "title": "ReceptionCreation"
+      },
+      "ReceptionSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "bonCommandeId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Boncommandeid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "dateReception": {
+            "type": "string",
+            "format": "date",
+            "title": "Datereception"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeReception"
+          },
+          "centreId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Centreid"
+          },
+          "agentResponsableCode": {
+            "type": "string",
+            "title": "Agentresponsablecode"
+          },
+          "observations": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Observations"
+          },
+          "statut": {
+            "$ref": "#/components/schemas/StatutReception"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "lignes": {
+            "items": {
+              "$ref": "#/components/schemas/LigneReceptionSchema-Output"
+            },
+            "type": "array",
+            "title": "Lignes"
+          },
+          "reserves": {
+            "items": {
+              "$ref": "#/components/schemas/ReserveSortie"
+            },
+            "type": "array",
+            "title": "Reserves"
+          },
+          "attestation": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/AttestationSortie"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "bonCommandeId",
+          "numero",
+          "dateReception",
+          "type",
+          "centreId",
+          "agentResponsableCode",
+          "observations",
+          "statut",
+          "creeParCode",
+          "creeLe",
+          "version",
+          "lignes",
+          "reserves",
+          "attestation"
+        ],
+        "title": "ReceptionSortie"
+      },
       "ReferentielCreation": {
         "properties": {
           "code": {
@@ -14307,6 +15626,97 @@
           "version"
         ],
         "title": "ReferentielSortie"
+      },
+      "ReserveCreation": {
+        "properties": {
+          "description": {
+            "type": "string",
+            "maxLength": 1000,
+            "minLength": 1,
+            "title": "Description"
+          },
+          "dateConstat": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateconstat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "description",
+          "dateConstat"
+        ],
+        "title": "ReserveCreation"
+      },
+      "ReserveLevee": {
+        "properties": {
+          "dateLevee": {
+            "type": "string",
+            "format": "date",
+            "title": "Datelevee"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dateLevee"
+        ],
+        "title": "ReserveLevee"
+      },
+      "ReserveSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "receptionId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Receptionid"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description"
+          },
+          "dateConstat": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateconstat"
+          },
+          "dateLevee": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datelevee"
+          },
+          "leveeParCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Leveeparcode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "receptionId",
+          "description",
+          "dateConstat",
+          "dateLevee",
+          "leveeParCode"
+        ],
+        "title": "ReserveSortie"
       },
       "ResultatSortie": {
         "properties": {
@@ -14966,7 +16376,8 @@
               "Contrat",
               "Avenant",
               "Engagement",
-              "Derogation"
+              "Derogation",
+              "Reception"
             ],
             "title": "Typeobjet"
           },
@@ -15034,6 +16445,18 @@
         },
         "type": "object",
         "title": "StatutModification"
+      },
+      "StatutReception": {
+        "type": "string",
+        "enum": [
+          "BROUILLON",
+          "SOUMIS",
+          "EN_VALIDATION",
+          "A_CORRIGER",
+          "VALIDE",
+          "REJETE"
+        ],
+        "title": "StatutReception"
       },
       "StatutRevision": {
         "type": "string",
@@ -15339,7 +16762,8 @@
               "Contrat",
               "Avenant",
               "Engagement",
-              "Derogation"
+              "Derogation",
+              "Reception"
             ],
             "title": "Typeobjet"
           },
@@ -15629,6 +17053,15 @@
         ],
         "title": "TypeDepenseSortie"
       },
+      "TypeOrdre": {
+        "type": "string",
+        "enum": [
+          "BON_COMMANDE",
+          "TRANCHE",
+          "ORDRE_SERVICE"
+        ],
+        "title": "TypeOrdre"
+      },
       "TypePieceCreation": {
         "properties": {
           "code": {
@@ -15659,7 +17092,8 @@
                 "Contrat",
                 "Avenant",
                 "Engagement",
-                "Derogation"
+                "Derogation",
+                "Reception"
               ]
             },
             "type": "array",
@@ -15722,7 +17156,8 @@
                     "Contrat",
                     "Avenant",
                     "Engagement",
-                    "Derogation"
+                    "Derogation",
+                    "Reception"
                   ]
                 },
                 "type": "array"
@@ -15781,7 +17216,8 @@
                     "Contrat",
                     "Avenant",
                     "Engagement",
-                    "Derogation"
+                    "Derogation",
+                    "Reception"
                   ]
                 },
                 "type": "array"
@@ -15804,6 +17240,15 @@
           "typesObjets"
         ],
         "title": "TypePieceSortie"
+      },
+      "TypeReception": {
+        "type": "string",
+        "enum": [
+          "TOTALE",
+          "PARTIELLE",
+          "REFUSEE"
+        ],
+        "title": "TypeReception"
       },
       "TypeRevision": {
         "type": "string",

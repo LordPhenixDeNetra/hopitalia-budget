@@ -114,6 +114,11 @@ TRANSITIONS_REFERENCE: dict[str, tuple[Transition, ...]] = {
         *_circuit("SOUMIS", "EN_CONTROLE", "VALIDE", "REJETE", "A_CORRIGER"),
     ),
     "Derogation": _circuit("SOUMIS", "EN_VALIDATION", "VALIDE", "REJETE", "A_CORRIGER"),
+    # Réception : saisie en brouillon (quantités, réserves, pièces), puis service fait validé.
+    "Reception": (
+        Transition("BROUILLON", Action.SOUMETTRE, "SOUMIS"),
+        *_circuit("SOUMIS", "EN_VALIDATION", "VALIDE", "REJETE", "A_CORRIGER"),
+    ),
 }
 
 
@@ -128,7 +133,12 @@ OPERATIONS: dict[str, tuple[Operation, tuple[Operation, ...]]] = {
         (Operation.CONTROLER_ENGAGEMENT, Operation.VALIDER_ENGAGEMENT),
     ),
     "Derogation": (Operation.DEMANDER_ENGAGEMENT, (Operation.ACCORDER_DEROGATION,)),
+    "Reception": (Operation.ENREGISTRER_RECEPTION, (Operation.VALIDER_SERVICE_FAIT,)),
 }
+
+# Section 17, point 16 : l'ordonnateur valide toujours en dernier ces objets-là ; le service
+# fait d'une réception, lui, revient au valideur du service (matrice des habilitations).
+ORDONNATEUR_FINAL = {"RevisionBudgetaire", "Contrat", "Avenant", "Engagement", "Derogation"}
 
 
 def statuts_reference(type_objet: str) -> set[str]:
@@ -196,18 +206,22 @@ CIRCUITS_PAR_DEFAUT: dict[str, Circuit] = {
             Etape(3, "Ordonnateur", Profil.ORD),
         )
     ),
+    "Reception": Circuit((Etape(1, "Service fait", Profil.VAL),)),
 }
 
 
 def verifier_etapes(type_objet: str, etapes: list[Etape]) -> None:
     """Ordres 1..n ; chaque profil a le droit de valider ce type d'objet dans la matrice ; la
-    dernière étape est obligatoire et revient à l'ordonnateur (section 17, point 16)."""
+    dernière étape est obligatoire ; pour les objets du point 16 (section 17), elle revient à
+    l'ordonnateur."""
     if not etapes or [e.ordre for e in etapes] != list(range(1, len(etapes) + 1)):
         raise ErreurMetier("CIRCUIT_INVALIDE", champ="etapes")
     validations = OPERATIONS[type_objet][1]
     if not all(any(autorise(e.profil, o, Droit.VALIDER) for o in validations) for e in etapes):
         raise ErreurMetier("CIRCUIT_INVALIDE", champ="etapes")
-    if etapes[-1].profil is not Profil.ORD or not etapes[-1].obligatoire:
+    if not etapes[-1].obligatoire or (
+        type_objet in ORDONNATEUR_FINAL and etapes[-1].profil is not Profil.ORD
+    ):
         raise ErreurMetier("CIRCUIT_INVALIDE", champ="etapes")
 
 
