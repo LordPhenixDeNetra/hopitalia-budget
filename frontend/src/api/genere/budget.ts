@@ -179,6 +179,7 @@ import type {
   PieceSortie,
   Planification,
   Preferences,
+  ProduireEtatParams,
   ProgrammeCreation,
   ProgrammeModification,
   ProgrammeSortie,
@@ -10354,6 +10355,135 @@ export const useLancerAlertesPlanifiees = <TError = unknown,
       > => {
       return useMutation(getLancerAlertesPlanifieesMutationOptions(options), queryClient);
     }
+
+export const getProduireEtatUrl = (code: 'budget' | 'engagements' | 'contrats' | 'commandes' | 'factures' | 'liquidations' | 'paiements' | 'rapprochements' | 'restes' | 'depenses' | 'echeances',
+    params: ProduireEtatParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/etats/${code}?${stringifiedParams}` : `/api/v1/etats/${code}`
+}
+
+/**
+ * État de la section 14.4 en JSON, CSV, tableur (XLSX) ou PDF, dans la langue demandée.
+ * @summary Produire Etat
+ */
+export const produireEtat = async (code: 'budget' | 'engagements' | 'contrats' | 'commandes' | 'factures' | 'liquidations' | 'paiements' | 'rapprochements' | 'restes' | 'depenses' | 'echeances',
+    params: ProduireEtatParams, options?: Parameters<typeof appelerApi>[1]): Promise<unknown | Blob> => {
+
+  return appelerApi<unknown | Blob>(getProduireEtatUrl(code,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getProduireEtatQueryKey = (code: 'budget' | 'engagements' | 'contrats' | 'commandes' | 'factures' | 'liquidations' | 'paiements' | 'rapprochements' | 'restes' | 'depenses' | 'echeances',
+    params?: ProduireEtatParams,) => {
+    return [
+    `/api/v1/etats/${code}`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getProduireEtatQueryOptions = <TData = Awaited<ReturnType<typeof produireEtat>>, TError = HTTPValidationError>(code: 'budget' | 'engagements' | 'contrats' | 'commandes' | 'factures' | 'liquidations' | 'paiements' | 'rapprochements' | 'restes' | 'depenses' | 'echeances',
+    params: ProduireEtatParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof produireEtat>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getProduireEtatQueryKey(code,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof produireEtat>>> = ({ signal }) => produireEtat(code,params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: code !== null && code !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof produireEtat>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ProduireEtatQueryResult = NonNullable<Awaited<ReturnType<typeof produireEtat>>>
+export type ProduireEtatQueryError = HTTPValidationError
+
+
+/**
+ * État de la section 14.4 en JSON, CSV, tableur (XLSX) ou PDF, dans la langue demandée.
+ * @summary Produire Etat
+ */
+export function useProduireEtat<TData = Awaited<ReturnType<typeof produireEtat>>, TError = HTTPValidationError>(
+ code: 'budget' | 'engagements' | 'contrats' | 'commandes' | 'factures' | 'liquidations' | 'paiements' | 'rapprochements' | 'restes' | 'depenses' | 'echeances',
+    params: ProduireEtatParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof produireEtat>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof produireEtat>>,
+          TError,
+          Awaited<ReturnType<typeof produireEtat>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * État de la section 14.4 en JSON, CSV, tableur (XLSX) ou PDF, dans la langue demandée.
+ * @summary Produire Etat
+ */
+export function useProduireEtat<TData = Awaited<ReturnType<typeof produireEtat>>, TError = HTTPValidationError>(
+ code: 'budget' | 'engagements' | 'contrats' | 'commandes' | 'factures' | 'liquidations' | 'paiements' | 'rapprochements' | 'restes' | 'depenses' | 'echeances',
+    params: ProduireEtatParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof produireEtat>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof produireEtat>>,
+          TError,
+          Awaited<ReturnType<typeof produireEtat>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * État de la section 14.4 en JSON, CSV, tableur (XLSX) ou PDF, dans la langue demandée.
+ * @summary Produire Etat
+ */
+export function useProduireEtat<TData = Awaited<ReturnType<typeof produireEtat>>, TError = HTTPValidationError>(
+ code: 'budget' | 'engagements' | 'contrats' | 'commandes' | 'factures' | 'liquidations' | 'paiements' | 'rapprochements' | 'restes' | 'depenses' | 'echeances',
+    params: ProduireEtatParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof produireEtat>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * État de la section 14.4 en JSON, CSV, tableur (XLSX) ou PDF, dans la langue demandée.
+ * @summary Produire Etat
+ */
+export function useProduireEtat<TData = Awaited<ReturnType<typeof produireEtat>>, TError = HTTPValidationError>(
+ code: 'budget' | 'engagements' | 'contrats' | 'commandes' | 'factures' | 'liquidations' | 'paiements' | 'rapprochements' | 'restes' | 'depenses' | 'echeances',
+    params: ProduireEtatParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof produireEtat>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getProduireEtatQueryOptions(code,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getListerSitesUrl = (params?: ListerSitesParams,) => {
   const normalizedParams = new URLSearchParams();

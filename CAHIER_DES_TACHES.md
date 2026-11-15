@@ -33,11 +33,11 @@
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
-| P2 | 10 | 0 | 21 | 1 | 0 | 0 | 32 |
+| P2 | 16 | 0 | 15 | 1 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **159** | **4** | **43** | **1** | **0** | **2** | **209** |
+| **Total** | **165** | **4** | **37** | **1** | **0** | **2** | **209** |
 
-Avancement : 159 / 207 tâches actives terminées (77 %), hors 2 abandonnées.
+Avancement : 165 / 207 tâches actives terminées (80 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -314,12 +314,12 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-230 | Moteur d'états : PDF, tableur, JSON (`/etats/{code}`), dans la langue de l'utilisateur. | ENF-09, I18N-08 | T-195, T-059 | À faire | Un état produit dans les trois formats, en `fr` et en `en`. |
-| T-231 | États budgétaires : budget primitif et révisé, crédits disponibles. | §14.4 | T-230 | À faire | Totaux identiques au tableau de bord. |
-| T-232 | États d'engagement et d'exécution des contrats. | §14.4 | T-230 | À faire | Idem. |
-| T-233 | États des commandes, réceptions, factures, liquidations. | §14.4 | T-230 | À faire | Idem. |
-| T-234 | États des paiements, rapprochements et restes (à engager, liquider, payer). | §14.4 | T-230 | À faire | Idem. |
-| T-235 | État des dépenses par service, compte, nature, période ; contrats arrivant à échéance. | §14.4 | T-230 | À faire | Idem. |
+| T-230 | Moteur d'états : PDF, tableur, JSON (`/etats/{code}`), dans la langue de l'utilisateur. | ENF-09, I18N-08 | T-195, T-059 | Fait | Un état produit dans les trois formats, en `fr` et en `en`. `GET /etats/{code}` en JSON, CSV, XLSX et PDF, choisi par `?format=` ou `Accept`, titres, colonnes, statuts, montants et dates en `fr` et en `en` (`test_t230_trois_formats_deux_langues`, `test_formats_et_pagination`) ; écran États et parcours Playwright REC-18 (PDF dans la langue de l'agent). |
+| T-231 | États budgétaires : budget primitif et révisé, crédits disponibles. | §14.4 | T-230 | Fait | Totaux identiques au tableau de bord. États `budget` et `restes` : totaux égaux à ceux du tableau de bord (`test_t231_a_t235_totaux_identiques_au_tableau_de_bord`). |
+| T-232 | États d'engagement et d'exécution des contrats. | §14.4 | T-230 | Fait | Idem. États `engagements` et `contrats` : totaux égaux aux étapes du tableau de bord et à la synthèse du marché (même test). |
+| T-233 | États des commandes, réceptions, factures, liquidations. | §14.4 | T-230 | Fait | Idem. États `commandes`, `factures` et `liquidations` : totaux égaux au tableau de bord (même test). |
+| T-234 | États des paiements, rapprochements et restes (à engager, liquider, payer). | §14.4 | T-230 | Fait | Idem. États `paiements`, `rapprochements` et `restes` : totaux égaux au tableau de bord (même test). |
+| T-235 | État des dépenses par service, compte, nature, période ; contrats arrivant à échéance. | §14.4 | T-230 | Fait | Idem. États `depenses` (mêmes répartitions que le tableau de bord, période comprise) et `echeances` (jours restants) (même test). |
 | T-236 | Consultation du journal d'audit et rapport d'audit (profil auditeur, lecture seule). | EF-AUD-01, §14.4 | T-055 | À faire | Test API-06 vert ; aucune action de modification pour l'auditeur. |
 | T-237 | Journalisation des connexions et opérations sensibles. | EF-AUD-02 | T-052, T-055 | À faire | Connexions réussies et échouées tracées. |
 | T-238 | Recherche transverse (numéro, date, fournisseur, montant, compte, service). | EF-DOC-03 | T-195 | À faire | Résultats en moins de 3 s sur un exercice. |
@@ -440,3 +440,4 @@ flowchart LR
 | 15/11/2026 | T-210 à T-214 (P2.A) | À faire | Fait | Tableau de bord de la direction, indicateurs opérationnels, filtres, jauges 80/90/100 %, restes à payer exportables ; 193 tests backend, 49 tests Vitest, parcours Playwright du tableau de bord. |
 | 15/11/2026 | T-220 à T-224 (P2.B) | À faire | Fait | Règles d'alerte, alertes des contrôles et des refus, tâche planifiée, tentatives tracées, centre d'alertes ; migration 0010 ; 198 tests backend, 51 tests Vitest. |
 | 15/11/2026 | T-225 | À faire | Bloqué | Adresses électroniques des agents et serveur SMTP de l'hôpital manquants. |
+| 15/11/2026 | T-230 à T-235 (P2.C) | À faire | Fait | Moteur d'états (JSON, CSV, XLSX, PDF, fr et en) et onze états de la section 14.4, totaux égaux au tableau de bord ; écran États ; parcours REC-18 (PDF). |

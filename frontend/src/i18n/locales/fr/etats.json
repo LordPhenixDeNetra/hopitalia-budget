@@ -1,0 +1,57 @@
+{
+  "titre": "États",
+  "intro": "États de suivi à imprimer ou exporter, pour les filtres choisis. Leurs totaux sont ceux du tableau de bord.",
+  "formats": {
+    "pdf": "PDF",
+    "xlsx": "Tableur",
+    "csv": "CSV",
+    "json": "JSON"
+  },
+  "echec": "L'état n'a pas pu être produit.",
+  "codes": {
+    "budget": {
+      "titre": "Budget primitif et révisé, crédits disponibles",
+      "description": "Par ligne : budget initial, modifications, budget révisé, engagé, en cours, disponible."
+    },
+    "restes": {
+      "titre": "Restes à engager, à liquider et à payer",
+      "description": "Par ligne : disponible, engagé restant à liquider, transmis, payé, reste à payer."
+    },
+    "engagements": {
+      "titre": "Engagements",
+      "description": "Engagements validés, avec fournisseur, marché, liquidé et payé."
+    },
+    "contrats": {
+      "titre": "Exécution financière des contrats",
+      "description": "Par marché : engagé, commandé, réceptionné, facturé, liquidé, payé, reste à engager."
+    },
+    "commandes": {
+      "titre": "Commandes et réceptions",
+      "description": "Bons de commande et valeur réceptionnée."
+    },
+    "factures": {
+      "titre": "Factures",
+      "description": "Factures reçues, rejetées, liquidées et payées, avec leur reste à payer."
+    },
+    "liquidations": {
+      "titre": "Liquidations",
+      "description": "Liquidé, déductions et net à payer."
+    },
+    "paiements": {
+      "titre": "Paiements",
+      "description": "Paiements, part affectée au périmètre et statut."
+    },
+    "rapprochements": {
+      "titre": "Rapprochements",
+      "description": "Écarts commande, réception, facture et paiement, avec leur explication."
+    },
+    "depenses": {
+      "titre": "Dépenses par service, compte, nature et fournisseur",
+      "description": "Engagé, liquidé et payé, sur la période choisie."
+    },
+    "echeances": {
+      "titre": "Contrats par date d'échéance",
+      "description": "Échéance, jours restants et consommation."
+    }
+  }
+}

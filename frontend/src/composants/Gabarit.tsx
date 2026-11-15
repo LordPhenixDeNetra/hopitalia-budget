@@ -5,6 +5,7 @@ import {
   AuditOutlined,
   ContainerOutlined,
   DashboardOutlined,
+  FileTextOutlined,
   FundOutlined,
   HomeOutlined,
   LogoutOutlined,
@@ -77,6 +78,11 @@ export function Gabarit() {
           onClick={({ key }) => naviguer(key)}
           items={[
             { key: '/', icon: <HomeOutlined aria-hidden />, label: t('menu.accueil') },
+            {
+              key: '/etats',
+              icon: <FileTextOutlined aria-hidden />,
+              label: t('menu.etats'),
+            },
             {
               key: '/alertes',
               icon: <BellOutlined aria-hidden />,

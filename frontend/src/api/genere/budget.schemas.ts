@@ -2862,6 +2862,29 @@ export type ModifierRegleParams = {
   etablissementId: string;
 };
 
+export type ProduireEtatParams = {
+  format?: ProduireEtatFormat;
+  exerciceId: string;
+  etablissementId?: string | null;
+  centreId?: string | null;
+  compteId?: string | null;
+  sourceId?: string | null;
+  fournisseurId?: string | null;
+  contratId?: string | null;
+  du?: string | null;
+  au?: string | null;
+};
+
+export type ProduireEtatFormat = typeof ProduireEtatFormat[keyof typeof ProduireEtatFormat] | null;
+
+
+export const ProduireEtatFormat = {
+  json: 'json',
+  csv: 'csv',
+  xlsx: 'xlsx',
+  pdf: 'pdf',
+} as const;
+
 export type ListerSitesParams = {
   /** @minimum 1 */
   page?: number;

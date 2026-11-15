@@ -121,6 +121,11 @@ export const routes: RouteObject[] = [
           import('./pages/tableaux/TableauDeBord').then((m) => ({ Component: m.TableauDeBord })),
       },
       {
+        path: 'etats',
+        handle: fil('menu.etats'),
+        lazy: () => import('./pages/tableaux/Etats').then((m) => ({ Component: m.Etats })),
+      },
+      {
         path: 'restes-a-payer',
         handle: fil('menu.tableauDeBord'),
         lazy: () =>

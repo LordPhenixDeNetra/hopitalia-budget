@@ -1,0 +1,57 @@
+{
+  "titre": "Reports",
+  "intro": "Monitoring reports to print or export, for the chosen filters. Their totals match the dashboard.",
+  "formats": {
+    "pdf": "PDF",
+    "xlsx": "Spreadsheet",
+    "csv": "CSV",
+    "json": "JSON"
+  },
+  "echec": "The report could not be produced.",
+  "codes": {
+    "budget": {
+      "titre": "Initial and revised budget, available credits",
+      "description": "Per line: initial budget, changes, revised budget, committed, pending, available."
+    },
+    "restes": {
+      "titre": "Amounts left to commit, settle and pay",
+      "description": "Per line: available, committed left to settle, sent, paid, left to pay."
+    },
+    "engagements": {
+      "titre": "Commitments",
+      "description": "Approved commitments, with supplier, contract, settled and paid."
+    },
+    "contrats": {
+      "titre": "Contract financial execution",
+      "description": "Per contract: committed, ordered, received, invoiced, settled, paid, left to commit."
+    },
+    "commandes": {
+      "titre": "Purchase orders and receipts",
+      "description": "Purchase orders and received value."
+    },
+    "factures": {
+      "titre": "Invoices",
+      "description": "Received, rejected, settled and paid invoices, with amount left to pay."
+    },
+    "liquidations": {
+      "titre": "Settlements",
+      "description": "Settled amount, deductions and net payable."
+    },
+    "paiements": {
+      "titre": "Payments",
+      "description": "Payments, share within the scope and status."
+    },
+    "rapprochements": {
+      "titre": "Reconciliations",
+      "description": "Order, receipt, invoice and payment gaps, with their explanation."
+    },
+    "depenses": {
+      "titre": "Spending by department, account, nature and supplier",
+      "description": "Committed, settled and paid over the chosen period."
+    },
+    "echeances": {
+      "titre": "Contracts by end date",
+      "description": "End date, days left and consumption."
+    }
+  }
+}

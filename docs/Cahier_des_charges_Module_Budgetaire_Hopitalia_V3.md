@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.10 · 15 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.11 · 15 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -17,6 +17,7 @@
 | 3.8 | 15/11/2026 | Ordonnancement et paiements (lot P1.G) : règles de l'ordonnancement et du paiement (8.3), ordonnancement et paiement sans circuit de visa (10.2), ressources d'API précisées (11.2). |
 | 3.9 | 15/11/2026 | Tableaux de bord (lot P2.A) : périmètre et filtres du tableau de bord de la direction (14.1), définitions des indicateurs opérationnels (14.2), ressources d'API (11.2). |
 | 3.10 | 15/11/2026 | Alertes (lot P2.B) : création, destinataires, lecture par agent, règles par établissement et tâche planifiée (14.3), type `CONTROLE_BLOQUANT`, ressources d'API (11.2). |
+| 3.11 | 15/11/2026 | États (lot P2.C, première partie) : liste des états, formats et règles de production (14.4), ressource `/etats/{code}` (11.2). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1636,7 +1637,7 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/regles-alertes` | GET, PUT | Filtre `etablissementId` obligatoire ; `PUT /regles-alertes/{type}` (administrateur). |
 | `/journal-audit` | GET | Lecture seule, pagination par curseur. |
 | `/tableaux-de-bord/{code}` | GET | |
-| `/etats/{code}` | GET | `Accept: application/pdf`, tableur ou JSON. |
+| `/etats/{code}` | GET | `Accept: application/pdf`, tableur ou JSON, ou `?format=pdf|xlsx|csv|json` ; filtres du tableau de bord (14.1). |
 | `/recettes` | GET, POST | Si le volet est actif. |
 
 ### 11.3. Idempotence
@@ -1831,6 +1832,12 @@ Facture en attente : reçue, en contrôle, retournée, liquidée, mise en paieme
 Budget primitif et révisé par compte et service ; situation des crédits disponibles ; engagements par fournisseur, marché et compte ; exécution financière de chaque contrat ; commandes et réceptions ; factures reçues, rejetées, validées et liquidées ; dossiers transmis en paiement ; paiements et rapprochements ; restes à engager, à liquider et à payer ; dépenses par service, compte, nature et période ; contrats arrivant à échéance ; journal des opérations et rapport d'audit.
 
 La tutelle n'impose pas de modèle officiel : la présentation des états est libre (réponse de cadrage Q-D11).
+
+**Production des états (lot P2.C).**
+
+- États disponibles (`/etats/{code}`) : `budget` (budget primitif et révisé, crédits disponibles), `restes` (restes à engager, à liquider et à payer), `engagements`, `contrats` (exécution financière), `commandes` (et réceptions), `factures`, `liquidations`, `paiements`, `rapprochements`, `depenses` (par service, compte, nature et fournisseur) et `echeances` (contrats par date d'échéance). Le journal des opérations et le rapport d'audit relèvent de la consultation du journal (T-236).
+- Mêmes filtres et même périmètre que le tableau de bord (14.1) : chaque total d'état est celui du tableau de bord pour les mêmes filtres. Un paiement groupé compte pour sa part affectée au périmètre ; le total des paiements ne compte que les paiements exécutés.
+- Formats : JSON, CSV (séparateur « ; », pour tableur français), tableur XLSX (montants en nombres exacts) et PDF (A4 paysage, en-tête répété, numéros de page). Le format se choisit par `?format=` ou par l'en-tête `Accept`. Titres, colonnes, statuts, montants et dates suivent la langue de l'agent (I18N-08).
 
 ## 15. Recette
 
