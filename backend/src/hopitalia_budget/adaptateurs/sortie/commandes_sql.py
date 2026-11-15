@@ -66,15 +66,38 @@ def commande_et_receptionne_par_contrat(
     session: Session, contrat_ids: list[UUID]
 ) -> tuple[dict[UUID, Decimal], dict[UUID, Decimal]]:
     """6.2 : commandes émises, et valeur acceptée des réceptions validées, par contrat."""
-    commandes = {
-        bc: contrat
-        for bc, contrat in session.execute(
-            select(BC.id, EngagementModele.contrat_id)
-            .join(EngagementModele, EngagementModele.id == BC.engagement_id)
-            .where(EngagementModele.contrat_id.in_(contrat_ids))
-        )
-        if contrat is not None
-    }
+    return commande_et_receptionne(
+        session,
+        {
+            bc: contrat
+            for bc, contrat in session.execute(
+                select(BC.id, EngagementModele.contrat_id)
+                .join(EngagementModele, EngagementModele.id == BC.engagement_id)
+                .where(EngagementModele.contrat_id.in_(contrat_ids))
+            )
+            if contrat is not None
+        },
+    )
+
+
+def commande_et_receptionne_par_engagement(
+    session: Session, engagement_ids: list[UUID]
+) -> tuple[dict[UUID, Decimal], dict[UUID, Decimal]]:
+    """Commandes émises et réceptionné validé, par engagement (tableau de bord, 14.1)."""
+    return commande_et_receptionne(
+        session,
+        dict(
+            session.execute(
+                select(BC.id, BC.engagement_id).where(BC.engagement_id.in_(engagement_ids))
+            ).all()
+        ),
+    )
+
+
+def commande_et_receptionne(
+    session: Session, commandes: dict[UUID, UUID]
+) -> tuple[dict[UUID, Decimal], dict[UUID, Decimal]]:
+    """Commandé et réceptionné cumulés par groupe ; `commandes` : bon de commande -> groupe."""
     commande: defaultdict[UUID, Decimal] = defaultdict(lambda: ZERO)
     for bc, total in total_commande(session, list(commandes)).items():
         commande[commandes[bc]] += total
