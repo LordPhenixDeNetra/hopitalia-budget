@@ -373,3 +373,16 @@ def test_limite_de_debit(session: Session, parametres: Parametres, donnees: dict
     assert int(bloquee.headers["Retry-After"]) > 0
     # Un autre utilisateur a son propre compteur.
     assert client.get("/api/v1/moi", headers=entetes(AUDITEUR)).status_code != 429
+
+
+def test_limite_de_debit_jeton_forge(parametres: Parametres) -> None:
+    """API-08, T-252 : un jeton à signature fausse ne donne pas un nouveau compteur."""
+    client = TestClient(
+        creer_application(parametres.model_copy(update={"limite_requetes_par_minute": 2}))
+    )
+    for rang in range(2):
+        client.get(
+            "/api/v1/moi", headers={"Authorization": f"Bearer {jeton(900 + rang, cle='x' * 64)}"}
+        )
+    forge = {"Authorization": f"Bearer {jeton(999, cle='x' * 64)}"}
+    assert client.get("/api/v1/moi", headers=forge).status_code == 429

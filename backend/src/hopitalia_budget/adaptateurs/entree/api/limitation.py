@@ -3,33 +3,35 @@
 import time
 from collections.abc import Awaitable, Callable
 
-import jwt
 from fastapi import Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.types import ASGIApp
 
+from hopitalia_budget.adaptateurs.entree.api.dependances import decoder_jeton
 from hopitalia_budget.adaptateurs.entree.api.problemes import langue_requete, reponse_probleme
+from hopitalia_budget.domaine.erreurs import ErreurMetier
 
 FENETRE_SECONDES = 60
 
 
-def _cle_client(request: Request) -> str:
+def _cle_client(request: Request, cle: str) -> str:
     entete = request.headers.get("authorization", "")
     if entete.lower().startswith("bearer "):
         try:
-            # Sert seulement à répartir les compteurs ; la signature est vérifiée par la route.
-            revendications = jwt.decode(entete[7:], options={"verify_signature": False})
-            return f"utilisateur:{revendications.get('userId')}"
-        except jwt.PyJWTError:
+            # Jeton vérifié : un identifiant forgé ne donne pas un nouveau compteur.
+            return f"utilisateur:{decoder_jeton(entete[7:], cle).get('userId')}"
+        except ErreurMetier:
             pass
+    # Derrière le proxy, l'adresse est celle du client (en-têtes du proxy, voir Dockerfile).
     return f"ip:{request.client.host if request.client else 'inconnue'}"
 
 
 class LimitationDebit(BaseHTTPMiddleware):
     # ponytail: compteurs en mémoire, un jeu par processus ; passer à Redis si plusieurs workers.
-    def __init__(self, application: ASGIApp, limite_par_minute: int) -> None:
+    def __init__(self, application: ASGIApp, limite_par_minute: int, cle_jeton: str) -> None:
         super().__init__(application)
         self.limite = limite_par_minute
+        self.cle_jeton = cle_jeton
         self.fenetre = -1
         self.compteurs: dict[str, int] = {}
 
@@ -42,7 +44,7 @@ class LimitationDebit(BaseHTTPMiddleware):
         fenetre = int(maintenant // FENETRE_SECONDES)
         if fenetre != self.fenetre:
             self.fenetre, self.compteurs = fenetre, {}
-        cle = _cle_client(request)
+        cle = _cle_client(request, self.cle_jeton)
         self.compteurs[cle] = self.compteurs.get(cle, 0) + 1
         restantes = self.limite - self.compteurs[cle]
         reinitialisation = FENETRE_SECONDES - int(maintenant % FENETRE_SECONDES)
