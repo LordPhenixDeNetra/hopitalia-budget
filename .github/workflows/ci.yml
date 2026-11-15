@@ -26,7 +26,8 @@ jobs:
           # Sans base exploitable (premier push d'une branche), tout est vérifié.
           if fichiers=$(git diff --name-only "$BASE" "$GITHUB_SHA" 2>/dev/null); then :; else fichiers="backend/ frontend/"; fi
           echo "$fichiers"
-          grep -qE '^(backend/|frontend/src/i18n/locales/|frontend/openapi\.json|docs/cadrage/matrice|\.github/workflows/)' <<<"$fichiers" && echo "backend=true" >> "$GITHUB_OUTPUT" || echo "backend=false" >> "$GITHUB_OUTPUT"
+          # Le backend vérifie aussi la traçabilité, qui lit les titres des tests du frontend.
+          grep -qE '^(backend/|frontend/src/i18n/locales/|frontend/openapi\.json|frontend/src/App\.test\.tsx|frontend/e2e/|docs/cadrage/matrice|docs/recette/tracabilite|\.github/workflows/)' <<<"$fichiers" && echo "backend=true" >> "$GITHUB_OUTPUT" || echo "backend=false" >> "$GITHUB_OUTPUT"
           grep -qE '^(frontend/|\.github/workflows/)' <<<"$fichiers" && echo "frontend=true" >> "$GITHUB_OUTPUT" || echo "frontend=false" >> "$GITHUB_OUTPUT"
 
   backend:

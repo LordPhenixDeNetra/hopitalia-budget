@@ -74,3 +74,32 @@ def test_rec15_aucune_fonction_de_passation_dans_l_api() -> None:
     ]
     assert textes, "schéma OpenAPI vide"
     assert [t for t in textes if any(mot in t for mot in PASSATION)] == []
+
+
+def test_rg14_aucun_indicateur_stocke() -> None:
+    """RG-14 : engagé, liquidé, payé, restes, disponibles et taux se calculent depuis les pièces ;
+    aucune table ne les stocke comme valeur de référence."""
+    from hopitalia_budget.adaptateurs.sortie.base import Base
+
+    interdits = {
+        "engage",
+        "liquide",
+        "transmis",
+        "paye",
+        "disponible",
+        "reste_a_engager",
+        "reste_a_payer",
+        "engage_restant_a_liquider",
+        "net_a_payer",
+        "montant_liquide",
+        "consommation_budgetaire",
+        "taux_engagement",
+        "taux_consommation",
+    }
+    stockes = [
+        f"{table.name}.{colonne.name}"
+        for table in Base.metadata.tables.values()
+        for colonne in table.columns
+        if colonne.name in interdits
+    ]
+    assert stockes == []

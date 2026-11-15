@@ -272,7 +272,8 @@ def test_rg02_credit_insuffisant_et_derogation_limitee(
 
 
 def test_rec03_plafond_du_marche(client: TestClient, lot2d: dict[str, Any]) -> None:
-    """REC-03 et critère de T-144 : engagement lié au marché, crédits et plafond contrôlés."""
+    """RG-04 et REC-03, critère de T-144 : engagement lié au marché, crédits et plafond
+    contrôlés."""
     marche = _contrat_valide(client, lot2d, "MARCHE")
     imputations = [
         {"ligneId": lot2d["med"]["id"], "montant": "50000000.00"},
@@ -386,7 +387,8 @@ def test_idempotence_de_la_creation(
 def test_annulation_partielle_puis_totale(
     client: TestClient, lot2d: dict[str, Any], origine: str
 ) -> None:
-    """Critères de T-117 (initial visible avec son annulation) et annulation de T-148."""
+    """RG-09 et RG-18 : annulation motivée et tracée, l'engagement initial reste intact.
+    Critères de T-117 (initial visible avec son annulation) et annulation de T-148."""
     e = _valide(client, lot2d, origine)
     url = f"/api/v1/engagements/{e['id']}"
     imputation = e["imputations"][0]["id"]
@@ -432,7 +434,8 @@ def test_annulation_partielle_puis_totale(
 
 
 def test_rec16_deux_engagements_simultanes_un_seul_passe(moteur: Engine) -> None:
-    """Critère de T-143 : deux validations concurrentes sur le même crédit, une seule passe.
+    """RG-20 et REC-16, critère de T-143 : deux validations concurrentes sur le même crédit,
+    une seule passe.
 
     Données validées en base (deux connexions réelles), puis supprimées.
     """
@@ -546,3 +549,42 @@ def test_rec16_deux_engagements_simultanes_un_seul_passe(moteur: Engine) -> None
             for modele, condition in nettoyage:
                 s.execute(delete(modele).where(condition))
             s.commit()
+
+
+def test_rg01_engagement_rattache_a_un_exercice_et_a_ses_lignes(
+    client: TestClient, lot2d: dict[str, Any]
+) -> None:
+    """RG-01 : l'engagement prend l'exercice de ses lignes ; des lignes de deux exercices, ou
+    une ligne inconnue, sont refusées."""
+    from tests.test_audit_cloture import _exercice_2027
+
+    suivant = _exercice_2027(client, lot2d, ["604-MED"])
+    melange = poster(
+        client,
+        GMC_A,
+        "/api/v1/engagements",
+        _corps(
+            lot2d,
+            "DECISION_AUTORISEE",
+            montant="2.00",
+            imputations=[
+                {"ligneId": lot2d["med"]["id"], "montant": "1.00"},
+                {"ligneId": suivant["604-MED"]["id"], "montant": "1.00"},
+            ],
+        ),
+    )
+    assert (melange.status_code, melange.json()["champ"]) == (422, "imputations")
+    inconnue = poster(
+        client,
+        GMC_A,
+        "/api/v1/engagements",
+        _corps(
+            lot2d,
+            "DECISION_AUTORISEE",
+            montant="1.00",
+            imputations=[{"ligneId": str(uuid.uuid4()), "montant": "1.00"}],
+        ),
+    )
+    assert inconnue.json()["champ"] == "imputations"
+    e = creer(client, GMC_A, "/api/v1/engagements", _corps(lot2d, "DECISION_AUTORISEE"))
+    assert e["exerciceId"] == lot2d["exercice"]["id"]
