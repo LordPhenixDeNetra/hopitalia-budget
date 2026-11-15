@@ -1,0 +1,86 @@
+{
+  "titre": "Tableau de bord",
+  "intro": "Exécution du budget de l'exercice : crédits, étapes de la dépense, marchés en cours, factures en attente. Montants recalculés à chaque affichage.",
+  "filtres": {
+    "exerciceId": "Exercice",
+    "etablissementId": "Établissement",
+    "centreId": "Service",
+    "compteId": "Compte",
+    "sourceId": "Source de financement",
+    "fournisseurId": "Fournisseur",
+    "contratId": "Marché",
+    "du": "Engagé à partir du",
+    "au": "Engagé jusqu'au"
+  },
+  "indicateurs": {
+    "budgetRevise": "Budget révisé",
+    "engage": "Engagé",
+    "disponibleApresEngagements": "Disponible",
+    "liquide": "Liquidé",
+    "paye": "Payé",
+    "resteAPayer": "Reste à payer",
+    "tauxEngagement": "Taux d'engagement",
+    "tauxLiquidation": "Taux de liquidation",
+    "tauxPaiement": "Taux de paiement",
+    "enCoursValidation": "Engagements en cours de validation"
+  },
+  "chaine": {
+    "titre": "Étapes de la dépense",
+    "aide": "Étapes successives d'une même dépense : elles ne s'additionnent pas.",
+    "etape": "Étape",
+    "montant": "Montant",
+    "engage": "Engagé",
+    "commande": "Commandé",
+    "receptionne": "Réceptionné",
+    "facture": "Facturé",
+    "liquide": "Liquidé",
+    "transmis": "Transmis en paiement",
+    "paye": "Payé"
+  },
+  "credits": {
+    "titre": "Consommation des crédits",
+    "ensemble": "Ensemble des lignes",
+    "ligne": "Ligne"
+  },
+  "operationnel": {
+    "titre": "Indicateurs opérationnels",
+    "resteAEngagerMarches": "Reste à engager sur marchés",
+    "resteContractuelAPayer": "Reste contractuel à payer",
+    "resteAPayerFactures": "Reste à payer sur factures",
+    "montantFacturesEnAttente": "Montant des factures en attente",
+    "facturesEnAttente": "Factures en attente",
+    "ageMoyenFacturesJours": "Âge moyen des factures en attente",
+    "delaiMoyenTraitementJours": "Délai moyen de traitement",
+    "jours": "{{nombre}} jours"
+  },
+  "marches": {
+    "titre": "Principaux marchés en cours",
+    "marche": "Marché",
+    "consommation": "Consommation",
+    "montantActualise": "Montant actualisé",
+    "engage": "Engagé",
+    "paye": "Payé",
+    "resteAEngager": "Reste à engager",
+    "dateEcheance": "Échéance"
+  },
+  "repartitions": {
+    "titre": "Répartition",
+    "cle": "Élément",
+    "nonRenseigne": "Non renseigné",
+    "compte": "Par compte",
+    "service": "Par service",
+    "nature": "Par nature",
+    "fournisseur": "Par fournisseur"
+  },
+  "restes": {
+    "titre": "Restes à payer et factures en attente",
+    "intro": "Factures reçues et pas encore soldées, avec leur reste à payer sur liquidé et leur âge depuis la réception.",
+    "exporter": "Exporter (CSV)",
+    "numero": "Facture",
+    "statut": "Statut",
+    "dateReception": "Reçue le",
+    "montantTtc": "Montant TTC",
+    "resteAPayer": "Reste à payer",
+    "ageJours": "Âge (jours)"
+  }
+}

@@ -1,0 +1,86 @@
+{
+  "titre": "Dashboard",
+  "intro": "Budget execution for the year: credits, spending stages, ongoing contracts, pending invoices. Amounts recomputed on every display.",
+  "filtres": {
+    "exerciceId": "Year",
+    "etablissementId": "Facility",
+    "centreId": "Department",
+    "compteId": "Account",
+    "sourceId": "Funding source",
+    "fournisseurId": "Supplier",
+    "contratId": "Contract",
+    "du": "Committed from",
+    "au": "Committed until"
+  },
+  "indicateurs": {
+    "budgetRevise": "Revised budget",
+    "engage": "Committed",
+    "disponibleApresEngagements": "Available",
+    "liquide": "Settled",
+    "paye": "Paid",
+    "resteAPayer": "Left to pay",
+    "tauxEngagement": "Commitment rate",
+    "tauxLiquidation": "Settlement rate",
+    "tauxPaiement": "Payment rate",
+    "enCoursValidation": "Commitments awaiting approval"
+  },
+  "chaine": {
+    "titre": "Spending stages",
+    "aide": "Successive stages of the same spending: they do not add up.",
+    "etape": "Stage",
+    "montant": "Amount",
+    "engage": "Committed",
+    "commande": "Ordered",
+    "receptionne": "Received",
+    "facture": "Invoiced",
+    "liquide": "Settled",
+    "transmis": "Sent for payment",
+    "paye": "Paid"
+  },
+  "credits": {
+    "titre": "Credit consumption",
+    "ensemble": "All lines",
+    "ligne": "Line"
+  },
+  "operationnel": {
+    "titre": "Operational indicators",
+    "resteAEngagerMarches": "Left to commit on contracts",
+    "resteContractuelAPayer": "Contract amount left to pay",
+    "resteAPayerFactures": "Left to pay on invoices",
+    "montantFacturesEnAttente": "Pending invoices amount",
+    "facturesEnAttente": "Pending invoices",
+    "ageMoyenFacturesJours": "Average age of pending invoices",
+    "delaiMoyenTraitementJours": "Average processing time",
+    "jours": "{{nombre}} days"
+  },
+  "marches": {
+    "titre": "Main ongoing contracts",
+    "marche": "Contract",
+    "consommation": "Consumption",
+    "montantActualise": "Current amount",
+    "engage": "Committed",
+    "paye": "Paid",
+    "resteAEngager": "Left to commit",
+    "dateEcheance": "End date"
+  },
+  "repartitions": {
+    "titre": "Breakdown",
+    "cle": "Item",
+    "nonRenseigne": "Not specified",
+    "compte": "By account",
+    "service": "By department",
+    "nature": "By nature",
+    "fournisseur": "By supplier"
+  },
+  "restes": {
+    "titre": "Amounts left to pay and pending invoices",
+    "intro": "Invoices received and not yet paid in full, with the settled amount left to pay and their age since receipt.",
+    "exporter": "Export (CSV)",
+    "numero": "Invoice",
+    "statut": "Status",
+    "dateReception": "Received on",
+    "montantTtc": "Amount incl. tax",
+    "resteAPayer": "Left to pay",
+    "ageJours": "Age (days)"
+  }
+}

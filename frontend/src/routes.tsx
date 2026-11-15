@@ -110,6 +110,18 @@ export const routes: RouteObject[] = [
         ],
       },
       {
+        path: 'tableau-de-bord',
+        handle: fil('menu.tableauDeBord'),
+        lazy: () =>
+          import('./pages/tableaux/TableauDeBord').then((m) => ({ Component: m.TableauDeBord })),
+      },
+      {
+        path: 'restes-a-payer',
+        handle: fil('menu.tableauDeBord'),
+        lazy: () =>
+          import('./pages/tableaux/RestesAPayer').then((m) => ({ Component: m.RestesAPayer })),
+      },
+      {
         path: 'paiements',
         handle: fil('menu.paiements'),
         lazy: () => import('./pages/paiements/Paiements').then((m) => ({ Component: m.Paiements })),

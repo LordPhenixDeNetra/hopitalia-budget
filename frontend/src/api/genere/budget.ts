@@ -78,6 +78,7 @@ import type {
   ExerciceSortie,
   FactureChamps,
   FactureCreation,
+  FactureEnAttente,
   FactureSortie,
   FournisseurCreation,
   FournisseurModification,
@@ -186,6 +187,7 @@ import type {
   ReserveCreation,
   ReserveLevee,
   ReserveSortie,
+  RestesAPayerParams,
   ResultatControleSortie,
   RevisionCorrection,
   RevisionCreation,
@@ -203,6 +205,8 @@ import type {
   StatutModification,
   StatutSortie,
   SyntheseContrat,
+  TableauDirection,
+  TableauDirectionParams,
   TransitionCreation,
   TransitionModification,
   TransitionReference,
@@ -9472,6 +9476,248 @@ export const useAnnulerPaiement = <TError = HTTPValidationError,
       > => {
       return useMutation(getAnnulerPaiementMutationOptions(options), queryClient);
     }
+
+export const getTableauDirectionUrl = (params: TableauDirectionParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/tableaux-de-bord/direction?${stringifiedParams}` : `/api/v1/tableaux-de-bord/direction`
+}
+
+/**
+ * Section 14.1 et indicateurs opérationnels (14.2), recalculés à chaque lecture (RG-14).
+ * @summary Tableau Direction
+ */
+export const tableauDirection = async (params: TableauDirectionParams, options?: Parameters<typeof appelerApi>[1]): Promise<TableauDirection> => {
+
+  return appelerApi<TableauDirection>(getTableauDirectionUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getTableauDirectionQueryKey = (params?: TableauDirectionParams,) => {
+    return [
+    `/api/v1/tableaux-de-bord/direction`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getTableauDirectionQueryOptions = <TData = Awaited<ReturnType<typeof tableauDirection>>, TError = HTTPValidationError>(params: TableauDirectionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tableauDirection>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTableauDirectionQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof tableauDirection>>> = ({ signal }) => tableauDirection(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof tableauDirection>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TableauDirectionQueryResult = NonNullable<Awaited<ReturnType<typeof tableauDirection>>>
+export type TableauDirectionQueryError = HTTPValidationError
+
+
+/**
+ * Section 14.1 et indicateurs opérationnels (14.2), recalculés à chaque lecture (RG-14).
+ * @summary Tableau Direction
+ */
+export function useTableauDirection<TData = Awaited<ReturnType<typeof tableauDirection>>, TError = HTTPValidationError>(
+ params: TableauDirectionParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof tableauDirection>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof tableauDirection>>,
+          TError,
+          Awaited<ReturnType<typeof tableauDirection>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Section 14.1 et indicateurs opérationnels (14.2), recalculés à chaque lecture (RG-14).
+ * @summary Tableau Direction
+ */
+export function useTableauDirection<TData = Awaited<ReturnType<typeof tableauDirection>>, TError = HTTPValidationError>(
+ params: TableauDirectionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tableauDirection>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof tableauDirection>>,
+          TError,
+          Awaited<ReturnType<typeof tableauDirection>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Section 14.1 et indicateurs opérationnels (14.2), recalculés à chaque lecture (RG-14).
+ * @summary Tableau Direction
+ */
+export function useTableauDirection<TData = Awaited<ReturnType<typeof tableauDirection>>, TError = HTTPValidationError>(
+ params: TableauDirectionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tableauDirection>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Section 14.1 et indicateurs opérationnels (14.2), recalculés à chaque lecture (RG-14).
+ * @summary Tableau Direction
+ */
+export function useTableauDirection<TData = Awaited<ReturnType<typeof tableauDirection>>, TError = HTTPValidationError>(
+ params: TableauDirectionParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tableauDirection>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTableauDirectionQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRestesAPayerUrl = (params: RestesAPayerParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/tableaux-de-bord/restes-a-payer?${stringifiedParams}` : `/api/v1/tableaux-de-bord/restes-a-payer`
+}
+
+/**
+ * Tableau de bord des restes à payer et des factures en attente (18.1), du périmètre.
+ * @summary Restes A Payer
+ */
+export const restesAPayer = async (params: RestesAPayerParams, options?: Parameters<typeof appelerApi>[1]): Promise<FactureEnAttente[]> => {
+
+  return appelerApi<FactureEnAttente[]>(getRestesAPayerUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getRestesAPayerQueryKey = (params?: RestesAPayerParams,) => {
+    return [
+    `/api/v1/tableaux-de-bord/restes-a-payer`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getRestesAPayerQueryOptions = <TData = Awaited<ReturnType<typeof restesAPayer>>, TError = HTTPValidationError>(params: RestesAPayerParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof restesAPayer>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getRestesAPayerQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof restesAPayer>>> = ({ signal }) => restesAPayer(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof restesAPayer>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RestesAPayerQueryResult = NonNullable<Awaited<ReturnType<typeof restesAPayer>>>
+export type RestesAPayerQueryError = HTTPValidationError
+
+
+/**
+ * Tableau de bord des restes à payer et des factures en attente (18.1), du périmètre.
+ * @summary Restes A Payer
+ */
+export function useRestesAPayer<TData = Awaited<ReturnType<typeof restesAPayer>>, TError = HTTPValidationError>(
+ params: RestesAPayerParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof restesAPayer>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof restesAPayer>>,
+          TError,
+          Awaited<ReturnType<typeof restesAPayer>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Tableau de bord des restes à payer et des factures en attente (18.1), du périmètre.
+ * @summary Restes A Payer
+ */
+export function useRestesAPayer<TData = Awaited<ReturnType<typeof restesAPayer>>, TError = HTTPValidationError>(
+ params: RestesAPayerParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof restesAPayer>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof restesAPayer>>,
+          TError,
+          Awaited<ReturnType<typeof restesAPayer>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Tableau de bord des restes à payer et des factures en attente (18.1), du périmètre.
+ * @summary Restes A Payer
+ */
+export function useRestesAPayer<TData = Awaited<ReturnType<typeof restesAPayer>>, TError = HTTPValidationError>(
+ params: RestesAPayerParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof restesAPayer>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Tableau de bord des restes à payer et des factures en attente (18.1), du périmètre.
+ * @summary Restes A Payer
+ */
+export function useRestesAPayer<TData = Awaited<ReturnType<typeof restesAPayer>>, TError = HTTPValidationError>(
+ params: RestesAPayerParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof restesAPayer>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getRestesAPayerQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
 
 export const getListerSitesUrl = (params?: ListerSitesParams,) => {
   const normalizedParams = new URLSearchParams();

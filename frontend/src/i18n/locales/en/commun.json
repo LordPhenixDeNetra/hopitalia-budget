@@ -15,7 +15,8 @@
     "engagements": "Commitments",
     "commandes": "Orders",
     "factures": "Invoices",
-    "paiements": "Payments"
+    "paiements": "Payments",
+    "tableauDeBord": "Dashboard"
   },
   "entete": {
     "langue": "Language",
@@ -63,5 +64,12 @@
     "titre": "Page not found",
     "detail": "This page does not exist or is not accessible.",
     "retour": "Back to home"
+  },
+  "jauge": {
+    "normal": "Below 80%",
+    "seuil80": "80% threshold reached",
+    "seuil90": "90% threshold reached",
+    "seuil100": "100% reached or exceeded",
+    "sansBase": "No calculation base"
   }
 }

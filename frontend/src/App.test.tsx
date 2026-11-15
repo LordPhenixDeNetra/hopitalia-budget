@@ -4,6 +4,8 @@ import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
 import { jetons } from './auth/jetons'
 import { BadgeStatut } from './composants/BadgeStatut'
+import { Jauge } from './composants/Jauge'
+import { versCsv } from './format/csv'
 import { creerTheme } from './theme/theme'
 import { Fournisseurs } from './Fournisseurs'
 import i18n from './i18n'
@@ -50,6 +52,7 @@ beforeAll(async () => {
     'commandes',
     'factures',
     'paiements',
+    'tableaux',
   ])
 })
 
@@ -962,5 +965,106 @@ describe('périmètre du module (REC-15, RG-12)', () => {
     const textes = [...chemins, ...Object.values(commun.menu)].map((t) => String(t).toLowerCase())
     const passation = /passation|appel.d.offres?|attribution|adjudication|soumissionnaire|lancement/
     expect(textes.filter((t) => passation.test(t))).toEqual([])
+  })
+})
+
+describe('tableaux de bord (lot 6)', () => {
+  test('jauge : taux et seuil écrits en clair, repères 80/90/100 % (T-213, IHM-06, IHM-10)', () => {
+    const { rerender } = render(<Jauge libelle="604-MED" taux="85.5" />)
+    expect(screen.getByText('85,5 %')).toBeTruthy()
+    expect(screen.getByText('Seuil de 80 % atteint')).toBeTruthy()
+    expect(screen.getByRole('meter', { name: '604-MED' }).getAttribute('aria-valuetext')).toBe(
+      '85,5 % — Seuil de 80 % atteint',
+    )
+    rerender(<Jauge libelle="604-MED" taux="112" />)
+    expect(screen.getByText('100 % atteints ou dépassés')).toBeTruthy()
+    rerender(<Jauge libelle="604-MED" taux={null} />)
+    expect(screen.getAllByText('Sans base de calcul')).toHaveLength(2)
+  })
+
+  test('tableau de la direction : étapes distinctes, filtre transmis à l’API (T-210, T-212)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const montant = (m: string) => `${m}000000.00`
+    const indicateurs = {
+      budgetInitial: montant('130'),
+      budgetRevise: montant('130'),
+      engage: montant('80'),
+      enCoursValidation: '0.00',
+      disponibleApresEngagements: montant('50'),
+      liquide: montant('45'),
+      transmis: montant('35'),
+      paye: montant('30'),
+      resteAPayer: montant('15'),
+      tauxEngagement: '61.54',
+      tauxLiquidation: '34.62',
+      tauxPaiement: '23.08',
+    }
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(MOI)],
+      'GET /api/v1/exercices': [
+        json({
+          donnees: [{ id: 'x1', code: '2026' }],
+          pagination: { page: 1, taille: 100, total: 1, suivant: null },
+        }),
+      ],
+      'GET /api/v1/tableaux-de-bord/direction': [
+        json({
+          indicateurs,
+          chaine: {
+            engage: montant('80'),
+            commande: montant('65'),
+            receptionne: montant('55'),
+            facture: montant('50'),
+            liquide: montant('45'),
+            transmis: montant('35'),
+            paye: montant('30'),
+          },
+          lignes: [
+            {
+              ligneId: 'l1',
+              code: '604-MED',
+              libelle: 'Médicaments',
+              indicateurs: { ...indicateurs, tauxEngagement: '72.22' },
+            },
+          ],
+          repartitions: { compte: [], service: [], nature: [], fournisseur: [] },
+          marches: [],
+          operationnel: {
+            resteAEngagerMarches: montant('20'),
+            resteContractuelAPayer: montant('70'),
+            resteAPayerFactures: montant('15'),
+            facturesEnAttente: 3,
+            montantFacturesEnAttente: montant('50'),
+            ageMoyenFacturesJours: '212.0',
+            delaiMoyenTraitementJours: '4.0',
+          },
+        }),
+      ],
+    })
+    afficher('/tableau-de-bord')
+    expect(await screen.findByText('Réceptionné', {}, { timeout: 5000 })).toBeTruthy()
+    expect(screen.getByText('Transmis en paiement')).toBeTruthy()
+    expect(screen.getByRole('meter', { name: '604-MED — Médicaments' })).toBeTruthy()
+    expect(screen.getByText('212 jours')).toBeTruthy()
+    const urls = appel.mock.calls.map(([url]) => String(url))
+    expect(urls.some((u) => u.includes('/tableaux-de-bord/direction?exerciceId=x1'))).toBe(true)
+    fireEvent.change(screen.getByLabelText('Engagé à partir du'), {
+      target: { value: '2026-03-02' },
+    })
+    await vi.waitFor(() =>
+      expect(appel.mock.calls.some(([url]) => String(url).includes('du=2026-03-02'))).toBe(true),
+    )
+  })
+
+  test('export des restes à payer : CSV pour tableur, montants exacts (T-214)', () => {
+    expect(
+      versCsv(
+        ['Facture', 'Reste'],
+        [
+          ['FA;1', '5000000.00'],
+          ['FA "2"', null],
+        ],
+      ),
+    ).toBe('﻿Facture;Reste\r\n"FA;1";5000000.00\r\n"FA ""2""";\r\n')
   })
 })
