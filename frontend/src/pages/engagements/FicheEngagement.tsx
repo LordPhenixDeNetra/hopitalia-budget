@@ -35,7 +35,7 @@ import type {
   DerogationSortie,
   EngagementSortie,
   NatureDerogation,
-  ResultatSortie,
+  ResultatControleSortie as ResultatSortie,
 } from '../../api/genere/budget.schemas'
 import { useAProfil } from '../../auth/session'
 import { BadgeStatut, type Ton } from '../../composants/BadgeStatut'

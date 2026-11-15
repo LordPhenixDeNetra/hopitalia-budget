@@ -48,6 +48,7 @@ from hopitalia_budget.adaptateurs.sortie.contrats_sql import (
     DepotContratsSql,
     mouvements_contrats,
 )
+from hopitalia_budget.adaptateurs.sortie.factures_sql import deductions_du_contrat
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     AvenantModele,
     CentreResponsabiliteModele,
@@ -484,8 +485,9 @@ def obtenir_synthese_contrat(
     i = calculer_indicateurs_contrat(
         mouvements_contrats(session, [m])[m.id], parametres_calcul(session, m.etablissement_id)
     )
-    # ponytail: déductions vides tant que les liquidations n'existent pas (lot 4).
-    suivi = calculer_avance_retenue(i.montant_actualise, m.taux_avance, [])
+    suivi = calculer_avance_retenue(
+        i.montant_actualise, m.taux_avance, deductions_du_contrat(session, m.id)
+    )
     incidence = session.scalar(
         select(func.coalesce(func.sum(RevisionPrixModele.incidence), 0)).where(
             RevisionPrixModele.contrat_id == m.id

@@ -94,6 +94,22 @@ export const routes: RouteObject[] = [
           import('./pages/commandes/FicheCommande').then((m) => ({ Component: m.FicheCommande })),
       },
       {
+        path: 'factures',
+        handle: fil('menu.factures'),
+        children: [
+          {
+            index: true,
+            lazy: () =>
+              import('./pages/factures/Factures').then((m) => ({ Component: m.Factures })),
+          },
+          {
+            path: ':id',
+            lazy: () =>
+              import('./pages/factures/FicheFacture').then((m) => ({ Component: m.FicheFacture })),
+          },
+        ],
+      },
+      {
         path: 'delegations',
         lazy: () => import('./pages/Delegations').then((m) => ({ Component: m.Delegations })),
         handle: fil('menu.delegations'),

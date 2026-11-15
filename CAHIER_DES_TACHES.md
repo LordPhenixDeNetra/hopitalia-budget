@@ -32,12 +32,12 @@
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
-| P1 | 55 | 2 | 25 | 0 | 0 | 0 | 82 |
+| P1 | 68 | 1 | 13 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **124** | **4** | **79** | **0** | **0** | **2** | **209** |
+| **Total** | **137** | **3** | **67** | **0** | **0** | **2** | **209** |
 
-Avancement : 124 / 207 tâches actives terminées (60 %), hors 2 abandonnées.
+Avancement : 137 / 207 tâches actives terminées (66 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -226,7 +226,7 @@ flowchart LR
 | T-145 | Contrôle de cohérence engagement / contrat / fournisseur. | EF-ENG-03 | T-141 | Fait | Fournisseur différent du titulaire refusé. `ControleCoherenceContrat` ; bénéficiaire différent du titulaire refusé, non dérogeable. |
 | T-146 | Détection des doublons d'engagement. | EF-ENG-03 | T-141 | Fait | Doublon signalé. `DetectionDoublonEngagement` ; doublon signalé (`test_doublon_signale`). |
 | T-147 | Dépenses hors marché et contrôle de seuil. | EF-DHM-01 | T-140, T-141 | Fait | Seuil dépassé bloqué ; tests `Engagement` verts avec `DepenseHorsMarche` (ARC-L). `DepenseHorsMarche` et `ControleSeuilHorsMarche` ; seuil dépassé ou absent bloqué ; tests d'API paramétrés décision et hors marché (ARC-L). |
-| T-148 | Annulation partielle et clôture avec désengagement automatique du reliquat. | EF-ENG-05 | T-117, T-140 | En cours | Disponible recrédité du reliquat, trace d'annulation créée. Annulation partielle et totale faites (disponible recrédité, trace créée). La clôture d'un engagement exécuté est en place mais se vérifiera de bout en bout avec les liquidations (lot 4). |
+| T-148 | Annulation partielle et clôture avec désengagement automatique du reliquat. | EF-ENG-05 | T-117, T-140 | Fait | Disponible recrédité du reliquat, trace d'annulation créée. Annulation partielle et totale faites (disponible recrédité, trace créée). Clôture d'un engagement partiellement exécuté : reliquat non liquidé désengagé, disponible recrédité, trace créée (`test_t148_cloture_desengage_le_reliquat`). |
 | T-149 | Idempotence de la création d'engagement. | §11.3 | T-049, T-140 | Fait | Rejeu sans doublon. Rejeu avec la même clé : même engagement, aucun doublon (`test_idempotence_de_la_creation`). |
 | T-150 | Écrans : demande d'engagement, contrôle, validation, liste. | — | T-140, T-120 | Fait | Parcours Playwright REC-03 vert. Liste, demande, fiche (contrôles, dérogations, validation, pièces, annulations) ; parcours Playwright REC-03 vert sur ordinateur et téléphone. |
 
@@ -247,18 +247,18 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-170 | Factures (tous types) rattachées à un engagement. | EF-FAC-01, 02, RG-05 | T-140 | À faire | Facture sans engagement refusée. |
-| T-171 | Détection des doublons de facture (`409` avec référence). | EF-FAC-03, RG-16, REC-11 | T-170 | À faire | Test REC-11 vert. |
-| T-172 | Avoirs liés à la facture d'origine. | EF-FAC-02 | T-170 | À faire | Facture d'origine intacte, cumuls nets corrects. |
-| T-173 | Décomptes successifs (marchés de travaux). | EF-FAC-02 | T-170 | À faire | Cumul des décomptes correct. |
-| T-174 | Liquidations par imputation d'engagement. | EF-LIQ-03, RG-17 | T-170 | À faire | Facture sur 2 lignes donne 2 liquidations. |
-| T-175 | Calculs de déduction extensibles (`CalculDeduction` : retenue de garantie, pénalité, avance récupérée, retenue à la source). | §6.3, §10.2 O | T-174 | À faire | Net à payer = liquidé − déductions, testé par type. |
-| T-176 | Contrôle du service fait avant liquidation. | RG-06 | T-141, T-165 | À faire | Liquidation sans réception requise bloquée. |
-| T-177 | Contrôle du reste dû et de la facture supérieure à la réception. | EF-LIQ-05, REC-07 | T-141, T-174 | À faire | Test REC-07 vert. |
-| T-178 | Rejet motivé, retour pour correction, validation de la liquidation. | EF-LIQ-04 | T-113, T-174 | À faire | Historique complet consultable. |
-| T-179 | Calculs par liquidation et facture (6.3) dans le service unique. | §6.3, ARC-S | T-093, T-174 | À faire | Tests unitaires de chaque formule, dont la règle de l'avance. |
-| T-180 | Rapprochement commande / réception / facture / paiement, avec explication des écarts. | §9.1 | T-174 | À faire | Écart sans explication non validable. |
-| T-181 | Écrans : traitement des factures, liquidation, rapprochement. | §18.1 | T-178, T-120 | À faire | Parcours Playwright REC-06 et REC-12 verts. |
+| T-170 | Factures (tous types) rattachées à un engagement. | EF-FAC-01, 02, RG-05 | T-140 | Fait | Facture sans engagement refusée. Factures de tous types rattachées à un engagement validé, fournisseur repris de l'engagement ; facture sans engagement valide refusée (`test_facture_rattachee_a_un_engagement_valide`). |
+| T-171 | Détection des doublons de facture (`409` avec référence). | EF-FAC-03, RG-16, REC-11 | T-170 | Fait | Test REC-11 vert. `409 FACTURE_DOUBLON` avec la référence du doublon, levée motivée tracée au journal d'audit (`test_rec11_doublon_de_facture`). |
+| T-172 | Avoirs liés à la facture d'origine. | EF-FAC-02 | T-170 | Fait | Facture d'origine intacte, cumuls nets corrects. Avoir négatif lié à sa facture d'origine, plafonné ; facture d'origine intacte, cumuls nets corrects (`test_avoir_et_decomptes`). |
+| T-173 | Décomptes successifs (marchés de travaux). | EF-FAC-02 | T-170 | Fait | Cumul des décomptes correct. Numéro de décompte et cumul des décomptes (`test_avoir_et_decomptes`). |
+| T-174 | Liquidations par imputation d'engagement. | EF-LIQ-03, RG-17 | T-170 | Fait | Facture sur 2 lignes donne 2 liquidations. Une liquidation par imputation ; une facture sur 2 lignes donne 2 liquidations, imputation étrangère refusée (`test_une_liquidation_par_imputation`). |
+| T-175 | Calculs de déduction extensibles (`CalculDeduction` : retenue de garantie, pénalité, avance récupérée, retenue à la source). | §6.3, §10.2 O | T-174 | Fait | Net à payer = liquidé − déductions, testé par type. `CalculDeduction` (retenue de garantie, avance récupérée au prorata et plafonnée, retenue à la source, montant saisi) ; net à payer testé par type (`test_calculs_de_deduction_par_type`). |
+| T-176 | Contrôle du service fait avant liquidation. | RG-06 | T-141, T-165 | Fait | Liquidation sans réception requise bloquée. `ControleServiceFait` : liquidation sans réception validée bloquée, non dérogeable, factures d'avance dispensées (`test_rg06_service_fait_avant_liquidation`). |
+| T-177 | Contrôle du reste dû et de la facture supérieure à la réception. | EF-LIQ-05, REC-07 | T-141, T-174 | Fait | Test REC-07 vert. `ControleResteDu` (dérogeable) et `ControleFactureSuperieureReception` (alerte non bloquante) ; test REC-07 vert (`test_rec07_reste_du_et_facture_superieure_a_la_reception`). |
+| T-178 | Rejet motivé, retour pour correction, validation de la liquidation. | EF-LIQ-04 | T-113, T-174 | Fait | Historique complet consultable. Liquidation validable par le circuit (DAF puis ordonnateur) ; retour, rejet, validation et historique des visas (`test_circuit_de_liquidation_et_indicateurs`, `test_rec12_rejet_correction_et_piste_d_audit`). |
+| T-179 | Calculs par liquidation et facture (6.3) dans le service unique. | §6.3, ARC-S | T-093, T-174 | Fait | Tests unitaires de chaque formule, dont la règle de l'avance. `calculer_liquidation` et `reste_a_payer_facture` dans `domaine/indicateurs.py`, branchés sur les indicateurs des lignes et des contrats (`test_formules_6_3_et_regle_de_l_avance`). |
+| T-180 | Rapprochement commande / réception / facture / paiement, avec explication des écarts. | §9.1 | T-174 | Fait | Écart sans explication non validable. Écarts commande, réception, facture et paiement ; écart sans explication refusé (`ECART_NON_EXPLIQUE`, `test_rapprochement_ecart_explique`). |
+| T-181 | Écrans : traitement des factures, liquidation, rapprochement. | §18.1 | T-178, T-120 | Fait | Parcours Playwright REC-06 et REC-12 verts. Page Factures, fiche facture (liquidations, contrôles, dérogation, circuit, rapprochement, facture numérisée) ; parcours Playwright REC-06 et REC-12 verts sur ordinateur et téléphone, et à 300 px. |
 
 ### P1.G — Lot 5 : ordonnancement et paiements
 
@@ -430,3 +430,5 @@ flowchart LR
 | 15/11/2026 | T-116 | En cours | Fait | API-04 vérifié sur l'engagement validé. |
 | 15/11/2026 | T-148 | À faire | En cours | Annulation partielle et totale faites ; clôture à vérifier avec les liquidations (lot 4). |
 | 15/11/2026 | T-160 à T-167 (P1.E) | À faire | Fait | Commandes, réceptions, réserves, attestation et service fait ; migration 0007 ; 165 tests backend, 37 tests Vitest, parcours REC-05. |
+| 15/11/2026 | T-170 à T-181 (P1.F) | À faire | Fait | Factures, avoirs, décomptes, liquidations par imputation, déductions, contrôles (RG-05, RG-06, REC-07), rapprochement, écrans ; dérogations communes à l'engagement et à la liquidation ; migration 0008 ; 178 tests backend, 40 tests Vitest, parcours REC-06 et REC-12. |
+| 15/11/2026 | T-148 | En cours | Fait | Clôture d'un engagement partiellement exécuté vérifiée avec les liquidations. |

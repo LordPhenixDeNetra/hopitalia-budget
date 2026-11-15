@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from hopitalia_budget.adaptateurs.sortie.commandes_sql import commande_et_receptionne_par_contrat
 from hopitalia_budget.adaptateurs.sortie.engagements_sql import engage_par_contrat
+from hopitalia_budget.adaptateurs.sortie.factures_sql import factures_par_contrat
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     AvenantModele,
     ContratModele,
@@ -51,8 +52,8 @@ def vers_contrat(m: ContratModele) -> Contrat:
 def mouvements_contrats(
     session: Session, contrats: list[ContratModele]
 ) -> dict[UUID, MouvementsContrat]:
-    """Avenants validés, engagements, commandes et réceptions validées ; facturé, liquidé,
-    transmis et payé restent à zéro jusqu'aux lots qui créent ces pièces."""
+    """Avenants validés, engagements, commandes, réceptions validées, factures et liquidations ;
+    transmis et payé restent à zéro jusqu'au lot 5 (ordonnancement et paiements)."""
     a = AvenantModele
     variations = {
         contrat_id: (positifs, negatifs)
@@ -68,6 +69,7 @@ def mouvements_contrats(
     }
     engage = engage_par_contrat(session, [c.id for c in contrats])
     commande, receptionne = commande_et_receptionne_par_contrat(session, [c.id for c in contrats])
+    facture, liquide, net = factures_par_contrat(session, [c.id for c in contrats])
     resultat = {}
     for c in contrats:
         positifs, negatifs = variations.get(c.id, (ZERO, ZERO))
@@ -78,6 +80,9 @@ def mouvements_contrats(
             engage=engage.get(c.id, ZERO),
             commande=commande.get(c.id, ZERO),
             receptionne=receptionne.get(c.id, ZERO),
+            facture=facture.get(c.id, ZERO),
+            liquide=liquide.get(c.id, ZERO),
+            net_a_payer=net.get(c.id, ZERO),
         )
     return resultat
 

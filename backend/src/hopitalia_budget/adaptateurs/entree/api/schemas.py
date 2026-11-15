@@ -36,5 +36,23 @@ Montant = Annotated[
 
 # Types d'objets validables (clés de domaine/workflow.TRANSITIONS_REFERENCE ; un test les compare).
 TypeObjet = Literal[
-    "RevisionBudgetaire", "Contrat", "Avenant", "Engagement", "Derogation", "Reception"
+    "RevisionBudgetaire",
+    "Contrat",
+    "Avenant",
+    "Engagement",
+    "Derogation",
+    "Reception",
+    "Liquidation",
+    "Facture",
 ]
+
+
+class ResultatControleSortie(Schema):
+    """Écart d'un contrôle automatique : levé par dérogation, ou alerte s'il ne bloque pas."""
+
+    code: str
+    nature: str | None
+    depassement: Montant
+    details: dict[str, str]
+    leve: bool
+    bloquant: bool

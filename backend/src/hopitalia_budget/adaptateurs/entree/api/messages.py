@@ -289,6 +289,49 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
             "({commande}).",
         ),
     ),
+    "FACTURE_DOUBLON": (
+        409,
+        (
+            "Facture en doublon",
+            "Une facture du même fournisseur a le même numéro, ou la même date et le même montant "
+            "(référence {reference}). Elle n'est enregistrée qu'avec un motif de levée (RG-16).",
+        ),
+        (
+            "Duplicate invoice",
+            "An invoice from the same supplier has the same number, or the same date and amount "
+            "(reference {reference}). It is recorded only with a release reason (RG-16).",
+        ),
+    ),
+    "FACTURE_NON_TRAITABLE": (
+        409,
+        (
+            "Facture non traitable",
+            "Cette action n'est pas possible sur la facture dans son état actuel ({statut}).",
+        ),
+        ("Invoice cannot be processed", "This action is not possible in its state ({statut})."),
+    ),
+    "DEDUCTION_INCALCULABLE": (
+        422,
+        (
+            "Déduction incalculable",
+            "Indiquez le montant ou le taux de la déduction {type} : le contrat ne le donne pas.",
+        ),
+        (
+            "Deduction cannot be computed",
+            "Give the amount or rate of the {type} deduction: the contract does not provide it.",
+        ),
+    ),
+    "ECART_NON_EXPLIQUE": (
+        422,
+        (
+            "Écart non expliqué",
+            "Le rapprochement présente un écart : il ne se valide qu'avec son explication.",
+        ),
+        (
+            "Unexplained gap",
+            "The reconciliation shows a gap: it is validated only with its reason.",
+        ),
+    ),
     "OPERATION_DEJA_TRAITEE": (
         409,
         ("Opération déjà traitée", "Cette opération n'attend aucune validation."),

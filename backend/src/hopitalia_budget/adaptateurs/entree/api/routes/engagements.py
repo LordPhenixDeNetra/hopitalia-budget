@@ -39,7 +39,12 @@ from hopitalia_budget.adaptateurs.entree.api.pagination import (
     lire_tri,
     parametres_autorises,
 )
-from hopitalia_budget.adaptateurs.entree.api.schemas import Montant, Schema
+from hopitalia_budget.adaptateurs.entree.api.schemas import (
+    Montant,
+    ResultatControleSortie,
+    Schema,
+)
+from hopitalia_budget.adaptateurs.sortie.derogations_sql import DepotDerogationsSql
 from hopitalia_budget.adaptateurs.sortie.engagements_sql import DepotEngagementsSql
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     AnnulationLigneModele,
@@ -55,7 +60,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
     ReferentielModele,
 )
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import DepotWorkflowSql
-from hopitalia_budget.application import engagements, workflow
+from hopitalia_budget.application import derogations, engagements, workflow
 from hopitalia_budget.domaine.controles import NatureDerogation
 from hopitalia_budget.domaine.engagements import (
     NatureHorsMarche,
@@ -387,23 +392,16 @@ def lister_engagements(
 # --- Contrôles et dérogations (T-141 à T-147, T-118) --------------------------------------------
 
 
-class ResultatSortie(Schema):
-    code: str
-    nature: NatureDerogation | None
-    depassement: Montant
-    details: dict[str, str]
-    leve: bool
-
-
-@router.get("/engagements/{engagement_id}/controles", response_model=list[ResultatSortie])
+@router.get("/engagements/{engagement_id}/controles", response_model=list[ResultatControleSortie])
 def lire_controles(
     engagement_id: UUID, session: SessionDep, utilisateur: UtilisateurDep
-) -> list[ResultatSortie]:
+) -> list[ResultatControleSortie]:
     """Résultat des contrôles automatiques à l'instant (sans verrou) ; écarts levés compris."""
     depot = DepotEngagementsSql(session)
     engagement = engagements.obtenir(depot, utilisateur, engagement_id)
     return [
-        ResultatSortie.model_validate(vars(r)) for r in engagements.controler(depot, engagement)
+        ResultatControleSortie.model_validate(vars(r))
+        for r in engagements.controler(depot, engagement)
     ]
 
 
@@ -438,19 +436,20 @@ def demander_derogation(
 ) -> DerogationSortie:
     """Demande soumise au circuit (visa DAF puis ordonnateur) ; une fois validée, elle lève
     l'écart de sa nature jusqu'à son montant, sur cet engagement seulement (RG-19)."""
-    identifiant = engagements.demander_derogation(
-        DepotEngagementsSql(session),
+    engagement = engagements.obtenir(DepotEngagementsSql(session), utilisateur, engagement_id)
+    engagements.exiger_saisie(utilisateur, engagement.etablissement_id)
+    identifiant = derogations.demander(
+        DepotDerogationsSql(session),
         DepotWorkflowSql(session),
         journal,
         horloge,
         utilisateur,
-        engagement_id,
+        engagements.porteur(engagement),
         corps.nature,
         corps.montant_depassement,
         corps.motif,
     )
     m = session.get_one(DerogationModele, identifiant)
-    m.cree_par_code = utilisateur.code_agent
     session.commit()
     return DerogationSortie.model_validate(m, from_attributes=True)
 

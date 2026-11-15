@@ -32,6 +32,7 @@ class ResultatControle:
     depassement: Decimal = Decimal("0")
     details: dict[str, Any] = field(default_factory=dict)
     leve: bool = False  # couvert par une dérogation validée
+    bloquant: bool = True  # sinon simple alerte : signalée, sans empêcher l'opération
 
 
 class RegleControle[Op](Protocol):
@@ -58,14 +59,22 @@ class MoteurControles[T]:
                     r.nature is not None and accordees.get(r.nature, Decimal("-1")) >= r.depassement
                 )
                 resultats.append(
-                    ResultatControle(r.code, r.nature, r.depassement, r.details, leve=couvert)
+                    ResultatControle(
+                        r.code,
+                        r.nature,
+                        r.depassement,
+                        r.details,
+                        leve=couvert,
+                        bloquant=r.bloquant,
+                    )
                 )
         return resultats
 
 
 def exiger_conformite(resultats: list[ResultatControle]) -> None:
-    """Refuse l'opération tant qu'un écart reste ouvert (ni corrigé ni couvert)."""
-    ouverts = [r for r in resultats if not r.leve]
+    """Refuse l'opération tant qu'un écart bloquant reste ouvert (ni corrigé ni couvert) ;
+    les alertes ne bloquent pas."""
+    ouverts = [r for r in resultats if r.bloquant and not r.leve]
     if ouverts:
         raise ErreurMetier(
             "CONTROLE_BLOQUANT",

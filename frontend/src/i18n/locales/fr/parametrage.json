@@ -75,7 +75,9 @@
     "Avenant": "Avenant",
     "Engagement": "Engagement",
     "Derogation": "Dérogation",
-    "Reception": "Réception"
+    "Reception": "Réception",
+    "Liquidation": "Liquidation",
+    "Facture": "Facture"
   },
   "actions": {
     "creer": "Ajouter",

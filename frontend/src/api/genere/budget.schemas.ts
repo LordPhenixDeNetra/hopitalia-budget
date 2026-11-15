@@ -306,6 +306,8 @@ export const CircuitCreationTypeObjet = {
   Engagement: 'Engagement',
   Derogation: 'Derogation',
   Reception: 'Reception',
+  Liquidation: 'Liquidation',
+  Facture: 'Facture',
 } as const;
 
 export type Profil = typeof Profil[keyof typeof Profil];
@@ -673,6 +675,36 @@ export interface DecisionCreation {
   visa?: string | null;
 }
 
+export type TypeDeduction = typeof TypeDeduction[keyof typeof TypeDeduction];
+
+
+export const TypeDeduction = {
+  AVANCE_RECUPEREE: 'AVANCE_RECUPEREE',
+  RETENUE_GARANTIE: 'RETENUE_GARANTIE',
+  PENALITE: 'PENALITE',
+  REFACTION: 'REFACTION',
+  RETENUE_SOURCE: 'RETENUE_SOURCE',
+  AUTRE: 'AUTRE',
+} as const;
+
+export interface DeductionSchema {
+  type: TypeDeduction;
+  montant?: string | null;
+  taux?: number | string | null;
+  /** @maxLength 500 */
+  motif?: string;
+  baseCalcul?: string | null;
+}
+
+export interface DeductionSortie {
+  type: TypeDeduction;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  taux: string | null;
+  motif: string | null;
+  baseCalcul: string | null;
+}
+
 export interface DelegationCreation {
   /**
      * @minLength 1
@@ -773,6 +805,24 @@ export interface DisponibiliteSortie {
   code: string;
   libelle: string;
   indicateurs: IndicateursSortie;
+}
+
+export interface EcartsSortie {
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  commande: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  receptionne: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  facture: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  paye: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  ecartCommandeReception: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  ecartReceptionFacture: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  ecartFacturePaiement: string;
+  sansEcart: boolean;
 }
 
 export interface EcheanceSchema {
@@ -997,6 +1047,111 @@ export interface ExerciceSortie {
   version: number;
 }
 
+export interface FactureChamps {
+  numero?: string | null;
+  objet?: string | null;
+  dateEmission?: string | null;
+  dateReception?: string | null;
+  dateEcheance?: string | null;
+  dateLimiteTraitement?: string | null;
+  periodeRattachement?: string | null;
+  montantHt?: string | null;
+  montantTaxes?: string | null;
+  montantTtc?: string | null;
+  motifLeveeDoublon?: string | null;
+}
+
+export type TypeFacture = typeof TypeFacture[keyof typeof TypeFacture];
+
+
+export const TypeFacture = {
+  AVANCE: 'AVANCE',
+  ACOMPTE: 'ACOMPTE',
+  PARTIELLE: 'PARTIELLE',
+  DEFINITIVE: 'DEFINITIVE',
+  DECOMPTE: 'DECOMPTE',
+  AVOIR: 'AVOIR',
+} as const;
+
+export interface FactureCreation {
+  /**
+     * @minLength 1
+     * @maxLength 50
+     */
+  numero: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  objet: string;
+  dateEmission: string;
+  dateReception: string;
+  dateEcheance?: string | null;
+  dateLimiteTraitement?: string | null;
+  periodeRattachement?: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantHt: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantTaxes?: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantTtc: string;
+  motifLeveeDoublon?: string | null;
+  engagementId: string;
+  bonCommandeId?: string | null;
+  factureOrigineId?: string | null;
+  type: TypeFacture;
+  numeroDecompte?: number | null;
+}
+
+export type StatutFacture = typeof StatutFacture[keyof typeof StatutFacture];
+
+
+export const StatutFacture = {
+  RECUE: 'RECUE',
+  EN_CONTROLE: 'EN_CONTROLE',
+  RETOURNEE: 'RETOURNEE',
+  REJETEE: 'REJETEE',
+  LIQUIDEE: 'LIQUIDEE',
+  MISE_EN_PAIEMENT: 'MISE_EN_PAIEMENT',
+  PARTIELLEMENT_PAYEE: 'PARTIELLEMENT_PAYEE',
+  PAYEE: 'PAYEE',
+} as const;
+
+export interface FactureSortie {
+  id: string;
+  etablissementId: string;
+  engagementId: string;
+  fournisseurId: string;
+  bonCommandeId: string | null;
+  factureOrigineId: string | null;
+  numero: string;
+  type: TypeFacture;
+  objet: string;
+  dateEmission: string;
+  dateReception: string;
+  dateEcheance: string | null;
+  dateLimiteTraitement: string | null;
+  periodeRattachement: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantHt: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantTaxes: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantTtc: string;
+  numeroDecompte: number | null;
+  montantCumuleDecomptes: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  liquideValide: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteAPayer: string;
+  statut: StatutFacture;
+  motifStatut: string | null;
+  motifLeveeDoublon: string | null;
+  creeParCode: string;
+  creeLe: string;
+  version: number;
+}
+
 export interface FournisseurCreation {
   /**
      * @minLength 1
@@ -1147,6 +1302,61 @@ export interface LigneSortie {
   version: number;
 }
 
+export interface LiquidationChamps {
+  dateLiquidation?: string | null;
+  montantBase?: string | null;
+  observations?: string | null;
+  receptionIds?: string[] | null;
+  deductions?: DeductionSchema[] | null;
+}
+
+export interface LiquidationCreation {
+  dateLiquidation: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantBase: string;
+  observations?: string | null;
+  receptionIds?: string[];
+  deductions?: DeductionSchema[];
+  imputationId: string;
+}
+
+export type StatutLiquidation = typeof StatutLiquidation[keyof typeof StatutLiquidation];
+
+
+export const StatutLiquidation = {
+  BROUILLON: 'BROUILLON',
+  SOUMIS: 'SOUMIS',
+  EN_VALIDATION: 'EN_VALIDATION',
+  A_CORRIGER: 'A_CORRIGER',
+  VALIDE: 'VALIDE',
+  REJETE: 'REJETE',
+} as const;
+
+export interface LiquidationSortie {
+  id: string;
+  factureId: string;
+  imputationId: string;
+  numero: string;
+  dateLiquidation: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantBase: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantLiquide: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  deductionsTotal: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  netAPayer: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  consommationBudgetaire: string;
+  observations: string | null;
+  statut: StatutLiquidation;
+  receptionIds: string[];
+  deductions: DeductionSortie[];
+  creeParCode: string;
+  creeLe: string;
+  version: number;
+}
+
 export interface LotSchema {
   /**
      * @minLength 1
@@ -1198,6 +1408,14 @@ export interface Moi {
   service: string;
   habilitations: ProfilBudgetaire[];
   langue: MoiLangue;
+}
+
+export interface MotifSchema {
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  motif: string;
 }
 
 export interface NotificationLigne {
@@ -1336,6 +1554,11 @@ export interface PageEtablissementSortie {
 
 export interface PageExerciceSortie {
   donnees: ExerciceSortie[];
+  pagination: Pagination;
+}
+
+export interface PageFactureSortie {
+  donnees: FactureSortie[];
   pagination: Pagination;
 }
 
@@ -1522,7 +1745,7 @@ export interface TypePieceSortie {
   actif: boolean;
   version: number;
   dureeConservationAns: number | null;
-  typesObjets: ('RevisionBudgetaire' | 'Contrat' | 'Avenant' | 'Engagement' | 'Derogation' | 'Reception')[] | null;
+  typesObjets: ('RevisionBudgetaire' | 'Contrat' | 'Avenant' | 'Engagement' | 'Derogation' | 'Reception' | 'Liquidation' | 'Facture')[] | null;
 }
 
 export interface PageTypePieceSortie {
@@ -1591,6 +1814,23 @@ export interface RapportImport {
   crees: number;
   misAJour: number;
   anomalies: Anomalie[];
+}
+
+export interface RapprochementCreation {
+  explication?: string | null;
+}
+
+export interface RapprochementSortie {
+  id: string;
+  dateRapprochement: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  ecartCommandeReception: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  ecartReceptionFacture: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  ecartFacturePaiement: string;
+  explication: string | null;
+  creeParCode: string;
 }
 
 export interface ReceptionChamps {
@@ -1695,15 +1935,19 @@ export interface ReserveLevee {
   dateLevee: string;
 }
 
-export type ResultatSortieDetails = {[key: string]: string};
+export type ResultatControleSortieDetails = {[key: string]: string};
 
-export interface ResultatSortie {
+/**
+ * Écart d'un contrôle automatique : levé par dérogation, ou alerte s'il ne bloque pas.
+ */
+export interface ResultatControleSortie {
   code: string;
-  nature: NatureDerogation | null;
+  nature: string | null;
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
   depassement: string;
-  details: ResultatSortieDetails;
+  details: ResultatControleSortieDetails;
   leve: boolean;
+  bloquant: boolean;
 }
 
 export interface RevisionCorrection {
@@ -1826,6 +2070,8 @@ export const StatutCreationTypeObjet = {
   Engagement: 'Engagement',
   Derogation: 'Derogation',
   Reception: 'Reception',
+  Liquidation: 'Liquidation',
+  Facture: 'Facture',
 } as const;
 
 export interface StatutCreation {
@@ -1913,6 +2159,8 @@ export const TransitionCreationTypeObjet = {
   Engagement: 'Engagement',
   Derogation: 'Derogation',
   Reception: 'Reception',
+  Liquidation: 'Liquidation',
+  Facture: 'Facture',
 } as const;
 
 export interface TransitionCreation {
@@ -1974,6 +2222,8 @@ export const TypePieceCreationTypesObjetsItem = {
   Engagement: 'Engagement',
   Derogation: 'Derogation',
   Reception: 'Reception',
+  Liquidation: 'Liquidation',
+  Facture: 'Facture',
 } as const;
 
 export interface TypePieceCreation {
@@ -2000,7 +2250,7 @@ export interface TypePieceModification {
   libelle?: string | null;
   actif?: boolean | null;
   dureeConservationAns?: number | null;
-  typesObjets?: ('RevisionBudgetaire' | 'Contrat' | 'Avenant' | 'Engagement' | 'Derogation' | 'Reception')[] | null;
+  typesObjets?: ('RevisionBudgetaire' | 'Contrat' | 'Avenant' | 'Engagement' | 'Derogation' | 'Reception' | 'Liquidation' | 'Facture')[] | null;
 }
 
 export type Health200 = {[key: string]: string};
@@ -2135,6 +2385,22 @@ export type ListerBonsCommandeParams = {
 export type ListerReservesParams = {
   nonLevees?: boolean;
 };
+
+export type ListerFacturesParams = {
+  etablissementId?: string | null;
+  engagementId?: string | null;
+  statut?: StatutFacture | null;
+  type?: TypeFacture | null;
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
+
+export type DemanderDerogationLiquidation201 = {[key: string]: string};
 
 export type ListerSitesParams = {
   /** @minimum 1 */

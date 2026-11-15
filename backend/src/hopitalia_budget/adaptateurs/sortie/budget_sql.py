@@ -11,6 +11,7 @@ from hopitalia_budget.adaptateurs.sortie.engagements_sql import (
     en_cours_par_ligne,
     engage_par_ligne,
 )
+from hopitalia_budget.adaptateurs.sortie.factures_sql import liquide_et_net_par_ligne
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     BudgetModele,
     LigneBudgetaireModele,
@@ -49,8 +50,8 @@ def parametres_calcul(session: Session, etablissement_id: UUID) -> ParametresCal
 def mouvements_lignes(session: Session, ligne_ids: list[UUID]) -> dict[UUID, MouvementsLigne]:
     """Montants agrégés par ligne à partir des pièces.
 
-    Dotations, révisions validées et engagements. Liquidations et paiements viendront des
-    lots 4 et 5 ; d'ici là, leurs montants valent zéro.
+    Dotations, révisions validées, engagements et liquidations validées. Les paiements
+    viendront du lot 5 ; d'ici là, le payé vaut zéro.
     """
     if not ligne_ids:
         return {}
@@ -100,6 +101,7 @@ def mouvements_lignes(session: Session, ligne_ids: list[UUID]) -> dict[UUID, Mou
         negatives[ligne] += montant
     engage = engage_par_ligne(session, ligne_ids)
     en_cours = en_cours_par_ligne(session, ligne_ids)
+    liquide, net = liquide_et_net_par_ligne(session, ligne_ids)
     return {
         ligne: MouvementsLigne(
             dotation_initiale=dotation,
@@ -107,6 +109,8 @@ def mouvements_lignes(session: Session, ligne_ids: list[UUID]) -> dict[UUID, Mou
             modifications_negatives=negatives[ligne],
             engage=engage.get(ligne, ZERO),
             en_cours_validation=en_cours.get(ligne, ZERO),
+            liquide=liquide.get(ligne, ZERO),
+            net_a_payer=net.get(ligne, ZERO),
         )
         for ligne, dotation in dotations.items()
     }

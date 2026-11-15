@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.6 · 15 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.7 · 15 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -13,6 +13,7 @@
 | 3.4 | 15/11/2026 | Contrats et avenants (lot P1.C) : cycles de vie (8.5), règles de saisie et de calcul du contrat, ressources d'API précisées (11.2). |
 | 3.5 | 15/11/2026 | Engagements et contrôles (lot P1.D) : règles de l'engagement, des contrôles, des dérogations et des annulations (8.1), nature de dérogation `SEUIL_HORS_MARCHE` (18.4), ressources d'API précisées (11.2). |
 | 3.6 | 15/11/2026 | Commandes, réceptions et service fait (lot P1.E) : cycle de la réception (8.6), bon de commande émis sans circuit (10.2), ordonnateur final limité aux objets du point 16 (7.6), ressources d'API précisées (11.2). |
+| 3.7 | 15/11/2026 | Factures, liquidations et rapprochement (lot P1.F) : cycle et règles de la facture et de la liquidation (8.2), dérogations communes à l'engagement et à la liquidation (8.1), facture justifiable sans circuit (10.2), ressources d'API précisées (11.2). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1192,8 +1193,9 @@ stateDiagram-v2
   A_CORRIGER --> SOUMIS : resoumettre
   EN_CONTROLE --> VALIDE : valider (credits et plafond OK)
   EN_CONTROLE --> REJETE : rejeter
-  VALIDE --> PARTIELLEMENT_EXECUTE : premiere liquidation
-  PARTIELLEMENT_EXECUTE --> EXECUTE : liquide = engage
+  VALIDE --> PARTIELLEMENT_EXECUTE : premiere liquidation validee
+  VALIDE --> EXECUTE : liquide = engage net
+  PARTIELLEMENT_EXECUTE --> EXECUTE : liquide = engage net
   VALIDE --> ANNULE : annuler
   PARTIELLEMENT_EXECUTE --> CLOTURE : cloturer (reliquat desengage)
   EXECUTE --> CLOTURE : cloturer
@@ -1208,7 +1210,7 @@ stateDiagram-v2
 - Saisie en brouillon ; montant égal à la somme des imputations, toutes positives (RG-15) ; lignes d'un même exercice ouvert, de l'établissement de l'engagement (RG-01). Origine `CONTRAT` : contrat obligatoire ; `HORS_MARCHE` : type de dépense et nature obligatoires ; sinon, pas de contrat. Numéro attribué par établissement et exercice (`ENG-2026-00001`).
 - Circuit par défaut : contrôle financier (profil AF, « prise en charge » : `EN_CONTROLE`), visa de la DAF, puis ordonnateur (section 17, point 16). Un établissement peut paramétrer d'autres circuits (7.6).
 - Contrôles automatiques, à la soumission puis à la validation finale : crédits de chaque ligne (RG-02), plafond du contrat (RG-04), contrat validé et bénéficiaire égal au titulaire, doublon probable (même bénéficiaire, même montant, même objet, à moins de 30 jours), seuil hors marché (point 9 : sans seuil renseigné, la dérogation est exigée). À la validation finale, les lignes et le contrat sont verrouillés jusqu'à la fin de la transaction (RG-20).
-- Un écart bloquant se corrige, ou se couvre par une dérogation de même nature, validée (visa DAF puis ordonnateur), d'un montant au moins égal au dépassement, sur cet engagement seulement (RG-19). Le contrat non validé et le bénéficiaire incohérent ne se couvrent pas.
+- Un écart bloquant se corrige, ou se couvre par une dérogation de même nature, validée (visa DAF puis ordonnateur), d'un montant au moins égal au dépassement, sur cet engagement seulement (RG-19). Le contrat non validé et le bénéficiaire incohérent ne se couvrent pas. La dérogation est un objet commun : elle porte le type et l'identifiant de l'objet couvert (engagement ou liquidation) et suit le même circuit.
 - L'engagé d'une ligne ou d'un contrat compte les engagements validés, moins leurs annulations et clôtures ; l'en-cours compte les engagements soumis ou en contrôle (6.1, 6.2).
 - Annulation partielle ou totale du reliquat d'un engagement validé, par imputation : l'engagement reste intact, l'annulation s'y ajoute (RG-18). Le reliquat entièrement annulé, sans rien de liquidé, fait passer l'engagement à `ANNULE`. La clôture d'un engagement exécuté désengage le reliquat non liquidé et le fait passer à `CLOTURE`.
 
@@ -1217,10 +1219,13 @@ stateDiagram-v2
 ```mermaid
 stateDiagram-v2
   [*] --> RECUE
-  RECUE --> EN_CONTROLE : rapprocher
+  RECUE --> EN_CONTROLE : premiere liquidation
+  RECUE --> RETOURNEE : retour pour correction
   EN_CONTROLE --> RETOURNEE : retour pour correction
-  RETOURNEE --> EN_CONTROLE : correction recue
-  EN_CONTROLE --> REJETEE : rejet motive
+  RETOURNEE --> RECUE : correction (sans liquidation)
+  RETOURNEE --> EN_CONTROLE : correction (liquidation en cours)
+  RECUE --> REJETEE : rejet motive
+  EN_CONTROLE --> REJETEE : rejet motive (sans liquidation)
   EN_CONTROLE --> LIQUIDEE : liquidations validees
   LIQUIDEE --> MISE_EN_PAIEMENT : ordonnancement transmis
   MISE_EN_PAIEMENT --> LIQUIDEE : ordonnancement rejete
@@ -1230,6 +1235,16 @@ stateDiagram-v2
   REJETEE --> [*]
   PAYEE --> [*]
 ```
+
+**Règles de la facture et de la liquidation (lot P1.F).**
+
+- La facture se rattache à un engagement validé, partiellement exécuté ou exécuté ; son fournisseur est celui de l'engagement. Type : avance, acompte, partielle, définitive, décompte, avoir. TTC = HT + taxes. Un décompte porte son numéro et le cumul des décomptes s'affiche. Un avoir est négatif, lié à sa facture d'origine et ne dépasse pas son montant ; il n'est pas liquidé.
+- Doublon (RG-16) : même fournisseur et même numéro, ou même date et même montant, hors factures rejetées. La création est refusée (`409 FACTURE_DOUBLON` avec la référence du doublon) ; l'agent qui sait la facture distincte la crée avec un motif de levée, tracé au journal d'audit.
+- La facture n'a pas de circuit propre : enregistrement, correction, retour et rejet sont des actions de l'agent financier (profil AF), motivées et tracées. Le rejet n'est plus possible dès qu'une liquidation existe. La facture numérisée est une pièce obligatoire, vérifiée à la validation de la liquidation.
+- Une liquidation par imputation de l'engagement (RG-17), saisie en brouillon puis validée par le circuit (par défaut : visa de la DAF, puis ordonnateur). Montants selon 6.3 : pénalités et réfactions (motif obligatoire) réduisent le liquidé ; retenue de garantie et avance récupérée se calculent depuis le contrat quand leur montant n'est pas saisi (l'avance au prorata, plafonnée à ce qui reste à récupérer).
+- Contrôles à la soumission et à la validation finale : service fait par une réception validée (RG-05, non dérogeable ; les factures d'avance en sont dispensées) ; liquidé au-delà du reste dû de l'imputation (dérogeable, `LIQUIDATION_SUP_DU`) ; liquidations au-delà du montant de la facture (bloquant) ; facturé au-delà du réceptionné (alerte, non bloquante). L'imputation est verrouillée à la validation (RG-20).
+- La facture passe à `LIQUIDEE` quand ses liquidations validées couvrent son montant ; l'engagement passe à `PARTIELLEMENT_EXECUTE`, puis à `EXECUTE` quand le liquidé atteint son montant net d'annulations.
+- Rapprochement (9.1) : commandé, réceptionné, facturé et payé de la facture, et leurs écarts. Un rapprochement avec écart n'est enregistré qu'avec son explication (`422 ECART_NON_EXPLIQUE`). L'écart facture et paiement ne compte qu'une fois la facture mise en paiement (lot 5).
 
 ### 8.3. Ordonnancement
 
@@ -1497,8 +1512,8 @@ Un objet n'implémente que les capacités qu'il possède. Le `Validable` unique 
 | Révision budgétaire | Oui | Oui | | |
 | Bon de commande | | | | |
 | Réception | Oui | Oui | | |
-| Facture | Oui | Oui | Oui | |
-| Liquidation | Oui | | Oui | Oui |
+| Facture | | Oui | Oui | |
+| Liquidation | Oui | Oui | Oui | Oui |
 | Ordonnancement, Rapprochement | Oui | | | |
 | Paiement | Oui | Oui | Oui | Oui |
 
@@ -1592,11 +1607,11 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/engagements/{id}/derogations`, `/annulations`, `/clotures` | GET, POST | Dérogations validées par le circuit (`/derogations/{id}/validations`). |
 | `/engagements/{id}/bons-commande` | GET, POST | `GET /bons-commande?enRetard=true` : commandes en retard ; `GET /bons-commande/{id}` donne le reste à recevoir par ligne. |
 | `/bons-commande/{id}/receptions` | GET, POST | `PATCH /receptions/{id}` en brouillon ou à corriger ; `/receptions/{id}/reserves`, `/attestations` ; `PATCH /reserves/{id}` (levée) ; `GET /reserves?nonLevees=true`. |
-| `/factures` | GET, POST | Détection de doublon à la création (`409` + référence du doublon). |
-| `/factures/{id}/liquidations` | GET, POST | |
+| `/factures` | GET, POST, PATCH | Filtres `engagementId`, `statut`, `type`. Détection de doublon à la création (`409` + référence du doublon, levée par `motifLeveeDoublon`). `POST /factures/{id}/retours`, `/rejets` (motif). |
+| `/factures/{id}/liquidations` | GET, POST | `PATCH /liquidations/{id}` en brouillon ou à corriger ; `GET /liquidations/{id}/controles` ; `POST /liquidations/{id}/derogations` ; circuit par `/liquidations/{id}/validations`. |
 | `/ordonnancements` | GET, POST | |
 | `/paiements` | GET, POST | Allocations dans le corps de la requête. |
-| `/rapprochements` | GET, POST | |
+| `/factures/{id}/rapprochements` | GET, POST | `GET /factures/{id}/rapprochement` donne les montants et les écarts à l'instant. |
 | `/{ressource}/{id}/validations`, `/annulations`, `/derogations`, `/pieces` | GET, POST | Sur les ressources qui implémentent l'interface correspondante. `GET .../validations` donne le circuit figé, les visas, les étapes ouvertes et si l'agent peut décider. |
 | `/{ressource}/{id}/soumissions` | POST | Renvoi au circuit après un retour pour correction. |
 | `/pieces/{id}/contenu` | GET | Fichier vérifié par son empreinte ; `409 PIECE_ALTEREE` sinon. |

@@ -1,5 +1,6 @@
 import {
   ApartmentOutlined,
+  FileDoneOutlined,
   AuditOutlined,
   ContainerOutlined,
   FundOutlined,
@@ -90,6 +91,11 @@ export function Gabarit() {
               key: '/commandes',
               icon: <ShoppingCartOutlined aria-hidden />,
               label: t('menu.commandes'),
+            },
+            {
+              key: '/factures',
+              icon: <FileDoneOutlined aria-hidden />,
+              label: t('menu.factures'),
             },
             {
               key: '/nomenclature',

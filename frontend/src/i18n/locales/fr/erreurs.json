@@ -55,6 +55,10 @@
   "COMMANDE_SUPERIEURE_ENGAGEMENT": "Les commandes dépasseraient le montant net de l'engagement.",
   "QUANTITES_INCOHERENTES": "Quantités positives, et acceptée plus rejetée au plus égale à la reçue.",
   "RECEPTION_SUPERIEURE_COMMANDE": "La quantité acceptée cumulée dépasserait la quantité commandée.",
+  "FACTURE_DOUBLON": "Facture en doublon : même fournisseur et même numéro, ou même date et même montant. Indiquez un motif de levée si elle est bien distincte.",
+  "FACTURE_NON_TRAITABLE": "Cette action n'est pas possible sur la facture dans son état actuel.",
+  "DEDUCTION_INCALCULABLE": "Indiquez le montant ou le taux de la déduction : le contrat ne le donne pas.",
+  "ECART_NON_EXPLIQUE": "Le rapprochement présente un écart : expliquez-le pour le valider.",
   "champ": {
     "missing": "Ce champ est obligatoire.",
     "string_too_short": "Ce champ est trop court.",

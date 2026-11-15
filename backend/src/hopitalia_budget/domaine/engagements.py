@@ -286,16 +286,6 @@ def regles_engagement(contexte: ContexteEngagement) -> list[RegleControle[Engage
     ]
 
 
-@dataclass(frozen=True)
-class Derogation:
-    id: UUID
-    engagement_id: UUID
-    nature: NatureDerogation
-    montant_depassement: Decimal
-    statut: str
-    createur_id: int
-
-
 class DepotEngagements(Protocol):
     def engagement(self, engagement_id: UUID) -> Engagement | None: ...
 
@@ -323,11 +313,3 @@ class DepotEngagements(Protocol):
     ) -> UUID: ...
 
     def pieces_obligatoires_presentes(self, type_objet: str, id_objet: UUID) -> bool: ...
-
-    def derogation(self, derogation_id: UUID) -> Derogation | None: ...
-
-    def ajouter_derogation(
-        self, derogation: Derogation, engagement: Engagement, motif: str, maintenant: datetime
-    ) -> None: ...
-
-    def changer_statut_derogation(self, derogation_id: UUID, statut: str) -> None: ...

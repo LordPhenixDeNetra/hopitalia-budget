@@ -81,7 +81,9 @@
       "Avenant": "Amendment",
       "Engagement": "Commitment",
       "Derogation": "Derogation",
-      "Reception": "Receipt"
+      "Reception": "Receipt",
+      "Liquidation": "Settlement",
+      "Facture": "Invoice"
     }
   }
 }

@@ -5,22 +5,19 @@ Un écart bloquant se corrige, ou se couvre par une dérogation validée (RG-19)
 Annulation partielle ou totale, clôture avec désengagement du reliquat (EF-ENG-05, RG-18).
 """
 
-import uuid
 from decimal import Decimal
 from uuid import UUID
 
-from hopitalia_budget.application import workflow
 from hopitalia_budget.domaine.controles import (
     MoteurControles,
-    NatureDerogation,
     ResultatControle,
     exiger_conformite,
 )
+from hopitalia_budget.domaine.derogations import Porteur
 from hopitalia_budget.domaine.engagements import (
     CLOTURABLES,
     ZERO,
     DepotEngagements,
-    Derogation,
     Engagement,
     StatutEngagement,
     regles_engagement,
@@ -31,7 +28,7 @@ from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.habilitations import Droit, Operation
 from hopitalia_budget.domaine.ports import EvenementAudit, Horloge, JournaliseurAudit
 from hopitalia_budget.domaine.utilisateur import Utilisateur
-from hopitalia_budget.domaine.workflow import DepotWorkflow, ObjetValidable
+from hopitalia_budget.domaine.workflow import ObjetValidable
 
 
 def controler(
@@ -97,44 +94,7 @@ def exiger_saisie(utilisateur: Utilisateur, etablissement_id: UUID) -> None:
         raise ErreurMetier("ACCES_REFUSE")
 
 
-# --- Dérogations (T-118) ----------------------------------------------------------------------
-
-
-class DerogationValidable:
-    """Dérogation : validée par le circuit (point 16), elle couvre son objet et son montant."""
-
-    def __init__(
-        self, depot: DepotEngagements, derogation: Derogation, engagement: Engagement
-    ) -> None:
-        self.depot = depot
-        self.derogation = derogation
-        self.engagement = engagement
-
-    def objet(self) -> ObjetValidable:
-        d = self.derogation
-        return ObjetValidable(
-            type_objet="Derogation",
-            id=d.id,
-            etablissement_id=self.engagement.etablissement_id,
-            createur_id=d.createur_id,
-            statut_reference=d.statut,
-            montant=d.montant_depassement,
-            centre_id=self.engagement.centre_id,
-        )
-
-    def controler_soumission(self) -> None:
-        """Rien à contrôler : l'écart a été constaté par les contrôles de l'engagement."""
-
-    def controler_validation_finale(self) -> None:
-        if self.engagement.statut not in MODIFIABLES:
-            raise ErreurMetier("OPERATION_DEJA_TRAITEE")
-
-    def changer_statut(self, statut_reference: str) -> None:
-        self.depot.changer_statut_derogation(self.derogation.id, statut_reference)
-
-    def pieces_obligatoires_presentes(self) -> bool:
-        return self.depot.pieces_obligatoires_presentes("Derogation", self.derogation.id)
-
+# --- Dérogations (T-118) : l'engagement est un objet couvert (application/derogations.py) ---------
 
 # Statuts où l'engagement n'est pas encore validé : une dérogation peut encore servir.
 MODIFIABLES = {
@@ -145,58 +105,14 @@ MODIFIABLES = {
 }
 
 
-def derogation_validable(
-    depot: DepotEngagements, utilisateur: Utilisateur, derogation_id: UUID
-) -> DerogationValidable:
-    derogation = depot.derogation(derogation_id)
-    if derogation is None:
-        raise ErreurMetier("RESSOURCE_INTROUVABLE")
-    return DerogationValidable(
-        depot, derogation, obtenir(depot, utilisateur, derogation.engagement_id)
+def porteur(engagement: Engagement) -> Porteur:
+    return Porteur(
+        "Engagement",
+        engagement.id,
+        engagement.etablissement_id,
+        engagement.centre_id,
+        engagement.statut in MODIFIABLES,
     )
-
-
-def demander_derogation(
-    depot: DepotEngagements,
-    depot_workflow: DepotWorkflow,
-    journal: JournaliseurAudit,
-    horloge: Horloge,
-    utilisateur: Utilisateur,
-    engagement_id: UUID,
-    nature: NatureDerogation,
-    montant: Decimal,
-    motif: str,
-) -> UUID:
-    """Par un agent qui saisit les engagements, avant la validation ; soumise dès sa création."""
-    engagement = obtenir(depot, utilisateur, engagement_id)
-    exiger_saisie(utilisateur, engagement.etablissement_id)
-    if engagement.statut not in MODIFIABLES:
-        raise ErreurMetier("OPERATION_DEJA_TRAITEE")
-    if montant < 0:
-        raise ErreurMetier("REFERENCE_INVALIDE", champ="montantDepassement")
-    derogation = Derogation(
-        uuid.uuid4(), engagement_id, nature, montant, "SOUMIS", utilisateur.id_hopitalia
-    )
-    depot.ajouter_derogation(derogation, engagement, motif, horloge.maintenant())
-    workflow.engager(depot_workflow, DerogationValidable(depot, derogation, engagement).objet())
-    journal.tracer(
-        EvenementAudit(
-            action="CREATION",
-            type_objet="Derogation",
-            id_objet=str(derogation.id),
-            ancienne_valeur=None,
-            nouvelle_valeur={
-                "engagement": str(engagement_id),
-                "nature": nature.value,
-                "montantDepassement": format(montant, "f"),
-                "motif": motif,
-            },
-            utilisateur_id=utilisateur.id_hopitalia,
-            code_agent=utilisateur.code_agent,
-            etablissement_id=engagement.etablissement_id,
-        )
-    )
-    return derogation.id
 
 
 # --- Annulations et clôture (T-117, T-148) --------------------------------------------------------
