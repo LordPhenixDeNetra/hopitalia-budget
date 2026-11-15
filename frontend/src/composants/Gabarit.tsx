@@ -11,6 +11,7 @@ import {
   ShopOutlined,
   ShoppingCartOutlined,
   SwapOutlined,
+  WalletOutlined,
 } from '@ant-design/icons'
 import { Breadcrumb, Button, Flex, Layout, Menu, Select, Typography, theme } from 'antd'
 import { Link, Outlet, useLocation, useMatches, useNavigate } from 'react-router'
@@ -96,6 +97,11 @@ export function Gabarit() {
               key: '/factures',
               icon: <FileDoneOutlined aria-hidden />,
               label: t('menu.factures'),
+            },
+            {
+              key: '/paiements',
+              icon: <WalletOutlined aria-hidden />,
+              label: t('menu.paiements'),
             },
             {
               key: '/nomenclature',

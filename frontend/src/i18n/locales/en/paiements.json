@@ -1,0 +1,72 @@
+{
+  "titre": "Payment orders and payments",
+  "intro": "The authorising officer sends approved settlements to the accountant; the accountant takes them over, then records payments, broken down by settlement.",
+  "onglets": {
+    "ordonnancements": "Payment orders",
+    "paiements": "Payments"
+  },
+  "valeurs": {
+    "PREPARE": "Prepared",
+    "TRANSMIS": "Sent",
+    "COMPLEMENT_DEMANDE": "Information requested",
+    "SUSPENDU": "Suspended",
+    "REJETE": "Rejected",
+    "PRIS_EN_CHARGE": "Taken over",
+    "MANDAT": "Payment warrant",
+    "ORDRE_PAIEMENT": "Payment order",
+    "ENREGISTRE": "Recorded",
+    "EXECUTE": "Executed",
+    "ANNULE": "Cancelled"
+  },
+  "actions": {
+    "TRANSMETTRE": "Send to the accountant",
+    "DEMANDER_COMPLEMENT": "Request information",
+    "FOURNIR_COMPLEMENT": "Information provided",
+    "SUSPENDRE": "Suspend",
+    "REPRENDRE": "Resume",
+    "REJETER": "Reject",
+    "PRENDRE_EN_CHARGE": "Take over"
+  },
+  "ordonnancements": {
+    "preparer": "Prepare a payment order",
+    "prepare": "Payment order prepared.",
+    "referencePiece": "Warrant reference",
+    "typePiece": "Document type",
+    "serviceDestinataire": "Recipient department",
+    "liquidations": "Settlements to order",
+    "aucuneLiquidation": "No approved settlement to order.",
+    "montant": "Amount",
+    "statut": "Status",
+    "dateTransmission": "Sent on",
+    "detail": "Details",
+    "liquidation": "Settlement",
+    "facture": "Invoice",
+    "motif": "Reason",
+    "decision": "Decision recorded."
+  },
+  "paiements": {
+    "enregistrer": "Record a payment",
+    "enregistre": "Payment recorded.",
+    "fournisseur": "Payee",
+    "datePaiement": "Payment date",
+    "modeReglementId": "Payment method",
+    "compteTresorerieId": "Treasury account",
+    "referenceTransaction": "Bank or transaction reference",
+    "pieceCaisse": "Cash voucher",
+    "retenueSource": "Withholding tax",
+    "ventilation": "Breakdown by settlement",
+    "aide": "Settlements taken over by the accountant. Enter the share paid for each, within its amount left to pay: the payment amount is their sum.",
+    "aucuneLiquidation": "No settlement to pay for this payee.",
+    "resteAPayer": "Left to pay",
+    "part": "Share paid",
+    "total": "Payment amount",
+    "numero": "Number",
+    "date": "Date",
+    "montant": "Amount",
+    "statut": "Status",
+    "allocations": "Settlements paid",
+    "annuler": "Cancel",
+    "annule": "Payment cancelled.",
+    "motifAnnulation": "Cancellation reason"
+  }
+}

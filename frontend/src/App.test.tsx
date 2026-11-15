@@ -1,4 +1,4 @@
-import { cleanup, render, screen, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { createMemoryRouter, RouterProvider } from 'react-router'
 import { afterEach, beforeAll, describe, expect, test, vi } from 'vitest'
@@ -49,6 +49,7 @@ beforeAll(async () => {
     'engagements',
     'commandes',
     'factures',
+    'paiements',
   ])
 })
 
@@ -827,5 +828,122 @@ describe('factures et liquidations (lot 4)', () => {
     expect(await screen.findByText('Rejetée')).toBeTruthy()
     const envoi = appel.mock.calls.find(([, o]) => o?.method === 'POST')!
     expect(JSON.parse(String(envoi[1]!.body))).toEqual({ motif: 'Prix non conformes' })
+  })
+})
+
+describe('ordonnancement et paiements (lot 5)', () => {
+  const CPT = { ...MOI, habilitations: [{ profil: 'CPT', etablissementId: 'a1' }] }
+  const page = (donnees: unknown[]) => ({
+    donnees,
+    pagination: { page: 1, taille: 100, total: donnees.length, suivant: null },
+  })
+  const ORDONNANCEMENT = {
+    id: 'o1',
+    etablissementId: 'a1',
+    referencePiece: 'MD-2026-014',
+    typePiece: 'MANDAT',
+    serviceDestinataire: 'Agence comptable',
+    dateTransmission: '2026-05-02',
+    statut: 'TRANSMIS',
+    motifStatut: null,
+    montant: '6000000.00',
+    lignes: [
+      {
+        liquidationId: 'l1',
+        liquidationNumero: 'LIQ-2026-00001',
+        factureId: 'f1',
+        factureNumero: 'FA-778',
+        montant: '6000000.00',
+      },
+    ],
+    creeParCode: 'AG030',
+    creeLe: '2026-05-01T10:00:00Z',
+    version: 2,
+  }
+
+  test('le comptable répond à un ordonnancement transmis, motif exigé pour un rejet (T-186)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(CPT)],
+      'GET /api/v1/ordonnancements': [json(page([ORDONNANCEMENT]))],
+      'POST /api/v1/ordonnancements/o1/decisions': [
+        json({ ...ORDONNANCEMENT, statut: 'REJETE', motifStatut: 'Mandat non signé' }, 201),
+      ],
+    })
+    afficher('/paiements')
+    await userEvent.click(await screen.findByRole('button', { name: 'Détail' }, { timeout: 5000 }))
+    // Réponses du comptable seulement : la transmission revient à l'ordonnateur.
+    expect(await screen.findByRole('button', { name: 'Prendre en charge' })).toBeTruthy()
+    expect(screen.queryByRole('button', { name: 'Transmettre au comptable' })).toBeNull()
+    await userEvent.click(screen.getByRole('button', { name: 'Rejeter' }))
+    const dialogue = (await screen.findAllByRole('dialog')).at(-1)!
+    await userEvent.type(within(dialogue).getByLabelText('Motif'), 'Mandat non signé')
+    await userEvent.click(within(dialogue).getByRole('button', { name: 'Enregistrer' }))
+    expect(await screen.findByText('Décision enregistrée.')).toBeTruthy()
+    const envoi = appel.mock.calls.find(([, o]) => o?.method === 'POST')!
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({
+      action: 'REJETER',
+      motif: 'Mandat non signé',
+    })
+  })
+
+  test('paiement groupé : ventilation par liquidation, montant égal à la somme exacte (T-188)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(CPT)],
+      'GET /api/v1/fournisseurs': [
+        json(page([{ id: 'fo1', code: 'F01', raisonSociale: 'Medipharm' }])),
+      ],
+      'GET /api/v1/modes-reglement': [
+        json(page([{ id: 'vir', code: 'VIR', libelle: 'Virement' }])),
+      ],
+      'GET /api/v1/comptes-tresorerie': [
+        json(page([{ id: 'bq', code: 'BQ1', libelle: 'Banque' }])),
+      ],
+      'GET /api/v1/liquidations': [
+        json(
+          ['1', '2'].map((n) => ({
+            id: `l${n}`,
+            numero: `LIQ-2026-0000${n}`,
+            factureId: `f${n}`,
+            factureNumero: `FA-77${n}`,
+            fournisseurId: 'fo1',
+            netAPayer: '6000000.00',
+            paye: '0.00',
+            resteAPayer: '6000000.00',
+            ordonnancementId: 'o1',
+          })),
+        ),
+      ],
+      'POST /api/v1/paiements': [json({ id: 'p1' }, 201)],
+    })
+    afficher('/paiements')
+    await userEvent.click(await screen.findByRole('tab', { name: 'Paiements' }, { timeout: 5000 }))
+    await userEvent.click(await screen.findByRole('button', { name: 'Enregistrer un paiement' }))
+    const tiroir = await screen.findByRole('dialog')
+    await userEvent.click(within(tiroir).getByLabelText('Bénéficiaire'))
+    await userEvent.click(await screen.findByTitle('F01 — Medipharm'))
+    await userEvent.type(await within(tiroir).findByLabelText('Part payée — LIQ-2026-00001'), '0.1')
+    await userEvent.type(within(tiroir).getByLabelText('Part payée — LIQ-2026-00002'), '0.2')
+    // Somme exacte, sans flottant : 0,3 et non 0,30000000000000004.
+    expect(within(tiroir).getByText(/0,3(?!\d)/)).toBeTruthy()
+    fireEvent.change(within(tiroir).getByLabelText('Date du paiement'), {
+      target: { value: '2026-05-10' },
+    })
+    await userEvent.click(within(tiroir).getByLabelText('Mode de règlement'))
+    await userEvent.click(await screen.findByTitle('VIR — Virement'))
+    await userEvent.click(within(tiroir).getByLabelText('Compte de trésorerie'))
+    await userEvent.click(await screen.findByTitle('BQ1 — Banque'))
+    await userEvent.click(within(tiroir).getByRole('button', { name: 'Enregistrer' }))
+    expect(await screen.findByText('Paiement enregistré.')).toBeTruthy()
+    const envoi = appel.mock.calls.find(([, o]) => o?.method === 'POST')!
+    expect(JSON.parse(String(envoi[1]!.body))).toMatchObject({
+      montant: '0.30',
+      allocations: [
+        { liquidationId: 'l1', montant: '0.1' },
+        { liquidationId: 'l2', montant: '0.2' },
+      ],
+    })
+    expect(new Headers(envoi[1]!.headers).get('Idempotency-Key')).toBeTruthy()
   })
 })

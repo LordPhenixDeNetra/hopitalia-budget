@@ -110,6 +110,11 @@ export const routes: RouteObject[] = [
         ],
       },
       {
+        path: 'paiements',
+        handle: fil('menu.paiements'),
+        lazy: () => import('./pages/paiements/Paiements').then((m) => ({ Component: m.Paiements })),
+      },
+      {
         path: 'delegations',
         lazy: () => import('./pages/Delegations').then((m) => ({ Component: m.Delegations })),
         handle: fil('menu.delegations'),

@@ -15,6 +15,34 @@ export const Action = {
   RETOURNER: 'RETOURNER',
 } as const;
 
+export type ActionOrdonnancement = typeof ActionOrdonnancement[keyof typeof ActionOrdonnancement];
+
+
+export const ActionOrdonnancement = {
+  TRANSMETTRE: 'TRANSMETTRE',
+  DEMANDER_COMPLEMENT: 'DEMANDER_COMPLEMENT',
+  FOURNIR_COMPLEMENT: 'FOURNIR_COMPLEMENT',
+  SUSPENDRE: 'SUSPENDRE',
+  REPRENDRE: 'REPRENDRE',
+  REJETER: 'REJETER',
+  PRENDRE_EN_CHARGE: 'PRENDRE_EN_CHARGE',
+} as const;
+
+export interface AllocationSchema {
+  liquidationId: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+}
+
+export interface AllocationSortie {
+  liquidationId: string;
+  liquidationNumero: string;
+  factureId: string;
+  factureNumero: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+}
+
 export interface AnnulationLigneSchema {
   imputationId: string;
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
@@ -675,6 +703,11 @@ export interface DecisionCreation {
   visa?: string | null;
 }
 
+export interface DecisionOrdonnancement {
+  action: ActionOrdonnancement;
+  motif?: string | null;
+}
+
 export type TypeDeduction = typeof TypeDeduction[keyof typeof TypeDeduction];
 
 
@@ -1271,6 +1304,15 @@ export interface LigneModification {
   natureEconomique?: string | null;
 }
 
+export interface LigneOrdonnancementSortie {
+  liquidationId: string;
+  liquidationNumero: string;
+  factureId: string;
+  factureNumero: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+}
+
 export interface LigneReceptionSchemaInput {
   ligneCommandeId: string;
   quantiteRecue: number | string;
@@ -1300,6 +1342,21 @@ export interface LigneSortie {
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
   dotationInitiale: string;
   version: number;
+}
+
+export interface LiquidationAPayerSortie {
+  id: string;
+  numero: string;
+  factureId: string;
+  factureNumero: string;
+  fournisseurId: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  netAPayer: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  paye: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteAPayer: string;
+  ordonnancementId: string | null;
 }
 
 export interface LiquidationChamps {
@@ -1465,6 +1522,66 @@ export interface NotificationSortie {
   id: string;
 }
 
+export type TypePieceMandat = typeof TypePieceMandat[keyof typeof TypePieceMandat];
+
+
+export const TypePieceMandat = {
+  MANDAT: 'MANDAT',
+  ORDRE_PAIEMENT: 'ORDRE_PAIEMENT',
+} as const;
+
+export interface OrdonnancementChamps {
+  referencePiece?: string | null;
+  typePiece?: TypePieceMandat | null;
+  serviceDestinataire?: string | null;
+  liquidationIds?: string[] | null;
+}
+
+export interface OrdonnancementCreation {
+  /**
+     * @minLength 1
+     * @maxLength 50
+     */
+  referencePiece: string;
+  typePiece?: TypePieceMandat;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  serviceDestinataire: string;
+  /** @minItems 1 */
+  liquidationIds: string[];
+}
+
+export type StatutOrdonnancement = typeof StatutOrdonnancement[keyof typeof StatutOrdonnancement];
+
+
+export const StatutOrdonnancement = {
+  PREPARE: 'PREPARE',
+  TRANSMIS: 'TRANSMIS',
+  COMPLEMENT_DEMANDE: 'COMPLEMENT_DEMANDE',
+  SUSPENDU: 'SUSPENDU',
+  REJETE: 'REJETE',
+  PRIS_EN_CHARGE: 'PRIS_EN_CHARGE',
+} as const;
+
+export interface OrdonnancementSortie {
+  id: string;
+  etablissementId: string;
+  referencePiece: string;
+  typePiece: TypePieceMandat;
+  serviceDestinataire: string;
+  dateTransmission: string | null;
+  statut: StatutOrdonnancement;
+  motifStatut: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  lignes: LigneOrdonnancementSortie[];
+  creeParCode: string;
+  creeLe: string;
+  version: number;
+}
+
 export interface OrdreServiceSchema {
   /**
      * @minLength 1
@@ -1579,6 +1696,47 @@ export interface PageLigneSortie {
 
 export interface PageNotificationSortie {
   donnees: NotificationSortie[];
+  pagination: Pagination;
+}
+
+export interface PageOrdonnancementSortie {
+  donnees: OrdonnancementSortie[];
+  pagination: Pagination;
+}
+
+export type StatutPaiement = typeof StatutPaiement[keyof typeof StatutPaiement];
+
+
+export const StatutPaiement = {
+  ENREGISTRE: 'ENREGISTRE',
+  EXECUTE: 'EXECUTE',
+  ANNULE: 'ANNULE',
+} as const;
+
+export interface PaiementSortie {
+  id: string;
+  etablissementId: string;
+  fournisseurId: string;
+  numero: string;
+  datePaiement: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  modeReglementId: string;
+  compteTresorerieId: string;
+  referenceTransaction: string | null;
+  pieceCaisse: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  retenueSource: string;
+  statut: StatutPaiement;
+  motifAnnulation: string | null;
+  allocations: AllocationSortie[];
+  creeParCode: string;
+  creeLe: string;
+  version: number;
+}
+
+export interface PagePaiementSortie {
+  donnees: PaiementSortie[];
   pagination: Pagination;
 }
 
@@ -1751,6 +1909,20 @@ export interface TypePieceSortie {
 export interface PageTypePieceSortie {
   donnees: TypePieceSortie[];
   pagination: Pagination;
+}
+
+export interface PaiementCreation {
+  datePaiement: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  modeReglementId: string;
+  compteTresorerieId: string;
+  referenceTransaction?: string | null;
+  pieceCaisse?: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  retenueSource?: string;
+  /** @minItems 1 */
+  allocations: AllocationSchema[];
 }
 
 export interface ParametresCalculSchema {
@@ -2401,6 +2573,46 @@ export type ListerFacturesParams = {
 };
 
 export type DemanderDerogationLiquidation201 = {[key: string]: string};
+
+export type ListerOrdonnancementsParams = {
+  etablissementId?: string | null;
+  statut?: StatutOrdonnancement | null;
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
+
+export type ListerLiquidationsATraiterParams = {
+  etape: ListerLiquidationsATraiterEtape;
+  fournisseurId?: string | null;
+  etablissementId?: string | null;
+};
+
+export type ListerLiquidationsATraiterEtape = typeof ListerLiquidationsATraiterEtape[keyof typeof ListerLiquidationsATraiterEtape];
+
+
+export const ListerLiquidationsATraiterEtape = {
+  A_ORDONNANCER: 'A_ORDONNANCER',
+  A_PAYER: 'A_PAYER',
+} as const;
+
+export type ListerPaiementsParams = {
+  etablissementId?: string | null;
+  fournisseurId?: string | null;
+  factureId?: string | null;
+  statut?: StatutPaiement | null;
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
 
 export type ListerSitesParams = {
   /** @minimum 1 */
