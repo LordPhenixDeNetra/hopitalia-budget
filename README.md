@@ -12,6 +12,7 @@ Le module suit uniquement des marchés **déjà attribués** et des contrats **d
 | [Cahier des tâches](CAHIER_DES_TACHES.md) | Tâches par priorité, statuts et avancement. |
 | [AGENTS.md](AGENTS.md) | Règles du projet pour les développeurs et les agents de code. |
 | [docs/cadrage/](docs/cadrage/) | Décisions de cadrage, intégration avec Hopitalia, nomenclature, jeu d'essai. |
+| [docs/exploitation/](docs/exploitation/) | Sauvegarde et restauration, déploiement de l'environnement de recette. |
 
 ## Structure
 
@@ -59,7 +60,9 @@ Ensuite, les administrateurs attribuent et retirent les profils dans l'écran **
 | API | http://127.0.0.1:8000 (santé : `/health`) |
 | PostgreSQL | interne au réseau Docker |
 
-Arrêt : `docker compose down` (ajouter `-v` pour effacer aussi la base).
+Le service `sauvegarde` sauvegarde la base et les pièces chaque jour ([docs/exploitation/sauvegarde.md](docs/exploitation/sauvegarde.md)).
+
+Arrêt : `docker compose down` (ajouter `-v` pour effacer aussi la base et les sauvegardes).
 
 ## Développement
 

@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.12 · 15 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.13 · 15 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -19,6 +19,7 @@
 | 3.10 | 15/11/2026 | Alertes (lot P2.B) : création, destinataires, lecture par agent, règles par établissement et tâche planifiée (14.3), type `CONTROLE_BLOQUANT`, ressources d'API (11.2). |
 | 3.11 | 15/11/2026 | États (lot P2.C, première partie) : liste des états, formats et règles de production (14.4), ressource `/etats/{code}` (11.2). |
 | 3.12 | 15/11/2026 | Audit, recherche et clôture (lot P2.C, seconde partie) : clôture d'exercice par établissement et engagements de report (8.1), journalisation des connexions et des exports, rapport d'audit, recherche transverse (4.9), ressources d'API (11.2). |
+| 3.13 | 15/11/2026 | Qualité et exploitation (lot P2.D) : teintes de texte des statuts pour le contraste de 4,5:1 (IHM-03), sauvegarde quotidienne, rétention et copie hors du serveur (ENF-06). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1729,7 +1730,7 @@ Règle d'usage : **un seul niveau d'imbrication**. Au-delà, on repart de la res
 | ENF-03 | Chiffrement des échanges (TLS) et des données sensibles (coordonnées bancaires). |
 | ENF-04 | Fonctionnement multi-établissements avec cloisonnement des données, vérifié côté serveur à chaque requête. |
 | ENF-05 | Journal d'audit en ajout seul, non modifiable par les utilisateurs opérationnels. |
-| ENF-06 | Sauvegardes régulières et restauration testée au moins une fois par trimestre *(fréquence à valider)*. |
+| ENF-06 | Sauvegardes régulières et restauration testée au moins une fois par trimestre *(fréquence à valider)*. Base et pièces justificatives sauvegardées chaque jour, conservées 30 jours (paramétrable), copiées hors du serveur par la DSI ; restauration toujours dans une base neuve (`docs/exploitation/sauvegarde.md`). |
 | ENF-07 | Temps de réponse indicatifs : 95 % des lectures en moins d'une seconde, tableaux de bord en moins de trois secondes, à volumétrie d'un exercice. |
 | ENF-08 | Contrôle de crédit atomique : verrouillage ou transaction sérialisée sur la ligne budgétaire (RG-20). |
 | ENF-09 | Exports PDF, tableur et formats structurés (CSV, JSON). |
@@ -1744,7 +1745,7 @@ Règle d'usage : **un seul niveau d'imbrication**. Au-delà, on repart de la res
 |---|---|
 | IHM-01 | **Style** sobre et fonctionnel, de type « minimaliste suisse » : grille régulière, hiérarchie typographique nette, peu d'effets. Thème clair par défaut, thème sombre en option. |
 | IHM-02 | **Densité** élevée adaptée au travail sur écran toute la journée : mode compact d'Ant Design pour les tableaux et formulaires. |
-| IHM-03 | **Palette** définie une seule fois dans le thème Ant Design (`ConfigProvider`), jamais de couleur en dur dans un composant. Couleur principale `#1E40AF` (bleu de confiance), fond `#F8FAFC`, cartes `#FFFFFF`, texte `#020617`, texte secondaire `#475569`, bordures `#E2E8F0`, succès `#059669`, avertissement `#B45309`, erreur `#DC2626`. |
+| IHM-03 | **Palette** définie une seule fois dans le thème Ant Design (`ConfigProvider`), jamais de couleur en dur dans un composant. Couleur principale `#1E40AF` (bleu de confiance), fond `#F8FAFC`, cartes `#FFFFFF`, texte `#020617`, texte secondaire `#475569`, bordures `#E2E8F0`, succès `#059669`, avertissement `#B45309`, erreur `#DC2626`. Un texte ou une étiquette de statut prend la teinte foncée de sa couleur, pour garder le contraste de 4,5:1 (IHM-07) : succès `#047857` (`#065F46` sur une étiquette), avertissement `#92400E`, erreur `#B91C1C`, information `#1E40AF` ; textes discrets et indications de saisie `#64748B`. |
 | IHM-04 | **Typographie :** Lexend pour les titres, Source Sans 3 pour le texte, 14 px minimum dans les tableaux, 16 px dans les formulaires. Polices hébergées avec l'application, pas chargées depuis Google : le réseau de l'hôpital peut filtrer l'accès externe. |
 | IHM-05 | **Montants :** chiffres à chasse fixe (`tabular-nums`), alignés à droite, séparateur de milliers, devise affichée (`45 000 000 XOF`). |
 | IHM-06 | **Statuts et alertes** jamais signalés par la seule couleur : libellé et icône toujours présents (accessibilité). |

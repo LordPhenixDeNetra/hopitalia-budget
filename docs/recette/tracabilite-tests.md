@@ -51,7 +51,7 @@ Tableau produit à partir des tests (nom et docstring des tests backend, titre d
 | API-05 | `backend/tests/test_api_avec_base.py::test_modification_exige_if_match_a_jour` |
 | API-06 | `backend/tests/test_api_avec_base.py::test_curseur_stable_malgre_nouvelles_lignes` |
 | API-07 | `backend/tests/test_api_avec_base.py::test_champ_non_documente_refuse` |
-| API-08 | `backend/tests/test_api_avec_base.py::test_limite_de_debit` |
+| API-08 | `backend/tests/test_api_avec_base.py::test_limite_de_debit`<br>`backend/tests/test_api_avec_base.py::test_limite_de_debit_jeton_forge` |
 | API-09 | `backend/tests/test_api_avec_base.py::test_api09_version_inconnue` |
 | API-10 | `backend/tests/test_api_avec_base.py::test_lecteur_ne_voit_que_son_etablissement` |
 | API-11 | `backend/tests/test_contrat_openapi.py::test_api11_reponses_conformes_au_document_publie`<br>`backend/tests/test_contrat_openapi.py::test_document_publie_identique_a_l_application`<br>`backend/tests/test_tracabilite.py::test_chaque_exigence_a_son_test` |

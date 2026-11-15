@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 
 const MOI = {
@@ -975,10 +976,16 @@ async function payer(page: Page, parts: Record<string, string>) {
   await tiroir.getByLabel('Bénéficiaire').click()
   await page.getByTitle('F01 — Medipharm').click()
   await tiroir.getByLabel('Date du paiement').fill('2026-05-10')
-  await tiroir.getByLabel('Mode de règlement').click()
-  await page.getByTitle('VIR — Virement').click()
-  await tiroir.getByLabel('Compte de trésorerie').click()
-  await page.getByTitle('BQ1 — Banque').click()
+  // Listes à une seule option, choisie au clavier : sur téléphone, un clic sur l'option se
+  // perdait parfois pendant l'ouverture de la liste.
+  for (const [champ, option] of [
+    ['Mode de règlement', 'VIR — Virement'],
+    ['Compte de trésorerie', 'BQ1 — Banque'],
+  ]) {
+    await tiroir.getByLabel(champ).press('ArrowDown')
+    await tiroir.getByLabel(champ).press('Enter')
+    await expect(tiroir.getByTitle(option)).toBeVisible()
+  }
   for (const [liquidation, montant] of Object.entries(parts)) {
     await tiroir.getByLabel(`Part payée — ${liquidation}`).fill(montant)
   }
@@ -1196,4 +1203,190 @@ test('REC-18 : état PDF produit dans la langue de l’agent (T-230)', async ({ 
     'x1',
   ])
   expect(demandes[0].langue).toBe('en')
+})
+
+// --- T-249, T-250 : accessibilité et responsive sur chaque écran ------------------------------
+
+const ECRANS = [
+  '/',
+  '/tableau-de-bord',
+  '/etats',
+  '/restes-a-payer',
+  '/alertes',
+  '/recherche',
+  '/etablissements',
+  '/budgets',
+  '/contrats',
+  '/engagements',
+  '/commandes',
+  '/factures',
+  '/paiements',
+  '/nomenclature',
+  '/delegations',
+  '/parametrage',
+  '/habilitations',
+  '/audit',
+  '/cloture-exercice',
+]
+
+/** API simulée minimale : un agent qui voit tous les écrans, des listes vides ou typiques. */
+async function simulerToutesLesPages(page: Page) {
+  const m = (n: string) => `${n}000000.00`
+  const indicateurs = {
+    budgetInitial: m('130'),
+    budgetRevise: m('130'),
+    engage: m('80'),
+    enCoursValidation: '0.00',
+    disponibleApresEngagements: m('50'),
+    liquide: m('45'),
+    transmis: m('35'),
+    paye: m('30'),
+    resteAPayer: m('15'),
+    tauxEngagement: '61.54',
+    tauxLiquidation: '34.62',
+    tauxPaiement: '23.08',
+  }
+  await page.route('**/api/v1/**', async (route) => {
+    const chemin = new URL(route.request().url()).pathname
+    const reponses: Record<string, unknown> = {
+      '/api/v1/auth/connexion': { jetonAcces: 'a', jetonRafraichissement: 'r', expireDans: 900 },
+      '/api/v1/moi': {
+        ...MOI,
+        habilitations: ['ADM', 'RB', 'VAL', 'ORD', 'AF', 'GMC', 'CPT', 'AUD'].map((profil) => ({
+          profil,
+          etablissementId: profil === 'ADM' ? null : 'a1',
+        })),
+      },
+      '/api/v1/etablissements': ETABLISSEMENTS,
+      '/api/v1/exercices': pageDe([{ id: 'x1', code: '2026' }]),
+      '/api/v1/reserves': [],
+      '/api/v1/nomenclature': [],
+      '/api/v1/liquidations': [],
+      '/api/v1/alertes': { donnees: [], suivant: null },
+      '/api/v1/alertes/compteur': { nonLues: 2 },
+      '/api/v1/journal-audit': { donnees: [], pagination: { taille: 50, suivant: null } },
+      '/api/v1/tableaux-de-bord/restes-a-payer': [],
+      '/api/v1/tableaux-de-bord/direction': {
+        indicateurs,
+        chaine: {
+          engage: m('80'),
+          commande: m('65'),
+          receptionne: m('55'),
+          facture: m('50'),
+          liquide: m('45'),
+          transmis: m('35'),
+          paye: m('30'),
+        },
+        lignes: [
+          {
+            ligneId: 'l1',
+            code: '604-MED',
+            libelle: 'Médicaments',
+            indicateurs: { ...indicateurs, tauxEngagement: '92.50' },
+          },
+        ],
+        repartitions: { compte: [], service: [], nature: [], fournisseur: [] },
+        marches: [],
+        operationnel: {
+          resteAEngagerMarches: m('20'),
+          resteContractuelAPayer: m('70'),
+          resteAPayerFactures: m('15'),
+          facturesEnAttente: 1,
+          montantFacturesEnAttente: m('30'),
+          ageMoyenFacturesJours: '212.0',
+          delaiMoyenTraitementJours: '4.0',
+        },
+      },
+    }
+    await route.fulfill({ json: reponses[chemin] ?? pageDe([]) })
+  })
+}
+
+test('T-249 : aucun défaut d’accessibilité bloquant, sur chaque écran (IHM-07)', async ({
+  page,
+}, infos) => {
+  test.skip(infos.project.name !== 'ordinateur', 'Audit fait une fois, à la largeur ordinateur')
+  test.setTimeout(180_000)
+  await simulerToutesLesPages(page)
+  await page.goto('/connexion')
+  const bloquants = async (ecran: string) =>
+    (
+      await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21aa'])
+        // Ligne de mesure interne d'Ant Design, invisible et hors du parcours clavier réel.
+        .exclude('.ant-table-measure-row')
+        .analyze()
+    ).violations
+      .filter((v) => v.impact === 'serious' || v.impact === 'critical')
+      .map((v) => `${ecran} : ${v.id} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`)
+  const defauts = await bloquants('/connexion')
+  await page.getByLabel('Identifiant').fill('agent')
+  await page.getByLabel('Mot de passe').fill('secret')
+  await page.getByRole('button', { name: 'Se connecter' }).click()
+  await expect(page.getByText('Bienvenue, Awa Diop')).toBeVisible()
+  for (const ecran of ECRANS) {
+    await page.goto(ecran)
+    await page.waitForLoadState('networkidle')
+    await expect(page.getByRole('heading', { level: 1 }), ecran).toBeVisible()
+    defauts.push(...(await bloquants(ecran)))
+  }
+  expect(defauts).toEqual([])
+})
+
+test('T-249 : navigation au clavier, focus visible (IHM-07)', async ({ page }, infos) => {
+  test.skip(infos.project.name !== 'ordinateur', 'Clavier testé à la largeur ordinateur')
+  await simulerToutesLesPages(page)
+  await page.goto('/connexion')
+  // Toute la connexion se fait au clavier : le champ est atteint en quelques tabulations.
+  const identifiant = page.getByLabel('Identifiant')
+  for (let essai = 0; essai < 5; essai++) {
+    await page.keyboard.press('Tab')
+    if (await identifiant.evaluate((e) => e === document.activeElement)) break
+  }
+  await expect(identifiant).toBeFocused()
+  await page.keyboard.type('agent')
+  await page.keyboard.press('Tab')
+  await expect(page.getByLabel('Mot de passe')).toBeFocused()
+  await page.keyboard.type('secret')
+  await page.keyboard.press('Enter')
+  await expect(page.getByText('Bienvenue, Awa Diop')).toBeVisible()
+  // Le menu se parcourt au clavier et l'élément actif a un contour visible.
+  await page.getByRole('menuitem', { name: 'Tableau de bord' }).focus()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible()
+  const element = page.getByRole('combobox', { name: 'Exercice' })
+  await element.focus()
+  const contour = await element.evaluate((e) => {
+    const style = getComputedStyle(e.closest('.ant-select') ?? e)
+    return style.outlineStyle !== 'none' || style.boxShadow !== 'none'
+  })
+  expect(contour).toBe(true)
+})
+
+test('T-250 : chaque écran tient en 375, 768, 1024 et 1440 px (IHM-08)', async ({
+  page,
+}, infos) => {
+  test.skip(infos.project.name !== 'ordinateur', 'Les largeurs sont fixées par le test')
+  test.setTimeout(240_000)
+  await simulerToutesLesPages(page)
+  await connecterAgentFinancier(page, '/')
+  await expect(page.getByText('Bienvenue, Awa Diop')).toBeVisible()
+  const debordements: string[] = []
+  for (const largeur of [375, 768, 1024, 1440]) {
+    await page.setViewportSize({ width: largeur, height: 900 })
+    for (const ecran of ECRANS) {
+      await page.goto(ecran)
+      await page.waitForLoadState('networkidle')
+      await expect(page.getByRole('heading', { level: 1 }), ecran).toBeVisible()
+      const deborde = await page.evaluate(
+        () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+      )
+      if (deborde) debordements.push(`${ecran} à ${largeur} px`)
+      await infos.attach(`${ecran.replaceAll('/', '_') || 'accueil'}-${largeur}`, {
+        body: await page.screenshot({ fullPage: true }),
+        contentType: 'image/png',
+      })
+    }
+  }
+  expect(debordements).toEqual([])
 })

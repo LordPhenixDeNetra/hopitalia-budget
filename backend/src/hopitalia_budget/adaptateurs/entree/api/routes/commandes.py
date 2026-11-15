@@ -272,17 +272,31 @@ def lister_bons_commande(
         requete = requete.where(BC.engagement_id == engagement_id)
     jour = horloge.maintenant().date()
     if en_retard_seulement:
-        requete = requete.where(BC.date_livraison_prevue < jour)
-    # ponytail: retard évalué en Python sur les commandes filtrées (volumes d'un établissement).
+        # EF-REC-06 en SQL : date prévue dépassée et au moins une ligne pas entièrement acceptée
+        # par les réceptions validées ; filtre et pagination restent dans la base (T-251).
+        accepte = (
+            select(LR.ligne_commande_id, func.sum(LR.quantite_acceptee).label("quantite"))
+            .join(R, R.id == LR.reception_id)
+            .where(R.statut == StatutReception.VALIDE)
+            .group_by(LR.ligne_commande_id)
+            .subquery()
+        )
+        reste = (
+            select(LC.id)
+            .outerjoin(accepte, accepte.c.ligne_commande_id == LC.id)
+            .where(LC.bon_commande_id == BC.id, LC.quantite > func.coalesce(accepte.c.quantite, 0))
+            .exists()
+        )
+        requete = requete.where(BC.date_livraison_prevue < jour, reste)
+    total = session.scalar(select(func.count()).select_from(requete.subquery())) or 0
     sorties = [
         _sortie_commande(session, m, jour)
-        for m in session.scalars(requete.order_by(BC.numero.desc()))
+        for m in session.scalars(
+            requete.order_by(BC.numero.desc()).offset((page - 1) * taille).limit(taille)
+        )
     ]
-    if en_retard_seulement:
-        sorties = [s for s in sorties if s["enRetard"]]
-    total = len(sorties)
     return {
-        "donnees": sorties[(page - 1) * taille : page * taille],
+        "donnees": sorties,
         "pagination": Pagination(
             page=page,
             taille=taille,

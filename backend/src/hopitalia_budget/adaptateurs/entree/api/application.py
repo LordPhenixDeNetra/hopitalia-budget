@@ -64,7 +64,9 @@ def creer_application(
 
     installer_gestionnaires(application)
     application.add_middleware(
-        LimitationDebit, limite_par_minute=parametres.limite_requetes_par_minute
+        LimitationDebit,
+        limite_par_minute=parametres.limite_requetes_par_minute,
+        cle_jeton=parametres.hopitalia_jwt_cle.get_secret_value(),
     )
 
     @application.middleware("http")

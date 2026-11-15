@@ -3,9 +3,10 @@ paiement des factures (section 8.2)."""
 
 from collections import defaultdict
 from decimal import Decimal
+from typing import Any
 from uuid import UUID
 
-from sqlalchemy import func, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.orm import Session
 
 from hopitalia_budget.adaptateurs.sortie.factures_sql import montants
@@ -59,25 +60,36 @@ def transmis_par_liquidation(session: Session, liquidation_ids: list[UUID]) -> d
 
 
 def transmis_et_paye_par_groupe(
-    session: Session, groupe_par_imputation: dict[UUID, UUID]
+    session: Session, correspondance: Select[Any, Any]
 ) -> tuple[dict[UUID, Decimal], dict[UUID, Decimal]]:
-    """Transmis et payé des liquidations validées, cumulés par groupe (ligne ou contrat)."""
-    groupes = {
-        liquidation: groupe_par_imputation[imputation]
-        for liquidation, imputation in session.execute(
-            select(L.id, L.imputation_id).where(
-                L.imputation_id.in_(list(groupe_par_imputation)),
-                L.statut == StatutLiquidation.VALIDE,
-            )
-        )
-    }
-    transmis: defaultdict[UUID, Decimal] = defaultdict(lambda: ZERO)
-    paye: defaultdict[UUID, Decimal] = defaultdict(lambda: ZERO)
-    for liquidation, montant in transmis_par_liquidation(session, list(groupes)).items():
-        transmis[groupes[liquidation]] += montant
-    for liquidation, montant in paye_par_liquidation(session, list(groupes)).items():
-        paye[groupes[liquidation]] += montant
-    return transmis, paye
+    """Transmis et payé des liquidations validées, cumulés par groupe (ligne, contrat ou
+    engagement). `correspondance` sélectionne les colonnes `imputation` et `groupe` : jointe en
+    base, elle évite de faire circuler de longues listes d'identifiants (T-251)."""
+    c = correspondance.subquery()
+    liquidations = (
+        select(c.c.groupe, L.id.label("liquidation"))
+        .join(L, L.imputation_id == c.c.imputation)
+        .where(L.statut == StatutLiquidation.VALIDE)
+        .subquery()
+    )
+    transmis = (
+        select(liquidations.c.groupe, func.sum(LO.montant))
+        .join(LO, LO.liquidation_id == liquidations.c.liquidation)
+        .join(Ord, Ord.id == LO.ordonnancement_id)
+        .where(Ord.statut.in_(TRANSMIS))
+        .group_by(liquidations.c.groupe)
+    )
+    paye = (
+        select(liquidations.c.groupe, func.sum(A.montant))
+        .join(A, A.liquidation_id == liquidations.c.liquidation)
+        .join(P, P.id == A.paiement_id)
+        .where(P.statut == StatutPaiement.EXECUTE)
+        .group_by(liquidations.c.groupe)
+    )
+    return (
+        defaultdict(lambda: ZERO, session.execute(transmis).all()),
+        defaultdict(lambda: ZERO, session.execute(paye).all()),
+    )
 
 
 def transmis_et_paye_par_ligne(
@@ -86,8 +98,8 @@ def transmis_et_paye_par_ligne(
     """6.1 : par ligne budgétaire."""
     return transmis_et_paye_par_groupe(
         session,
-        dict(
-            session.execute(select(Imp.id, Imp.ligne_id).where(Imp.ligne_id.in_(ligne_ids))).all()
+        select(Imp.id.label("imputation"), Imp.ligne_id.label("groupe")).where(
+            Imp.ligne_id.in_(ligne_ids)
         ),
     )
 
@@ -98,15 +110,9 @@ def transmis_et_paye_par_contrat(
     """6.2 : par contrat, via les engagements rattachés."""
     return transmis_et_paye_par_groupe(
         session,
-        {
-            imputation: contrat
-            for imputation, contrat in session.execute(
-                select(Imp.id, E.contrat_id)
-                .join(E, E.id == Imp.engagement_id)
-                .where(E.contrat_id.in_(contrat_ids))
-            )
-            if contrat is not None
-        },
+        select(Imp.id.label("imputation"), E.contrat_id.label("groupe"))
+        .join(E, E.id == Imp.engagement_id)
+        .where(E.contrat_id.in_(contrat_ids)),
     )
 
 

@@ -33,17 +33,18 @@
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
-| P2 | 25 | 0 | 6 | 1 | 0 | 0 | 32 |
+| P2 | 30 | 0 | 0 | 2 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **174** | **4** | **28** | **1** | **0** | **2** | **209** |
+| **Total** | **179** | **4** | **22** | **2** | **0** | **2** | **209** |
 
-Avancement : 174 / 207 tâches actives terminées (84 %), hors 2 abandonnées.
+Avancement : 179 / 207 tâches actives terminées (86 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
 | Tâche | Ce qui bloque | Qui peut débloquer |
 |---|---|---|
 | T-225 (courriels d'alerte) | Adresses électroniques des agents, absentes de l'API Hopitalia utilisée ; serveur SMTP de l'hôpital. | Équipe Hopitalia (adresses), DSI de l'hôpital (serveur de messagerie). |
+| T-254 (environnement de recette), donc aussi la séance de recette T-198 | Serveur, nom d'hôte et certificat TLS ; accès à l'API Hopitalia de recette. | DSI de l'hôpital (serveur), équipe Hopitalia (accès). |
 
 ## Ordre de réalisation
 
@@ -334,12 +335,12 @@ flowchart LR
 | T-246 | Automatisation des scénarios REC-01 à REC-18. | §15.1 | T-195 | Fait | Tous verts en CI. REC-01 à REC-18 nommés par des tests backend, Vitest ou Playwright, tous verts ; leur présence est vérifiée par `test_tracabilite.py`, que la CI lance aussi quand les tests du frontend changent. |
 | T-247 | Automatisation des scénarios API-01 à API-11. | §15.2 | T-193 | Fait | Tous verts en CI. API-01 à API-11 nommés et verts ; ajout d'API-09 (version inconnue) et d'API-11 (contrat OpenAPI). |
 | T-248 | Vérification de conformité OpenAPI publiée / API réelle. | API-11 | T-045 | Fait | Test de contrat en CI. `test_contrat_openapi.py` : document publié identique à celui de l'application, et chaque `GET` documenté appelé sur le jeu d'essai, réponse validée contre le schéma publié (types, champs obligatoires, aucun champ non documenté, énumérations, montants). |
-| T-249 | Audit d'accessibilité (contraste, clavier, focus, libellés). | IHM-07 | T-193 | À faire | Aucun défaut bloquant. |
-| T-250 | Tests responsive à 375, 768, 1024 et 1440 px. | IHM-08 | T-193 | À faire | Captures Playwright sans débordement. |
-| T-251 | Tests de performance à volumétrie d'un exercice. | ENF-07 | T-195 | À faire | Lectures < 1 s (95 %), tableaux de bord < 3 s. |
-| T-252 | Revue de sécurité (OWASP, dépendances, secrets, chiffrement des coordonnées bancaires). | ENF-03 | T-195 | À faire | Aucune faille critique ouverte. |
-| T-253 | Sauvegardes automatiques et test de restauration. | ENF-06 | T-027 | À faire | Restauration réussie et chronométrée. |
-| T-254 | Environnement de recette déployé. | — | T-027 | À faire | Accessible aux testeurs de la DAF. |
+| T-249 | Audit d'accessibilité (contraste, clavier, focus, libellés). | IHM-07 | T-193 | Fait | Aucun défaut bloquant. Audit axe (WCAG 2.1 AA) de la connexion et des 19 écrans, sans défaut grave ni critique (test Playwright) ; contrastes corrigés par le thème (spec 3.13, IHM-03), un titre de niveau 1 par écran ; connexion complète au clavier et focus visible (test Playwright). |
+| T-250 | Tests responsive à 375, 768, 1024 et 1440 px. | IHM-08 | T-193 | Fait | Captures Playwright sans débordement. Test Playwright : 19 écrans à 375, 768, 1024 et 1440 px, aucun débordement horizontal, captures jointes au rapport. |
+| T-251 | Tests de performance à volumétrie d'un exercice. | ENF-07 | T-195 | Fait | Lectures < 1 s (95 %), tableaux de bord < 3 s. `test_performance.py` sur 2 000 engagements avec toute leur chaîne : lectures au plus 0,52 s (95 %), tableau de direction 2,3 s, restes à payer 0,8 s, état du budget 0,5 s. Liste des commandes, transmis et payé calculés en SQL. |
+| T-252 | Revue de sécurité (OWASP, dépendances, secrets, chiffrement des coordonnées bancaires). | ENF-03 | T-195 | Fait | Aucune faille critique ouverte. `docs/recette/revue-securite.md` : aucune faille critique ouverte ; limitation de débit, en-têtes HTTP et adresse du client corrigés (test `test_limite_de_debit_jeton_forge`) ; `npm audit` et `pip-audit` sans vulnérabilité. |
+| T-253 | Sauvegardes automatiques et test de restauration. | ENF-06 | T-027 | Fait | Restauration réussie et chronométrée. Service `sauvegarde` (base et pièces, quotidien, rétention 30 jours) ; restauration chronométrée par `exploitation/restaurer.sh` : 4 s pour un exercice (17 Mo), lignes identiques (`docs/exploitation/sauvegarde.md`). |
+| T-254 | Environnement de recette déployé. | — | T-027 | Bloqué | Accessible aux testeurs de la DAF. Bloqué : serveur de recette, nom d'hôte et certificat (DSI de l'hôpital), accès à Hopitalia de recette (équipe Hopitalia). Déploiement prêt : `docs/exploitation/deploiement-recette.md`. |
 
 ---
 
@@ -443,3 +444,5 @@ flowchart LR
 | 15/11/2026 | T-230 à T-235 (P2.C) | À faire | Fait | Moteur d'états (JSON, CSV, XLSX, PDF, fr et en) et onze états de la section 14.4, totaux égaux au tableau de bord ; écran États ; parcours REC-18 (PDF). |
 | 15/11/2026 | T-236 à T-240 (P2.C) | À faire | Fait | Rapport d'audit et auditeur en lecture seule, connexions et exports tracés, recherche transverse, clôture d'exercice avec report des reliquats, réouverture ; migration 0011. |
 | 15/11/2026 | T-245 à T-248 (P2.D) | À faire | Fait | Traçabilité RG, REC et API vers les tests vérifiée automatiquement, tests RG-01, RG-14, API-09 ajoutés, contrat d'API OpenAPI. |
+| 15/11/2026 | T-249 à T-253 (P2.D) | À faire | Fait | Accessibilité (axe, clavier), responsive sur quatre largeurs, performance à volumétrie d'un exercice, revue de sécurité, sauvegardes et restauration chronométrée. |
+| 15/11/2026 | T-254 (P2.D) | À faire | Bloqué | Serveur de recette attendu de la DSI ; déploiement documenté. |
