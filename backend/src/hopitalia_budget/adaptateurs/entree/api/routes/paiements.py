@@ -64,6 +64,7 @@ from hopitalia_budget.application.factures import exiger
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.factures import StatutLiquidation
 from hopitalia_budget.domaine.habilitations import Operation
+from hopitalia_budget.domaine.indicateurs import reste_a_payer_facture
 from hopitalia_budget.domaine.paiements import (
     ACTIFS,
     ORDONNANCABLES,
@@ -115,7 +116,9 @@ def _soldes(session: Session, liquidations: list[LiquidationModele]) -> dict[UUI
     """Solde dû de chaque liquidation : net à payer moins les paiements exécutés (6.3)."""
     nets = montants(session, liquidations)
     payes = paye_par_liquidation(session, [m.id for m in liquidations])
-    return {m.id: nets[m.id].net_a_payer - payes[m.id] for m in liquidations}
+    return {
+        m.id: reste_a_payer_facture([nets[m.id].net_a_payer], [payes[m.id]]) for m in liquidations
+    }
 
 
 # --- Ordonnancements (T-185, T-186) -----------------------------------------------------------
@@ -461,7 +464,7 @@ def lister_liquidations_a_traiter(
     resultat = []
     for lq, f in lignes:
         ordonnancement = actifs.get(lq.id)
-        reste = nets[lq.id].net_a_payer - payes[lq.id]
+        reste = reste_a_payer_facture([nets[lq.id].net_a_payer], [payes[lq.id]])
         retenue = (
             ordonnancement is None and f.statut in ORDONNANCABLES
             if etape == "A_ORDONNANCER"

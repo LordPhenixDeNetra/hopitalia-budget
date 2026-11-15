@@ -19,7 +19,7 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
 | [POINTS_REPORTES.md](POINTS_REPORTES.md) | Ce qui a été volontairement remis à plus tard. |
 | [docs/cadrage/](docs/cadrage/) | Questionnaires (DAF, équipe Hopitalia), matrice des habilitations, jeu d'essai de référence. |
 
-**État actuel :** priorité P0, lot 1 (P1.A), workflow transverse (P1.B, sauf annulations et dérogations qui attendent les engagements) contrats (P1.C), engagements (P1.D), commandes, réceptions et service fait (P1.E), factures, liquidations et rapprochement (P1.F), ordonnancement et paiements (P1.G) terminés. Suite : recette de la chaîne de dépense (P1.H). Une ressource avec règles métier reprend le schéma des révisions (domaine, cas d'utilisation, dépôt, routes, écrans, tests) ; un référentiel simple passe par les routes communes (voir Architecture).
+**État actuel :** priorité P0, lot 1 (P1.A), workflow transverse (P1.B, sauf annulations et dérogations qui attendent les engagements) contrats (P1.C), engagements (P1.D), commandes, réceptions et service fait (P1.E), factures, liquidations et rapprochement (P1.F), ordonnancement et paiements (P1.G) terminés ; recette de la chaîne de dépense (P1.H) faite, sauf la recette utilisateur avec la DAF (T-198, support dans `docs/recette/`). Suite : priorité P2 (tableaux de bord, alertes, états). Une ressource avec règles métier reprend le schéma des révisions (domaine, cas d'utilisation, dépôt, routes, écrans, tests) ; un référentiel simple passe par les routes communes (voir Architecture).
 
 ## Pile technique
 

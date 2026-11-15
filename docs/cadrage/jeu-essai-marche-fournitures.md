@@ -2,7 +2,7 @@
 
 **Projet :** Hopitalia Budget · **Statut :** validé le 13/11/2026 ; codes du projet de nomenclature (tâche T-009) · **Référence :** cahier des charges V3, annexe 18.2
 
-Ce jeu d'essai détaille, pièce par pièce, l'exemple chiffré de l'annexe 18.2. Il sert de référence aux tests automatisés et à la recette : chaque résultat attendu doit être retrouvé exactement par l'application.
+Ce jeu d'essai détaille, pièce par pièce, l'exemple chiffré de l'annexe 18.2. Il sert de référence aux tests automatisés et à la recette : chaque résultat attendu doit être retrouvé exactement par l'application. Le test `test_rec14_jeu_d_essai_de_l_annexe_18_2` (`backend/tests/test_recette_chaine_depense.py`) saisit toutes les pièces par l'API et vérifie les montants, les statuts et les contrôles de la section 4 ; les alertes de la section 3 se vérifieront avec les alertes planifiées (T-222).
 
 Les codes budgétaires sont ceux du [projet de nomenclature](nomenclature-budgetaire.md) construit sur le plan SYSCOHADA révisé : `604-MED` (médicaments consommés dans les soins) et `604-CMD` (consommables médicaux). Pour simplifier, les montants sont toutes taxes comprises et sans retenue (net à payer = montant liquidé). Montants en francs CFA (XOF).
 
@@ -48,7 +48,7 @@ Les codes budgétaires sont ceux du [projet de nomenclature](nomenclature-budget
 | FAC-001 | 30 000 000 | ENG-001, REC-001 | LIQ-001 | ENG-001 / 604-MED | 30 000 000 | Validée |
 | FAC-002 | 15 000 000 | ENG-002, REC-002 | LIQ-002 | ENG-002 / 604-MED | 10 000 000 | Validée |
 | | | | LIQ-003 | ENG-002 / 604-CMD | 5 000 000 | Validée |
-| FAC-003 | 5 000 000 | ENG-001, REC-003 | — | — | — | Facture en contrôle |
+| FAC-003 | 5 000 000 | ENG-001, REC-003 | — | — | — | Facture reçue, pas encore liquidée |
 
 FAC-002 porte sur les deux lignes de l'engagement ENG-002 : elle donne deux liquidations, une par imputation (règle RG-17).
 
@@ -99,7 +99,7 @@ LIQ-002 n'est pas encore ordonnancée.
 | Engagé restant à liquider | 25 000 000 | 10 000 000 | 35 000 000 |
 | Payé | 25 000 000 | 5 000 000 | 30 000 000 |
 | Reste à payer | 15 000 000 | 0 | 15 000 000 |
-| Taux d'engagement | 72,2 % | 37,5 % | 61,5 % |
+| Taux d'engagement | 72,22 % | 37,50 % | 61,54 % |
 
 ### Reste à payer par liquidation
 
@@ -117,7 +117,7 @@ LIQ-002 n'est pas encore ordonnancée.
 | ENG-002 | Partiellement exécuté | Liquidé 15 000 000 sur 30 000 000. |
 | FAC-001 | Partiellement payée | Payé 25 000 000 sur 30 000 000. |
 | FAC-002 | Partiellement payée | LIQ-003 payée, LIQ-002 pas encore. |
-| FAC-003 | En contrôle | Pas encore liquidée. |
+| FAC-003 | Reçue | Pas encore liquidée : elle passe en contrôle à sa première liquidation (cahier des charges, section 8.2). |
 
 ### Alertes attendues
 

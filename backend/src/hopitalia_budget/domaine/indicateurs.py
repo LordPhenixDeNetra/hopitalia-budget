@@ -80,6 +80,16 @@ class IndicateursLigne:
     taux_paiement: Decimal | None
 
 
+def engage_restant_a_liquider(engage: Decimal, liquide: Decimal) -> Decimal:
+    """6.1 : engagé (net des annulations) - liquidé ; aussi par imputation d'engagement."""
+    return engage - liquide
+
+
+def reste_a_engager(actualise: Decimal, engage: Decimal) -> Decimal:
+    """6.2 : montant actualisé du contrat - cumul engagé ; aussi pour le contrôle du plafond."""
+    return actualise - engage
+
+
 def _taux(numerateur: Decimal, denominateur: Decimal) -> Decimal | None:
     if denominateur == 0:
         return None
@@ -108,7 +118,7 @@ def calculer_indicateurs_ligne(
         disponible_previsionnel=disponible_previsionnel,
         liquide=m.liquide,
         paye=m.paye,
-        engage_restant_a_liquider=m.engage - m.liquide,
+        engage_restant_a_liquider=engage_restant_a_liquider(m.engage, m.liquide),
         reste_a_payer=m.net_a_payer - m.paye,
         taux_engagement=_taux(m.engage, base),
         taux_liquidation=_taux(m.liquide, base),
@@ -171,7 +181,7 @@ def calculer_indicateurs_contrat(
         avenants_valides=avenants,
         montant_actualise=actualise,
         engage=m.engage,
-        reste_a_engager=actualise - m.engage,
+        reste_a_engager=reste_a_engager(actualise, m.engage),
         commande=m.commande,
         receptionne=m.receptionne,
         facture=m.facture,
@@ -267,7 +277,8 @@ def calculer_liquidation(
 
 
 def reste_a_payer_facture(nets_valides: list[Decimal], allocations: list[Decimal]) -> Decimal:
-    """6.3 : nets à payer des liquidations validées de la facture, moins les allocations reçues."""
+    """6.3 : nets à payer des liquidations validées, moins les allocations reçues ; pour une
+    facture, ou pour une seule liquidation (son solde dû, RG-07)."""
     return sum(nets_valides, ZERO) - sum(allocations, ZERO)
 
 

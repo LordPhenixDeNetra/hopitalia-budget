@@ -39,6 +39,7 @@ from hopitalia_budget.domaine.indicateurs import (
     Deduction,
     MontantsLiquidation,
     calculer_liquidation,
+    engage_restant_a_liquider,
 )
 
 F, L, Imp, E = FactureModele, LiquidationModele, ImputationEngagementModele, EngagementModele
@@ -251,7 +252,9 @@ class DepotFacturesSql:
             type_facture=TypeFacture(facture.type),
             exige_service_fait=bool(commandes),
             receptions_validees=validees or 0,
-            reste_du_imputation=imputation.montant - Decimal(annule or 0) - deja_liquide,
+            reste_du_imputation=engage_restant_a_liquider(
+                imputation.montant - Decimal(annule or 0), deja_liquide
+            ),
             reste_facture=facture.montant_ttc - Decimal(base_autres or 0),
             facture_cumulee=Decimal(facture_cumulee or 0),
             receptionne=receptionne,
