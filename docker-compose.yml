@@ -22,6 +22,9 @@ services:
       HOPITALIA_API_URL: ${HOPITALIA_API_URL:-}
       HOPITALIA_JWT_CLE: ${HOPITALIA_JWT_CLE:-}
       COORDONNEES_CLE: ${COORDONNEES_CLE:-}
+      # Adresse du client transmise par nginx (limitation de débit par adresse, T-252). Toute
+      # source est admise : l'API n'est joignable que par nginx et depuis le serveur lui-même.
+      FORWARDED_ALLOW_IPS: "*"
     volumes:
       - pieces:/app/pieces
     depends_on:
@@ -44,6 +47,25 @@ services:
       - api
     restart: unless-stopped
 
+  # Sauvegarde quotidienne de la base et des pièces (T-253, exploitation/sauvegarde.md).
+  sauvegarde:
+    image: postgres:16-alpine
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-hopitalia}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-hopitalia_budget}
+      RETENTION_JOURS: ${RETENTION_JOURS:-30}
+    volumes:
+      - ./exploitation:/exploitation:ro
+      - sauvegardes:/sauvegardes
+      - pieces:/pieces
+    command: ["sh", "-c", "while true; do sh /exploitation/sauvegarder.sh; sleep 86400; done"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
   web:
     build: ./frontend
     image: hopitalia-budget-web
@@ -55,3 +77,6 @@ services:
 volumes:
   db-data:
   pieces:
+  # Copier ce volume hors du serveur (exploitation/sauvegarde.md) : sur le même disque, il ne
+  # protège pas d'une panne du serveur.
+  sauvegardes:
