@@ -340,7 +340,7 @@ def modifier_contrat(
     m = _charger(session, utilisateur, contrat_id)
     contrats.exiger_saisie(utilisateur, m.etablissement_id)
     cible = contrats.validable(DepotContratsSql(session), utilisateur, contrat_id)
-    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet())
+    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet(), utilisateur.code_agent)
     if m.version != version_attendue(if_match):
         raise ErreurMetier("PRECONDITION_ECHOUEE")
     changements = corps.model_dump(exclude_unset=True, exclude={"imputations"})
@@ -620,7 +620,7 @@ def corriger_avenant(
 ) -> dict[str, Any]:
     """Correction après retour, par son auteur (RG-18)."""
     cible = contrats.avenant_validable(DepotContratsSql(session), utilisateur, avenant_id)
-    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet())
+    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet(), utilisateur.code_agent)
     if utilisateur.id_hopitalia != cible.avenant.createur_id:
         raise ErreurMetier("ACCES_REFUSE")
     m = session.get_one(AvenantModele, avenant_id)
@@ -691,7 +691,9 @@ def _sous_ressource(
         contrats.exiger_saisie(utilisateur, contrat.etablissement_id)
         if contrat_modifiable:
             cible = contrats.validable(DepotContratsSql(session), utilisateur, contrat.id)
-            workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet())
+            workflow.exiger_modifiable(
+                DepotWorkflowSql(session), cible.objet(), utilisateur.code_agent
+            )
 
     def lister(contrat_id: UUID, session: SessionDep, utilisateur: UtilisateurDep) -> list[Any]:
         _charger(session, utilisateur, contrat_id)

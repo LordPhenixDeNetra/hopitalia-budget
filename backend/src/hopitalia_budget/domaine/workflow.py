@@ -12,6 +12,7 @@ from enum import StrEnum
 from typing import Protocol, runtime_checkable
 from uuid import UUID
 
+from hopitalia_budget.domaine.alertes import Signal
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.habilitations import Droit, Operation, Profil, autorise
 
@@ -318,6 +319,8 @@ class DepotWorkflow(Protocol):
     def visas(self, type_objet: str, id_objet: UUID) -> list[Visa]: ...
 
     def ajouter_visa(self, type_objet: str, id_objet: UUID, visa: Visa) -> None: ...
+
+    def signaler(self, signal: Signal) -> None: ...
 
     def profils_delegues(
         self, delegataire_id: int, etablissement_id: UUID, jour: date

@@ -6021,6 +6021,302 @@
         }
       }
     },
+    "/api/v1/alertes": {
+      "get": {
+        "tags": [
+          "alertes"
+        ],
+        "summary": "Lister Alertes",
+        "description": "Centre d'alertes, des plus récentes aux plus anciennes, paginé par curseur (11.4).",
+        "operationId": "lister_alertes",
+        "parameters": [
+          {
+            "name": "nonLues",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": false,
+              "title": "Nonlues"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TypeAlerte"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "apres",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Apres"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageAlertes"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alertes/compteur": {
+      "get": {
+        "tags": [
+          "alertes"
+        ],
+        "summary": "Compter Alertes",
+        "description": "Nombre d'alertes non lues, pour le badge du menu.",
+        "operationId": "compter_alertes",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CompteurAlertes"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alertes/{alerte_id}": {
+      "patch": {
+        "tags": [
+          "alertes"
+        ],
+        "summary": "Marquer Alerte",
+        "description": "Marquer comme lue (ou non lue) pour soi seulement.",
+        "operationId": "marquer_alerte",
+        "parameters": [
+          {
+            "name": "alerte_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Alerte Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LectureAlerte"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlerteSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/regles-alertes": {
+      "get": {
+        "tags": [
+          "alertes"
+        ],
+        "summary": "Lister Regles",
+        "description": "Règles de l'établissement, valeurs par défaut comprises (14.3).",
+        "operationId": "lister_regles",
+        "parameters": [
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Etablissementid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RegleSortie"
+                  },
+                  "title": "Response Lister Regles"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/regles-alertes/{type_alerte}": {
+      "put": {
+        "tags": [
+          "alertes"
+        ],
+        "summary": "Modifier Regle",
+        "description": "Seuils, délais et activation propres à l'établissement (T-220), tracés.",
+        "operationId": "modifier_regle",
+        "parameters": [
+          {
+            "name": "type_alerte",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TypeAlerte"
+            }
+          },
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Etablissementid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegleModification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RegleSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/alertes/planifications": {
+      "post": {
+        "tags": [
+          "alertes"
+        ],
+        "summary": "Lancer Alertes Planifiees",
+        "description": "Lance la détection planifiée tout de suite, pour les établissements que l'agent paramètre\n(la tâche quotidienne fait de même pour tous : `python -m hopitalia_budget.outils.alertes`).",
+        "operationId": "lancer_alertes_planifiees",
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Planification"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sites": {
       "get": {
         "tags": [
@@ -11157,6 +11453,76 @@
         ],
         "title": "ActionOrdonnancement"
       },
+      "AlerteSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeAlerte"
+          },
+          "gravite": {
+            "$ref": "#/components/schemas/Gravite"
+          },
+          "typeObjet": {
+            "type": "string",
+            "title": "Typeobjet"
+          },
+          "idObjet": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Idobjet"
+          },
+          "details": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Details"
+          },
+          "codeAgent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Codeagent"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "lue": {
+            "type": "boolean",
+            "title": "Lue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "type",
+          "gravite",
+          "typeObjet",
+          "idObjet",
+          "details",
+          "codeAgent",
+          "creeLe",
+          "lue"
+        ],
+        "title": "AlerteSortie"
+      },
       "AllocationSchema": {
         "properties": {
           "liquidationId": {
@@ -12656,6 +13022,19 @@
           "numero"
         ],
         "title": "CompteTresorerieSortie"
+      },
+      "CompteurAlertes": {
+        "properties": {
+          "nonLues": {
+            "type": "integer",
+            "title": "Nonlues"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nonLues"
+        ],
+        "title": "CompteurAlertes"
       },
       "Connexion": {
         "properties": {
@@ -16090,6 +16469,14 @@
         ],
         "title": "FournisseurSortie"
       },
+      "Gravite": {
+        "type": "string",
+        "enum": [
+          "BLOCAGE",
+          "ALERTE"
+        ],
+        "title": "Gravite"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -16584,6 +16971,19 @@
           "expireDans"
         ],
         "title": "Jetons"
+      },
+      "LectureAlerte": {
+        "properties": {
+          "lue": {
+            "type": "boolean",
+            "title": "Lue"
+          }
+        },
+        "type": "object",
+        "required": [
+          "lue"
+        ],
+        "title": "LectureAlerte"
       },
       "LigneCommandeSchema": {
         "properties": {
@@ -18253,6 +18653,34 @@
         ],
         "title": "Origine"
       },
+      "PageAlertes": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/AlerteSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "suivant": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Suivant"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "suivant"
+        ],
+        "title": "PageAlertes"
+      },
       "PageCurseur_EntreeJournal_": {
         "properties": {
           "donnees": {
@@ -19150,6 +19578,19 @@
         ],
         "title": "PieceSortie"
       },
+      "Planification": {
+        "properties": {
+          "signaux": {
+            "type": "integer",
+            "title": "Signaux"
+          }
+        },
+        "type": "object",
+        "required": [
+          "signaux"
+        ],
+        "title": "Planification"
+      },
       "Preferences": {
         "properties": {
           "langue": {
@@ -19806,6 +20247,99 @@
           "version"
         ],
         "title": "ReferentielSortie"
+      },
+      "RegleModification": {
+        "properties": {
+          "actif": {
+            "type": "boolean",
+            "title": "Actif"
+          },
+          "seuilPourcent": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seuilpourcent"
+          },
+          "delaiJours": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 3650.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delaijours"
+          },
+          "notifierParEmail": {
+            "type": "boolean",
+            "title": "Notifierparemail",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "actif"
+        ],
+        "title": "RegleModification"
+      },
+      "RegleSortie": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TypeAlerte"
+          },
+          "actif": {
+            "type": "boolean",
+            "title": "Actif"
+          },
+          "seuilPourcent": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Seuilpourcent"
+          },
+          "delaiJours": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delaijours"
+          },
+          "notifierParEmail": {
+            "type": "boolean",
+            "title": "Notifierparemail"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "actif",
+          "seuilPourcent",
+          "delaiJours",
+          "notifierParEmail"
+        ],
+        "title": "RegleSortie"
       },
       "Repartition": {
         "properties": {
@@ -21318,6 +21852,26 @@
           "version"
         ],
         "title": "TransitionSortie"
+      },
+      "TypeAlerte": {
+        "type": "string",
+        "enum": [
+          "CREDIT_INSUFFISANT",
+          "DEPASSEMENT_MARCHE",
+          "SEUIL_MARCHE",
+          "AVENANT_NECESSAIRE",
+          "FACTURE_DOUBLON",
+          "FACTURE_SUP_RECEPTION",
+          "SERVICE_FAIT_MANQUANT",
+          "PAIEMENT_SUP_LIQUIDE",
+          "FACTURE_ECHUE",
+          "ECART_RAPPROCHEMENT",
+          "ENGAGEMENT_ANCIEN",
+          "ECHEANCE_CONTRAT",
+          "MODIFICATION_APRES_VALIDATION",
+          "CONTROLE_BLOQUANT"
+        ],
+        "title": "TypeAlerte"
       },
       "TypeContrat": {
         "type": "string",

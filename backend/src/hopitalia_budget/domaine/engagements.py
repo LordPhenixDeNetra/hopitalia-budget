@@ -11,6 +11,7 @@ from enum import StrEnum
 from typing import Protocol
 from uuid import UUID
 
+from hopitalia_budget.domaine.alertes import Signal
 from hopitalia_budget.domaine.controles import NatureDerogation, RegleControle, ResultatControle
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.indicateurs import reste_a_engager
@@ -297,6 +298,8 @@ class DepotEngagements(Protocol):
     ) -> None: ...
 
     def derogations_accordees(self, engagement_id: UUID) -> dict[NatureDerogation, Decimal]: ...
+
+    def signaler(self, signal: Signal) -> None: ...
 
     def annule_par_imputation(self, engagement_id: UUID) -> dict[UUID, Decimal]: ...
 

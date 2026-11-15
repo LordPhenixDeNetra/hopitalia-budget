@@ -977,3 +977,50 @@ class AllocationPaiementModele(Base):
     paiement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("paiement.id"), index=True)
     liquidation_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("liquidation.id"), index=True)
     montant: Mapped[Decimal] = mapped_column(MONTANT)
+
+
+# --- Lot 6 : alertes ---------------------------------------------------------------------------
+
+
+class RegleAlerteModele(Base):
+    """Règle d'alerte d'un établissement ; absente, la valeur par défaut s'applique (T-220)."""
+
+    __tablename__ = "regle_alerte"
+
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("etablissement.id"), primary_key=True
+    )
+    type: Mapped[str] = mapped_column(String(40), primary_key=True)
+    actif: Mapped[bool] = mapped_column(default=True)
+    seuil_pourcent: Mapped[Decimal | None] = mapped_column(MONTANT)
+    delai_jours: Mapped[int | None]
+    notifier_par_email: Mapped[bool] = mapped_column(default=False)
+
+
+class AlerteModele(Base):
+    """Alerte créée par un contrôle, une tentative refusée ou la tâche planifiée (14.3)."""
+
+    __tablename__ = "alerte"
+    __table_args__ = (UniqueConstraint("type", "type_objet", "id_objet", "cle"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    type: Mapped[str] = mapped_column(String(40), index=True)
+    gravite: Mapped[str] = mapped_column(String(10))
+    type_objet: Mapped[str] = mapped_column(String(40))
+    id_objet: Mapped[uuid.UUID]
+    cle: Mapped[str | None] = mapped_column(String(60))
+    details: Mapped[Any] = mapped_column(JSONB)
+    profils: Mapped[list[str]] = mapped_column(JSONB)
+    code_agent: Mapped[str | None] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+
+
+class LectureAlerteModele(Base):
+    """Alerte lue par un agent : chaque destinataire a son propre état de lecture."""
+
+    __tablename__ = "lecture_alerte"
+
+    alerte_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("alerte.id"), primary_key=True)
+    utilisateur_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
+    lue_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))

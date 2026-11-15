@@ -175,7 +175,9 @@ def corriger(
 ) -> Revision:
     """Correction après retour (RG-18) : par son auteur, montant et motif seulement."""
     revision = obtenir(depot, utilisateur, revision_id)
-    workflow.exiger_modifiable(depot_workflow, RevisionValidable(depot, revision).objet())
+    workflow.exiger_modifiable(
+        depot_workflow, RevisionValidable(depot, revision).objet(), utilisateur.code_agent
+    )
     if utilisateur.id_hopitalia != revision.cree_par_id:
         raise ErreurMetier("ACCES_REFUSE")
     if montant <= 0:

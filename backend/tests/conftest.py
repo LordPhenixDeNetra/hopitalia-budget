@@ -27,6 +27,7 @@ from sqlalchemy.orm import Session
 from hopitalia_budget.adaptateurs.entree.api.application import creer_application
 from hopitalia_budget.adaptateurs.entree.api.dependances import obtenir_session
 from hopitalia_budget.adaptateurs.entree.api.routes.budget import obtenir_fabrique_traitement
+from hopitalia_budget.adaptateurs.sortie.alertes_sql import persister_apres_echec
 from hopitalia_budget.adaptateurs.sortie.hopitalia import ClientHopitalia
 from hopitalia_budget.adaptateurs.sortie.modeles import EtablissementModele, HabilitationModele
 from hopitalia_budget.config import Parametres
@@ -139,6 +140,7 @@ def application(session: Session, parametres: Parametres, horloge: HorlogeFixe) 
             yield session
         except Exception:
             session.rollback()
+            persister_apres_echec(session)
             raise
 
     application.dependency_overrides[obtenir_session] = session_de_test

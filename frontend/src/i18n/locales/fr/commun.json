@@ -16,7 +16,10 @@
     "commandes": "Commandes",
     "factures": "Factures",
     "paiements": "Paiements",
-    "tableauDeBord": "Tableau de bord"
+    "tableauDeBord": "Tableau de bord",
+    "alertes": "Alertes",
+    "alertesNonLues_one": "{{count}} alerte non lue",
+    "alertesNonLues_other": "{{count}} alertes non lues"
   },
   "entete": {
     "langue": "Langue",

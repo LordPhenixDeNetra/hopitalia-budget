@@ -307,7 +307,7 @@ def modifier_engagement(
     engagements.exiger_saisie(utilisateur, m.etablissement_id)
     depot = DepotEngagementsSql(session)
     cible = engagements.validable(depot, horloge, utilisateur, engagement_id)
-    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet())
+    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet(), utilisateur.code_agent)
     if m.version != version_attendue(if_match):
         raise ErreurMetier("PRECONDITION_ECHOUEE")
     changements = corps.model_dump(exclude_unset=True, exclude={"imputations"})

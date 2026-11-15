@@ -110,6 +110,11 @@ export const routes: RouteObject[] = [
         ],
       },
       {
+        path: 'alertes',
+        handle: fil('menu.alertes'),
+        lazy: () => import('./pages/Alertes').then((m) => ({ Component: m.Alertes })),
+      },
+      {
         path: 'tableau-de-bord',
         handle: fil('menu.tableauDeBord'),
         lazy: () =>

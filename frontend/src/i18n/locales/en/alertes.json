@@ -1,0 +1,61 @@
+{
+  "titre": "Alerts",
+  "intro": "Blocked checks, refused attempts and scheduled alerts that concern you. Each agent marks their own alerts as read.",
+  "onglets": {
+    "alertes": "Alerts",
+    "regles": "Rules"
+  },
+  "gravites": {
+    "BLOCAGE": "Blocking",
+    "ALERTE": "Alert"
+  },
+  "nonLue": "Unread",
+  "nonLuesSeulement": "Unread only",
+  "aucune": "No alert.",
+  "marquerLue": "Mark as read",
+  "marquerNonLue": "Mark as unread",
+  "voir": "View",
+  "plus": "Show more",
+  "regles": {
+    "etablissement": "Facility",
+    "type": "Alert",
+    "actif": "Active",
+    "seuilPourcent": "Threshold (%)",
+    "delaiJours": "Delay (days)",
+    "enregistree": "Rule saved.",
+    "lancer": "Run detection now",
+    "planifiee": "Detection started."
+  },
+  "types": {
+    "CREDIT_INSUFFISANT": "Insufficient credit",
+    "DEPASSEMENT_MARCHE": "Contract cap exceeded",
+    "SEUIL_MARCHE": "Contract consumption threshold",
+    "AVENANT_NECESSAIRE": "Amendment needed",
+    "FACTURE_DOUBLON": "Duplicate invoice",
+    "FACTURE_SUP_RECEPTION": "Invoiced above received or due",
+    "SERVICE_FAIT_MANQUANT": "Service delivery missing",
+    "PAIEMENT_SUP_LIQUIDE": "Payment above settled",
+    "FACTURE_ECHUE": "Overdue invoice",
+    "ECART_RAPPROCHEMENT": "Reconciliation gap",
+    "ENGAGEMENT_ANCIEN": "Old commitment",
+    "ECHEANCE_CONTRAT": "Contract end date",
+    "MODIFICATION_APRES_VALIDATION": "Change after approval",
+    "CONTROLE_BLOQUANT": "Blocking check"
+  },
+  "messages": {
+    "CREDIT_INSUFFISANT": "Commitment refused: {{depassement}} XOF above the available credit.",
+    "DEPASSEMENT_MARCHE": "Commitment refused: {{depassement}} XOF above the contract amount left to commit.",
+    "AVENANT_NECESSAIRE": "The need exceeds the contract cap by {{depassement}} XOF: an amendment or a derogation is needed.",
+    "SEUIL_MARCHE": "Contract {{numero}} consumed at {{taux}}% ({{seuil}}% marker).",
+    "FACTURE_DOUBLON": "Invoice {{numero}} refused: duplicate of invoice {{reference}}.",
+    "FACTURE_SUP_RECEPTION": "Settlement above received, invoice or amount due ({{depassement}} XOF).",
+    "SERVICE_FAIT_MANQUANT": "Settlement refused: no approved receipt proves the service delivery.",
+    "PAIEMENT_SUP_LIQUIDE": "Payment refused on settlement {{numero}}: share of {{part}} XOF for {{resteDu}} XOF due.",
+    "FACTURE_ECHUE": "Invoice {{numero}}, received on {{recueLe}}, not paid in time.",
+    "ECART_RAPPROCHEMENT": "Reconciliation of invoice {{numero}} recorded with a gap: {{explication}}",
+    "ENGAGEMENT_ANCIEN": "Commitment {{numero}}, approved on {{valideLe}}, still not completed.",
+    "ECHEANCE_CONTRAT": "Contract {{numero}}: ends on {{echeance}}.",
+    "MODIFICATION_APRES_VALIDATION": "Change refused on an operation with status {{statut}}.",
+    "CONTROLE_BLOQUANT": "Operation refused by check {{code}}."
+  }
+}

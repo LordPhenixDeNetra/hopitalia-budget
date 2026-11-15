@@ -33,15 +33,17 @@
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
-| P2 | 5 | 0 | 27 | 0 | 0 | 0 | 32 |
+| P2 | 10 | 0 | 21 | 1 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **154** | **4** | **49** | **0** | **0** | **2** | **209** |
+| **Total** | **159** | **4** | **43** | **1** | **0** | **2** | **209** |
 
-Avancement : 154 / 207 tâches actives terminées (74 %), hors 2 abandonnées.
+Avancement : 159 / 207 tâches actives terminées (77 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
-Aucune tâche bloquée.
+| Tâche | Ce qui bloque | Qui peut débloquer |
+|---|---|---|
+| T-225 (courriels d'alerte) | Adresses électroniques des agents, absentes de l'API Hopitalia utilisée ; serveur SMTP de l'hôpital. | Équipe Hopitalia (adresses), DSI de l'hôpital (serveur de messagerie). |
 
 ## Ordre de réalisation
 
@@ -301,12 +303,12 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-220 | Règles d'alerte paramétrables (`RegleAlerte`). | §14.3 | T-092 | À faire | Seuils et délais modifiables par établissement. |
-| T-221 | Alertes immédiates déclenchées par les contrôles (crédit, plafond, doublon, service fait, paiement). | §14.3 | T-220, T-141 | À faire | Chaque contrôle bloquant crée son alerte. |
-| T-222 | Alertes planifiées (seuils 80/90/100 %, factures échues, engagements anciens, échéances de contrat). | §14.3 | T-220 | À faire | Tâche planifiée testée avec une horloge simulée. |
-| T-223 | Alerte de modification après validation. | §14.3, RG-18 | T-116, T-220 | À faire | Tentative tracée et signalée. |
-| T-224 | Centre d'alertes (liste, marquer comme lue) et pagination par curseur. | §11.2 | T-221 | À faire | Écran et API testés. |
-| T-225 | Notifications par courriel (option par règle), dans la langue du destinataire. | §7.6, I18N-08 | T-222, T-056, T-059 | À faire | Courriel reçu en environnement de test, dans la langue du destinataire. |
+| T-220 | Règles d'alerte paramétrables (`RegleAlerte`). | §14.3 | T-092 | Fait | Seuils et délais modifiables par établissement. Règles par établissement et valeurs par défaut (`GET`, `PUT /regles-alertes`), modification tracée, réservée à l'administrateur ; une règle désactivée ne crée plus d'alerte (`test_t220_regles_par_etablissement`). |
+| T-221 | Alertes immédiates déclenchées par les contrôles (crédit, plafond, doublon, service fait, paiement). | §14.3 | T-220, T-141 | Fait | Chaque contrôle bloquant crée son alerte. Crédit, plafond (et avenant nécessaire), doublon de facture, service fait, paiement au-delà du solde : chaque refus crée son alerte, conservée malgré l'annulation de l'opération, sans doublon (`test_t221_t223_chaque_blocage_cree_son_alerte`). |
+| T-222 | Alertes planifiées (seuils 80/90/100 %, factures échues, engagements anciens, échéances de contrat). | §14.3 | T-220 | Fait | Tâche planifiée testée avec une horloge simulée. Seuils 80/90/100 %, factures échues, engagements anciens, échéances de contrat ; tâche rejouable sans doublon, testée avec une horloge simulée (`test_t222_alertes_planifiees_horloge_simulee`) ; service quotidien `alertes` dans docker-compose. |
+| T-223 | Alerte de modification après validation. | §14.3, RG-18 | T-116, T-220 | Fait | Tentative tracée et signalée. Tentative refusée tracée au journal d'audit (`TENTATIVE_MODIFICATION`) et signalée à VAL, ORD et AUD, avec le code de l'agent (`test_t221_t223_chaque_blocage_cree_son_alerte`). |
+| T-224 | Centre d'alertes (liste, marquer comme lue) et pagination par curseur. | §11.2 | T-221 | Fait | Écran et API testés. API par curseur, compteur, lecture propre à chaque agent, cloisonnement (`test_t224_centre_d_alertes`) ; écran Alertes et badge du menu (test Vitest). |
+| T-225 | Notifications par courriel (option par règle), dans la langue du destinataire. | §7.6, I18N-08 | T-222, T-056, T-059 | Bloqué | Courriel reçu en environnement de test, dans la langue du destinataire. Bloqué : adresses électroniques des agents (non fournies par l'API Hopitalia utilisée) et serveur SMTP de l'hôpital. Peuvent débloquer : l'équipe Hopitalia (adresses) et la DSI de l'hôpital (serveur). |
 
 ### P2.C — Lot 6 : états, audit, clôture
 
@@ -436,3 +438,5 @@ flowchart LR
 | 15/11/2026 | T-195 à T-197 (P1.H) | À faire | Fait | Jeu d'essai de l'annexe 18.2 rejoué de bout en bout (REC-14), absence de passation vérifiée (REC-15), revue d'architecture et trois écarts ARC-S corrigés. |
 | 15/11/2026 | T-198 | À faire | En cours | Support de recette prêt ; séance et procès-verbal avec la DAF à venir. |
 | 15/11/2026 | T-210 à T-214 (P2.A) | À faire | Fait | Tableau de bord de la direction, indicateurs opérationnels, filtres, jauges 80/90/100 %, restes à payer exportables ; 193 tests backend, 49 tests Vitest, parcours Playwright du tableau de bord. |
+| 15/11/2026 | T-220 à T-224 (P2.B) | À faire | Fait | Règles d'alerte, alertes des contrôles et des refus, tâche planifiée, tentatives tracées, centre d'alertes ; migration 0010 ; 198 tests backend, 51 tests Vitest. |
+| 15/11/2026 | T-225 | À faire | Bloqué | Adresses électroniques des agents et serveur SMTP de l'hôpital manquants. |

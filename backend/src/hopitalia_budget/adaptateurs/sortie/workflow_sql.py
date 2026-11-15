@@ -7,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import exists, select
 from sqlalchemy.orm import Session
 
+from hopitalia_budget.adaptateurs.sortie.alertes_sql import mettre_en_attente
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     CircuitValidationModele,
     DelegationModele,
@@ -18,6 +19,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
     ValidationModele,
     WorkflowObjetModele,
 )
+from hopitalia_budget.domaine.alertes import Signal
 from hopitalia_budget.domaine.habilitations import Profil
 from hopitalia_budget.domaine.workflow import (
     Action,
@@ -174,6 +176,9 @@ class DepotWorkflowSql:
             )
         )
         self.session.flush()
+
+    def signaler(self, signal: Signal) -> None:
+        mettre_en_attente(self.session, signal)
 
     def profils_delegues(
         self, delegataire_id: int, etablissement_id: UUID, jour: date

@@ -53,6 +53,7 @@ beforeAll(async () => {
     'factures',
     'paiements',
     'tableaux',
+    'alertes',
   ])
 })
 
@@ -1066,5 +1067,45 @@ describe('tableaux de bord (lot 6)', () => {
         ],
       ),
     ).toBe('﻿Facture;Reste\r\n"FA;1";5000000.00\r\n"FA ""2""";\r\n')
+  })
+})
+
+describe('centre d’alertes (lot 6)', () => {
+  test('badge du menu, message lisible, alerte marquée comme lue (T-224)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const alerte = {
+      id: 'al1',
+      etablissementId: 'a1',
+      type: 'SEUIL_MARCHE',
+      gravite: 'ALERTE',
+      typeObjet: 'Contrat',
+      idObjet: 'c1',
+      details: { numero: 'M-2026-001', taux: '80.00', seuil: '80.00' },
+      codeAgent: null,
+      creeLe: '2026-11-14T09:00:00Z',
+      lue: false,
+    }
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(MOI)],
+      'GET /api/v1/alertes/compteur': [json({ nonLues: 1 })],
+      'GET /api/v1/alertes': [json({ donnees: [alerte], suivant: null })],
+      'PATCH /api/v1/alertes/al1': [json({ ...alerte, lue: true })],
+    })
+    afficher('/alertes')
+    expect(await screen.findByLabelText('1 alerte non lue', {}, { timeout: 5000 })).toBeTruthy()
+    expect(
+      await screen.findByText('Marché M-2026-001 consommé à 80.00 % (repère de 80.00 %).'),
+    ).toBeTruthy()
+    // Gravité et état écrits en clair (IHM-06).
+    expect(screen.getByText('Alerte')).toBeTruthy()
+    expect(screen.getByText('Non lue')).toBeTruthy()
+    expect(screen.getByRole('link', { name: 'Voir' }).getAttribute('href')).toBe('/contrats/c1')
+    await userEvent.click(screen.getByRole('button', { name: 'Marquer comme lue' }))
+    await vi.waitFor(() => {
+      const envoi = appel.mock.calls.find(([, o]) => o?.method === 'PATCH')
+      expect(JSON.parse(String(envoi![1]!.body))).toEqual({ lue: true })
+    })
+    const urls = appel.mock.calls.map(([url]) => String(url))
+    expect(urls.some((u) => u.includes('/api/v1/alertes?nonLues=true'))).toBe(true)
   })
 })

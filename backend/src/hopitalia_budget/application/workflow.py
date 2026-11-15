@@ -7,6 +7,8 @@ limitées à celles paramétrées ; objet validé immuable (RG-18).
 
 from dataclasses import dataclass
 
+from hopitalia_budget.domaine.alertes import Alerteur, Signal, TypeAlerte, signaux_des_controles
+from hopitalia_budget.domaine.controles import ResultatControle
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.habilitations import Profil
 from hopitalia_budget.domaine.ports import EvenementAudit, Horloge, JournaliseurAudit
@@ -236,10 +238,33 @@ def soumettre(
     return etat(depot, horloge, utilisateur, cible)
 
 
-def exiger_modifiable(depot: DepotWorkflow, o: ObjetValidable) -> None:
+def signaler(
+    alerteur: Alerteur, o: ObjetValidable, resultats: list[ResultatControle]
+) -> list[ResultatControle]:
+    """T-221 : chaque écart ouvert d'un contrôle crée son alerte, même si l'opération est
+    refusée ; renvoie les résultats inchangés."""
+    for s in signaux_des_controles(resultats, o.type_objet, o.id, o.etablissement_id):
+        alerteur.signaler(s)
+    return resultats
+
+
+def exiger_modifiable(
+    depot: DepotWorkflow, o: ObjetValidable, code_agent: str | None = None
+) -> None:
     """RG-18 : seul un objet retourné pour correction (qui attend d'être resoumis) se modifie."""
     corrigeables = {
         t.depuis for t in TRANSITIONS_REFERENCE[o.type_objet] if t.action is Action.SOUMETTRE
     }
     if _references(depot, o).get(_statut(depot, o)) not in corrigeables:
+        depot.signaler(
+            Signal(
+                TypeAlerte.MODIFICATION_APRES_VALIDATION,
+                o.type_objet,
+                o.id,
+                o.etablissement_id,
+                cle=None,
+                details={"statut": o.statut_reference},
+                code_agent=code_agent,
+            )
+        )
         raise ErreurMetier("OPERATION_NON_MODIFIABLE", statut=o.statut_reference)

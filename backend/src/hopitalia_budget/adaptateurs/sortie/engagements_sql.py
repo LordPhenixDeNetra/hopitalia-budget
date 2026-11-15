@@ -13,6 +13,7 @@ from uuid import UUID
 from sqlalchemy import ColumnElement, func, select
 from sqlalchemy.orm import Session
 
+from hopitalia_budget.adaptateurs.sortie.alertes_sql import mettre_en_attente
 from hopitalia_budget.adaptateurs.sortie.derogations_sql import accordees
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     AnnulationLigneModele,
@@ -24,6 +25,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
     ReferentielModele,
 )
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import pieces_obligatoires_presentes
+from hopitalia_budget.domaine.alertes import Signal
 from hopitalia_budget.domaine.controles import NatureDerogation
 from hopitalia_budget.domaine.engagements import (
     EN_COURS,
@@ -199,6 +201,9 @@ class DepotEngagementsSql:
         if statut is StatutEngagement.VALIDE and m.date_validation is None:
             m.date_validation = maintenant
         self.session.flush()
+
+    def signaler(self, signal: Signal) -> None:
+        mettre_en_attente(self.session, signal)
 
     def derogations_accordees(self, engagement_id: UUID) -> dict[NatureDerogation, Decimal]:
         return accordees(self.session, "Engagement", engagement_id)
