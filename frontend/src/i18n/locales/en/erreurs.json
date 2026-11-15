@@ -48,6 +48,9 @@
   "VENTILATION_INCOHERENTE": "The allocations must add up to the contract amount including tax.",
   "CONTRAT_NON_VALIDE": "An amendment applies only to an approved contract.",
   "PLAFOND_INSUFFISANT": "The new ceiling would be below zero or below the amount already committed.",
+  "ENGAGEMENT_INCOHERENT": "The amount must equal the sum of the allocations, all positive.",
+  "CONTROLE_BLOQUANT": "An automatic check found a gap: correct the commitment or request a derogation.",
+  "ANNULATION_IMPOSSIBLE": "Only the remainder of an approved commitment can be cancelled; closing follows execution.",
   "champ": {
     "missing": "This field is required.",
     "string_too_short": "This field is too short.",

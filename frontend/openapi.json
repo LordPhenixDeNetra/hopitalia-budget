@@ -2819,6 +2819,647 @@
         }
       }
     },
+    "/api/v1/engagements": {
+      "post": {
+        "tags": [
+          "engagements"
+        ],
+        "summary": "Creer Engagement",
+        "description": "Engagement en brouillon ; numéro attribué par établissement et exercice. Un rejeu avec la\nmême clé d'idempotence renvoie le même engagement, sans doublon (T-149).",
+        "operationId": "creer_engagement",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EngagementCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngagementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "engagements"
+        ],
+        "summary": "Lister Engagements",
+        "operationId": "lister_engagements",
+        "parameters": [
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "statut",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/StatutEngagement"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Statut"
+            }
+          },
+          {
+            "name": "origine",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Origine"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Origine"
+            }
+          },
+          {
+            "name": "contratId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Contratid"
+            }
+          },
+          {
+            "name": "fournisseurId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fournisseurid"
+            }
+          },
+          {
+            "name": "centreId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Centreid"
+            }
+          },
+          {
+            "name": "tri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tri"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_EngagementSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagements/{engagement_id}": {
+      "get": {
+        "tags": [
+          "engagements"
+        ],
+        "summary": "Obtenir Engagement",
+        "operationId": "obtenir_engagement",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngagementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "engagements"
+        ],
+        "summary": "Modifier Engagement",
+        "description": "Brouillon ou retour pour correction seulement : un engagement validé répond 409 (API-04).",
+        "operationId": "modifier_engagement",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EngagementChamps"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EngagementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagements/{engagement_id}/controles": {
+      "get": {
+        "tags": [
+          "engagements"
+        ],
+        "summary": "Lire Controles",
+        "description": "Résultat des contrôles automatiques à l'instant (sans verrou) ; écarts levés compris.",
+        "operationId": "lire_controles",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ResultatSortie"
+                  },
+                  "title": "Response Lire Controles"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagements/{engagement_id}/derogations": {
+      "post": {
+        "tags": [
+          "engagements"
+        ],
+        "summary": "Demander Derogation",
+        "description": "Demande soumise au circuit (visa DAF puis ordonnateur) ; une fois validée, elle lève\nl'écart de sa nature jusqu'à son montant, sur cet engagement seulement (RG-19).",
+        "operationId": "demander_derogation",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DerogationCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DerogationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "engagements"
+        ],
+        "summary": "Lister Derogations",
+        "operationId": "lister_derogations",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DerogationSortie"
+                  },
+                  "title": "Response Lister Derogations"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagements/{engagement_id}/annulations": {
+      "post": {
+        "tags": [
+          "engagements"
+        ],
+        "summary": "Annuler Engagement",
+        "description": "Contre-opération tracée : l'engagement reste visible avec ses annulations (RG-09, RG-18).",
+        "operationId": "annuler_engagement",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AnnulationCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnulationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "engagements"
+        ],
+        "summary": "Lister Annulations",
+        "operationId": "lister_annulations",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AnnulationSortie"
+                  },
+                  "title": "Response Lister Annulations"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/engagements/{engagement_id}/clotures": {
+      "post": {
+        "tags": [
+          "engagements"
+        ],
+        "summary": "Cloturer Engagement",
+        "description": "Clôture d'un engagement exécuté : le reliquat non liquidé est désengagé (EF-ENG-05).",
+        "operationId": "cloturer_engagement",
+        "parameters": [
+          {
+            "name": "engagement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Engagement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClotureCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnnulationSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sites": {
       "get": {
         "tags": [
@@ -6474,7 +7115,9 @@
               "enum": [
                 "revisions-budgetaires",
                 "contrats",
-                "avenants"
+                "avenants",
+                "engagements",
+                "derogations"
               ],
               "type": "string",
               "title": "Ressource"
@@ -6530,7 +7173,9 @@
               "enum": [
                 "revisions-budgetaires",
                 "contrats",
-                "avenants"
+                "avenants",
+                "engagements",
+                "derogations"
               ],
               "type": "string",
               "title": "Ressource"
@@ -6598,7 +7243,9 @@
               "enum": [
                 "revisions-budgetaires",
                 "contrats",
-                "avenants"
+                "avenants",
+                "engagements",
+                "derogations"
               ],
               "type": "string",
               "title": "Ressource"
@@ -6655,7 +7302,9 @@
               "enum": [
                 "revisions-budgetaires",
                 "contrats",
-                "avenants"
+                "avenants",
+                "engagements",
+                "derogations"
               ],
               "type": "string",
               "title": "Ressource"
@@ -6715,7 +7364,9 @@
               "enum": [
                 "revisions-budgetaires",
                 "contrats",
-                "avenants"
+                "avenants",
+                "engagements",
+                "derogations"
               ],
               "type": "string",
               "title": "Ressource"
@@ -7154,7 +7805,9 @@
               "enum": [
                 "RevisionBudgetaire",
                 "Contrat",
-                "Avenant"
+                "Avenant",
+                "Engagement",
+                "Derogation"
               ],
               "type": "string",
               "title": "Type Objet"
@@ -7915,6 +8568,110 @@
         ],
         "title": "Action"
       },
+      "AnnulationCreation": {
+        "properties": {
+          "motif": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Motif"
+          },
+          "lignes": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/AnnulationLigneSchema"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Lignes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "motif"
+        ],
+        "title": "AnnulationCreation"
+      },
+      "AnnulationLigneSchema": {
+        "properties": {
+          "imputationId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Imputationid"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "imputationId",
+          "montant"
+        ],
+        "title": "AnnulationLigneSchema"
+      },
+      "AnnulationSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "type": {
+            "type": "string",
+            "title": "Type"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "motif": {
+            "type": "string",
+            "title": "Motif"
+          },
+          "codeAgent": {
+            "type": "string",
+            "title": "Codeagent"
+          },
+          "horodatage": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Horodatage"
+          },
+          "lignes": {
+            "items": {
+              "$ref": "#/components/schemas/AnnulationLigneSchema"
+            },
+            "type": "array",
+            "title": "Lignes"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "montant",
+          "motif",
+          "codeAgent",
+          "horodatage",
+          "lignes"
+        ],
+        "title": "AnnulationSortie"
+      },
       "Anomalie": {
         "properties": {
           "ligne": {
@@ -8523,7 +9280,9 @@
             "enum": [
               "RevisionBudgetaire",
               "Contrat",
-              "Avenant"
+              "Avenant",
+              "Engagement",
+              "Derogation"
             ],
             "title": "Typeobjet"
           },
@@ -8768,6 +9527,21 @@
           "version"
         ],
         "title": "CircuitSortie"
+      },
+      "ClotureCreation": {
+        "properties": {
+          "motif": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Motif"
+          }
+        },
+        "type": "object",
+        "required": [
+          "motif"
+        ],
+        "title": "ClotureCreation"
       },
       "CompteComptableSortie": {
         "properties": {
@@ -10088,7 +10862,7 @@
           },
           "imputations": {
             "items": {
-              "$ref": "#/components/schemas/ImputationSortie"
+              "$ref": "#/components/schemas/hopitalia_budget__adaptateurs__entree__api__routes__contrats__ImputationSortie"
             },
             "type": "array",
             "title": "Imputations"
@@ -10344,6 +11118,93 @@
         ],
         "title": "DelegationSortie"
       },
+      "DerogationCreation": {
+        "properties": {
+          "nature": {
+            "$ref": "#/components/schemas/NatureDerogation"
+          },
+          "montantDepassement": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantdepassement",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "motif": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Motif"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nature",
+          "montantDepassement",
+          "motif"
+        ],
+        "title": "DerogationCreation"
+      },
+      "DerogationSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "idObjet": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Idobjet"
+          },
+          "nature": {
+            "$ref": "#/components/schemas/NatureDerogation"
+          },
+          "montantDepassement": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantdepassement",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "motif": {
+            "type": "string",
+            "title": "Motif"
+          },
+          "statut": {
+            "type": "string",
+            "title": "Statut"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "idObjet",
+          "nature",
+          "montantDepassement",
+          "motif",
+          "statut",
+          "creeParCode",
+          "creeLe",
+          "version"
+        ],
+        "title": "DerogationSortie"
+      },
       "DisponibiliteSortie": {
         "properties": {
           "ligneId": {
@@ -10437,6 +11298,447 @@
           "id"
         ],
         "title": "EcheanceSortie"
+      },
+      "EngagementChamps": {
+        "properties": {
+          "dateEngagement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateengagement"
+          },
+          "objet": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objet"
+          },
+          "montant": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montant"
+          },
+          "fournisseurId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fournisseurid"
+          },
+          "centreId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Centreid"
+          },
+          "typeDepenseId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typedepenseid"
+          },
+          "natureHorsMarche": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NatureHorsMarche"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "justification": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Justification"
+          },
+          "referenceDecision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencedecision"
+          },
+          "imputations": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ImputationSchema"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imputations"
+          }
+        },
+        "type": "object",
+        "title": "EngagementChamps",
+        "description": "Champs modifiables tant que l'engagement est en brouillon ou retourné pour correction."
+      },
+      "EngagementCreation": {
+        "properties": {
+          "dateEngagement": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateengagement"
+          },
+          "objet": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Objet"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "fournisseurId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fournisseurid"
+          },
+          "centreId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Centreid"
+          },
+          "typeDepenseId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typedepenseid"
+          },
+          "natureHorsMarche": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NatureHorsMarche"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "justification": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 1000
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Justification"
+          },
+          "referenceDecision": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencedecision"
+          },
+          "imputations": {
+            "items": {
+              "$ref": "#/components/schemas/ImputationSchema"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Imputations"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "origine": {
+            "$ref": "#/components/schemas/Origine"
+          },
+          "contratId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contratid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "dateEngagement",
+          "objet",
+          "montant",
+          "centreId",
+          "imputations",
+          "etablissementId",
+          "origine"
+        ],
+        "title": "EngagementCreation"
+      },
+      "EngagementSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "exerciceId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Exerciceid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "dateEngagement": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateengagement"
+          },
+          "objet": {
+            "type": "string",
+            "title": "Objet"
+          },
+          "origine": {
+            "$ref": "#/components/schemas/Origine"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "montantAnnule": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantannule",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "contratId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Contratid"
+          },
+          "fournisseurId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fournisseurid"
+          },
+          "centreId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Centreid"
+          },
+          "typeDepenseId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Typedepenseid"
+          },
+          "natureHorsMarche": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NatureHorsMarche"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "justification": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Justification"
+          },
+          "referenceDecision": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencedecision"
+          },
+          "statut": {
+            "$ref": "#/components/schemas/StatutEngagement"
+          },
+          "dateValidation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datevalidation"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "imputations": {
+            "items": {
+              "$ref": "#/components/schemas/hopitalia_budget__adaptateurs__entree__api__routes__engagements__ImputationSortie"
+            },
+            "type": "array",
+            "title": "Imputations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "exerciceId",
+          "numero",
+          "dateEngagement",
+          "objet",
+          "origine",
+          "montant",
+          "montantAnnule",
+          "contratId",
+          "fournisseurId",
+          "centreId",
+          "typeDepenseId",
+          "natureHorsMarche",
+          "justification",
+          "referenceDecision",
+          "statut",
+          "dateValidation",
+          "creeParCode",
+          "creeLe",
+          "version",
+          "imputations"
+        ],
+        "title": "EngagementSortie"
       },
       "EntreeJournal": {
         "properties": {
@@ -11187,35 +12489,6 @@
         ],
         "title": "ImputationSchema"
       },
-      "ImputationSortie": {
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Id"
-          },
-          "ligneId": {
-            "type": "string",
-            "format": "uuid",
-            "title": "Ligneid"
-          },
-          "montant": {
-            "type": "string",
-            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
-            "title": "Montant",
-            "examples": [
-              "45000000.00"
-            ]
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "ligneId",
-          "montant"
-        ],
-        "title": "ImputationSortie"
-      },
       "IndicateursSortie": {
         "properties": {
           "budgetInitial": {
@@ -11753,6 +13026,30 @@
         ],
         "title": "Moi"
       },
+      "NatureDerogation": {
+        "type": "string",
+        "enum": [
+          "CREDIT",
+          "PLAFOND_CONTRAT",
+          "SEUIL_HORS_MARCHE",
+          "LIQUIDATION_SUP_DU",
+          "PAIEMENT_SUP_SOLDE",
+          "DOUBLON"
+        ],
+        "title": "NatureDerogation"
+      },
+      "NatureHorsMarche": {
+        "type": "string",
+        "enum": [
+          "MISSION",
+          "PETIT_ACHAT",
+          "EAU_ELEC_TELECOM",
+          "FONCTIONNEMENT",
+          "PRESTATION_PONCTUELLE",
+          "AUTRE"
+        ],
+        "title": "NatureHorsMarche"
+      },
       "NatureMarche": {
         "type": "string",
         "enum": [
@@ -12046,6 +13343,15 @@
         ],
         "title": "OrdreServiceSortie"
       },
+      "Origine": {
+        "type": "string",
+        "enum": [
+          "CONTRAT",
+          "DECISION_AUTORISEE",
+          "HORS_MARCHE"
+        ],
+        "title": "Origine"
+      },
       "PageCurseur_EntreeJournal_": {
         "properties": {
           "donnees": {
@@ -12185,6 +13491,26 @@
           "pagination"
         ],
         "title": "Page[DelegationSortie]"
+      },
+      "Page_EngagementSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/EngagementSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[EngagementSortie]"
       },
       "Page_EtablissementSortie_": {
         "properties": {
@@ -12982,6 +14308,52 @@
         ],
         "title": "ReferentielSortie"
       },
+      "ResultatSortie": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "nature": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NatureDerogation"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "depassement": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Depassement",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "details": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Details"
+          },
+          "leve": {
+            "type": "boolean",
+            "title": "Leve"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "nature",
+          "depassement",
+          "details",
+          "leve"
+        ],
+        "title": "ResultatSortie"
+      },
       "RevisionCorrection": {
         "properties": {
           "montant": {
@@ -13592,7 +14964,9 @@
             "enum": [
               "RevisionBudgetaire",
               "Contrat",
-              "Avenant"
+              "Avenant",
+              "Engagement",
+              "Derogation"
             ],
             "title": "Typeobjet"
           },
@@ -13625,6 +14999,22 @@
           "statutReference"
         ],
         "title": "StatutCreation"
+      },
+      "StatutEngagement": {
+        "type": "string",
+        "enum": [
+          "BROUILLON",
+          "SOUMIS",
+          "EN_CONTROLE",
+          "A_CORRIGER",
+          "VALIDE",
+          "REJETE",
+          "PARTIELLEMENT_EXECUTE",
+          "EXECUTE",
+          "CLOTURE",
+          "ANNULE"
+        ],
+        "title": "StatutEngagement"
       },
       "StatutModification": {
         "properties": {
@@ -13947,7 +15337,9 @@
             "enum": [
               "RevisionBudgetaire",
               "Contrat",
-              "Avenant"
+              "Avenant",
+              "Engagement",
+              "Derogation"
             ],
             "title": "Typeobjet"
           },
@@ -14265,7 +15657,9 @@
               "enum": [
                 "RevisionBudgetaire",
                 "Contrat",
-                "Avenant"
+                "Avenant",
+                "Engagement",
+                "Derogation"
               ]
             },
             "type": "array",
@@ -14326,7 +15720,9 @@
                   "enum": [
                     "RevisionBudgetaire",
                     "Contrat",
-                    "Avenant"
+                    "Avenant",
+                    "Engagement",
+                    "Derogation"
                   ]
                 },
                 "type": "array"
@@ -14383,7 +15779,9 @@
                   "enum": [
                     "RevisionBudgetaire",
                     "Contrat",
-                    "Avenant"
+                    "Avenant",
+                    "Engagement",
+                    "Derogation"
                   ]
                 },
                 "type": "array"
@@ -14538,6 +15936,73 @@
           "horodatage"
         ],
         "title": "VisaSortie"
+      },
+      "hopitalia_budget__adaptateurs__entree__api__routes__contrats__ImputationSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "ligneId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ligneid"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "ligneId",
+          "montant"
+        ],
+        "title": "ImputationSortie"
+      },
+      "hopitalia_budget__adaptateurs__entree__api__routes__engagements__ImputationSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "ligneId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ligneid"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "annule": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Annule",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "ligneId",
+          "montant",
+          "annule"
+        ],
+        "title": "ImputationSortie"
       }
     }
   }

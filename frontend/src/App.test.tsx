@@ -46,6 +46,7 @@ beforeAll(async () => {
     'budget',
     'workflow',
     'contrats',
+    'engagements',
   ])
 })
 
@@ -562,5 +563,79 @@ describe('contrats et marchés (lot 2)', () => {
         ([url, o]) => url === '/api/v1/contrats/c1/soumissions' && o?.method === 'POST',
       ),
     ).toBe(true)
+  })
+})
+
+describe('engagements (lot 2)', () => {
+  const GMC = { ...MOI, habilitations: [{ profil: 'GMC', etablissementId: 'a1' }] }
+  const ENGAGEMENT = {
+    id: 'e1',
+    etablissementId: 'a1',
+    exerciceId: 'x1',
+    numero: 'ENG-2026-00001',
+    dateEngagement: '2026-03-01',
+    objet: 'Médicaments',
+    origine: 'CONTRAT',
+    montant: '30000000.00',
+    montantAnnule: '0.00',
+    contratId: 'c1',
+    fournisseurId: 'f1',
+    centreId: 'ce1',
+    typeDepenseId: null,
+    natureHorsMarche: null,
+    justification: null,
+    referenceDecision: null,
+    statut: 'BROUILLON',
+    dateValidation: null,
+    creeParCode: 'AG011',
+    creeLe: '2026-03-01T10:00:00Z',
+    version: 1,
+    imputations: [{ id: 'i1', ligneId: 'l1', montant: '30000000.00', annule: '0.00' }],
+  }
+
+  test('contrôles : écart lisible, dérogation demandée pour son montant (T-118, T-150)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(GMC)],
+      'GET /api/v1/engagements/e1': [json(ENGAGEMENT)],
+      'GET /api/v1/engagements/e1/controles': [
+        json([
+          {
+            code: 'PLAFOND_DEPASSE',
+            nature: 'PLAFOND_CONTRAT',
+            depassement: '10000000.00',
+            details: { resteAEngager: '20000000.00' },
+            leve: false,
+          },
+          {
+            code: 'FOURNISSEUR_INCOHERENT',
+            nature: null,
+            depassement: '0.00',
+            details: {},
+            leve: false,
+          },
+        ]),
+      ],
+      'GET /api/v1/engagements/e1/derogations': [json([])],
+      'POST /api/v1/engagements/e1/derogations': [json({ id: 'd1' }, 201)],
+    })
+    afficher('/engagements/e1')
+    await userEvent.click(await screen.findByRole('tab', { name: 'Contrôles' }))
+    expect(await screen.findByText('Plafond du marché dépassé')).toBeTruthy()
+    // L'état est écrit en clair, pas signalé par la seule couleur (IHM-06).
+    expect(screen.getByText('Non dérogeable : à corriger')).toBeTruthy()
+    expect(screen.getByText('Reste à engager : 20000000.00')).toBeTruthy()
+    await userEvent.click(screen.getByRole('button', { name: 'Demander une dérogation' }))
+    const dialogue = await screen.findByRole('dialog')
+    await userEvent.type(within(dialogue).getByLabelText('Motif'), 'Avenant en cours')
+    await userEvent.click(within(dialogue).getByRole('button', { name: 'Enregistrer' }))
+    expect(await screen.findByText('Dérogation demandée et soumise au circuit.')).toBeTruthy()
+
+    const envoi = appel.mock.calls.find(([, o]) => o?.method === 'POST')!
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({
+      montantDepassement: '10000000.00',
+      motif: 'Avenant en cours',
+      nature: 'PLAFOND_CONTRAT',
+    })
   })
 })

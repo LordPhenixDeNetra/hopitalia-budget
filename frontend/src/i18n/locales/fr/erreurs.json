@@ -48,6 +48,9 @@
   "VENTILATION_INCOHERENTE": "La somme des imputations doit égaler le montant TTC du contrat.",
   "CONTRAT_NON_VALIDE": "Un avenant ne porte que sur un contrat validé.",
   "PLAFOND_INSUFFISANT": "Le nouveau plafond serait inférieur à zéro ou au montant déjà engagé.",
+  "ENGAGEMENT_INCOHERENT": "Le montant doit égaler la somme des imputations, toutes positives.",
+  "CONTROLE_BLOQUANT": "Un contrôle automatique a relevé un écart : corrigez l'engagement ou demandez une dérogation.",
+  "ANNULATION_IMPOSSIBLE": "Seul le reliquat d'un engagement validé s'annule ; la clôture suit une exécution.",
   "champ": {
     "missing": "Ce champ est obligatoire.",
     "string_too_short": "Ce champ est trop court.",

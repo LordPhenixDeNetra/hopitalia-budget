@@ -1,5 +1,6 @@
 import {
   ApartmentOutlined,
+  AuditOutlined,
   ContainerOutlined,
   FundOutlined,
   HomeOutlined,
@@ -78,6 +79,11 @@ export function Gabarit() {
               key: '/contrats',
               icon: <ContainerOutlined aria-hidden />,
               label: t('menu.contrats'),
+            },
+            {
+              key: '/engagements',
+              icon: <AuditOutlined aria-hidden />,
+              label: t('menu.engagements'),
             },
             {
               key: '/nomenclature',

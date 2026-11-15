@@ -30,8 +30,9 @@ import { Montant } from '../../composants/Montant'
 import { TableauServeur, type EtatTableau } from '../../composants/TableauServeur'
 import { useOptions } from './PageReferentiel'
 
-// Profils qui ont le droit de valider une révision, un contrat ou un avenant (matrice).
-const PROFILS_VALIDEURS = ['VAL', 'ORD']
+// Profils qui valident un objet dans la matrice (le contrôle financier pour les engagements) ;
+// le serveur refuse un profil sans droit sur le type d'objet choisi.
+const PROFILS_VALIDEURS = ['AF', 'VAL', 'ORD']
 
 function Formulaire({ circuit, fermer }: { circuit?: CircuitSortie; fermer: () => void }) {
   const { t } = useTranslation('workflow')
@@ -107,7 +108,13 @@ function Formulaire({ circuit, fermer }: { circuit?: CircuitSortie; fermer: () =
             </Form.Item>
             <Form.Item name="typeObjet" label={t('circuits.typeObjet')} rules={requis}>
               <Select
-                options={['RevisionBudgetaire', 'Contrat', 'Avenant'].map((v) => ({
+                options={[
+                  'RevisionBudgetaire',
+                  'Contrat',
+                  'Avenant',
+                  'Engagement',
+                  'Derogation',
+                ].map((v) => ({
                   value: v,
                   label: t(`circuits.types.${v}`),
                 }))}

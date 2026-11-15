@@ -15,6 +15,32 @@ export const Action = {
   RETOURNER: 'RETOURNER',
 } as const;
 
+export interface AnnulationLigneSchema {
+  imputationId: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+}
+
+export interface AnnulationCreation {
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  motif: string;
+  lignes?: AnnulationLigneSchema[] | null;
+}
+
+export interface AnnulationSortie {
+  id: string;
+  type: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  motif: string;
+  codeAgent: string;
+  horodatage: string;
+  lignes: AnnulationLigneSchema[];
+}
+
 export interface Anomalie {
   ligne: number;
   code: string;
@@ -194,6 +220,8 @@ export const CircuitCreationTypeObjet = {
   RevisionBudgetaire: 'RevisionBudgetaire',
   Contrat: 'Contrat',
   Avenant: 'Avenant',
+  Engagement: 'Engagement',
+  Derogation: 'Derogation',
 } as const;
 
 export type Profil = typeof Profil[keyof typeof Profil];
@@ -264,6 +292,14 @@ export interface CircuitSortie {
   actif: boolean;
   etapes: EtapeSchema[];
   version: number;
+}
+
+export interface ClotureCreation {
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  motif: string;
 }
 
 export interface NoeudSortie {
@@ -464,7 +500,7 @@ export interface ContratResume {
   tauxConsommation: string | null;
 }
 
-export interface ImputationSortie {
+export interface HopitaliaBudgetAdaptateursEntreeApiRoutesContratsImputationSortie {
   id: string;
   ligneId: string;
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
@@ -511,7 +547,7 @@ export interface ContratSortie {
   creeParCode: string;
   creeLe: string;
   version: number;
-  imputations: ImputationSortie[];
+  imputations: HopitaliaBudgetAdaptateursEntreeApiRoutesContratsImputationSortie[];
 }
 
 export interface CoordonneeCreation {
@@ -582,6 +618,42 @@ export interface DelegationSortie {
   version: number;
 }
 
+export type NatureDerogation = typeof NatureDerogation[keyof typeof NatureDerogation];
+
+
+export const NatureDerogation = {
+  CREDIT: 'CREDIT',
+  PLAFOND_CONTRAT: 'PLAFOND_CONTRAT',
+  SEUIL_HORS_MARCHE: 'SEUIL_HORS_MARCHE',
+  LIQUIDATION_SUP_DU: 'LIQUIDATION_SUP_DU',
+  PAIEMENT_SUP_SOLDE: 'PAIEMENT_SUP_SOLDE',
+  DOUBLON: 'DOUBLON',
+} as const;
+
+export interface DerogationCreation {
+  nature: NatureDerogation;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantDepassement: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  motif: string;
+}
+
+export interface DerogationSortie {
+  id: string;
+  idObjet: string;
+  nature: NatureDerogation;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantDepassement: string;
+  motif: string;
+  statut: string;
+  creeParCode: string;
+  creeLe: string;
+  version: number;
+}
+
 export interface IndicateursSortie {
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
   budgetInitial: string;
@@ -640,6 +712,117 @@ export interface EcheanceSortie {
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
   montantPrevu: string;
   id: string;
+}
+
+export type NatureHorsMarche = typeof NatureHorsMarche[keyof typeof NatureHorsMarche];
+
+
+export const NatureHorsMarche = {
+  MISSION: 'MISSION',
+  PETIT_ACHAT: 'PETIT_ACHAT',
+  EAU_ELEC_TELECOM: 'EAU_ELEC_TELECOM',
+  FONCTIONNEMENT: 'FONCTIONNEMENT',
+  PRESTATION_PONCTUELLE: 'PRESTATION_PONCTUELLE',
+  AUTRE: 'AUTRE',
+} as const;
+
+/**
+ * Champs modifiables tant que l'engagement est en brouillon ou retourné pour correction.
+ */
+export interface EngagementChamps {
+  dateEngagement?: string | null;
+  objet?: string | null;
+  montant?: string | null;
+  fournisseurId?: string | null;
+  centreId?: string | null;
+  typeDepenseId?: string | null;
+  natureHorsMarche?: NatureHorsMarche | null;
+  justification?: string | null;
+  referenceDecision?: string | null;
+  imputations?: ImputationSchema[] | null;
+}
+
+export type Origine = typeof Origine[keyof typeof Origine];
+
+
+export const Origine = {
+  CONTRAT: 'CONTRAT',
+  DECISION_AUTORISEE: 'DECISION_AUTORISEE',
+  HORS_MARCHE: 'HORS_MARCHE',
+} as const;
+
+export interface EngagementCreation {
+  dateEngagement: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  objet: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  fournisseurId?: string | null;
+  centreId: string;
+  typeDepenseId?: string | null;
+  natureHorsMarche?: NatureHorsMarche | null;
+  justification?: string | null;
+  referenceDecision?: string | null;
+  /** @minItems 1 */
+  imputations: ImputationSchema[];
+  etablissementId: string;
+  origine: Origine;
+  contratId?: string | null;
+}
+
+export type StatutEngagement = typeof StatutEngagement[keyof typeof StatutEngagement];
+
+
+export const StatutEngagement = {
+  BROUILLON: 'BROUILLON',
+  SOUMIS: 'SOUMIS',
+  EN_CONTROLE: 'EN_CONTROLE',
+  A_CORRIGER: 'A_CORRIGER',
+  VALIDE: 'VALIDE',
+  REJETE: 'REJETE',
+  PARTIELLEMENT_EXECUTE: 'PARTIELLEMENT_EXECUTE',
+  EXECUTE: 'EXECUTE',
+  CLOTURE: 'CLOTURE',
+  ANNULE: 'ANNULE',
+} as const;
+
+export interface HopitaliaBudgetAdaptateursEntreeApiRoutesEngagementsImputationSortie {
+  id: string;
+  ligneId: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  annule: string;
+}
+
+export interface EngagementSortie {
+  id: string;
+  etablissementId: string;
+  exerciceId: string;
+  numero: string;
+  dateEngagement: string;
+  objet: string;
+  origine: Origine;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantAnnule: string;
+  contratId: string | null;
+  fournisseurId: string | null;
+  centreId: string;
+  typeDepenseId: string | null;
+  natureHorsMarche: NatureHorsMarche | null;
+  justification: string | null;
+  referenceDecision: string | null;
+  statut: StatutEngagement;
+  dateValidation: string | null;
+  creeParCode: string;
+  creeLe: string;
+  version: number;
+  imputations: HopitaliaBudgetAdaptateursEntreeApiRoutesEngagementsImputationSortie[];
 }
 
 export type EntreeJournalAncienneValeur = { [key: string]: unknown } | null;
@@ -1038,6 +1221,11 @@ export interface PageDelegationSortie {
   pagination: Pagination;
 }
 
+export interface PageEngagementSortie {
+  donnees: EngagementSortie[];
+  pagination: Pagination;
+}
+
 export interface PageEtablissementSortie {
   donnees: EtablissementSortie[];
   pagination: Pagination;
@@ -1231,7 +1419,7 @@ export interface TypePieceSortie {
   actif: boolean;
   version: number;
   dureeConservationAns: number | null;
-  typesObjets: ('RevisionBudgetaire' | 'Contrat' | 'Avenant')[] | null;
+  typesObjets: ('RevisionBudgetaire' | 'Contrat' | 'Avenant' | 'Engagement' | 'Derogation')[] | null;
 }
 
 export interface PageTypePieceSortie {
@@ -1319,6 +1507,17 @@ export interface ReferentielCreation {
 export interface ReferentielModification {
   libelle?: string | null;
   actif?: boolean | null;
+}
+
+export type ResultatSortieDetails = {[key: string]: string};
+
+export interface ResultatSortie {
+  code: string;
+  nature: NatureDerogation | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  depassement: string;
+  details: ResultatSortieDetails;
+  leve: boolean;
 }
 
 export interface RevisionCorrection {
@@ -1438,6 +1637,8 @@ export const StatutCreationTypeObjet = {
   RevisionBudgetaire: 'RevisionBudgetaire',
   Contrat: 'Contrat',
   Avenant: 'Avenant',
+  Engagement: 'Engagement',
+  Derogation: 'Derogation',
 } as const;
 
 export interface StatutCreation {
@@ -1522,6 +1723,8 @@ export const TransitionCreationTypeObjet = {
   RevisionBudgetaire: 'RevisionBudgetaire',
   Contrat: 'Contrat',
   Avenant: 'Avenant',
+  Engagement: 'Engagement',
+  Derogation: 'Derogation',
 } as const;
 
 export interface TransitionCreation {
@@ -1580,6 +1783,8 @@ export const TypePieceCreationTypesObjetsItem = {
   RevisionBudgetaire: 'RevisionBudgetaire',
   Contrat: 'Contrat',
   Avenant: 'Avenant',
+  Engagement: 'Engagement',
+  Derogation: 'Derogation',
 } as const;
 
 export interface TypePieceCreation {
@@ -1606,7 +1811,7 @@ export interface TypePieceModification {
   libelle?: string | null;
   actif?: boolean | null;
   dureeConservationAns?: number | null;
-  typesObjets?: ('RevisionBudgetaire' | 'Contrat' | 'Avenant')[] | null;
+  typesObjets?: ('RevisionBudgetaire' | 'Contrat' | 'Avenant' | 'Engagement' | 'Derogation')[] | null;
 }
 
 export type Health200 = {[key: string]: string};
@@ -1698,6 +1903,23 @@ export type ListerContratsParams = {
   centreId?: string | null;
   statut?: Statut | null;
   consommationMin?: number | string | null;
+  tri?: string | null;
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
+
+export type ListerEngagementsParams = {
+  etablissementId?: string | null;
+  statut?: StatutEngagement | null;
+  origine?: Origine | null;
+  contratId?: string | null;
+  fournisseurId?: string | null;
+  centreId?: string | null;
   tri?: string | null;
   /** @minimum 1 */
   page?: number;

@@ -118,7 +118,7 @@ export const RESSOURCES: Record<string, DefinitionRessource> = {
     {
       nom: 'typesObjets',
       type: 'choixMultiple',
-      valeurs: ['RevisionBudgetaire', 'Contrat', 'Avenant'],
+      valeurs: ['RevisionBudgetaire', 'Contrat', 'Avenant', 'Engagement', 'Derogation'],
     },
   ),
   fournisseurs: {
