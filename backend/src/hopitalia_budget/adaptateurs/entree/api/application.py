@@ -21,6 +21,7 @@ from hopitalia_budget.adaptateurs.entree.api.routes import (
     moi,
     paiements,
     parametrage,
+    tableaux_de_bord,
     workflow,
 )
 from hopitalia_budget.adaptateurs.sortie.base import creer_fabrique_sessions
@@ -99,6 +100,7 @@ def creer_application(
         commandes,
         factures,
         paiements,
+        tableaux_de_bord,
     ):
         v1.include_router(module.router)
     for routeur in [*parametrage.routeurs(), *workflow.routeurs()]:

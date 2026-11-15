@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.8 · 15 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.9 · 15 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -15,6 +15,7 @@
 | 3.6 | 15/11/2026 | Commandes, réceptions et service fait (lot P1.E) : cycle de la réception (8.6), bon de commande émis sans circuit (10.2), ordonnateur final limité aux objets du point 16 (7.6), ressources d'API précisées (11.2). |
 | 3.7 | 15/11/2026 | Factures, liquidations et rapprochement (lot P1.F) : cycle et règles de la facture et de la liquidation (8.2), dérogations communes à l'engagement et à la liquidation (8.1), facture justifiable sans circuit (10.2), ressources d'API précisées (11.2). |
 | 3.8 | 15/11/2026 | Ordonnancement et paiements (lot P1.G) : règles de l'ordonnancement et du paiement (8.3), ordonnancement et paiement sans circuit de visa (10.2), ressources d'API précisées (11.2). |
+| 3.9 | 15/11/2026 | Tableaux de bord (lot P2.A) : périmètre et filtres du tableau de bord de la direction (14.1), définitions des indicateurs opérationnels (14.2), ressources d'API (11.2). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1623,6 +1624,7 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/factures/{id}/liquidations` | GET, POST | `PATCH /liquidations/{id}` en brouillon ou à corriger ; `GET /liquidations/{id}/controles` ; `POST /liquidations/{id}/derogations` ; circuit par `/liquidations/{id}/validations`. |
 | `/ordonnancements` | GET, POST, PATCH | `PATCH` tant que préparé ; `POST /ordonnancements/{id}/decisions` (transmettre, complément, suspension, reprise, rejet, prise en charge). `GET /liquidations?etape=A_ORDONNANCER` ou `A_PAYER` : liquidations à traiter. |
 | `/paiements` | GET, POST | Allocations dans le corps de la requête ; filtres `fournisseurId`, `factureId`, `statut`. `POST /paiements/{id}/annulations` (motif). |
+| `/tableaux-de-bord/direction`, `/tableaux-de-bord/restes-a-payer` | GET | Filtres `exerciceId` (obligatoire), `etablissementId`, `centreId`, `compteId`, `sourceId`, `fournisseurId`, `contratId`, `du`, `au` (14.1). |
 | `/factures/{id}/rapprochements` | GET, POST | `GET /factures/{id}/rapprochement` donne les montants et les écarts à l'instant. |
 | `/{ressource}/{id}/validations`, `/annulations`, `/derogations`, `/pieces` | GET, POST | Sur les ressources qui implémentent l'interface correspondante. `GET .../validations` donne le circuit figé, les visas, les étapes ouvertes et si l'agent peut décider. |
 | `/{ressource}/{id}/soumissions` | POST | Renvoi au circuit après un retour pour correction. |
@@ -1781,9 +1783,19 @@ Budget initial, budget révisé et taux d'exécution ; engagements cumulés et c
 
 Filtres : exercice, période, service, compte, fournisseur, marché, source de financement.
 
+**Périmètre et filtres (lot P2.A).**
+
+- Les crédits (budget initial et révisé, engagé, disponible, liquidé, transmis, payé, taux) agrègent les lignes budgétaires de l'exercice retenues par les filtres établissement, service (service de la ligne), compte et source. Un total additionne les mouvements des lignes puis applique les formules de la section 6 : un taux agrégé est recalculé, jamais additionné.
+- Les étapes de la dépense (engagé, commandé, réceptionné, facturé, liquidé, transmis, payé) portent sur les engagements validés imputés sur ces lignes, restreints par les filtres fournisseur, marché et période. La période porte sur la date d'engagement. Engagé, liquidé, transmis et payé se comptent par imputation ; commandé, réceptionné et facturé ne se répartissent pas par ligne et comptent pour l'engagement entier. Le liquidé des étapes est le montant liquidé (6.3) ; celui des crédits est la consommation budgétaire (6.1).
+- Un fournisseur n'a pas de budget : les filtres fournisseur, marché et période ne changent pas les crédits, seulement les étapes, les marchés et les factures en attente.
+- Répartition par compte, par service, par nature (nature économique de la ligne budgétaire) et par fournisseur (fournisseur de l'engagement). Principaux marchés en cours : les dix contrats validés les plus engagés, avec leur échéance.
+- Un agent ne voit que les établissements où il a le droit de consulter les tableaux de bord ; le réceptionnaire n'y a pas accès (matrice des habilitations).
+
 ### 14.2. Indicateurs opérationnels
 
 Taux d'engagement, de liquidation et de paiement ; reste à engager sur marchés ; reste contractuel à payer ; reste à payer sur factures ; âge des factures en attente et délai moyen de traitement ; part des dépenses par service, nature, compte et fournisseur. Définitions : section 6.
+
+Facture en attente : reçue, en contrôle, retournée, liquidée, mise en paiement ou partiellement payée. Âge : jours écoulés depuis sa réception. Délai moyen de traitement : moyenne, sur les factures entièrement liquidées, des jours entre la réception et la dernière liquidation validée. Le tableau des restes à payer liste les factures en attente du périmètre, avec leur reste à payer sur liquidé (6.3), et s'exporte en CSV.
 
 ### 14.3. Alertes
 

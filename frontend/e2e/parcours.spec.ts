@@ -1038,3 +1038,120 @@ test('REC-10 : paiement groupé ventilé facture par facture', async ({ page }) 
     ],
   })
 })
+
+test('tableau de bord : étapes, jauges lisibles, restes à payer exportés (T-210 à T-214)', async ({
+  page,
+}) => {
+  const m = (n: string) => `${n}000000.00`
+  const indicateurs = {
+    budgetInitial: m('130'),
+    budgetRevise: m('130'),
+    engage: m('80'),
+    enCoursValidation: '0.00',
+    disponibleApresEngagements: m('50'),
+    liquide: m('45'),
+    transmis: m('35'),
+    paye: m('30'),
+    resteAPayer: m('15'),
+    tauxEngagement: '61.54',
+    tauxLiquidation: '34.62',
+    tauxPaiement: '23.08',
+  }
+  await page.route('**/api/v1/**', async (route) => {
+    const chemin = new URL(route.request().url()).pathname
+    const reponses: Record<string, unknown> = {
+      '/api/v1/auth/connexion': { jetonAcces: 'a', jetonRafraichissement: 'r', expireDans: 900 },
+      '/api/v1/moi': { ...MOI, habilitations: [{ profil: 'VAL', etablissementId: 'a1' }] },
+      '/api/v1/exercices': pageDe([{ id: 'x1', code: '2026' }]),
+      '/api/v1/tableaux-de-bord/direction': {
+        indicateurs,
+        chaine: {
+          engage: m('80'),
+          commande: m('65'),
+          receptionne: m('55'),
+          facture: m('50'),
+          liquide: m('45'),
+          transmis: m('35'),
+          paye: m('30'),
+        },
+        lignes: [
+          {
+            ligneId: 'l1',
+            code: '604-MED',
+            libelle: 'Médicaments',
+            indicateurs: { ...indicateurs, tauxEngagement: '72.22' },
+          },
+          {
+            ligneId: 'l2',
+            code: '604-CMD',
+            libelle: 'Consommables médicaux',
+            indicateurs: { ...indicateurs, tauxEngagement: '92.50' },
+          },
+        ],
+        repartitions: { compte: [], service: [], nature: [], fournisseur: [] },
+        marches: [
+          {
+            contratId: 'c1',
+            numero: 'M-2026-001',
+            intitule: 'Fournitures médicales',
+            fournisseurId: 'f1',
+            dateEcheance: '2026-12-31',
+            montantActualise: m('100'),
+            engage: m('80'),
+            liquide: m('45'),
+            paye: m('30'),
+            resteAEngager: m('20'),
+            resteContractuelAPayer: m('70'),
+            tauxConsommation: '80.00',
+          },
+        ],
+        operationnel: {
+          resteAEngagerMarches: m('20'),
+          resteContractuelAPayer: m('70'),
+          resteAPayerFactures: m('15'),
+          facturesEnAttente: 1,
+          montantFacturesEnAttente: m('30'),
+          ageMoyenFacturesJours: '212.0',
+          delaiMoyenTraitementJours: '4.0',
+        },
+      },
+      '/api/v1/tableaux-de-bord/restes-a-payer': [
+        {
+          factureId: 'fa1',
+          numero: 'FAC-001',
+          engagementId: 'e1',
+          fournisseurId: 'f1',
+          statut: 'PARTIELLEMENT_PAYEE',
+          dateReception: '2026-04-16',
+          montantTtc: m('30'),
+          resteAPayer: m('5'),
+          ageJours: 212,
+        },
+      ],
+    }
+    await route.fulfill({ json: reponses[chemin] ?? pageDe([]) })
+  })
+
+  await connecterAgentFinancier(page, '/tableau-de-bord')
+  await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible()
+  await expect(page.getByText('Transmis en paiement')).toBeVisible()
+  // Seuils écrits en clair, pas seulement par la couleur (IHM-06, IHM-10).
+  await expect(
+    page.getByRole('meter', { name: '604-CMD — Consommables médicaux' }),
+  ).toHaveAttribute('aria-valuetext', '92,5 % — Seuil de 90 % atteint')
+  await expect(page.getByText('Seuil de 80 % atteint').first()).toBeVisible()
+  // Pas de défilement horizontal de la page, même sur téléphone (IHM-08).
+  const deborde = await page.evaluate(
+    () => document.documentElement.scrollWidth > document.documentElement.clientWidth,
+  )
+  expect(deborde).toBe(false)
+
+  await page.getByRole('link', { name: 'Restes à payer et factures en attente' }).click()
+  await expect(page.getByRole('link', { name: 'FAC-001' })).toBeVisible()
+  const telechargement = page.waitForEvent('download')
+  await page.getByRole('button', { name: 'Exporter (CSV)' }).click()
+  const fichier = await telechargement
+  expect(fichier.suggestedFilename()).toBe('restes-a-payer.csv')
+  const contenu = (await import('node:fs')).readFileSync((await fichier.path())!, 'utf-8')
+  expect(contenu).toContain('FAC-001;Partiellement payée;2026-04-16;30000000.00;5000000.00;212')
+})

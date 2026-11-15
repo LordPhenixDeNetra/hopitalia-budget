@@ -5657,6 +5657,370 @@
         }
       }
     },
+    "/api/v1/tableaux-de-bord/direction": {
+      "get": {
+        "tags": [
+          "tableaux-de-bord"
+        ],
+        "summary": "Tableau Direction",
+        "description": "Section 14.1 et indicateurs opérationnels (14.2), recalculés à chaque lecture (RG-14).",
+        "operationId": "tableau_direction",
+        "parameters": [
+          {
+            "name": "exerciceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Exerciceid"
+            }
+          },
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "centreId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Centreid"
+            }
+          },
+          {
+            "name": "compteId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Compteid"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sourceid"
+            }
+          },
+          {
+            "name": "fournisseurId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fournisseurid"
+            }
+          },
+          {
+            "name": "contratId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Contratid"
+            }
+          },
+          {
+            "name": "du",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Du"
+            }
+          },
+          {
+            "name": "au",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Au"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableauDirection"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tableaux-de-bord/restes-a-payer": {
+      "get": {
+        "tags": [
+          "tableaux-de-bord"
+        ],
+        "summary": "Restes A Payer",
+        "description": "Tableau de bord des restes à payer et des factures en attente (18.1), du périmètre.",
+        "operationId": "restes_a_payer",
+        "parameters": [
+          {
+            "name": "exerciceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Exerciceid"
+            }
+          },
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "centreId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Centreid"
+            }
+          },
+          {
+            "name": "compteId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Compteid"
+            }
+          },
+          {
+            "name": "sourceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Sourceid"
+            }
+          },
+          {
+            "name": "fournisseurId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fournisseurid"
+            }
+          },
+          {
+            "name": "contratId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Contratid"
+            }
+          },
+          {
+            "name": "du",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Du"
+            }
+          },
+          {
+            "name": "au",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Au"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/FactureEnAttente"
+                  },
+                  "title": "Response Restes A Payer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sites": {
       "get": {
         "tags": [
@@ -11773,6 +12137,77 @@
         ],
         "title": "CentreSortie"
       },
+      "ChaineSortie": {
+        "properties": {
+          "engage": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Engage",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "commande": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Commande",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "receptionne": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Receptionne",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "facture": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Facture",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "liquide": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Liquide",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "transmis": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Transmis",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "paye": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Paye",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "engage",
+          "commande",
+          "receptionne",
+          "facture",
+          "liquide",
+          "transmis",
+          "paye"
+        ],
+        "title": "ChaineSortie"
+      },
       "CircuitCreation": {
         "properties": {
           "etablissementId": {
@@ -15133,6 +15568,70 @@
         ],
         "title": "FactureCreation"
       },
+      "FactureEnAttente": {
+        "properties": {
+          "factureId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Factureid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "engagementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Engagementid"
+          },
+          "fournisseurId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Fournisseurid"
+          },
+          "statut": {
+            "$ref": "#/components/schemas/StatutFacture"
+          },
+          "dateReception": {
+            "type": "string",
+            "format": "date",
+            "title": "Datereception"
+          },
+          "montantTtc": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantttc",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteAPayer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Resteapayer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "ageJours": {
+            "type": "integer",
+            "title": "Agejours"
+          }
+        },
+        "type": "object",
+        "required": [
+          "factureId",
+          "numero",
+          "engagementId",
+          "fournisseurId",
+          "statut",
+          "dateReception",
+          "montantTtc",
+          "resteAPayer",
+          "ageJours"
+        ],
+        "title": "FactureEnAttente"
+      },
       "FactureSortie": {
         "properties": {
           "id": {
@@ -15761,6 +16260,143 @@
           "montant"
         ],
         "title": "ImputationSchema"
+      },
+      "Indicateurs": {
+        "properties": {
+          "budgetInitial": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Budgetinitial",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "budgetRevise": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Budgetrevise",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "engage": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Engage",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "enCoursValidation": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Encoursvalidation",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "disponibleApresEngagements": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Disponibleapresengagements",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "liquide": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Liquide",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "transmis": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Transmis",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "paye": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Paye",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteAPayer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Resteapayer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "tauxEngagement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxengagement"
+          },
+          "tauxLiquidation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxliquidation"
+          },
+          "tauxPaiement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxpaiement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "budgetInitial",
+          "budgetRevise",
+          "engage",
+          "enCoursValidation",
+          "disponibleApresEngagements",
+          "liquide",
+          "transmis",
+          "paye",
+          "resteAPayer",
+          "tauxEngagement",
+          "tauxLiquidation",
+          "tauxPaiement"
+        ],
+        "title": "Indicateurs"
       },
       "IndicateursSortie": {
         "properties": {
@@ -16415,6 +17051,34 @@
         ],
         "title": "LigneSortie"
       },
+      "LigneTableau": {
+        "properties": {
+          "ligneId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ligneid"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "libelle": {
+            "type": "string",
+            "title": "Libelle"
+          },
+          "indicateurs": {
+            "$ref": "#/components/schemas/Indicateurs"
+          }
+        },
+        "type": "object",
+        "required": [
+          "ligneId",
+          "code",
+          "libelle",
+          "indicateurs"
+        ],
+        "title": "LigneTableau"
+      },
       "LiquidationAPayerSortie": {
         "properties": {
           "id": {
@@ -16820,6 +17484,119 @@
         ],
         "title": "LotSortie"
       },
+      "MarcheTableau": {
+        "properties": {
+          "contratId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Contratid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "intitule": {
+            "type": "string",
+            "title": "Intitule"
+          },
+          "fournisseurId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Fournisseurid"
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "montantActualise": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantactualise",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "engage": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Engage",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "liquide": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Liquide",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "paye": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Paye",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteAEngager": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Resteaengager",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteContractuelAPayer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Restecontractuelapayer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "tauxConsommation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxconsommation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "contratId",
+          "numero",
+          "intitule",
+          "fournisseurId",
+          "dateEcheance",
+          "montantActualise",
+          "engage",
+          "liquide",
+          "paye",
+          "resteAEngager",
+          "resteContractuelAPayer",
+          "tauxConsommation"
+        ],
+        "title": "MarcheTableau"
+      },
       "Moi": {
         "properties": {
           "idHopitalia": {
@@ -17119,6 +17896,79 @@
           "id"
         ],
         "title": "NotificationSortie"
+      },
+      "Operationnel": {
+        "properties": {
+          "resteAEngagerMarches": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Resteaengagermarches",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteContractuelAPayer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Restecontractuelapayer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteAPayerFactures": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Resteapayerfactures",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "facturesEnAttente": {
+            "type": "integer",
+            "title": "Facturesenattente"
+          },
+          "montantFacturesEnAttente": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantfacturesenattente",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "ageMoyenFacturesJours": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Agemoyenfacturesjours"
+          },
+          "delaiMoyenTraitementJours": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Delaimoyentraitementjours"
+          }
+        },
+        "type": "object",
+        "required": [
+          "resteAEngagerMarches",
+          "resteContractuelAPayer",
+          "resteAPayerFactures",
+          "facturesEnAttente",
+          "montantFacturesEnAttente",
+          "ageMoyenFacturesJours",
+          "delaiMoyenTraitementJours"
+        ],
+        "title": "Operationnel"
       },
       "OrdonnancementChamps": {
         "properties": {
@@ -18957,6 +19807,138 @@
         ],
         "title": "ReferentielSortie"
       },
+      "Repartition": {
+        "properties": {
+          "cle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Cle"
+          },
+          "libelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Libelle"
+          },
+          "engage": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Engage",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "liquide": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Liquide",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "paye": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Paye",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "budgetRevise": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Budgetrevise"
+          },
+          "tauxEngagement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxengagement"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cle",
+          "libelle",
+          "engage",
+          "liquide",
+          "paye",
+          "budgetRevise",
+          "tauxEngagement"
+        ],
+        "title": "Repartition",
+        "description": "Une clé (compte, service, nature ou fournisseur) et ses montants ; clé nulle : non\nrenseignée."
+      },
+      "Repartitions": {
+        "properties": {
+          "compte": {
+            "items": {
+              "$ref": "#/components/schemas/Repartition"
+            },
+            "type": "array",
+            "title": "Compte"
+          },
+          "service": {
+            "items": {
+              "$ref": "#/components/schemas/Repartition"
+            },
+            "type": "array",
+            "title": "Service"
+          },
+          "nature": {
+            "items": {
+              "$ref": "#/components/schemas/Repartition"
+            },
+            "type": "array",
+            "title": "Nature"
+          },
+          "fournisseur": {
+            "items": {
+              "$ref": "#/components/schemas/Repartition"
+            },
+            "type": "array",
+            "title": "Fournisseur"
+          }
+        },
+        "type": "object",
+        "required": [
+          "compte",
+          "service",
+          "nature",
+          "fournisseur"
+        ],
+        "title": "Repartitions"
+      },
       "ReserveCreation": {
         "properties": {
           "description": {
@@ -20133,6 +21115,46 @@
           "incidenceRevisionsPrix"
         ],
         "title": "SyntheseContrat"
+      },
+      "TableauDirection": {
+        "properties": {
+          "indicateurs": {
+            "$ref": "#/components/schemas/Indicateurs"
+          },
+          "chaine": {
+            "$ref": "#/components/schemas/ChaineSortie"
+          },
+          "lignes": {
+            "items": {
+              "$ref": "#/components/schemas/LigneTableau"
+            },
+            "type": "array",
+            "title": "Lignes"
+          },
+          "repartitions": {
+            "$ref": "#/components/schemas/Repartitions"
+          },
+          "marches": {
+            "items": {
+              "$ref": "#/components/schemas/MarcheTableau"
+            },
+            "type": "array",
+            "title": "Marches"
+          },
+          "operationnel": {
+            "$ref": "#/components/schemas/Operationnel"
+          }
+        },
+        "type": "object",
+        "required": [
+          "indicateurs",
+          "chaine",
+          "lignes",
+          "repartitions",
+          "marches",
+          "operationnel"
+        ],
+        "title": "TableauDirection"
       },
       "TransitionCreation": {
         "properties": {

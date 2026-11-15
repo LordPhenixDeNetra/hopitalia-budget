@@ -324,6 +324,23 @@ export interface CentreSortie {
   version: number;
 }
 
+export interface ChaineSortie {
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  engage: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  commande: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  receptionne: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  facture: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  liquide: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  transmis: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  paye: string;
+}
+
 export type CircuitCreationTypeObjet = typeof CircuitCreationTypeObjet[keyof typeof CircuitCreationTypeObjet];
 
 
@@ -1150,6 +1167,20 @@ export const StatutFacture = {
   PAYEE: 'PAYEE',
 } as const;
 
+export interface FactureEnAttente {
+  factureId: string;
+  numero: string;
+  engagementId: string;
+  fournisseurId: string;
+  statut: StatutFacture;
+  dateReception: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantTtc: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteAPayer: string;
+  ageJours: number;
+}
+
 export interface FactureSortie {
   id: string;
   etablissementId: string;
@@ -1267,6 +1298,30 @@ export interface ImportSortie {
   termineLe: string | null;
 }
 
+export interface Indicateurs {
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  budgetInitial: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  budgetRevise: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  engage: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  enCoursValidation: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  disponibleApresEngagements: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  liquide: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  transmis: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  paye: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteAPayer: string;
+  tauxEngagement: string | null;
+  tauxLiquidation: string | null;
+  tauxPaiement: string | null;
+}
+
 export interface Jetons {
   jetonAcces: string;
   jetonRafraichissement: string;
@@ -1342,6 +1397,13 @@ export interface LigneSortie {
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
   dotationInitiale: string;
   version: number;
+}
+
+export interface LigneTableau {
+  ligneId: string;
+  code: string;
+  libelle: string;
+  indicateurs: Indicateurs;
 }
 
 export interface LiquidationAPayerSortie {
@@ -1445,6 +1507,27 @@ export interface LotSortie {
   id: string;
 }
 
+export interface MarcheTableau {
+  contratId: string;
+  numero: string;
+  intitule: string;
+  fournisseurId: string;
+  dateEcheance: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantActualise: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  engage: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  liquide: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  paye: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteAEngager: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteContractuelAPayer: string;
+  tauxConsommation: string | null;
+}
+
 export type MoiLangue = typeof MoiLangue[keyof typeof MoiLangue] | null;
 
 
@@ -1520,6 +1603,20 @@ export interface NotificationSortie {
   /** @minItems 1 */
   lignes: NotificationLigne[];
   id: string;
+}
+
+export interface Operationnel {
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteAEngagerMarches: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteContractuelAPayer: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteAPayerFactures: string;
+  facturesEnAttente: number;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantFacturesEnAttente: string;
+  ageMoyenFacturesJours: string | null;
+  delaiMoyenTraitementJours: string | null;
 }
 
 export type TypePieceMandat = typeof TypePieceMandat[keyof typeof TypePieceMandat];
@@ -2094,6 +2191,30 @@ export interface ReferentielModification {
   actif?: boolean | null;
 }
 
+/**
+ * Une clé (compte, service, nature ou fournisseur) et ses montants ; clé nulle : non
+ * renseignée.
+ */
+export interface Repartition {
+  cle: string | null;
+  libelle: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  engage: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  liquide: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  paye: string;
+  budgetRevise: string | null;
+  tauxEngagement: string | null;
+}
+
+export interface Repartitions {
+  compte: Repartition[];
+  service: Repartition[];
+  nature: Repartition[];
+  fournisseur: Repartition[];
+}
+
 export interface ReserveCreation {
   /**
      * @minLength 1
@@ -2319,6 +2440,15 @@ export interface SyntheseContrat {
   retenueALiberer: string;
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
   incidenceRevisionsPrix: string;
+}
+
+export interface TableauDirection {
+  indicateurs: Indicateurs;
+  chaine: ChaineSortie;
+  lignes: LigneTableau[];
+  repartitions: Repartitions;
+  marches: MarcheTableau[];
+  operationnel: Operationnel;
 }
 
 export type TransitionCreationTypeObjet = typeof TransitionCreationTypeObjet[keyof typeof TransitionCreationTypeObjet];
@@ -2612,6 +2742,30 @@ export type ListerPaiementsParams = {
    * @maximum 100
    */
   taille?: number;
+};
+
+export type TableauDirectionParams = {
+  exerciceId: string;
+  etablissementId?: string | null;
+  centreId?: string | null;
+  compteId?: string | null;
+  sourceId?: string | null;
+  fournisseurId?: string | null;
+  contratId?: string | null;
+  du?: string | null;
+  au?: string | null;
+};
+
+export type RestesAPayerParams = {
+  exerciceId: string;
+  etablissementId?: string | null;
+  centreId?: string | null;
+  compteId?: string | null;
+  sourceId?: string | null;
+  fournisseurId?: string | null;
+  contratId?: string | null;
+  du?: string | null;
+  au?: string | null;
 };
 
 export type ListerSitesParams = {

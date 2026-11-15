@@ -58,7 +58,7 @@ def transmis_par_liquidation(session: Session, liquidation_ids: list[UUID]) -> d
     )
 
 
-def _regrouper(
+def transmis_et_paye_par_groupe(
     session: Session, groupe_par_imputation: dict[UUID, UUID]
 ) -> tuple[dict[UUID, Decimal], dict[UUID, Decimal]]:
     """Transmis et payé des liquidations validées, cumulés par groupe (ligne ou contrat)."""
@@ -84,7 +84,7 @@ def transmis_et_paye_par_ligne(
     session: Session, ligne_ids: list[UUID]
 ) -> tuple[dict[UUID, Decimal], dict[UUID, Decimal]]:
     """6.1 : par ligne budgétaire."""
-    return _regrouper(
+    return transmis_et_paye_par_groupe(
         session,
         dict(
             session.execute(select(Imp.id, Imp.ligne_id).where(Imp.ligne_id.in_(ligne_ids))).all()
@@ -96,7 +96,7 @@ def transmis_et_paye_par_contrat(
     session: Session, contrat_ids: list[UUID]
 ) -> tuple[dict[UUID, Decimal], dict[UUID, Decimal]]:
     """6.2 : par contrat, via les engagements rattachés."""
-    return _regrouper(
+    return transmis_et_paye_par_groupe(
         session,
         {
             imputation: contrat

@@ -15,7 +15,8 @@
     "engagements": "Engagements",
     "commandes": "Commandes",
     "factures": "Factures",
-    "paiements": "Paiements"
+    "paiements": "Paiements",
+    "tableauDeBord": "Tableau de bord"
   },
   "entete": {
     "langue": "Langue",
@@ -63,5 +64,12 @@
     "titre": "Page introuvable",
     "detail": "Cette page n'existe pas ou n'est pas accessible.",
     "retour": "Retour à l'accueil"
+  },
+  "jauge": {
+    "normal": "Sous 80 %",
+    "seuil80": "Seuil de 80 % atteint",
+    "seuil90": "Seuil de 90 % atteint",
+    "seuil100": "100 % atteints ou dépassés",
+    "sansBase": "Sans base de calcul"
   }
 }
