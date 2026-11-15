@@ -171,6 +171,46 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
         ),
         ("Insufficient credit", "Available {disponible}, requested {montant} on line {ligne}."),
     ),
+    "CONTRAT_NON_SIGNE": (
+        422,
+        (
+            "Contrat non signé",
+            "Le module suit des contrats déjà signés ou notifiés : indiquez la date de signature "
+            "ou de notification (RG-03).",
+        ),
+        (
+            "Contract not signed",
+            "The module tracks contracts already signed or notified: give the signature or "
+            "notification date (RG-03).",
+        ),
+    ),
+    "VENTILATION_INCOHERENTE": (
+        422,
+        (
+            "Ventilation incohérente",
+            "La somme des imputations ({ventile}) doit égaler le montant du contrat ({montant}).",
+        ),
+        (
+            "Inconsistent breakdown",
+            "The allocations ({ventile}) must add up to the contract amount ({montant}).",
+        ),
+    ),
+    "CONTRAT_NON_VALIDE": (
+        409,
+        ("Contrat non validé", "Un avenant ne porte que sur un contrat validé."),
+        ("Contract not approved", "An amendment applies only to an approved contract."),
+    ),
+    "PLAFOND_INSUFFISANT": (
+        422,
+        (
+            "Plafond insuffisant",
+            "Le nouveau plafond ({plafond}) serait inférieur au montant déjà engagé ({engage}).",
+        ),
+        (
+            "Ceiling too low",
+            "The new ceiling ({plafond}) would be below the amount already committed ({engage}).",
+        ),
+    ),
     "OPERATION_DEJA_TRAITEE": (
         409,
         ("Opération déjà traitée", "Cette opération n'attend aucune validation."),

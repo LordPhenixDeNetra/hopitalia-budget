@@ -131,6 +131,9 @@ class RevisionValidable:
             centre_id=ligne.centre_id if ligne else None,
         )
 
+    def controler_soumission(self) -> None:
+        """Rien de plus que les contrôles de saisie."""
+
     def controler_validation_finale(self) -> None:
         debitee = ligne_debitee(self.revision)
         if debitee is None:
