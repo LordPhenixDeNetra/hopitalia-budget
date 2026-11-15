@@ -45,6 +45,7 @@ beforeAll(async () => {
     'parametrage',
     'budget',
     'workflow',
+    'contrats',
   ])
 })
 
@@ -465,5 +466,101 @@ describe('paramétrage et budget (lot 1)', () => {
       motif: 'Congés',
     })
     expect(new Headers(envoi[1]!.headers).get('Idempotency-Key')).toMatch(/[0-9a-f-]{36}/)
+  })
+})
+
+describe('contrats et marchés (lot 2)', () => {
+  const GMC = { ...MOI, habilitations: [{ profil: 'GMC', etablissementId: 'a1' }] }
+  const RESUME = {
+    id: 'c1',
+    etablissementId: 'a1',
+    type: 'MARCHE',
+    numero: 'M-2026-001',
+    intitule: 'Fournitures médicales',
+    fournisseurId: 'f1',
+    fournisseur: 'Pharma Test SA',
+    centreId: 'ce1',
+    statut: 'VALIDE',
+    dateSignature: '2026-01-05',
+    dateEcheance: '2026-12-31',
+    montantActualise: '100000000.00',
+    engage: '80000000.00',
+    tauxConsommation: '80.00',
+  }
+  const CONTRAT = {
+    ...RESUME,
+    nature: 'FOURNITURES',
+    numeroLot: '1',
+    objet: null,
+    perimetre: null,
+    referenceDossier: null,
+    dateNotification: null,
+    dateDemarrage: null,
+    dureeMois: null,
+    devise: 'XOF',
+    montantInitialHt: '100000000.00',
+    tauxTaxe: '0.00',
+    montantInitialTtc: '100000000.00',
+    periodicite: null,
+    modaliteFacturation: null,
+    siteId: null,
+    sourceId: 's1',
+    familleAchatId: null,
+    responsableCode: null,
+    tauxAvance: null,
+    modeRecuperationAvance: null,
+    tauxRetenueGarantie: null,
+    conditionLiberationRetenue: null,
+    dateLiberationRetenue: null,
+    statut: 'BROUILLON',
+    creeParCode: 'AG011',
+    creeLe: '2026-01-05T10:00:00Z',
+    version: 1,
+    imputations: [{ id: 'i1', ligneId: 'l1', montant: '100000000.00' }],
+  }
+
+  test('liste : consommation lisible et filtre transmis à l’API (T-138)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(GMC)],
+      'GET /api/v1/contrats': [
+        json({ donnees: [RESUME], pagination: { page: 1, taille: 25, total: 1, suivant: null } }),
+      ],
+    })
+    afficher('/contrats?type=MARCHE')
+    expect(await screen.findByText('Pharma Test SA')).toBeTruthy()
+    // Taux écrit en clair, pas seulement par la longueur ou la couleur de la barre (IHM-06).
+    expect(screen.getByText('80.00 %')).toBeTruthy()
+    const liste = appel.mock.calls.find(([url]) => String(url).startsWith('/api/v1/contrats'))!
+    expect(String(liste[0])).toContain('type=MARCHE')
+  })
+
+  test('fiche : brouillon soumis au circuit, avenants réservés au contrat validé', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(GMC)],
+      'GET /api/v1/contrats/c1': [json(CONTRAT)],
+      'GET /api/v1/contrats/c1/synthese': [
+        json({
+          contratId: 'c1',
+          montantInitial: '100000000.00',
+          montantActualise: '100000000.00',
+          tauxConsommation: '0.00',
+        }),
+      ],
+      'GET /api/v1/contrats/c1/avenants': [json([])],
+      'POST /api/v1/contrats/c1/soumissions': [json({ statut: 'SOUMIS' }, 201)],
+    })
+    afficher('/contrats/c1')
+    expect(await screen.findByText('Montant contractuel actualisé')).toBeTruthy()
+    await userEvent.click(screen.getByRole('tab', { name: 'Avenants' }))
+    expect(await screen.findByText('Les avenants portent sur un contrat validé.')).toBeTruthy()
+    await userEvent.click(screen.getByRole('button', { name: 'Soumettre au circuit' }))
+    expect(await screen.findByText('Contrat soumis au circuit.')).toBeTruthy()
+    expect(
+      appel.mock.calls.some(
+        ([url, o]) => url === '/api/v1/contrats/c1/soumissions' && o?.method === 'POST',
+      ),
+    ).toBe(true)
   })
 })

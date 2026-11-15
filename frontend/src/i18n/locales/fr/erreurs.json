@@ -44,6 +44,10 @@
   "PIECE_TROP_VOLUMINEUSE": "Un fichier ne doit pas dépasser 20 Mo.",
   "TYPE_FICHIER_REFUSE": "Formats acceptés : PDF, PNG, JPEG, Word et Excel.",
   "DELEGATION_INVALIDE": "On ne se délègue pas ses propres droits.",
+  "CONTRAT_NON_SIGNE": "Indiquez la date de signature ou de notification : le module suit des contrats déjà signés.",
+  "VENTILATION_INCOHERENTE": "La somme des imputations doit égaler le montant TTC du contrat.",
+  "CONTRAT_NON_VALIDE": "Un avenant ne porte que sur un contrat validé.",
+  "PLAFOND_INSUFFISANT": "Le nouveau plafond serait inférieur à zéro ou au montant déjà engagé.",
   "champ": {
     "missing": "Ce champ est obligatoire.",
     "string_too_short": "Ce champ est trop court.",

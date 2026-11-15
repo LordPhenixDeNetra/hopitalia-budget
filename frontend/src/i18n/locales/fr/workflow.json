@@ -76,7 +76,9 @@
     "oui": "Oui",
     "non": "Non",
     "types": {
-      "RevisionBudgetaire": "Révision budgétaire"
+      "RevisionBudgetaire": "Révision budgétaire",
+      "Contrat": "Contrat",
+      "Avenant": "Avenant"
     }
   }
 }

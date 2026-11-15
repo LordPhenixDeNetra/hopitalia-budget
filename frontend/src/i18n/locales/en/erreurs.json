@@ -44,6 +44,10 @@
   "PIECE_TROP_VOLUMINEUSE": "A file must not exceed 20 MB.",
   "TYPE_FICHIER_REFUSE": "Accepted formats: PDF, PNG, JPEG, Word and Excel.",
   "DELEGATION_INVALIDE": "You cannot delegate to yourself.",
+  "CONTRAT_NON_SIGNE": "Give the signature or notification date: the module tracks contracts already signed.",
+  "VENTILATION_INCOHERENTE": "The allocations must add up to the contract amount including tax.",
+  "CONTRAT_NON_VALIDE": "An amendment applies only to an approved contract.",
+  "PLAFOND_INSUFFISANT": "The new ceiling would be below zero or below the amount already committed.",
   "champ": {
     "missing": "This field is required.",
     "string_too_short": "This field is too short.",

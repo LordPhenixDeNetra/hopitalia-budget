@@ -30,7 +30,7 @@ import { Montant } from '../../composants/Montant'
 import { TableauServeur, type EtatTableau } from '../../composants/TableauServeur'
 import { useOptions } from './PageReferentiel'
 
-// Profils qui ont le droit de valider une révision dans la matrice des habilitations.
+// Profils qui ont le droit de valider une révision, un contrat ou un avenant (matrice).
 const PROFILS_VALIDEURS = ['VAL', 'ORD']
 
 function Formulaire({ circuit, fermer }: { circuit?: CircuitSortie; fermer: () => void }) {
@@ -107,9 +107,10 @@ function Formulaire({ circuit, fermer }: { circuit?: CircuitSortie; fermer: () =
             </Form.Item>
             <Form.Item name="typeObjet" label={t('circuits.typeObjet')} rules={requis}>
               <Select
-                options={[
-                  { value: 'RevisionBudgetaire', label: t('circuits.types.RevisionBudgetaire') },
-                ]}
+                options={['RevisionBudgetaire', 'Contrat', 'Avenant'].map((v) => ({
+                  value: v,
+                  label: t(`circuits.types.${v}`),
+                }))}
               />
             </Form.Item>
             <Form.Item name="centreId" label={t('circuits.centreId')}>

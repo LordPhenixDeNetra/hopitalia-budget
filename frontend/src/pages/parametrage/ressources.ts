@@ -115,7 +115,11 @@ export const RESSOURCES: Record<string, DefinitionRessource> = {
     'types-pieces',
     { nom: 'dureeConservationAns', type: 'entier' },
     // Objets qui ne peuvent pas être validés sans une pièce de ce type (T-119).
-    { nom: 'typesObjets', type: 'choixMultiple', valeurs: ['RevisionBudgetaire'] },
+    {
+      nom: 'typesObjets',
+      type: 'choixMultiple',
+      valeurs: ['RevisionBudgetaire', 'Contrat', 'Avenant'],
+    },
   ),
   fournisseurs: {
     chemin: 'fournisseurs',

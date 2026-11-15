@@ -21,6 +21,54 @@ export interface Anomalie {
   valeur?: string;
 }
 
+export interface AvenantCorrection {
+  objet?: string | null;
+  variation?: string | null;
+  dateEffet?: string | null;
+}
+
+export interface AvenantCreation {
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  objet: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  variation: string;
+  dateEffet: string;
+}
+
+/**
+ * Statuts de référence d'un contrat et d'un avenant (un avenant naît soumis).
+ */
+export type Statut = typeof Statut[keyof typeof Statut];
+
+
+export const Statut = {
+  BROUILLON: 'BROUILLON',
+  SOUMIS: 'SOUMIS',
+  EN_VALIDATION: 'EN_VALIDATION',
+  A_CORRIGER: 'A_CORRIGER',
+  VALIDE: 'VALIDE',
+  REJETE: 'REJETE',
+} as const;
+
+export interface AvenantSortie {
+  id: string;
+  contratId: string;
+  numero: number;
+  objet: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  variation: string;
+  dateEffet: string;
+  montantAvant: string | null;
+  nouveauPlafond: string | null;
+  statut: Statut;
+  creeParCode: string;
+  creeLe: string;
+  version: number;
+}
+
 export type BaseConsommationMarche = typeof BaseConsommationMarche[keyof typeof BaseConsommationMarche];
 
 
@@ -139,6 +187,15 @@ export interface CentreSortie {
   version: number;
 }
 
+export type CircuitCreationTypeObjet = typeof CircuitCreationTypeObjet[keyof typeof CircuitCreationTypeObjet];
+
+
+export const CircuitCreationTypeObjet = {
+  RevisionBudgetaire: 'RevisionBudgetaire',
+  Contrat: 'Contrat',
+  Avenant: 'Avenant',
+} as const;
+
 export type Profil = typeof Profil[keyof typeof Profil];
 
 
@@ -170,7 +227,7 @@ export interface EtapeSchema {
 
 export interface CircuitCreation {
   etablissementId: string;
-  typeObjet: 'RevisionBudgetaire';
+  typeObjet: CircuitCreationTypeObjet;
   /**
      * @minLength 1
      * @maxLength 200
@@ -268,6 +325,193 @@ export interface CompteTresorerieSortie {
 export interface Connexion {
   identifiant: string;
   motDePasse: string;
+}
+
+export type NatureMarche = typeof NatureMarche[keyof typeof NatureMarche];
+
+
+export const NatureMarche = {
+  FOURNITURES: 'FOURNITURES',
+  TRAVAUX: 'TRAVAUX',
+  SERVICES: 'SERVICES',
+  PRESTATIONS_INTELLECTUELLES: 'PRESTATIONS_INTELLECTUELLES',
+} as const;
+
+export type Periodicite = typeof Periodicite[keyof typeof Periodicite];
+
+
+export const Periodicite = {
+  PONCTUELLE: 'PONCTUELLE',
+  A_LA_LIVRAISON: 'A_LA_LIVRAISON',
+  MENSUELLE: 'MENSUELLE',
+  TRIMESTRIELLE: 'TRIMESTRIELLE',
+  SEMESTRIELLE: 'SEMESTRIELLE',
+  ANNUELLE: 'ANNUELLE',
+} as const;
+
+export interface ImputationSchema {
+  ligneId: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+}
+
+/**
+ * Champs modifiables tant que le contrat est en brouillon ou retourné pour correction.
+ */
+export interface ContratChamps {
+  numero?: string | null;
+  intitule?: string | null;
+  nature?: NatureMarche | null;
+  numeroLot?: string | null;
+  fournisseurId?: string | null;
+  objet?: string | null;
+  perimetre?: string | null;
+  referenceDossier?: string | null;
+  dateNotification?: string | null;
+  dateSignature?: string | null;
+  dateDemarrage?: string | null;
+  dureeMois?: number | null;
+  dateEcheance?: string | null;
+  devise?: string | null;
+  montantInitialHt?: string | null;
+  tauxTaxe?: number | string | null;
+  periodicite?: Periodicite | null;
+  modaliteFacturation?: string | null;
+  siteId?: string | null;
+  centreId?: string | null;
+  sourceId?: string | null;
+  familleAchatId?: string | null;
+  responsableCode?: string | null;
+  tauxAvance?: number | string | null;
+  modeRecuperationAvance?: string | null;
+  tauxRetenueGarantie?: number | string | null;
+  conditionLiberationRetenue?: string | null;
+  dateLiberationRetenue?: string | null;
+  imputations?: ImputationSchema[] | null;
+}
+
+export type TypeContrat = typeof TypeContrat[keyof typeof TypeContrat];
+
+
+export const TypeContrat = {
+  MARCHE: 'MARCHE',
+  CONVENTION: 'CONVENTION',
+  MAINTENANCE: 'MAINTENANCE',
+  PRESTATION: 'PRESTATION',
+  AUTRE: 'AUTRE',
+} as const;
+
+export interface ContratCreation {
+  /**
+     * @minLength 1
+     * @maxLength 50
+     */
+  numero: string;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  intitule: string;
+  nature?: NatureMarche | null;
+  numeroLot?: string | null;
+  fournisseurId: string;
+  objet?: string | null;
+  perimetre?: string | null;
+  referenceDossier?: string | null;
+  dateNotification?: string | null;
+  dateSignature?: string | null;
+  dateDemarrage?: string | null;
+  dureeMois?: number | null;
+  dateEcheance?: string | null;
+  /** @pattern ^[A-Z]{3}$ */
+  devise?: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantInitialHt: string;
+  tauxTaxe?: number | string;
+  periodicite?: Periodicite | null;
+  modaliteFacturation?: string | null;
+  siteId?: string | null;
+  centreId: string;
+  sourceId: string;
+  familleAchatId?: string | null;
+  responsableCode?: string | null;
+  tauxAvance?: number | string | null;
+  modeRecuperationAvance?: string | null;
+  tauxRetenueGarantie?: number | string | null;
+  conditionLiberationRetenue?: string | null;
+  dateLiberationRetenue?: string | null;
+  imputations?: ImputationSchema[];
+  etablissementId: string;
+  type: TypeContrat;
+}
+
+export interface ContratResume {
+  id: string;
+  etablissementId: string;
+  type: TypeContrat;
+  numero: string;
+  intitule: string;
+  fournisseurId: string;
+  fournisseur: string;
+  centreId: string;
+  statut: Statut;
+  dateSignature: string | null;
+  dateEcheance: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantActualise: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  engage: string;
+  tauxConsommation: string | null;
+}
+
+export interface ImputationSortie {
+  id: string;
+  ligneId: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+}
+
+export interface ContratSortie {
+  id: string;
+  etablissementId: string;
+  type: TypeContrat;
+  numero: string;
+  intitule: string;
+  nature: NatureMarche | null;
+  numeroLot: string | null;
+  fournisseurId: string;
+  objet: string | null;
+  perimetre: string | null;
+  referenceDossier: string | null;
+  dateNotification: string | null;
+  dateSignature: string | null;
+  dateDemarrage: string | null;
+  dureeMois: number | null;
+  dateEcheance: string | null;
+  devise: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantInitialHt: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  tauxTaxe: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantInitialTtc: string;
+  periodicite: Periodicite | null;
+  modaliteFacturation: string | null;
+  siteId: string | null;
+  centreId: string;
+  sourceId: string;
+  familleAchatId: string | null;
+  responsableCode: string | null;
+  tauxAvance: string | null;
+  modeRecuperationAvance: string | null;
+  tauxRetenueGarantie: string | null;
+  conditionLiberationRetenue: string | null;
+  dateLiberationRetenue: string | null;
+  statut: Statut;
+  creeParCode: string;
+  creeLe: string;
+  version: number;
+  imputations: ImputationSortie[];
 }
 
 export interface CoordonneeCreation {
@@ -373,6 +617,29 @@ export interface DisponibiliteSortie {
   code: string;
   libelle: string;
   indicateurs: IndicateursSortie;
+}
+
+export interface EcheanceSchema {
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  dateEcheance: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantPrevu: string;
+}
+
+export interface EcheanceSortie {
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  dateEcheance: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantPrevu: string;
+  id: string;
 }
 
 export type EntreeJournalAncienneValeur = { [key: string]: unknown } | null;
@@ -599,6 +866,37 @@ export interface LigneSortie {
   version: number;
 }
 
+export interface LotSchema {
+  /**
+     * @minLength 1
+     * @maxLength 30
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+}
+
+export interface LotSortie {
+  /**
+     * @minLength 1
+     * @maxLength 30
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  libelle: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  id: string;
+}
+
 export type MoiLangue = typeof MoiLangue[keyof typeof MoiLangue] | null;
 
 
@@ -668,6 +966,31 @@ export interface NotificationSortie {
   id: string;
 }
 
+export interface OrdreServiceSchema {
+  /**
+     * @minLength 1
+     * @maxLength 50
+     */
+  reference: string;
+  /** @pattern ^(DEMARRAGE|ARRET|REPRISE|MODIFICATION|AUTRE)$ */
+  type: string;
+  date: string;
+  objet?: string | null;
+}
+
+export interface OrdreServiceSortie {
+  /**
+     * @minLength 1
+     * @maxLength 50
+     */
+  reference: string;
+  /** @pattern ^(DEMARRAGE|ARRET|REPRISE|MODIFICATION|AUTRE)$ */
+  type: string;
+  date: string;
+  objet?: string | null;
+  id: string;
+}
+
 export interface PaginationCurseur {
   taille: number;
   suivant: string | null;
@@ -702,6 +1025,11 @@ export interface PageCircuitSortie {
 
 export interface PageCompteTresorerieSortie {
   donnees: CompteTresorerieSortie[];
+  pagination: Pagination;
+}
+
+export interface PageContratResume {
+  donnees: ContratResume[];
   pagination: Pagination;
 }
 
@@ -903,7 +1231,7 @@ export interface TypePieceSortie {
   actif: boolean;
   version: number;
   dureeConservationAns: number | null;
-  typesObjets: 'RevisionBudgetaire'[] | null;
+  typesObjets: ('RevisionBudgetaire' | 'Contrat' | 'Avenant')[] | null;
 }
 
 export interface PageTypePieceSortie {
@@ -1018,6 +1346,31 @@ export interface RevisionCreation {
   motif: string;
 }
 
+export interface RevisionPrixSchema {
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  formule: string;
+  indice?: string | null;
+  date: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  incidence: string;
+}
+
+export interface RevisionPrixSortie {
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  formule: string;
+  indice?: string | null;
+  date: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  incidence: string;
+  id: string;
+}
+
 export interface SiteCreation {
   etablissementId: string;
   /**
@@ -1078,9 +1431,18 @@ export interface SourceModification {
   bailleur?: string | null;
 }
 
+export type StatutCreationTypeObjet = typeof StatutCreationTypeObjet[keyof typeof StatutCreationTypeObjet];
+
+
+export const StatutCreationTypeObjet = {
+  RevisionBudgetaire: 'RevisionBudgetaire',
+  Contrat: 'Contrat',
+  Avenant: 'Avenant',
+} as const;
+
 export interface StatutCreation {
   etablissementId: string;
-  typeObjet: 'RevisionBudgetaire';
+  typeObjet: StatutCreationTypeObjet;
   /**
      * @minLength 1
      * @maxLength 30
@@ -1103,9 +1465,68 @@ export interface StatutModification {
   libelle?: string | null;
 }
 
+export interface SyntheseContrat {
+  contratId: string;
+  numero: string;
+  intitule: string;
+  statut: Statut;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantInitial: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  avenantsValides: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantActualise: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  engage: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteAEngager: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  commande: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  receptionne: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  facture: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  liquide: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  transmis: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  paye: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  engageNonFacture: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteAPayerSurLiquide: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteContractuelAPayer: string;
+  tauxConsommation: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantAvance: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  avanceRecuperee: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  avanceRestantARecuperer: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  retenueOperee: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  retenueLiberee: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  retenueALiberer: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  incidenceRevisionsPrix: string;
+}
+
+export type TransitionCreationTypeObjet = typeof TransitionCreationTypeObjet[keyof typeof TransitionCreationTypeObjet];
+
+
+export const TransitionCreationTypeObjet = {
+  RevisionBudgetaire: 'RevisionBudgetaire',
+  Contrat: 'Contrat',
+  Avenant: 'Avenant',
+} as const;
+
 export interface TransitionCreation {
   etablissementId: string;
-  typeObjet: 'RevisionBudgetaire';
+  typeObjet: TransitionCreationTypeObjet;
   /**
      * @minLength 1
      * @maxLength 30
@@ -1152,6 +1573,15 @@ export interface TypeDepenseModification {
   seuilHorsMarche?: string | null;
 }
 
+export type TypePieceCreationTypesObjetsItem = typeof TypePieceCreationTypesObjetsItem[keyof typeof TypePieceCreationTypesObjetsItem];
+
+
+export const TypePieceCreationTypesObjetsItem = {
+  RevisionBudgetaire: 'RevisionBudgetaire',
+  Contrat: 'Contrat',
+  Avenant: 'Avenant',
+} as const;
+
 export interface TypePieceCreation {
   /**
      * @minLength 1
@@ -1169,14 +1599,14 @@ export interface TypePieceCreation {
      * @maximum 100
      */
   dureeConservationAns?: number;
-  typesObjets?: 'RevisionBudgetaire'[];
+  typesObjets?: TypePieceCreationTypesObjetsItem[];
 }
 
 export interface TypePieceModification {
   libelle?: string | null;
   actif?: boolean | null;
   dureeConservationAns?: number | null;
-  typesObjets?: 'RevisionBudgetaire'[] | null;
+  typesObjets?: ('RevisionBudgetaire' | 'Contrat' | 'Avenant')[] | null;
 }
 
 export type Health200 = {[key: string]: string};
@@ -1252,6 +1682,23 @@ export type ListerRevisionsParams = {
   budgetId?: string | null;
   statut?: StatutRevision | null;
   ligneId?: string | null;
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
+
+export type ListerContratsParams = {
+  etablissementId?: string | null;
+  type?: TypeContrat | null;
+  fournisseurId?: string | null;
+  centreId?: string | null;
+  statut?: Statut | null;
+  consommationMin?: number | string | null;
+  tri?: string | null;
   /** @minimum 1 */
   page?: number;
   /**

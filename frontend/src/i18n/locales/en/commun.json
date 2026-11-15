@@ -10,7 +10,8 @@
     "parametrage": "Configuration",
     "nomenclature": "Nomenclature",
     "budgets": "Budgets",
-    "delegations": "Delegations"
+    "delegations": "Delegations",
+    "contrats": "Contracts"
   },
   "entete": {
     "langue": "Language",

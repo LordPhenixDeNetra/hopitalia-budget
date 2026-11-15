@@ -70,7 +70,9 @@
     "OUVERT": "Ouvert",
     "CLOTURE": "Clôturé",
     "REOUVERT": "Réouvert",
-    "RevisionBudgetaire": "Révision budgétaire"
+    "RevisionBudgetaire": "Révision budgétaire",
+    "Contrat": "Contrat",
+    "Avenant": "Avenant"
   },
   "actions": {
     "creer": "Ajouter",
