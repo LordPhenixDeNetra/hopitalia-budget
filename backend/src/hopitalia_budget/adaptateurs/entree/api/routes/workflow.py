@@ -46,6 +46,7 @@ from hopitalia_budget.adaptateurs.entree.api.pagination import (
 from hopitalia_budget.adaptateurs.entree.api.schemas import Montant, Schema, TypeObjet
 from hopitalia_budget.adaptateurs.sortie.budget_sql import DepotRevisionsSql
 from hopitalia_budget.adaptateurs.sortie.contrats_sql import DepotContratsSql
+from hopitalia_budget.adaptateurs.sortie.engagements_sql import DepotEngagementsSql
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     CentreResponsabiliteModele,
     CircuitValidationModele,
@@ -59,9 +60,10 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
 )
 from hopitalia_budget.adaptateurs.sortie.systeme import StockagePiecesLocal
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import DepotWorkflowSql
-from hopitalia_budget.application import contrats, revisions, workflow
+from hopitalia_budget.application import contrats, engagements, revisions, workflow
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.habilitations import Droit, Operation, Profil
+from hopitalia_budget.domaine.ports import Horloge
 from hopitalia_budget.domaine.utilisateur import Utilisateur
 from hopitalia_budget.domaine.workflow import (
     OPERATIONS,
@@ -79,12 +81,16 @@ from hopitalia_budget.domaine.workflow import (
 router = APIRouter(tags=["workflow"])
 
 # Ressources validables : chemin d'URL -> chargement de l'objet (cloisonnement compris).
-VALIDABLES: dict[str, Callable[[Session, Utilisateur, UUID], Validable]] = {
-    "revisions-budgetaires": lambda s, u, i: revisions.validable(DepotRevisionsSql(s), u, i),
-    "contrats": lambda s, u, i: contrats.validable(DepotContratsSql(s), u, i),
-    "avenants": lambda s, u, i: contrats.avenant_validable(DepotContratsSql(s), u, i),
+VALIDABLES: dict[str, Callable[[Session, Utilisateur, UUID, Horloge], Validable]] = {
+    "revisions-budgetaires": lambda s, u, i, h: revisions.validable(DepotRevisionsSql(s), u, i),
+    "contrats": lambda s, u, i, h: contrats.validable(DepotContratsSql(s), u, i),
+    "avenants": lambda s, u, i, h: contrats.avenant_validable(DepotContratsSql(s), u, i),
+    "engagements": lambda s, u, i, h: engagements.validable(DepotEngagementsSql(s), h, u, i),
+    "derogations": lambda s, u, i, h: engagements.derogation_validable(
+        DepotEngagementsSql(s), u, i
+    ),
 }
-Ressource = Literal["revisions-budgetaires", "contrats", "avenants"]
+Ressource = Literal["revisions-budgetaires", "contrats", "avenants", "engagements", "derogations"]
 
 
 def obtenir_stockage(request: Request) -> StockagePiecesLocal:
@@ -160,7 +166,7 @@ def lire_validations(
     horloge: HorlogeDep,
 ) -> EtatValidationSortie:
     """Circuit figé, historique des visas, étapes ouvertes et droit de l'agent à décider."""
-    cible = VALIDABLES[ressource](session, utilisateur, identifiant)
+    cible = VALIDABLES[ressource](session, utilisateur, identifiant, horloge)
     return _etat(workflow.etat(DepotWorkflowSql(session), horloge, utilisateur, cible))
 
 
@@ -179,7 +185,7 @@ def decider(
     horloge: HorlogeDep,
 ) -> EtatValidationSortie:
     """Visa, rejet motivé ou retour pour correction à l'étape ouverte du circuit."""
-    cible = VALIDABLES[ressource](session, utilisateur, identifiant)
+    cible = VALIDABLES[ressource](session, utilisateur, identifiant, horloge)
     etat = workflow.decider(
         DepotWorkflowSql(session),
         journal,
@@ -208,7 +214,7 @@ def resoumettre(
     horloge: HorlogeDep,
 ) -> EtatValidationSortie:
     """Par l'auteur : soumission d'un brouillon, ou renvoi au circuit après correction."""
-    cible = VALIDABLES[ressource](session, utilisateur, identifiant)
+    cible = VALIDABLES[ressource](session, utilisateur, identifiant, horloge)
     etat = workflow.soumettre(DepotWorkflowSql(session), journal, horloge, utilisateur, cible)
     session.commit()
     return _etat(etat)
@@ -239,9 +245,13 @@ class PieceSortie(Schema):
 
 @router.get("/{ressource}/{identifiant}/pieces", response_model=list[PieceSortie])
 def lister_pieces(
-    ressource: Ressource, identifiant: UUID, session: SessionDep, utilisateur: UtilisateurDep
+    ressource: Ressource,
+    identifiant: UUID,
+    session: SessionDep,
+    utilisateur: UtilisateurDep,
+    horloge: HorlogeDep,
 ) -> list[PieceSortie]:
-    o = VALIDABLES[ressource](session, utilisateur, identifiant).objet()
+    o = VALIDABLES[ressource](session, utilisateur, identifiant, horloge).objet()
     m = PieceJustificativeModele
     pieces = session.scalars(
         select(m).where(m.type_objet == o.type_objet, m.id_objet == o.id).order_by(m.depose_le)
@@ -262,11 +272,11 @@ async def deposer_piece(
     stockage: Annotated[StockagePiecesLocal, Depends(obtenir_stockage)],
 ) -> PieceSortie:
     """Dépôt par l'auteur ou un valideur ; contenu rangé sous son empreinte SHA-256."""
-    o = VALIDABLES[ressource](session, utilisateur, identifiant).objet()
-    saisie, validation = OPERATIONS[o.type_objet]
+    o = VALIDABLES[ressource](session, utilisateur, identifiant, horloge).objet()
+    saisie, validations = OPERATIONS[o.type_objet]
     if not (
         utilisateur.peut(saisie, Droit.SAISIR, o.etablissement_id)
-        or utilisateur.peut(validation, Droit.VALIDER, o.etablissement_id)
+        or any(utilisateur.peut(v, Droit.VALIDER, o.etablissement_id) for v in validations)
     ):
         raise ErreurMetier("ACCES_REFUSE")
     type_piece = session.get(ReferentielModele, type_piece_id)

@@ -35,4 +35,4 @@ Montant = Annotated[
 
 
 # Types d'objets validables (clés de domaine/workflow.TRANSITIONS_REFERENCE ; un test les compare).
-TypeObjet = Literal["RevisionBudgetaire", "Contrat", "Avenant"]
+TypeObjet = Literal["RevisionBudgetaire", "Contrat", "Avenant", "Engagement", "Derogation"]

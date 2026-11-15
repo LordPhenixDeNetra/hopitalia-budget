@@ -12,6 +12,8 @@ from hopitalia_budget.domaine.habilitations import Profil
 from hopitalia_budget.domaine.ports import EvenementAudit, Horloge, JournaliseurAudit
 from hopitalia_budget.domaine.utilisateur import Utilisateur
 from hopitalia_budget.domaine.workflow import (
+    CIRCUIT_PAR_DEFAUT,
+    CIRCUITS_PAR_DEFAUT,
     TRANSITIONS_REFERENCE,
     Action,
     Circuit,
@@ -54,7 +56,10 @@ def _references(depot: DepotWorkflow, o: ObjetValidable) -> dict[str, str]:
 def _circuit(depot: DepotWorkflow, o: ObjetValidable) -> Circuit:
     """Circuit figé ; avant la première soumission, celui qui s'appliquerait (aperçu)."""
     return depot.circuit_fige(o.type_objet, o.id) or choisir_circuit(
-        depot.circuits(o.etablissement_id, o.type_objet), o.montant, o.centre_id
+        depot.circuits(o.etablissement_id, o.type_objet),
+        o.montant,
+        o.centre_id,
+        CIRCUITS_PAR_DEFAUT.get(o.type_objet, CIRCUIT_PAR_DEFAUT),
     )
 
 

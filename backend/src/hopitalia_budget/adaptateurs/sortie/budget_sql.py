@@ -7,6 +7,10 @@ from uuid import UUID
 from sqlalchemy import and_, case, func, or_, select
 from sqlalchemy.orm import Session
 
+from hopitalia_budget.adaptateurs.sortie.engagements_sql import (
+    en_cours_par_ligne,
+    engage_par_ligne,
+)
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     BudgetModele,
     LigneBudgetaireModele,
@@ -45,8 +49,8 @@ def parametres_calcul(session: Session, etablissement_id: UUID) -> ParametresCal
 def mouvements_lignes(session: Session, ligne_ids: list[UUID]) -> dict[UUID, MouvementsLigne]:
     """Montants agrégés par ligne à partir des pièces.
 
-    Lot 1 : dotations et révisions validées. Les engagements, liquidations et paiements
-    viendront des lots 2 à 5 ; d'ici là, leurs montants valent zéro.
+    Dotations, révisions validées et engagements. Liquidations et paiements viendront des
+    lots 4 et 5 ; d'ici là, leurs montants valent zéro.
     """
     if not ligne_ids:
         return {}
@@ -94,11 +98,15 @@ def mouvements_lignes(session: Session, ligne_ids: list[UUID]) -> dict[UUID, Mou
         .group_by("ligne")
     ):
         negatives[ligne] += montant
+    engage = engage_par_ligne(session, ligne_ids)
+    en_cours = en_cours_par_ligne(session, ligne_ids)
     return {
         ligne: MouvementsLigne(
             dotation_initiale=dotation,
             modifications_positives=positives[ligne],
             modifications_negatives=negatives[ligne],
+            engage=engage.get(ligne, ZERO),
+            en_cours_validation=en_cours.get(ligne, ZERO),
         )
         for ligne, dotation in dotations.items()
     }

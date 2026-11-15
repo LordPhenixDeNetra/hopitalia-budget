@@ -13,6 +13,7 @@ from hopitalia_budget.adaptateurs.entree.api.routes import (
     auth,
     budget,
     contrats,
+    engagements,
     etablissements,
     habilitations,
     moi,
@@ -83,7 +84,7 @@ def creer_application(
         return {"statut": "ok"}
 
     v1 = APIRouter(prefix="/api/v1")
-    for module in (auth, moi, etablissements, habilitations, audit, budget, contrats):
+    for module in (auth, moi, etablissements, habilitations, audit, budget, contrats, engagements):
         v1.include_router(module.router)
     for routeur in [*parametrage.routeurs(), *workflow.routeurs()]:
         v1.include_router(routeur)

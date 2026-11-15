@@ -108,14 +108,26 @@ TRANSITIONS_REFERENCE: dict[str, tuple[Transition, ...]] = {
         *_circuit("SOUMIS", "EN_VALIDATION", "VALIDE", "REJETE", "A_CORRIGER"),
     ),
     "Avenant": _circuit("SOUMIS", "EN_VALIDATION", "VALIDE", "REJETE", "A_CORRIGER"),
+    # Section 8.1 : brouillon, soumis, pris en charge (en contrôle), puis validé ou rejeté.
+    "Engagement": (
+        Transition("BROUILLON", Action.SOUMETTRE, "SOUMIS"),
+        *_circuit("SOUMIS", "EN_CONTROLE", "VALIDE", "REJETE", "A_CORRIGER"),
+    ),
+    "Derogation": _circuit("SOUMIS", "EN_VALIDATION", "VALIDE", "REJETE", "A_CORRIGER"),
 }
 
 
-# Opérations de la matrice des habilitations : saisie de l'objet, puis sa validation.
-OPERATIONS: dict[str, tuple[Operation, Operation]] = {
-    "RevisionBudgetaire": (Operation.DEMANDER_REVISION, Operation.VALIDER_REVISION),
-    "Contrat": (Operation.ENREGISTRER_CONTRAT, Operation.VALIDER_CONTRAT),
-    "Avenant": (Operation.ENREGISTRER_CONTRAT, Operation.VALIDER_CONTRAT),
+# Opérations de la matrice des habilitations : saisie de l'objet, puis celles qui le valident
+# (un profil d'étape doit avoir le droit « Valider » sur l'une d'elles).
+OPERATIONS: dict[str, tuple[Operation, tuple[Operation, ...]]] = {
+    "RevisionBudgetaire": (Operation.DEMANDER_REVISION, (Operation.VALIDER_REVISION,)),
+    "Contrat": (Operation.ENREGISTRER_CONTRAT, (Operation.VALIDER_CONTRAT,)),
+    "Avenant": (Operation.ENREGISTRER_CONTRAT, (Operation.VALIDER_CONTRAT,)),
+    "Engagement": (
+        Operation.DEMANDER_ENGAGEMENT,
+        (Operation.CONTROLER_ENGAGEMENT, Operation.VALIDER_ENGAGEMENT),
+    ),
+    "Derogation": (Operation.DEMANDER_ENGAGEMENT, (Operation.ACCORDER_DEROGATION,)),
 }
 
 
@@ -175,6 +187,16 @@ class CircuitParametre:
 CIRCUIT_PAR_DEFAUT = Circuit(
     (Etape(1, "Visa DAF", Profil.VAL), Etape(2, "Ordonnateur", Profil.ORD))
 )
+# Section 8.1 : l'engagement est d'abord pris en charge par le contrôle financier (profil AF).
+CIRCUITS_PAR_DEFAUT: dict[str, Circuit] = {
+    "Engagement": Circuit(
+        (
+            Etape(1, "Contrôle financier", Profil.AF),
+            Etape(2, "Visa DAF", Profil.VAL),
+            Etape(3, "Ordonnateur", Profil.ORD),
+        )
+    ),
+}
 
 
 def verifier_etapes(type_objet: str, etapes: list[Etape]) -> None:
@@ -182,15 +204,18 @@ def verifier_etapes(type_objet: str, etapes: list[Etape]) -> None:
     dernière étape est obligatoire et revient à l'ordonnateur (section 17, point 16)."""
     if not etapes or [e.ordre for e in etapes] != list(range(1, len(etapes) + 1)):
         raise ErreurMetier("CIRCUIT_INVALIDE", champ="etapes")
-    validation = OPERATIONS[type_objet][1]
-    if not all(autorise(e.profil, validation, Droit.VALIDER) for e in etapes):
+    validations = OPERATIONS[type_objet][1]
+    if not all(any(autorise(e.profil, o, Droit.VALIDER) for o in validations) for e in etapes):
         raise ErreurMetier("CIRCUIT_INVALIDE", champ="etapes")
     if etapes[-1].profil is not Profil.ORD or not etapes[-1].obligatoire:
         raise ErreurMetier("CIRCUIT_INVALIDE", champ="etapes")
 
 
 def choisir_circuit(
-    parametres: Iterable[CircuitParametre], montant: Decimal, centre_id: UUID | None
+    parametres: Iterable[CircuitParametre],
+    montant: Decimal,
+    centre_id: UUID | None,
+    defaut: Circuit = CIRCUIT_PAR_DEFAUT,
 ) -> Circuit:
     """Circuit du service s'il existe, sinon de l'établissement ; le seuil le plus élevé gagne."""
     candidats = [
@@ -201,7 +226,7 @@ def choisir_circuit(
         and (p.seuil_max is None or montant < p.seuil_max)
     ]
     if not candidats:
-        return CIRCUIT_PAR_DEFAUT
+        return defaut
     meilleur = max(candidats, key=lambda p: (p.centre_id is not None, p.seuil_min))
     return meilleur.circuit
 

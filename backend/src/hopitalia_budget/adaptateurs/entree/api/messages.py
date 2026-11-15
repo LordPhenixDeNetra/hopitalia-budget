@@ -211,6 +211,44 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
             "The new ceiling ({plafond}) would be below the amount already committed ({engage}).",
         ),
     ),
+    "ENGAGEMENT_INCOHERENT": (
+        422,
+        (
+            "Engagement incohérent",
+            "Le montant ({montant}) doit égaler la somme des imputations ({impute}), toutes "
+            "positives (RG-15).",
+        ),
+        (
+            "Inconsistent commitment",
+            "The amount ({montant}) must equal the sum of the allocations ({impute}), all "
+            "positive (RG-15).",
+        ),
+    ),
+    "CONTROLE_BLOQUANT": (
+        422,
+        (
+            "Contrôle bloquant",
+            "Un contrôle automatique a relevé un écart : corrigez l'opération ou obtenez une "
+            "dérogation de la nature de l'écart.",
+        ),
+        (
+            "Blocking check",
+            "An automatic check found a gap: correct the operation or obtain a derogation of "
+            "the gap's nature.",
+        ),
+    ),
+    "ANNULATION_IMPOSSIBLE": (
+        409,
+        (
+            "Annulation impossible",
+            "Seul le reliquat d'un engagement validé s'annule ; la clôture suit une exécution.",
+        ),
+        (
+            "Cancellation not possible",
+            "Only the remainder of an approved commitment can be cancelled; closing follows "
+            "execution.",
+        ),
+    ),
     "OPERATION_DEJA_TRAITEE": (
         409,
         ("Opération déjà traitée", "Cette opération n'attend aucune validation."),
