@@ -123,7 +123,7 @@ def test_t212_chaque_filtre(client: TestClient, jeu: dict[str, Any]) -> None:
     inconnu = str(uuid.uuid4())
 
     def chaine(**filtres: str) -> dict[str, str]:
-        reponse = _direction(client, jeu, **filtres)
+        reponse = _direction(client, jeu, VAL_A, **filtres)
         assert reponse.status_code == 200, reponse.json()
         resultat: dict[str, str] = reponse.json()["chaine"]
         return resultat
