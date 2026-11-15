@@ -33,11 +33,11 @@
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
-| P2 | 16 | 0 | 15 | 1 | 0 | 0 | 32 |
+| P2 | 21 | 0 | 10 | 1 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **165** | **4** | **37** | **1** | **0** | **2** | **209** |
+| **Total** | **170** | **4** | **32** | **1** | **0** | **2** | **209** |
 
-Avancement : 165 / 207 tâches actives terminées (80 %), hors 2 abandonnées.
+Avancement : 170 / 207 tâches actives terminées (82 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -320,11 +320,11 @@ flowchart LR
 | T-233 | États des commandes, réceptions, factures, liquidations. | §14.4 | T-230 | Fait | Idem. États `commandes`, `factures` et `liquidations` : totaux égaux au tableau de bord (même test). |
 | T-234 | États des paiements, rapprochements et restes (à engager, liquider, payer). | §14.4 | T-230 | Fait | Idem. États `paiements`, `rapprochements` et `restes` : totaux égaux au tableau de bord (même test). |
 | T-235 | État des dépenses par service, compte, nature, période ; contrats arrivant à échéance. | §14.4 | T-230 | Fait | Idem. États `depenses` (mêmes répartitions que le tableau de bord, période comprise) et `echeances` (jours restants) (même test). |
-| T-236 | Consultation du journal d'audit et rapport d'audit (profil auditeur, lecture seule). | EF-AUD-01, §14.4 | T-055 | À faire | Test API-06 vert ; aucune action de modification pour l'auditeur. |
-| T-237 | Journalisation des connexions et opérations sensibles. | EF-AUD-02 | T-052, T-055 | À faire | Connexions réussies et échouées tracées. |
-| T-238 | Recherche transverse (numéro, date, fournisseur, montant, compte, service). | EF-DOC-03 | T-195 | À faire | Résultats en moins de 3 s sur un exercice. |
-| T-239 | Clôture d'exercice avec report des engagements restant à payer. | EF-BUD-09, RG-10 | T-195 | À faire | Historique intact, restes rattachés au nouvel exercice. |
-| T-240 | Réouverture d'exercice motivée. | §7.2 | T-239 | À faire | Réouverture tracée. |
+| T-236 | Consultation du journal d'audit et rapport d'audit (profil auditeur, lecture seule). | EF-AUD-01, §14.4 | T-055 | Fait | Test API-06 vert ; aucune action de modification pour l'auditeur. API-06 vert (`test_api_avec_base`) ; auditeur sans aucun droit de saisie ni de visa dans la matrice, création refusée ; rapport d'audit PDF, tableur, CSV, filtres de période, export tracé (`test_t236_auditeur_en_lecture_seule_et_rapport`) ; écran Journal d'audit. |
+| T-237 | Journalisation des connexions et opérations sensibles. | EF-AUD-02 | T-052, T-055 | Fait | Connexions réussies et échouées tracées. Connexions réussies et échouées tracées avec l'adresse IP, sans mot de passe (`test_t237_connexions_tracees`) ; exports d'états et de rapports tracés. |
+| T-238 | Recherche transverse (numéro, date, fournisseur, montant, compte, service). | EF-DOC-03 | T-195 | Fait | Résultats en moins de 3 s sur un exercice. `GET /recherche` par numéro, fournisseur, montant, date, compte, service, cloisonnée ; moins de 3 s avec 5 000 engagements de plus (`test_t238_recherche_transverse`) ; écran Recherche. |
+| T-239 | Clôture d'exercice avec report des engagements restant à payer. | EF-BUD-09, RG-10 | T-195 | Fait | Historique intact, restes rattachés au nouvel exercice. Clôture par établissement : reliquats reportés sur l'exercice suivant (engagements de report liés à leur origine), historique intact, restes à payer toujours payables, plus d'engagement ni de soumission sur l'exercice clos (`test_t239_t240_cloture_report_et_reouverture`) ; écran Clôture d'exercice. |
+| T-240 | Réouverture d'exercice motivée. | §7.2 | T-239 | Fait | Réouverture tracée. Réouverture motivée, tracée au journal, sans annuler les reports (même test). |
 
 ### P2.D — Qualité, sécurité et exploitation
 
@@ -441,3 +441,4 @@ flowchart LR
 | 15/11/2026 | T-220 à T-224 (P2.B) | À faire | Fait | Règles d'alerte, alertes des contrôles et des refus, tâche planifiée, tentatives tracées, centre d'alertes ; migration 0010 ; 198 tests backend, 51 tests Vitest. |
 | 15/11/2026 | T-225 | À faire | Bloqué | Adresses électroniques des agents et serveur SMTP de l'hôpital manquants. |
 | 15/11/2026 | T-230 à T-235 (P2.C) | À faire | Fait | Moteur d'états (JSON, CSV, XLSX, PDF, fr et en) et onze états de la section 14.4, totaux égaux au tableau de bord ; écran États ; parcours REC-18 (PDF). |
+| 15/11/2026 | T-236 à T-240 (P2.C) | À faire | Fait | Rapport d'audit et auditeur en lecture seule, connexions et exports tracés, recherche transverse, clôture d'exercice avec report des reliquats, réouverture ; migration 0011. |
