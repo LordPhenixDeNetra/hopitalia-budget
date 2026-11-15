@@ -19,7 +19,8 @@
     "tableauDeBord": "Dashboard",
     "alertes": "Alerts",
     "alertesNonLues_one": "{{count}} unread alert",
-    "alertesNonLues_other": "{{count}} unread alerts"
+    "alertesNonLues_other": "{{count}} unread alerts",
+    "etats": "Reports"
   },
   "entete": {
     "langue": "Language",

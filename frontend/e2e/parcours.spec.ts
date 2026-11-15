@@ -1155,3 +1155,45 @@ test('tableau de bord : étapes, jauges lisibles, restes à payer exportés (T-2
   const contenu = (await import('node:fs')).readFileSync((await fichier.path())!, 'utf-8')
   expect(contenu).toContain('FAC-001;Partiellement payée;2026-04-16;30000000.00;5000000.00;212')
 })
+
+test('REC-18 : état PDF produit dans la langue de l’agent (T-230)', async ({ page }) => {
+  const demandes: { url: string; langue: string | null }[] = []
+  await page.route('**/api/v1/**', async (route) => {
+    const requete = route.request()
+    const chemin = new URL(requete.url()).pathname
+    if (chemin.startsWith('/api/v1/etats/')) {
+      demandes.push({ url: requete.url(), langue: await requete.headerValue('accept-language') })
+      await route.fulfill({
+        body: Buffer.from('%PDF-1.4 Initial and revised budget'),
+        contentType: 'application/pdf',
+      })
+      return
+    }
+    const reponses: Record<string, unknown> = {
+      '/api/v1/auth/connexion': { jetonAcces: 'a', jetonRafraichissement: 'r', expireDans: 900 },
+      '/api/v1/moi': {
+        ...MOI,
+        langue: 'en',
+        habilitations: [{ profil: 'VAL', etablissementId: 'a1' }],
+      },
+      '/api/v1/exercices': pageDe([{ id: 'x1', code: '2026' }]),
+    }
+    await route.fulfill({ json: reponses[chemin] ?? pageDe([]) })
+  })
+
+  await connecterAgentFinancier(page, '/etats')
+  await expect(page.getByRole('heading', { name: 'Reports' })).toBeVisible()
+  const telechargement = page.waitForEvent('download')
+  await page
+    .getByRole('button', { name: 'PDF — Initial and revised budget, available credits' })
+    .click()
+  const fichier = await telechargement
+  expect(fichier.suggestedFilename()).toBe('budget.pdf')
+  expect(demandes).toHaveLength(1)
+  const url = new URL(demandes[0].url)
+  expect([url.searchParams.get('format'), url.searchParams.get('exerciceId')]).toEqual([
+    'pdf',
+    'x1',
+  ])
+  expect(demandes[0].langue).toBe('en')
+})

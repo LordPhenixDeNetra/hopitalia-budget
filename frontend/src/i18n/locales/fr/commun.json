@@ -19,7 +19,8 @@
     "tableauDeBord": "Tableau de bord",
     "alertes": "Alertes",
     "alertesNonLues_one": "{{count}} alerte non lue",
-    "alertesNonLues_other": "{{count}} alertes non lues"
+    "alertesNonLues_other": "{{count}} alertes non lues",
+    "etats": "États"
   },
   "entete": {
     "langue": "Langue",
