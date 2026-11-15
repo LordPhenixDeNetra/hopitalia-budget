@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.11 · 15 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.12 · 15 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -18,6 +18,7 @@
 | 3.9 | 15/11/2026 | Tableaux de bord (lot P2.A) : périmètre et filtres du tableau de bord de la direction (14.1), définitions des indicateurs opérationnels (14.2), ressources d'API (11.2). |
 | 3.10 | 15/11/2026 | Alertes (lot P2.B) : création, destinataires, lecture par agent, règles par établissement et tâche planifiée (14.3), type `CONTROLE_BLOQUANT`, ressources d'API (11.2). |
 | 3.11 | 15/11/2026 | États (lot P2.C, première partie) : liste des états, formats et règles de production (14.4), ressource `/etats/{code}` (11.2). |
+| 3.12 | 15/11/2026 | Audit, recherche et clôture (lot P2.C, seconde partie) : clôture d'exercice par établissement et engagements de report (8.1), journalisation des connexions et des exports, rapport d'audit, recherche transverse (4.9), ressources d'API (11.2). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -260,6 +261,8 @@ Chaque exigence porte un identifiant stable, repris dans la recette (section 15)
 | EF-DOC-03 | Recherche par numéro, date, fournisseur, montant, compte ou service. |
 | EF-AUD-01 | Journal d'audit : horodatage, utilisateur, action, objet, ancienne et nouvelle valeur, adresse IP. Non modifiable par les utilisateurs opérationnels. |
 | EF-AUD-02 | Journalisation des connexions et des opérations sensibles. |
+
+**Audit et recherche (lot P2.C).** Sont tracées : chaque connexion réussie ou échouée (identifiant saisi et adresse IP, jamais le mot de passe), chaque export d'état et de rapport d'audit, chaque tentative de modification refusée, en plus de toute modification de donnée financière. Le journal se consulte en lecture seule (valideur, ordonnateur, auditeur), filtré par action, objet, identifiant et période ; le rapport d'audit l'exporte en PDF, tableur ou CSV. La recherche transverse lit le texte saisi comme un montant, une date ou un texte cherché dans les numéros, libellés, fournisseurs, comptes et services ; elle rend au plus 50 pièces, des plus récentes aux plus anciennes, dans les établissements visibles.
 
 ## 5. Règles de gestion
 
@@ -1216,6 +1219,7 @@ stateDiagram-v2
 - Contrôles automatiques, à la soumission puis à la validation finale : crédits de chaque ligne (RG-02), plafond du contrat (RG-04), contrat validé et bénéficiaire égal au titulaire, doublon probable (même bénéficiaire, même montant, même objet, à moins de 30 jours), seuil hors marché (point 9 : sans seuil renseigné, la dérogation est exigée). À la validation finale, les lignes et le contrat sont verrouillés jusqu'à la fin de la transaction (RG-20).
 - Un écart bloquant se corrige, ou se couvre par une dérogation de même nature, validée (visa DAF puis ordonnateur), d'un montant au moins égal au dépassement, sur cet engagement seulement (RG-19). Le contrat non validé et le bénéficiaire incohérent ne se couvrent pas. La dérogation est un objet commun : elle porte le type et l'identifiant de l'objet couvert (engagement ou liquidation) et suit le même circuit.
 - L'engagé d'une ligne ou d'un contrat compte les engagements validés, moins leurs annulations et clôtures ; l'en-cours compte les engagements soumis ou en contrôle (6.1, 6.2).
+- Clôture d'exercice (EF-BUD-09, RG-10), pour un établissement, par le responsable budgétaire ou l'ordonnateur, motivée : refusée tant qu'un engagement de l'exercice est dans son circuit, ou si une ligne à reporter n'existe pas (même code) dans le budget de l'exercice suivant. Le reliquat non liquidé de chaque engagement validé ou partiellement exécuté est désengagé (contre-opération `REPORT`) et repris dans l'exercice suivant par un engagement de report : validé, daté du premier jour de l'exercice, lié à son origine (`engagementOrigineId`), sur les lignes de même code. L'engagement d'origine passe à `CLOTURE`. Les liquidations validées non payées restent sur leur engagement d'origine et se paient après la clôture. Aucun engagement ne se crée ni ne se soumet sur un exercice clos. Une réouverture motivée lève la clôture sans annuler les reports ; clôture et réouverture sont tracées.
 - Annulation partielle ou totale du reliquat d'un engagement validé, par imputation : l'engagement reste intact, l'annulation s'y ajoute (RG-18). Le reliquat entièrement annulé, sans rien de liquidé, fait passer l'engagement à `ANNULE`. La clôture d'un engagement exécuté désengage le reliquat non liquidé et le fait passer à `CLOTURE`.
 
 ### 8.2. Facture
@@ -1607,7 +1611,9 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 
 | Ressource | Opérations | Remarques |
 |---|---|---|
-| `/exercices` | GET, POST | `POST /exercices/{id}/clotures` clôture l'exercice. |
+| `/exercices` | GET, POST | `POST /exercices/{id}/clotures` clôture l'exercice pour un établissement (reports) ; `POST /exercices/{id}/reouvertures` ; `GET /exercices/{id}/clotures` (historique). |
+| `/recherche` | GET | Paramètre `q` (au moins 2 caractères). |
+| `/journal-audit` | GET | Pagination par curseur ; filtres `action`, `typeObjet`, `idObjet`, `du`, `au` ; `GET /journal-audit/rapport?format=pdf|xlsx|csv`. |
 | `/budgets` | GET, POST | `POST /budgets/{id}/imports` : import asynchrone, `202 Accepted` et lien de suivi. |
 | `/budgets/{id}/lignes` | GET, POST | |
 | `/budgets/{id}/revisions` | GET, POST | |
