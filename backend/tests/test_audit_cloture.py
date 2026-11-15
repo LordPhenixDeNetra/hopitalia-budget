@@ -107,6 +107,9 @@ def test_t239_t240_cloture_report_et_reouverture(client: TestClient, jeu: dict[s
     assert (absente.status_code, absente.json()["code"]) == (409, "REPORT_LIGNE_ABSENTE")
     suivant["604-CMD"] = suivant["ligne"]("604-CMD")
     assert _cloturer(client, jeu, suivant, GMC_A).status_code == 403
+    brouillon = creer(
+        client, GMC_A, "/api/v1/engagements", _corps(jeu, "DECISION_AUTORISEE", "1000.00")
+    )
 
     cloture = _cloturer(client, jeu, suivant)
     assert cloture.status_code == 201, cloture.json()
@@ -156,6 +159,8 @@ def test_t239_t240_cloture_report_et_reouverture(client: TestClient, jeu: dict[s
         headers=entetes(GMC_A, **{"Idempotency-Key": uuid.uuid4().hex}),
     )
     assert ferme.json()["code"] == "EXERCICE_NON_OUVERT"
+    # Un brouillon de l'exercice clos ne part plus en validation.
+    assert _soumettre(client, brouillon).json()["code"] == "EXERCICE_NON_OUVERT"
     assert _cloturer(client, jeu, suivant).json()["code"] == "EXERCICE_NON_OUVERT"
     actions = {e["action"] for e in _journal(client, idObjet=jeu["exercice"]["id"])}
     assert actions == {"CREATION", "CLOTURE"}
