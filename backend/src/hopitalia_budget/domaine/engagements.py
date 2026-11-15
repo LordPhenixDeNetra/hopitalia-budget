@@ -13,6 +13,7 @@ from uuid import UUID
 
 from hopitalia_budget.domaine.controles import NatureDerogation, RegleControle, ResultatControle
 from hopitalia_budget.domaine.erreurs import ErreurMetier
+from hopitalia_budget.domaine.indicateurs import reste_a_engager
 
 ZERO = Decimal("0")
 
@@ -213,7 +214,7 @@ class ControlePlafondContrat:
         c = self.contexte.contrat(engagement.contrat_id, engagement.id)
         if c is None:
             return []
-        reste = c.montant_actualise - c.engage_autres
+        reste = reste_a_engager(c.montant_actualise, c.engage_autres)
         if engagement.montant <= reste:
             return []
         return [
