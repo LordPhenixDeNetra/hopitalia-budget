@@ -51,6 +51,10 @@
   "ENGAGEMENT_INCOHERENT": "Le montant doit égaler la somme des imputations, toutes positives.",
   "CONTROLE_BLOQUANT": "Un contrôle automatique a relevé un écart : corrigez l'engagement ou demandez une dérogation.",
   "ANNULATION_IMPOSSIBLE": "Seul le reliquat d'un engagement validé s'annule ; la clôture suit une exécution.",
+  "ENGAGEMENT_NON_VALIDE": "Une commande suit toujours un engagement validé.",
+  "COMMANDE_SUPERIEURE_ENGAGEMENT": "Les commandes dépasseraient le montant net de l'engagement.",
+  "QUANTITES_INCOHERENTES": "Quantités positives, et acceptée plus rejetée au plus égale à la reçue.",
+  "RECEPTION_SUPERIEURE_COMMANDE": "La quantité acceptée cumulée dépasserait la quantité commandée.",
   "champ": {
     "missing": "Ce champ est obligatoire.",
     "string_too_short": "Ce champ est trop court.",

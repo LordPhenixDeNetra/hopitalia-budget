@@ -28,6 +28,16 @@ export interface DefinitionRessource {
   desactivable?: boolean
 }
 
+/** Types d'objets validables (TypeObjet de l'API) : circuits et pièces obligatoires. */
+export const TYPES_OBJETS = [
+  'RevisionBudgetaire',
+  'Contrat',
+  'Avenant',
+  'Engagement',
+  'Derogation',
+  'Reception',
+]
+
 const CODE: Champ = { nom: 'code', type: 'texte', requis: true, creationSeulement: true }
 const LIBELLE: Champ = { nom: 'libelle', type: 'texte', requis: true }
 const ETABLISSEMENT: Champ = {
@@ -118,7 +128,7 @@ export const RESSOURCES: Record<string, DefinitionRessource> = {
     {
       nom: 'typesObjets',
       type: 'choixMultiple',
-      valeurs: ['RevisionBudgetaire', 'Contrat', 'Avenant', 'Engagement', 'Derogation'],
+      valeurs: TYPES_OBJETS,
     },
   ),
   fournisseurs: {

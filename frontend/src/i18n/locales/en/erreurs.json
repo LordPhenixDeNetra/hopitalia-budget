@@ -51,6 +51,10 @@
   "ENGAGEMENT_INCOHERENT": "The amount must equal the sum of the allocations, all positive.",
   "CONTROLE_BLOQUANT": "An automatic check found a gap: correct the commitment or request a derogation.",
   "ANNULATION_IMPOSSIBLE": "Only the remainder of an approved commitment can be cancelled; closing follows execution.",
+  "ENGAGEMENT_NON_VALIDE": "An order always follows an approved commitment.",
+  "COMMANDE_SUPERIEURE_ENGAGEMENT": "Orders would exceed the commitment's net amount.",
+  "QUANTITES_INCOHERENTES": "Positive quantities, and accepted plus rejected at most equal to received.",
+  "RECEPTION_SUPERIEURE_COMMANDE": "The cumulative accepted quantity would exceed the ordered one.",
   "champ": {
     "missing": "This field is required.",
     "string_too_short": "This field is too short.",

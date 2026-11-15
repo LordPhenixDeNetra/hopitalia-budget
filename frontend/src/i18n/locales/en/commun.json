@@ -12,7 +12,8 @@
     "budgets": "Budgets",
     "delegations": "Delegations",
     "contrats": "Contracts",
-    "engagements": "Commitments"
+    "engagements": "Commitments",
+    "commandes": "Orders"
   },
   "entete": {
     "langue": "Language",

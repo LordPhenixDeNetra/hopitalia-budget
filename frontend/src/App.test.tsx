@@ -47,6 +47,7 @@ beforeAll(async () => {
     'workflow',
     'contrats',
     'engagements',
+    'commandes',
   ])
 })
 
@@ -637,5 +638,53 @@ describe('engagements (lot 2)', () => {
       motif: 'Avenant en cours',
       nature: 'PLAFOND_CONTRAT',
     })
+  })
+})
+
+describe('commandes et réceptions (lot 3)', () => {
+  test('suivi : commandes en retard et réserves à lever (T-166, T-163)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(MOI)],
+      'GET /api/v1/bons-commande': [
+        json({
+          donnees: [
+            {
+              id: 'b1',
+              numero: 'BC-2026-00001',
+              type: 'BON_COMMANDE',
+              dateEmission: '2026-03-05',
+              dateLivraisonPrevue: '2026-04-30',
+              montantTtc: '10000000.00',
+              enRetard: true,
+              lignes: [],
+            },
+          ],
+          pagination: { page: 1, taille: 100, total: 1, suivant: null },
+        }),
+      ],
+      'GET /api/v1/reserves': [
+        json([
+          {
+            id: 'rs1',
+            receptionId: 'r1',
+            description: 'Cartons abîmés',
+            dateConstat: '2026-04-10',
+            dateLevee: null,
+            leveeParCode: null,
+          },
+        ]),
+      ],
+    })
+    afficher('/commandes')
+    // Retard écrit en clair, pas seulement par la couleur (IHM-06).
+    expect(await screen.findByText('En retard')).toBeTruthy()
+    expect(await screen.findByText('Cartons abîmés')).toBeTruthy()
+    await userEvent.click(screen.getByRole('switch', { name: 'En retard seulement' }))
+    const urls = appel.mock.calls.map(([url]) => String(url))
+    expect(
+      urls.some((u) => u.startsWith('/api/v1/bons-commande') && u.includes('enRetard=true')),
+    ).toBe(true)
+    expect(urls.some((u) => u.includes('/api/v1/reserves?nonLevees=true'))).toBe(true)
   })
 })

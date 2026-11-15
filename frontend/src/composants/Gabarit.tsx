@@ -8,6 +8,7 @@ import {
   SafetyOutlined,
   SettingOutlined,
   ShopOutlined,
+  ShoppingCartOutlined,
   SwapOutlined,
 } from '@ant-design/icons'
 import { Breadcrumb, Button, Flex, Layout, Menu, Select, Typography, theme } from 'antd'
@@ -84,6 +85,11 @@ export function Gabarit() {
               key: '/engagements',
               icon: <AuditOutlined aria-hidden />,
               label: t('menu.engagements'),
+            },
+            {
+              key: '/commandes',
+              icon: <ShoppingCartOutlined aria-hidden />,
+              label: t('menu.commandes'),
             },
             {
               key: '/nomenclature',

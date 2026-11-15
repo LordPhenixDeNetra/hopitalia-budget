@@ -74,7 +74,8 @@
     "Contrat": "Contract",
     "Avenant": "Amendment",
     "Engagement": "Commitment",
-    "Derogation": "Derogation"
+    "Derogation": "Derogation",
+    "Reception": "Receipt"
   },
   "actions": {
     "creer": "Add",

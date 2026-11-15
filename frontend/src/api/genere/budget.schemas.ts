@@ -47,6 +47,23 @@ export interface Anomalie {
   valeur?: string;
 }
 
+export interface AttestationCreation {
+  date: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  livrable: string;
+  conforme: boolean;
+}
+
+export interface AttestationSortie {
+  date: string;
+  livrable: string;
+  conforme: boolean;
+  creeParCode: string;
+}
+
 export interface AvenantCorrection {
   objet?: string | null;
   variation?: string | null;
@@ -114,6 +131,72 @@ export const BaseTaux = {
 export interface BodyDeposerPiece {
   fichier: Blob | File;
   typePieceId: string;
+}
+
+export type TypeOrdre = typeof TypeOrdre[keyof typeof TypeOrdre];
+
+
+export const TypeOrdre = {
+  BON_COMMANDE: 'BON_COMMANDE',
+  TRANCHE: 'TRANCHE',
+  ORDRE_SERVICE: 'ORDRE_SERVICE',
+} as const;
+
+export interface LigneCommandeSchema {
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  designation: string;
+  quantite: number | string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  prixUnitaire: string;
+  tauxTaxe?: number | string;
+}
+
+export interface BonCommandeCreation {
+  type?: TypeOrdre;
+  dateEmission: string;
+  lieuLivraison?: string | null;
+  dateLivraisonPrevue?: string | null;
+  /** @minItems 1 */
+  lignes: LigneCommandeSchema[];
+}
+
+export interface LigneCommandeSortie {
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  designation: string;
+  quantite: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  prixUnitaire: string;
+  tauxTaxe?: string;
+  id: string;
+  rang: number;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantTtc: string;
+  quantiteAcceptee: string;
+  resteARecevoir: string;
+}
+
+export interface BonCommandeSortie {
+  id: string;
+  etablissementId: string;
+  engagementId: string;
+  fournisseurId: string | null;
+  numero: string;
+  type: TypeOrdre;
+  dateEmission: string;
+  lieuLivraison: string | null;
+  dateLivraisonPrevue: string | null;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantTtc: string;
+  enRetard: boolean;
+  creeParCode: string;
+  creeLe: string;
+  lignes: LigneCommandeSortie[];
 }
 
 export type BudgetCreationType = typeof BudgetCreationType[keyof typeof BudgetCreationType];
@@ -222,6 +305,7 @@ export const CircuitCreationTypeObjet = {
   Avenant: 'Avenant',
   Engagement: 'Engagement',
   Derogation: 'Derogation',
+  Reception: 'Reception',
 } as const;
 
 export type Profil = typeof Profil[keyof typeof Profil];
@@ -1032,6 +1116,20 @@ export interface LigneModification {
   natureEconomique?: string | null;
 }
 
+export interface LigneReceptionSchemaInput {
+  ligneCommandeId: string;
+  quantiteRecue: number | string;
+  quantiteAcceptee: number | string;
+  quantiteRejetee?: number | string;
+}
+
+export interface LigneReceptionSchemaOutput {
+  ligneCommandeId: string;
+  quantiteRecue: string;
+  quantiteAcceptee: string;
+  quantiteRejetee?: string;
+}
+
 export interface LigneSortie {
   id: string;
   budgetId: string;
@@ -1189,6 +1287,11 @@ export interface Pagination {
   taille: number;
   total: number;
   suivant: string | null;
+}
+
+export interface PageBonCommandeSortie {
+  donnees: BonCommandeSortie[];
+  pagination: Pagination;
 }
 
 export interface PageBudgetSortie {
@@ -1419,7 +1522,7 @@ export interface TypePieceSortie {
   actif: boolean;
   version: number;
   dureeConservationAns: number | null;
-  typesObjets: ('RevisionBudgetaire' | 'Contrat' | 'Avenant' | 'Engagement' | 'Derogation')[] | null;
+  typesObjets: ('RevisionBudgetaire' | 'Contrat' | 'Avenant' | 'Engagement' | 'Derogation' | 'Reception')[] | null;
 }
 
 export interface PageTypePieceSortie {
@@ -1490,6 +1593,76 @@ export interface RapportImport {
   anomalies: Anomalie[];
 }
 
+export interface ReceptionChamps {
+  dateReception?: string | null;
+  centreId?: string | null;
+  agentResponsableCode?: string | null;
+  observations?: string | null;
+  lignes?: LigneReceptionSchemaInput[] | null;
+}
+
+export interface ReceptionCreation {
+  dateReception: string;
+  centreId: string;
+  /**
+     * @minLength 1
+     * @maxLength 20
+     */
+  agentResponsableCode: string;
+  observations?: string | null;
+  /** @minItems 1 */
+  lignes: LigneReceptionSchemaInput[];
+}
+
+export type TypeReception = typeof TypeReception[keyof typeof TypeReception];
+
+
+export const TypeReception = {
+  TOTALE: 'TOTALE',
+  PARTIELLE: 'PARTIELLE',
+  REFUSEE: 'REFUSEE',
+} as const;
+
+export type StatutReception = typeof StatutReception[keyof typeof StatutReception];
+
+
+export const StatutReception = {
+  BROUILLON: 'BROUILLON',
+  SOUMIS: 'SOUMIS',
+  EN_VALIDATION: 'EN_VALIDATION',
+  A_CORRIGER: 'A_CORRIGER',
+  VALIDE: 'VALIDE',
+  REJETE: 'REJETE',
+} as const;
+
+export interface ReserveSortie {
+  id: string;
+  receptionId: string;
+  description: string;
+  dateConstat: string;
+  dateLevee: string | null;
+  leveeParCode: string | null;
+}
+
+export interface ReceptionSortie {
+  id: string;
+  etablissementId: string;
+  bonCommandeId: string;
+  numero: string;
+  dateReception: string;
+  type: TypeReception;
+  centreId: string;
+  agentResponsableCode: string;
+  observations: string | null;
+  statut: StatutReception;
+  creeParCode: string;
+  creeLe: string;
+  version: number;
+  lignes: LigneReceptionSchemaOutput[];
+  reserves: ReserveSortie[];
+  attestation: AttestationSortie | null;
+}
+
 export interface ReferentielCreation {
   /**
      * @minLength 1
@@ -1507,6 +1680,19 @@ export interface ReferentielCreation {
 export interface ReferentielModification {
   libelle?: string | null;
   actif?: boolean | null;
+}
+
+export interface ReserveCreation {
+  /**
+     * @minLength 1
+     * @maxLength 1000
+     */
+  description: string;
+  dateConstat: string;
+}
+
+export interface ReserveLevee {
+  dateLevee: string;
 }
 
 export type ResultatSortieDetails = {[key: string]: string};
@@ -1639,6 +1825,7 @@ export const StatutCreationTypeObjet = {
   Avenant: 'Avenant',
   Engagement: 'Engagement',
   Derogation: 'Derogation',
+  Reception: 'Reception',
 } as const;
 
 export interface StatutCreation {
@@ -1725,6 +1912,7 @@ export const TransitionCreationTypeObjet = {
   Avenant: 'Avenant',
   Engagement: 'Engagement',
   Derogation: 'Derogation',
+  Reception: 'Reception',
 } as const;
 
 export interface TransitionCreation {
@@ -1785,6 +1973,7 @@ export const TypePieceCreationTypesObjetsItem = {
   Avenant: 'Avenant',
   Engagement: 'Engagement',
   Derogation: 'Derogation',
+  Reception: 'Reception',
 } as const;
 
 export interface TypePieceCreation {
@@ -1811,7 +2000,7 @@ export interface TypePieceModification {
   libelle?: string | null;
   actif?: boolean | null;
   dureeConservationAns?: number | null;
-  typesObjets?: ('RevisionBudgetaire' | 'Contrat' | 'Avenant' | 'Engagement' | 'Derogation')[] | null;
+  typesObjets?: ('RevisionBudgetaire' | 'Contrat' | 'Avenant' | 'Engagement' | 'Derogation' | 'Reception')[] | null;
 }
 
 export type Health200 = {[key: string]: string};
@@ -1928,6 +2117,23 @@ export type ListerEngagementsParams = {
    * @maximum 100
    */
   taille?: number;
+};
+
+export type ListerBonsCommandeParams = {
+  etablissementId?: string | null;
+  engagementId?: string | null;
+  enRetard?: boolean;
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
+
+export type ListerReservesParams = {
+  nonLevees?: boolean;
 };
 
 export type ListerSitesParams = {

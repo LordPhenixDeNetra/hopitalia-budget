@@ -43,6 +43,7 @@ import { Montant } from '../../composants/Montant'
 import { Pieces } from '../../composants/workflow/Pieces'
 import { Validations } from '../../composants/workflow/Validations'
 import { formaterDate, formaterDateHeure } from '../../format/format'
+import { FormulaireCommande, ListeCommandes } from '../commandes/Commandes'
 import { useOptions } from '../parametrage/PageReferentiel'
 import { SAISIE_ENGAGEMENT, TONS_ENGAGEMENT } from './Engagements'
 import { FormulaireEngagement } from './FormulaireEngagement'
@@ -350,6 +351,31 @@ function Annulations({
   )
 }
 
+/** Commandes émises sur l'engagement ; émission par le gestionnaire de marchés (EF-CMD-01). */
+function CommandesEngagement({ engagement }: { engagement: EngagementSortie }) {
+  const { t } = useTranslation('commandes')
+  const peutEmettre =
+    useAProfil(['GMC']) && ['VALIDE', 'PARTIELLEMENT_EXECUTE'].includes(engagement.statut)
+  const [emission, setEmission] = useState(false)
+  return (
+    <Flex vertical gap="middle">
+      {peutEmettre && (
+        <Button
+          type="primary"
+          style={{ alignSelf: 'flex-start' }}
+          onClick={() => setEmission(true)}
+        >
+          {t('emettre')}
+        </Button>
+      )}
+      <ListeCommandes engagementId={engagement.id} />
+      {emission && (
+        <FormulaireCommande engagementId={engagement.id} fermer={() => setEmission(false)} />
+      )}
+    </Flex>
+  )
+}
+
 /** Fiche engagement : /engagements/:id (T-150). */
 export function FicheEngagement() {
   const { id = '' } = useParams()
@@ -467,6 +493,11 @@ export function FicheEngagement() {
           <Pieces ressource="engagements" id={id} peutDeposer={peutDeposer} />
         </Flex>
       ),
+    },
+    {
+      key: 'commandes',
+      label: t('onglets.commandes'),
+      children: <CommandesEngagement engagement={engagement} />,
     },
     {
       key: 'annulations',

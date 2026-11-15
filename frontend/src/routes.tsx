@@ -83,6 +83,17 @@ export const routes: RouteObject[] = [
         ],
       },
       {
+        path: 'commandes',
+        handle: fil('menu.commandes'),
+        lazy: () => import('./pages/commandes/Commandes').then((m) => ({ Component: m.Commandes })),
+      },
+      {
+        path: 'bons-commande/:id',
+        handle: fil('menu.commandes'),
+        lazy: () =>
+          import('./pages/commandes/FicheCommande').then((m) => ({ Component: m.FicheCommande })),
+      },
+      {
         path: 'delegations',
         lazy: () => import('./pages/Delegations').then((m) => ({ Component: m.Delegations })),
         handle: fil('menu.delegations'),

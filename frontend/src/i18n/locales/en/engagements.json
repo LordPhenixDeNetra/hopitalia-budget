@@ -62,7 +62,8 @@
     "informations": "Details",
     "controles": "Checks",
     "validation": "Approval and documents",
-    "annulations": "Cancellations"
+    "annulations": "Cancellations",
+    "commandes": "Orders"
   },
   "controles": {
     "intro": "Checks run again at each reading. A blocking gap is corrected, or covered by an approved derogation of the same nature for at least the same amount.",
