@@ -983,7 +983,9 @@ async function payer(page: Page, parts: Record<string, string>) {
     await tiroir.getByLabel(`Part payée — ${liquidation}`).fill(montant)
   }
   await tiroir.getByRole('button', { name: 'Enregistrer' }).click()
-  await expect(page.getByText('Paiement enregistré.')).toBeVisible()
+  // Deux paiements rapprochés laissent deux messages à l'écran : le tiroir fermé fait foi.
+  await expect(page.getByText('Paiement enregistré.').first()).toBeVisible()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
 }
 
 test('REC-08 et REC-09 : ordonnancer, payer en partie, puis solder', async ({ page }) => {
