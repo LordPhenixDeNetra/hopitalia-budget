@@ -947,3 +947,20 @@ describe('ordonnancement et paiements (lot 5)', () => {
     expect(new Headers(envoi[1]!.headers).get('Idempotency-Key')).toBeTruthy()
   })
 })
+
+describe('périmètre du module (REC-15, RG-12)', () => {
+  test('aucun écran ni menu de lancement, passation ou attribution de marché', async () => {
+    const chemins: string[] = []
+    const parcourir = (liste: typeof routes) =>
+      liste.forEach((r) => {
+        if (r.path) chemins.push(r.path)
+        if (r.children) parcourir(r.children)
+      })
+    parcourir(routes)
+    expect(chemins).toContain('contrats')
+    const commun = (await import('./i18n/locales/fr/commun.json')).default
+    const textes = [...chemins, ...Object.values(commun.menu)].map((t) => String(t).toLowerCase())
+    const passation = /passation|appel.d.offres?|attribution|adjudication|soumissionnaire|lancement/
+    expect(textes.filter((t) => passation.test(t))).toEqual([])
+  })
+})
