@@ -18,10 +18,12 @@ from fastapi.responses import JSONResponse, Response
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from hopitalia_budget.adaptateurs.entree.api.crud import JournalDep, tracer
 from hopitalia_budget.adaptateurs.entree.api.dependances import (
     HorlogeDep,
     LangueDep,
     SessionDep,
+    UtilisateurDep,
 )
 from hopitalia_budget.adaptateurs.entree.api.pagination import parametres_autorises
 from hopitalia_budget.adaptateurs.entree.api.routes.tableaux_de_bord import (
@@ -825,6 +827,8 @@ def produire_etat(
     p: PerimetreDep,
     horloge: HorlogeDep,
     langue: LangueDep,
+    utilisateur: UtilisateurDep,
+    journal: JournalDep,
     format: Annotated[Format | None, Query()] = None,
     accept: Annotated[str | None, Header()] = None,
 ) -> Response:
@@ -833,6 +837,18 @@ def produire_etat(
         raise ErreurMetier("RESSOURCE_INTROUVABLE")
     choisi = _format(format, accept)
     etat = construire(session, p, code, langue, horloge.maintenant().date())
+    # EF-AUD-02 : un export d'état est une opération sensible, tracée.
+    tracer(
+        journal,
+        utilisateur,
+        "EXPORT",
+        "Etat",
+        code,
+        None,
+        {"format": choisi, "exerciceId": str(p.exercice_id), "lignes": str(len(etat.lignes))},
+        None,
+    )
+    session.commit()
     nom = f"{code}.{choisi}"
     entetes = {"Content-Disposition": f'attachment; filename="{nom}"', "Content-Language": langue}
     if choisi == "json":

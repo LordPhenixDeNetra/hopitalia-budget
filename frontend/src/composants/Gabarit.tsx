@@ -1,4 +1,6 @@
 import {
+  LockOutlined,
+  SearchOutlined,
   ApartmentOutlined,
   BellOutlined,
   FileDoneOutlined,
@@ -49,6 +51,10 @@ export function Gabarit() {
   const voitHabilitations = (moi?.habilitations ?? []).some((h) =>
     ['ADM', 'RB', 'AUD'].includes(h.profil),
   )
+  const profils = new Set((moi?.habilitations ?? []).map((h) => h.profil))
+  // Matrice des habilitations : journal d'audit (VAL, ORD, AUD), clôture d'exercice (RB, ORD).
+  const voitAudit = ['VAL', 'ORD', 'AUD'].some((p) => profils.has(p))
+  const clotureExercice = ['RB', 'ORD'].some((p) => profils.has(p))
 
   const changerLangue = (langue: Langue) => {
     memoriserLangue(langue)
@@ -151,6 +157,19 @@ export function Gabarit() {
               icon: <SettingOutlined aria-hidden />,
               label: t('menu.parametrage'),
             },
+            { key: '/recherche', icon: <SearchOutlined aria-hidden />, label: t('menu.recherche') },
+            ...(voitAudit
+              ? [{ key: '/audit', icon: <AuditOutlined aria-hidden />, label: t('menu.audit') }]
+              : []),
+            ...(clotureExercice
+              ? [
+                  {
+                    key: '/cloture-exercice',
+                    icon: <LockOutlined aria-hidden />,
+                    label: t('menu.clotureExercice'),
+                  },
+                ]
+              : []),
             ...(voitHabilitations
               ? [
                   {

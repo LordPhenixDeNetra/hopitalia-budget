@@ -61,6 +61,9 @@ class EngagementValidable:
         )
 
     def controler_soumission(self) -> None:
+        # EF-BUD-09 : un brouillon d'un exercice clos ne part plus en validation.
+        if not self.depot.exercice_ouvert(self.engagement):
+            raise ErreurMetier("EXERCICE_NON_OUVERT")
         exiger_conformite(
             signaler(self.depot, self.objet(), controler(self.depot, self.engagement))
         )

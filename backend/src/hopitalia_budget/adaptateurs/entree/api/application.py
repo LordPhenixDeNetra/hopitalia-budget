@@ -18,11 +18,13 @@ from hopitalia_budget.adaptateurs.entree.api.routes import (
     engagements,
     etablissements,
     etats,
+    exercices,
     factures,
     habilitations,
     moi,
     paiements,
     parametrage,
+    recherche,
     tableaux_de_bord,
     workflow,
 )
@@ -105,6 +107,8 @@ def creer_application(
         tableaux_de_bord,
         alertes,
         etats,
+        exercices,
+        recherche,
     ):
         v1.include_router(module.router)
     for routeur in [*parametrage.routeurs(), *workflow.routeurs()]:

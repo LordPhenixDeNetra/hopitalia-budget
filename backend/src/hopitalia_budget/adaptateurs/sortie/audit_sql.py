@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from uuid import UUID
 
 from sqlalchemy import select, tuple_
@@ -52,6 +52,15 @@ def lister_journal(
     ):
         if champ in filtres:
             requete = requete.where(colonne == filtres[champ])
+    # Période sur la date de l'horodatage, bornes comprises.
+    if "du" in filtres:
+        requete = requete.where(
+            JournalAuditModele.horodatage
+            >= datetime.fromisoformat(filtres["du"]).replace(tzinfo=UTC)
+        )
+    if "au" in filtres:
+        lendemain = datetime.fromisoformat(filtres["au"]).replace(tzinfo=UTC) + timedelta(days=1)
+        requete = requete.where(JournalAuditModele.horodatage < lendemain)
     if apres is not None:
         requete = requete.where(
             tuple_(JournalAuditModele.horodatage, JournalAuditModele.id) > tuple_(*apres)

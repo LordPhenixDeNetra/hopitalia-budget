@@ -397,6 +397,37 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
         ("Paiement déjà annulé", "Ce paiement est déjà annulé."),
         ("Payment already cancelled", "This payment is already cancelled."),
     ),
+    "CLOTURE_ENGAGEMENTS_EN_COURS": (
+        409,
+        (
+            "Clôture impossible",
+            "{nombre} engagement(s) de l'exercice sont encore dans leur circuit de validation : "
+            "validez-les ou rejetez-les avant la clôture.",
+        ),
+        (
+            "Closing not possible",
+            "{nombre} commitment(s) of the year are still in their approval flow: approve or "
+            "reject them before closing.",
+        ),
+    ),
+    "REPORT_LIGNE_ABSENTE": (
+        409,
+        (
+            "Report impossible",
+            "La ligne {ligne} de l'engagement {engagement} n'existe pas dans le budget de "
+            "l'exercice suivant : créez-la avant la clôture.",
+        ),
+        (
+            "Carry-over not possible",
+            "Line {ligne} of commitment {engagement} does not exist in the next year's budget: "
+            "create it before closing.",
+        ),
+    ),
+    "EXERCICE_NON_CLOS": (
+        409,
+        ("Exercice non clos", "Cet exercice n'est pas clos pour cet établissement."),
+        ("Year not closed", "This year is not closed for this facility."),
+    ),
     "OPERATION_DEJA_TRAITEE": (
         409,
         ("Opération déjà traitée", "Cette opération n'attend aucune validation."),

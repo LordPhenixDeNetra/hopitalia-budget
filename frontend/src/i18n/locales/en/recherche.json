@@ -1,0 +1,16 @@
+{
+  "titre": "Search",
+  "intro": "Find a document by number, label, supplier, amount, date, account or department.",
+  "champ": "Search",
+  "exemple": "FAC-001, Pharma, 30000000, 2026-04-16, 604-MED…",
+  "chercher": "Search",
+  "aucun": "No document found.",
+  "types": {
+    "Engagement": "Commitment",
+    "Contrat": "Contract",
+    "BonCommande": "Order",
+    "Facture": "Invoice",
+    "Liquidation": "Settlement",
+    "Paiement": "Payment"
+  }
+}

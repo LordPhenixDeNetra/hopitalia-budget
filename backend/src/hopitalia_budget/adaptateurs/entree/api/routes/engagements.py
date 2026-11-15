@@ -46,6 +46,7 @@ from hopitalia_budget.adaptateurs.entree.api.schemas import (
 )
 from hopitalia_budget.adaptateurs.sortie.derogations_sql import DepotDerogationsSql
 from hopitalia_budget.adaptateurs.sortie.engagements_sql import DepotEngagementsSql
+from hopitalia_budget.adaptateurs.sortie.exercices_sql import exercice_ouvert
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     AnnulationLigneModele,
     AnnulationModele,
@@ -134,6 +135,7 @@ class EngagementSortie(Schema):
     nature_hors_marche: NatureHorsMarche | None
     justification: str | None
     reference_decision: str | None
+    engagement_origine_id: UUID | None
     statut: StatutEngagement
     date_validation: datetime | None
     cree_par_code: str
@@ -184,7 +186,7 @@ def _preparer(
     if len(exercices) != 1:
         raise ErreurMetier("REFERENCE_INVALIDE", champ="imputations")
     exercice = session.get_one(ExerciceModele, exercices.pop())
-    if exercice.statut not in ("OUVERT", "REOUVERT"):
+    if not exercice_ouvert(session, exercice.id, etablissement_id):
         raise ErreurMetier("EXERCICE_NON_OUVERT")
     return d | {"exercice_id": exercice.id}
 

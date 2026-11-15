@@ -20,7 +20,10 @@
     "alertes": "Alertes",
     "alertesNonLues_one": "{{count}} alerte non lue",
     "alertesNonLues_other": "{{count}} alertes non lues",
-    "etats": "États"
+    "etats": "États",
+    "recherche": "Recherche",
+    "audit": "Journal d'audit",
+    "clotureExercice": "Clôture d'exercice"
   },
   "entete": {
     "langue": "Langue",

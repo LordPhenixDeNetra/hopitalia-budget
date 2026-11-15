@@ -44,7 +44,9 @@ import type {
   CircuitCreation,
   CircuitModification,
   CircuitSortie,
+  Cloture,
   ClotureCreation,
+  ClotureSortie,
   CompteComptableSortie,
   CompteTresorerieCreation,
   CompteTresorerieModification,
@@ -184,21 +186,25 @@ import type {
   ProgrammeModification,
   ProgrammeSortie,
   Rafraichissement,
+  RapportAuditParams,
   RapportImport,
   RapprochementCreation,
   RapprochementSortie,
   ReceptionChamps,
   ReceptionCreation,
   ReceptionSortie,
+  RechercherParams,
   ReferentielCreation,
   ReferentielModification,
   ReferentielSortie,
   RegleModification,
   RegleSortie,
+  Reouverture,
   ReserveCreation,
   ReserveLevee,
   ReserveSortie,
   RestesAPayerParams,
+  Resultat,
   ResultatControleSortie,
   RevisionCorrection,
   RevisionCreation,
@@ -1543,6 +1549,127 @@ export function useListerJournalAudit<TData = Awaited<ReturnType<typeof listerJo
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getListerJournalAuditQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getRapportAuditUrl = (params?: RapportAuditParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/journal-audit/rapport?${stringifiedParams}` : `/api/v1/journal-audit/rapport`
+}
+
+/**
+ * Rapport d'audit (14.4) : le journal filtré, en PDF, tableur ou CSV ; l'export est tracé.
+ * @summary Rapport Audit
+ */
+export const rapportAudit = async (params?: RapportAuditParams, options?: Parameters<typeof appelerApi>[1]): Promise<unknown | Blob> => {
+
+  return appelerApi<unknown | Blob>(getRapportAuditUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getRapportAuditQueryKey = (params?: RapportAuditParams,) => {
+    return [
+    `/api/v1/journal-audit/rapport`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getRapportAuditQueryOptions = <TData = Awaited<ReturnType<typeof rapportAudit>>, TError = HTTPValidationError>(params?: RapportAuditParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rapportAudit>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getRapportAuditQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof rapportAudit>>> = ({ signal }) => rapportAudit(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof rapportAudit>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RapportAuditQueryResult = NonNullable<Awaited<ReturnType<typeof rapportAudit>>>
+export type RapportAuditQueryError = HTTPValidationError
+
+
+/**
+ * Rapport d'audit (14.4) : le journal filtré, en PDF, tableur ou CSV ; l'export est tracé.
+ * @summary Rapport Audit
+ */
+export function useRapportAudit<TData = Awaited<ReturnType<typeof rapportAudit>>, TError = HTTPValidationError>(
+ params: undefined |  RapportAuditParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof rapportAudit>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof rapportAudit>>,
+          TError,
+          Awaited<ReturnType<typeof rapportAudit>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Rapport d'audit (14.4) : le journal filtré, en PDF, tableur ou CSV ; l'export est tracé.
+ * @summary Rapport Audit
+ */
+export function useRapportAudit<TData = Awaited<ReturnType<typeof rapportAudit>>, TError = HTTPValidationError>(
+ params?: RapportAuditParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rapportAudit>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof rapportAudit>>,
+          TError,
+          Awaited<ReturnType<typeof rapportAudit>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Rapport d'audit (14.4) : le journal filtré, en PDF, tableur ou CSV ; l'export est tracé.
+ * @summary Rapport Audit
+ */
+export function useRapportAudit<TData = Awaited<ReturnType<typeof rapportAudit>>, TError = HTTPValidationError>(
+ params?: RapportAuditParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rapportAudit>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Rapport d'audit (14.4) : le journal filtré, en PDF, tableur ou CSV ; l'export est tracé.
+ * @summary Rapport Audit
+ */
+export function useRapportAudit<TData = Awaited<ReturnType<typeof rapportAudit>>, TError = HTTPValidationError>(
+ params?: RapportAuditParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rapportAudit>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getRapportAuditQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -10473,6 +10600,423 @@ export function useProduireEtat<TData = Awaited<ReturnType<typeof produireEtat>>
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
   const queryOptions = getProduireEtatQueryOptions(code,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCloturerExerciceUrl = (exerciceId: string,) => {
+
+
+
+
+  return `/api/v1/exercices/${exerciceId}/clotures`
+}
+
+/**
+ * Clôture : reliquats reportés sur l'exercice suivant, historique intact (RG-10).
+ * @summary Cloturer Exercice
+ */
+export const cloturerExercice = async (exerciceId: string,
+    cloture: Cloture, options?: Parameters<typeof appelerApi>[1]): Promise<ClotureSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<ClotureSortie>(getCloturerExerciceUrl(exerciceId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(cloture)
+  }
+);}
+
+
+
+
+
+export const getCloturerExerciceMutationKey = () => ['cloturerExercice'] as const;
+
+export const getCloturerExerciceMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cloturerExercice>>, TError,CloturerExerciceMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof cloturerExercice>>, TError,CloturerExerciceMutationVariables, TContext> => {
+
+const mutationKey = getCloturerExerciceMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof cloturerExercice>>, CloturerExerciceMutationVariables> = (props) => {
+          const {exerciceId,data} = props ?? {};
+
+          return  cloturerExercice(exerciceId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CloturerExerciceMutationResult = NonNullable<Awaited<ReturnType<typeof cloturerExercice>>>
+    export type CloturerExerciceMutationBody = Cloture
+    export type CloturerExerciceMutationError = HTTPValidationError
+    export type CloturerExerciceMutationVariables = {exerciceId: string;data: Cloture}
+
+    /**
+ * Clôture : reliquats reportés sur l'exercice suivant, historique intact (RG-10).
+ * @summary Cloturer Exercice
+ */
+export const useCloturerExercice = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof cloturerExercice>>, TError,CloturerExerciceMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof cloturerExercice>>,
+        TError,
+        CloturerExerciceMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCloturerExerciceMutationOptions(options), queryClient);
+    }
+
+export const getListerCloturesUrl = (exerciceId: string,) => {
+
+
+
+
+  return `/api/v1/exercices/${exerciceId}/clotures`
+}
+
+/**
+ * Historique des clôtures et réouvertures, dans les établissements visibles.
+ * @summary Lister Clotures
+ */
+export const listerClotures = async (exerciceId: string, options?: Parameters<typeof appelerApi>[1]): Promise<ClotureSortie[]> => {
+
+  return appelerApi<ClotureSortie[]>(getListerCloturesUrl(exerciceId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerCloturesQueryKey = (exerciceId: string,) => {
+    return [
+    `/api/v1/exercices/${exerciceId}/clotures`
+    ] as const;
+    }
+
+
+export const getListerCloturesQueryOptions = <TData = Awaited<ReturnType<typeof listerClotures>>, TError = HTTPValidationError>(exerciceId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerClotures>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerCloturesQueryKey(exerciceId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerClotures>>> = ({ signal }) => listerClotures(exerciceId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: exerciceId !== null && exerciceId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerClotures>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerCloturesQueryResult = NonNullable<Awaited<ReturnType<typeof listerClotures>>>
+export type ListerCloturesQueryError = HTTPValidationError
+
+
+/**
+ * Historique des clôtures et réouvertures, dans les établissements visibles.
+ * @summary Lister Clotures
+ */
+export function useListerClotures<TData = Awaited<ReturnType<typeof listerClotures>>, TError = HTTPValidationError>(
+ exerciceId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerClotures>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerClotures>>,
+          TError,
+          Awaited<ReturnType<typeof listerClotures>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Historique des clôtures et réouvertures, dans les établissements visibles.
+ * @summary Lister Clotures
+ */
+export function useListerClotures<TData = Awaited<ReturnType<typeof listerClotures>>, TError = HTTPValidationError>(
+ exerciceId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerClotures>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerClotures>>,
+          TError,
+          Awaited<ReturnType<typeof listerClotures>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Historique des clôtures et réouvertures, dans les établissements visibles.
+ * @summary Lister Clotures
+ */
+export function useListerClotures<TData = Awaited<ReturnType<typeof listerClotures>>, TError = HTTPValidationError>(
+ exerciceId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerClotures>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Historique des clôtures et réouvertures, dans les établissements visibles.
+ * @summary Lister Clotures
+ */
+export function useListerClotures<TData = Awaited<ReturnType<typeof listerClotures>>, TError = HTTPValidationError>(
+ exerciceId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerClotures>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerCloturesQueryOptions(exerciceId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getReouvrirExerciceUrl = (exerciceId: string,) => {
+
+
+
+
+  return `/api/v1/exercices/${exerciceId}/reouvertures`
+}
+
+/**
+ * Réouverture motivée et tracée (T-240) ; les reports déjà faits restent acquis.
+ * @summary Reouvrir Exercice
+ */
+export const reouvrirExercice = async (exerciceId: string,
+    reouverture: Reouverture, options?: Parameters<typeof appelerApi>[1]): Promise<ClotureSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<ClotureSortie>(getReouvrirExerciceUrl(exerciceId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(reouverture)
+  }
+);}
+
+
+
+
+
+export const getReouvrirExerciceMutationKey = () => ['reouvrirExercice'] as const;
+
+export const getReouvrirExerciceMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reouvrirExercice>>, TError,ReouvrirExerciceMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof reouvrirExercice>>, TError,ReouvrirExerciceMutationVariables, TContext> => {
+
+const mutationKey = getReouvrirExerciceMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof reouvrirExercice>>, ReouvrirExerciceMutationVariables> = (props) => {
+          const {exerciceId,data} = props ?? {};
+
+          return  reouvrirExercice(exerciceId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ReouvrirExerciceMutationResult = NonNullable<Awaited<ReturnType<typeof reouvrirExercice>>>
+    export type ReouvrirExerciceMutationBody = Reouverture
+    export type ReouvrirExerciceMutationError = HTTPValidationError
+    export type ReouvrirExerciceMutationVariables = {exerciceId: string;data: Reouverture}
+
+    /**
+ * Réouverture motivée et tracée (T-240) ; les reports déjà faits restent acquis.
+ * @summary Reouvrir Exercice
+ */
+export const useReouvrirExercice = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof reouvrirExercice>>, TError,ReouvrirExerciceMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof reouvrirExercice>>,
+        TError,
+        ReouvrirExerciceMutationVariables,
+        TContext
+      > => {
+      return useMutation(getReouvrirExerciceMutationOptions(options), queryClient);
+    }
+
+export const getRechercherUrl = (params: RechercherParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/recherche?${stringifiedParams}` : `/api/v1/recherche`
+}
+
+/**
+ * Pièces correspondantes, au plus 50, des plus récentes aux plus anciennes.
+ * @summary Rechercher
+ */
+export const rechercher = async (params: RechercherParams, options?: Parameters<typeof appelerApi>[1]): Promise<Resultat[]> => {
+
+  return appelerApi<Resultat[]>(getRechercherUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getRechercherQueryKey = (params?: RechercherParams,) => {
+    return [
+    `/api/v1/recherche`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getRechercherQueryOptions = <TData = Awaited<ReturnType<typeof rechercher>>, TError = HTTPValidationError>(params: RechercherParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rechercher>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getRechercherQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof rechercher>>> = ({ signal }) => rechercher(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof rechercher>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type RechercherQueryResult = NonNullable<Awaited<ReturnType<typeof rechercher>>>
+export type RechercherQueryError = HTTPValidationError
+
+
+/**
+ * Pièces correspondantes, au plus 50, des plus récentes aux plus anciennes.
+ * @summary Rechercher
+ */
+export function useRechercher<TData = Awaited<ReturnType<typeof rechercher>>, TError = HTTPValidationError>(
+ params: RechercherParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof rechercher>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof rechercher>>,
+          TError,
+          Awaited<ReturnType<typeof rechercher>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Pièces correspondantes, au plus 50, des plus récentes aux plus anciennes.
+ * @summary Rechercher
+ */
+export function useRechercher<TData = Awaited<ReturnType<typeof rechercher>>, TError = HTTPValidationError>(
+ params: RechercherParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rechercher>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof rechercher>>,
+          TError,
+          Awaited<ReturnType<typeof rechercher>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Pièces correspondantes, au plus 50, des plus récentes aux plus anciennes.
+ * @summary Rechercher
+ */
+export function useRechercher<TData = Awaited<ReturnType<typeof rechercher>>, TError = HTTPValidationError>(
+ params: RechercherParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rechercher>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Pièces correspondantes, au plus 50, des plus récentes aux plus anciennes.
+ * @summary Rechercher
+ */
+export function useRechercher<TData = Awaited<ReturnType<typeof rechercher>>, TError = HTTPValidationError>(
+ params: RechercherParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof rechercher>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getRechercherQueryOptions(params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

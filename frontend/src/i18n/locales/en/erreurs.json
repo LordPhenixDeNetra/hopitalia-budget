@@ -65,6 +65,9 @@
   "PAIEMENT_SUP_SOLDE": "A share exceeds the amount left to pay on its settlement.",
   "SEPARATION_PAIEMENT": "You approved or ordered this settlement for payment: someone else must pay it.",
   "PAIEMENT_DEJA_ANNULE": "This payment is already cancelled.",
+  "CLOTURE_ENGAGEMENTS_EN_COURS": "Some commitments of the year are still in their approval flow: approve or reject them before closing.",
+  "REPORT_LIGNE_ABSENTE": "A line of a commitment to carry over does not exist in the next year's budget: create it before closing.",
+  "EXERCICE_NON_CLOS": "This year is not closed for this facility.",
   "champ": {
     "missing": "This field is required.",
     "string_too_short": "This field is too short.",
