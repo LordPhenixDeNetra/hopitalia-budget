@@ -45,6 +45,7 @@ from hopitalia_budget.adaptateurs.entree.api.pagination import (
 )
 from hopitalia_budget.adaptateurs.entree.api.schemas import Montant, Schema, TypeObjet
 from hopitalia_budget.adaptateurs.sortie.budget_sql import DepotRevisionsSql
+from hopitalia_budget.adaptateurs.sortie.commandes_sql import DepotReceptionsSql
 from hopitalia_budget.adaptateurs.sortie.contrats_sql import DepotContratsSql
 from hopitalia_budget.adaptateurs.sortie.engagements_sql import DepotEngagementsSql
 from hopitalia_budget.adaptateurs.sortie.modeles import (
@@ -60,7 +61,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
 )
 from hopitalia_budget.adaptateurs.sortie.systeme import StockagePiecesLocal
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import DepotWorkflowSql
-from hopitalia_budget.application import contrats, engagements, revisions, workflow
+from hopitalia_budget.application import contrats, engagements, receptions, revisions, workflow
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.habilitations import Droit, Operation, Profil
 from hopitalia_budget.domaine.ports import Horloge
@@ -86,11 +87,14 @@ VALIDABLES: dict[str, Callable[[Session, Utilisateur, UUID, Horloge], Validable]
     "contrats": lambda s, u, i, h: contrats.validable(DepotContratsSql(s), u, i),
     "avenants": lambda s, u, i, h: contrats.avenant_validable(DepotContratsSql(s), u, i),
     "engagements": lambda s, u, i, h: engagements.validable(DepotEngagementsSql(s), h, u, i),
+    "receptions": lambda s, u, i, h: receptions.validable(DepotReceptionsSql(s), u, i),
     "derogations": lambda s, u, i, h: engagements.derogation_validable(
         DepotEngagementsSql(s), u, i
     ),
 }
-Ressource = Literal["revisions-budgetaires", "contrats", "avenants", "engagements", "derogations"]
+Ressource = Literal[
+    "revisions-budgetaires", "contrats", "avenants", "engagements", "derogations", "receptions"
+]
 
 
 def obtenir_stockage(request: Request) -> StockagePiecesLocal:

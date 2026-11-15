@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     Identity,
     Index,
+    Numeric,
     String,
     Text,
     UniqueConstraint,
@@ -705,3 +706,100 @@ class AnnulationLigneModele(Base):
         ForeignKey("imputation_engagement.id"), index=True
     )
     montant: Mapped[Decimal] = mapped_column(MONTANT)
+
+
+QUANTITE = Numeric(18, 3)
+
+
+class BonCommandeModele(Base):
+    """Bon de commande, tranche ou ordre de service : toujours rattaché à un engagement validé."""
+
+    __tablename__ = "bon_commande"
+    __table_args__ = (UniqueConstraint("etablissement_id", "numero"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    engagement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("engagement.id"), index=True)
+    fournisseur_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("fournisseur.id"))
+    numero: Mapped[str] = mapped_column(String(30))
+    type: Mapped[str] = mapped_column(String(20))
+    date_emission: Mapped[date]
+    lieu_livraison: Mapped[str | None] = mapped_column(String(300))
+    date_livraison_prevue: Mapped[date | None]
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class LigneCommandeModele(Base):
+    __tablename__ = "ligne_commande"
+    __table_args__ = (UniqueConstraint("bon_commande_id", "rang"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    bon_commande_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("bon_commande.id"), index=True)
+    rang: Mapped[int]
+    designation: Mapped[str] = mapped_column(String(300))
+    quantite: Mapped[Decimal] = mapped_column(QUANTITE)
+    prix_unitaire: Mapped[Decimal] = mapped_column(MONTANT)
+    taux_taxe: Mapped[Decimal] = mapped_column(MONTANT)
+
+
+class ReceptionModele(Base):
+    """Réception d'une commande ; preuve du service fait une fois validée (EF-REC-05)."""
+
+    __tablename__ = "reception"
+    __table_args__ = (UniqueConstraint("etablissement_id", "numero"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    bon_commande_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("bon_commande.id"), index=True)
+    numero: Mapped[str] = mapped_column(String(30))
+    date_reception: Mapped[date]
+    type: Mapped[str] = mapped_column(String(20))
+    centre_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("centre_responsabilite.id"))
+    agent_responsable_code: Mapped[str] = mapped_column(String(20))
+    observations: Mapped[str | None] = mapped_column(String(1000))
+    statut: Mapped[str] = mapped_column(String(20), index=True)
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class LigneReceptionModele(Base):
+    __tablename__ = "ligne_reception"
+    __table_args__ = (UniqueConstraint("reception_id", "ligne_commande_id"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    reception_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("reception.id"), index=True)
+    ligne_commande_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("ligne_commande.id"), index=True
+    )
+    quantite_recue: Mapped[Decimal] = mapped_column(QUANTITE)
+    quantite_acceptee: Mapped[Decimal] = mapped_column(QUANTITE)
+    quantite_rejetee: Mapped[Decimal] = mapped_column(QUANTITE)
+
+
+class ReserveReceptionModele(Base):
+    __tablename__ = "reserve_reception"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    reception_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("reception.id"), index=True)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"))
+    description: Mapped[str] = mapped_column(String(1000))
+    date_constat: Mapped[date]
+    date_levee: Mapped[date | None]
+    levee_par_code: Mapped[str | None] = mapped_column(String(20))
+
+
+class AttestationServiceFaitModele(Base):
+    __tablename__ = "attestation_service_fait"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    reception_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("reception.id"), unique=True)
+    date: Mapped[date]
+    livrable: Mapped[str] = mapped_column(String(500))
+    conforme: Mapped[bool]
+    cree_par_code: Mapped[str] = mapped_column(String(20))

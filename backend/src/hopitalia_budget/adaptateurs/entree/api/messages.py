@@ -249,6 +249,46 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
             "execution.",
         ),
     ),
+    "ENGAGEMENT_NON_VALIDE": (
+        409,
+        ("Engagement non validé", "Une commande suit toujours un engagement validé (EF-CMD-01)."),
+        ("Commitment not approved", "An order always follows an approved commitment (EF-CMD-01)."),
+    ),
+    "COMMANDE_SUPERIEURE_ENGAGEMENT": (
+        422,
+        (
+            "Commande supérieure à l'engagement",
+            "Les commandes ({commande}) dépasseraient le montant net de l'engagement ({engage}).",
+        ),
+        (
+            "Order above commitment",
+            "Orders ({commande}) would exceed the commitment's net amount ({engage}).",
+        ),
+    ),
+    "QUANTITES_INCOHERENTES": (
+        422,
+        (
+            "Quantités incohérentes",
+            "Quantités positives, et quantité acceptée plus rejetée au plus égale à la reçue.",
+        ),
+        (
+            "Inconsistent quantities",
+            "Positive quantities, and accepted plus rejected at most equal to received.",
+        ),
+    ),
+    "RECEPTION_SUPERIEURE_COMMANDE": (
+        422,
+        (
+            "Réception supérieure à la commande",
+            "La quantité acceptée cumulée ({accepte}) dépasserait la quantité commandée "
+            "({commande}).",
+        ),
+        (
+            "Receipt above order",
+            "The cumulative accepted quantity ({accepte}) would exceed the ordered one "
+            "({commande}).",
+        ),
+    ),
     "OPERATION_DEJA_TRAITEE": (
         409,
         ("Opération déjà traitée", "Cette opération n'attend aucune validation."),
