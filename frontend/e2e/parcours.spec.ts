@@ -17,6 +17,27 @@ const ETABLISSEMENTS = {
   pagination: { page: 1, taille: 25, total: 2, suivant: null },
 }
 
+/**
+ * Ouvre un onglet de fiche. Sur téléphone, Ant Design fait défiler la barre d'onglets au doigt
+ * (pas de menu « … ») : les onglets qui ne tiennent pas sont hors de l'écran. On fait défiler
+ * la barre jusqu'à l'onglet, comme l'utilisateur, puis on le touche.
+ */
+async function ouvrirOnglet(page: Page, nom: string) {
+  const onglet = page.getByRole('tab', { name: nom })
+  const largeur = page.viewportSize()?.width ?? 0
+  const barre = page.locator('.ant-tabs-nav-wrap').first()
+  for (let essai = 0; essai < 10; essai++) {
+    const boite = await onglet.boundingBox()
+    if (boite && boite.x >= 0 && boite.x + boite.width <= largeur) break
+    const zone = (await barre.boundingBox())!
+    await page.mouse.move(zone.x + zone.width / 2, zone.y + zone.height / 2)
+    await page.mouse.wheel(0, 120)
+    await page.waitForTimeout(100)
+  }
+  await onglet.click()
+  await expect(onglet).toHaveAttribute('aria-selected', 'true')
+}
+
 async function simulerApi(page: Page) {
   await page.route('**/api/v1/**', async (route) => {
     const chemin = new URL(route.request().url()).pathname
@@ -132,7 +153,7 @@ test('REC-01 : créer un exercice puis importer les crédits du budget', async (
   await expect(page.getByText('Élément ajouté.')).toBeVisible()
 
   await page.goto('/budgets/b1')
-  await page.getByRole('tab', { name: 'Import des dotations' }).click()
+  await ouvrirOnglet(page, 'Import des dotations')
   await page.locator('input[type=file]').setInputFiles({
     name: 'dotations.csv',
     mimeType: 'text/csv',
@@ -264,14 +285,14 @@ test('REC-02 : enregistrer un marché avec ventilation, échéance et pièce', a
   await expect(
     page.getByRole('heading', { name: 'M-2026-001 — Fournitures médicales' }),
   ).toBeVisible()
-  await page.getByRole('tab', { name: 'Exécution' }).click()
+  await ouvrirOnglet(page, 'Exécution')
   await page.getByLabel('Libellé').first().fill('T1')
   await page.getByLabel('Date').first().fill('2026-03-31')
   await page.getByLabel('Montant prévu').fill('25000000.00')
   await page.getByRole('button', { name: 'Ajouter' }).first().click()
   await expect(page.getByText('Élément ajouté.')).toBeVisible()
 
-  await page.getByRole('tab', { name: 'Validation et pièces' }).click()
+  await ouvrirOnglet(page, 'Validation et pièces')
   await page.getByLabel('Type de pièce').click()
   await page.getByTitle('Contrat signé').click()
   await page.locator('input[type=file]').setInputFiles({
