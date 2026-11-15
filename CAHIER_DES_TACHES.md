@@ -33,11 +33,11 @@
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
-| P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
+| P2 | 5 | 0 | 27 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **149** | **4** | **54** | **0** | **0** | **2** | **209** |
+| **Total** | **154** | **4** | **49** | **0** | **0** | **2** | **209** |
 
-Avancement : 149 / 207 tâches actives terminées (72 %), hors 2 abandonnées.
+Avancement : 154 / 207 tâches actives terminées (74 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -291,11 +291,11 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-210 | Tableau de bord de la direction. | §14.1 | T-195 | À faire | Engagé, réceptionné, facturé, liquidé, transmis et payé distincts (REC-14). |
-| T-211 | Indicateurs opérationnels (taux, restes, âge des factures, délai moyen). | §14.2 | T-210 | À faire | Valeurs conformes à la section 6. |
-| T-212 | Filtres : exercice, période, service, compte, fournisseur, marché, source. | §14.1 | T-210 | À faire | Chaque filtre testé. |
-| T-213 | Jauges de consommation avec repères 80 / 90 / 100 % et tableau équivalent. | IHM-10 | T-210 | À faire | Valeur lisible en texte, sans dépendre de la couleur. |
-| T-214 | Tableau de bord des restes à payer et des factures en attente. | §18.1 | T-210 | À faire | Liste exportable. |
+| T-210 | Tableau de bord de la direction. | §14.1 | T-195 | Fait | Engagé, réceptionné, facturé, liquidé, transmis et payé distincts (REC-14). `GET /tableaux-de-bord/direction` et écran Tableau de bord : crédits, étapes engagé, commandé, réceptionné, facturé, liquidé, transmis et payé distinctes, répartitions, principaux marchés ; chiffres du jeu d'essai retrouvés (`test_t210_t211_tableau_de_la_direction`). |
+| T-211 | Indicateurs opérationnels (taux, restes, âge des factures, délai moyen). | §14.2 | T-210 | Fait | Valeurs conformes à la section 6. Taux, restes à engager et à payer, factures en attente, âge moyen et délai moyen de traitement, définis en 14.2 ; totaux recalculés par les formules de la section 6 (`test_un_taux_agrege_se_recalcule`). |
+| T-212 | Filtres : exercice, période, service, compte, fournisseur, marché, source. | §14.1 | T-210 | Fait | Chaque filtre testé. Exercice, établissement, service, compte, source, fournisseur, marché et période testés un à un, avec les refus (dates incohérentes, établissement non autorisé, paramètre inconnu) (`test_t212_chaque_filtre`). |
+| T-213 | Jauges de consommation avec repères 80 / 90 / 100 % et tableau équivalent. | IHM-10 | T-210 | Fait | Valeur lisible en texte, sans dépendre de la couleur. Composant `Jauge` : barre, repères 80/90/100 %, taux en texte et seuil écrit en clair, rôle `meter` ; tableau équivalent sous les jauges (test Vitest, Playwright sur ordinateur, téléphone et 300 px). |
+| T-214 | Tableau de bord des restes à payer et des factures en attente. | §18.1 | T-210 | Fait | Liste exportable. `GET /tableaux-de-bord/restes-a-payer` et écran Restes à payer, export CSV (`test_t214_restes_a_payer_et_factures_en_attente`, test Vitest de l'export, téléchargement vérifié par Playwright). |
 
 ### P2.B — Lot 6 : alertes
 
@@ -435,3 +435,4 @@ flowchart LR
 | 15/11/2026 | T-185 à T-193 (P1.G) | À faire | Fait | Ordonnancements, décisions du comptable, paiements partiels et groupés ventilés, solde dû (RG-07), statut de la facture (RG-08), payeur (RG-13), idempotence, annulation, écrans ; migration 0009 ; 186 tests backend, 44 tests Vitest, parcours REC-08 à REC-10. |
 | 15/11/2026 | T-195 à T-197 (P1.H) | À faire | Fait | Jeu d'essai de l'annexe 18.2 rejoué de bout en bout (REC-14), absence de passation vérifiée (REC-15), revue d'architecture et trois écarts ARC-S corrigés. |
 | 15/11/2026 | T-198 | À faire | En cours | Support de recette prêt ; séance et procès-verbal avec la DAF à venir. |
+| 15/11/2026 | T-210 à T-214 (P2.A) | À faire | Fait | Tableau de bord de la direction, indicateurs opérationnels, filtres, jauges 80/90/100 %, restes à payer exportables ; 193 tests backend, 49 tests Vitest, parcours Playwright du tableau de bord. |
