@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.5 · 15 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.6 · 15 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -12,6 +12,7 @@
 | 3.3 | 14/11/2026 | Workflow transverse (lot P1.B) : cycle de vie de la révision budgétaire (8.4), règles des circuits, statuts personnalisés et délégations (7.6), révision justifiable (10.2), ressources d'API ajoutées (11.2). |
 | 3.4 | 15/11/2026 | Contrats et avenants (lot P1.C) : cycles de vie (8.5), règles de saisie et de calcul du contrat, ressources d'API précisées (11.2). |
 | 3.5 | 15/11/2026 | Engagements et contrôles (lot P1.D) : règles de l'engagement, des contrôles, des dérogations et des annulations (8.1), nature de dérogation `SEUIL_HORS_MARCHE` (18.4), ressources d'API précisées (11.2). |
+| 3.6 | 15/11/2026 | Commandes, réceptions et service fait (lot P1.E) : cycle de la réception (8.6), bon de commande émis sans circuit (10.2), ordonnateur final limité aux objets du point 16 (7.6), ressources d'API précisées (11.2). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1169,7 +1170,7 @@ CleIdempotence "*" --> "1" Utilisateur
 
 - **Circuit figé à la soumission.** Le circuit applicable est choisi à la soumission puis conservé avec l'objet : un changement de paramétrage ne touche pas une opération en cours.
 - **Choix du circuit.** Parmi les circuits actifs de l'établissement pour ce type d'objet, ceux dont la tranche `[seuilMin, seuilMax[` contient le montant ; celui du service (`centreId`) prime sur celui de l'établissement, puis le seuil minimal le plus élevé. Sans circuit, le circuit par défaut s'applique : visa de la DAF (profil VAL), puis ordonnateur (section 17, point 16).
-- **Étapes.** Numérotées à partir de 1. Chaque profil d'étape a le droit « Valider » sur ce type d'objet dans la matrice des habilitations. La dernière étape est obligatoire et revient à l'ordonnateur. Une étape facultative peut être sautée : l'agent de l'étape obligatoire suivante peut viser directement.
+- **Étapes.** Numérotées à partir de 1. Chaque profil d'étape a le droit « Valider » sur ce type d'objet dans la matrice des habilitations. La dernière étape est obligatoire ; pour les objets du point 16 de la section 17 (révisions, contrats, avenants, engagements, dérogations), elle revient à l'ordonnateur. Le service fait d'une réception est validé par le valideur du service (profil VAL), seul à avoir ce droit dans la matrice. Une étape facultative peut être sautée : l'agent de l'étape obligatoire suivante peut viser directement.
 - **Décisions.** Visa favorable, rejet (définitif) ou retour pour correction ; motif obligatoire pour le rejet et le retour. Après correction, l'auteur renvoie l'opération au début du même circuit ; la séparation des tâches se juge sur le cycle en cours.
 - **Séparation des tâches** (RG-13, si le circuit l'exige) : l'auteur ne vise pas sa propre opération et un agent ne vise qu'une étape par cycle.
 - **Délégations.** Pendant sa période, le délégataire vise avec les profils du délégant, dans les circuits seulement ; il n'obtient aucun autre droit. Le visa garde le code du délégant. Une délégation se raccourcit ou se révoque, elle ne se prolonge pas.
@@ -1296,6 +1297,29 @@ stateDiagram-v2
 - Avenant : variation positive ou négative, non nulle. À la validation finale, le contrat doit être validé et le nouveau plafond rester positif et au moins égal au cumul engagé (RG-04) ; le montant avant et le nouveau plafond sont alors relevés sur l'avenant pour l'historique (REC-04). Le montant actualisé, lui, se recalcule toujours depuis les avenants validés (RG-14).
 - Révisions de prix : leur incidence est suivie à part ; elle n'entre pas dans le montant actualisé (6.2).
 - Avance et retenue de garantie : le contrat porte les taux et les conditions ; montant d'avance, avance récupérée, retenue opérée et libérée se calculent depuis le montant actualisé et les déductions des liquidations (6.3).
+
+### 8.6. Commande et réception
+
+Un bon de commande (ou une tranche, ou un ordre de service) est **émis** par le gestionnaire de marchés sur un engagement validé ; la matrice ne donne à personne le droit de le valider, il n'a donc pas de circuit. Le total des commandes d'un engagement ne dépasse pas son montant net d'annulations.
+
+```mermaid
+stateDiagram-v2
+  [*] --> BROUILLON : enregistrer (reception)
+  BROUILLON --> SOUMIS : soumettre (quantites controlees)
+  SOUMIS --> EN_VALIDATION : viser
+  SOUMIS --> VALIDE : service fait (derniere etape)
+  EN_VALIDATION --> VALIDE : service fait (derniere etape)
+  SOUMIS --> A_CORRIGER : retourner (motif)
+  A_CORRIGER --> SOUMIS : resoumettre
+  SOUMIS --> REJETE : rejeter (motif)
+  VALIDE --> [*]
+  REJETE --> [*]
+```
+
+- Une commande reçoit autant de réceptions que nécessaire. Par ligne : acceptée + rejetée ≤ reçue ; le cumul accepté des réceptions validées ne dépasse pas la quantité commandée (contrôle repris à la validation, commande verrouillée).
+- Seule une réception **validée** fait preuve du service fait : elle seule réduit le reste à recevoir et compte dans le « réceptionné » (6.2). Son type (totale, partielle, refusée) est établi à la validation.
+- Réserves constatées puis levées ; attestation de service fait (une par réception, avant validation) ; pièces obligatoires par type de pièce (bon de livraison, procès-verbal).
+- Une commande est en retard quand sa date de livraison prévue est passée et qu'il reste à recevoir.
 
 ## 9. Processus
 
@@ -1471,7 +1495,7 @@ Un objet n'implémente que les capacités qu'il possède. Le `Validable` unique 
 | Engagement | Oui | Oui | Oui | Oui |
 | Contrat, Avenant | Oui | Oui | | |
 | Révision budgétaire | Oui | Oui | | |
-| Bon de commande | Oui | | | |
+| Bon de commande | | | | |
 | Réception | Oui | Oui | | |
 | Facture | Oui | Oui | Oui | |
 | Liquidation | Oui | | Oui | Oui |
@@ -1566,8 +1590,8 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/contrats/{id}/synthese` | GET | Fiche de synthèse (annexe 18.1). |
 | `/engagements` | GET, POST, PATCH | Filtres `statut`, `origine`, `contratId`, `fournisseurId`, `centreId`. `GET /engagements/{id}/controles` donne les écarts à l'instant. |
 | `/engagements/{id}/derogations`, `/annulations`, `/clotures` | GET, POST | Dérogations validées par le circuit (`/derogations/{id}/validations`). |
-| `/engagements/{id}/bons-commande` | GET, POST | |
-| `/bons-commande/{id}/receptions` | GET, POST | |
+| `/engagements/{id}/bons-commande` | GET, POST | `GET /bons-commande?enRetard=true` : commandes en retard ; `GET /bons-commande/{id}` donne le reste à recevoir par ligne. |
+| `/bons-commande/{id}/receptions` | GET, POST | `PATCH /receptions/{id}` en brouillon ou à corriger ; `/receptions/{id}/reserves`, `/attestations` ; `PATCH /reserves/{id}` (levée) ; `GET /reserves?nonLevees=true`. |
 | `/factures` | GET, POST | Détection de doublon à la création (`409` + référence du doublon). |
 | `/factures/{id}/liquidations` | GET, POST | |
 | `/ordonnancements` | GET, POST | |
