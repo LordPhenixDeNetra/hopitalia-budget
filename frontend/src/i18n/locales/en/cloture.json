@@ -1,0 +1,20 @@
+{
+  "titre": "Year closing",
+  "intro": "Closing is done per facility. The unsettled remainder of each approved commitment is carried over to the next year, on the line with the same code; unpaid settlements remain payable. Nothing is deleted.",
+  "exercice": "Year",
+  "cloturer": "Close the year",
+  "etablissement": "Facility",
+  "suivant": "Next year",
+  "motif": "Reason",
+  "confirmation": "Close this year for this facility?",
+  "avertissement": "Remainders will be carried over to the next year. Reopening does not cancel them.",
+  "cloturee": "Year closed: {{nombre}} commitment(s) carried over, {{montant}} XOF.",
+  "le": "Closed on",
+  "engagementsReportes": "Commitments carried over",
+  "montantReporte": "Amount carried over",
+  "etat": "Status",
+  "clos": "Closed",
+  "rouvrir": "Reopen",
+  "rouvert": "Year reopened.",
+  "rouvertLe": "Reopened on"
+}

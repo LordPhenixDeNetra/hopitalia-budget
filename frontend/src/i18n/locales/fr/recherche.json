@@ -1,0 +1,16 @@
+{
+  "titre": "Recherche",
+  "intro": "Cherchez une pièce par son numéro, son libellé, son fournisseur, son montant, sa date, son compte ou son service.",
+  "champ": "Rechercher",
+  "exemple": "FAC-001, Pharma, 30 000 000, 16/04/2026, 604-MED…",
+  "chercher": "Chercher",
+  "aucun": "Aucune pièce trouvée.",
+  "types": {
+    "Engagement": "Engagement",
+    "Contrat": "Contrat",
+    "BonCommande": "Commande",
+    "Facture": "Facture",
+    "Liquidation": "Liquidation",
+    "Paiement": "Paiement"
+  }
+}

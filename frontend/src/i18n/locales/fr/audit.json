@@ -1,0 +1,29 @@
+{
+  "titre": "Journal d'audit",
+  "intro": "Toutes les opérations tracées, en lecture seule : modifications, validations, connexions, exports. Le rapport d'audit reprend les filtres choisis.",
+  "filtres": {
+    "action": "Action",
+    "typeObjet": "Type d'objet",
+    "idObjet": "Identifiant",
+    "du": "Du",
+    "au": "Au"
+  },
+  "filtrer": "Filtrer",
+  "rapport": "Rapport d'audit :",
+  "plus": "Afficher les suivantes",
+  "formats": {
+    "pdf": "PDF",
+    "xlsx": "Tableur",
+    "csv": "CSV"
+  },
+  "echec": "Le rapport n'a pas pu être produit.",
+  "colonnes": {
+    "horodatage": "Horodatage",
+    "agent": "Agent",
+    "action": "Action",
+    "objet": "Objet",
+    "identifiant": "Identifiant",
+    "ip": "Adresse IP",
+    "valeur": "Nouvelle valeur"
+  }
+}

@@ -65,6 +65,9 @@
   "PAIEMENT_SUP_SOLDE": "Une part dépasse le reste à payer de sa liquidation.",
   "SEPARATION_PAIEMENT": "Vous avez validé ou ordonnancé cette liquidation : une autre personne doit la payer.",
   "PAIEMENT_DEJA_ANNULE": "Ce paiement est déjà annulé.",
+  "CLOTURE_ENGAGEMENTS_EN_COURS": "Des engagements de l'exercice sont encore dans leur circuit de validation : validez-les ou rejetez-les avant la clôture.",
+  "REPORT_LIGNE_ABSENTE": "Une ligne d'un engagement à reporter n'existe pas dans le budget de l'exercice suivant : créez-la avant la clôture.",
+  "EXERCICE_NON_CLOS": "Cet exercice n'est pas clos pour cet établissement.",
   "champ": {
     "missing": "Ce champ est obligatoire.",
     "string_too_short": "Ce champ est trop court.",

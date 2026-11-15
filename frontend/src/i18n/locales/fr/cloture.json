@@ -1,0 +1,20 @@
+{
+  "titre": "Clôture d'exercice",
+  "intro": "La clôture se fait par établissement. Le reliquat non liquidé de chaque engagement validé est reporté sur l'exercice suivant, ligne de même code ; les liquidations non payées restent payables. Rien n'est supprimé.",
+  "exercice": "Exercice",
+  "cloturer": "Clôturer l'exercice",
+  "etablissement": "Établissement",
+  "suivant": "Exercice suivant",
+  "motif": "Motif",
+  "confirmation": "Clôturer cet exercice pour cet établissement ?",
+  "avertissement": "Les reliquats seront reportés sur l'exercice suivant. Une réouverture ne les annule pas.",
+  "cloturee": "Exercice clos : {{nombre}} engagement(s) reporté(s), {{montant}} XOF.",
+  "le": "Clos le",
+  "engagementsReportes": "Engagements reportés",
+  "montantReporte": "Montant reporté",
+  "etat": "État",
+  "clos": "Clos",
+  "rouvrir": "Rouvrir",
+  "rouvert": "Exercice rouvert.",
+  "rouvertLe": "Rouvert le"
+}

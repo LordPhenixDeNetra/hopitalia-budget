@@ -20,7 +20,10 @@
     "alertes": "Alerts",
     "alertesNonLues_one": "{{count}} unread alert",
     "alertesNonLues_other": "{{count}} unread alerts",
-    "etats": "Reports"
+    "etats": "Reports",
+    "recherche": "Search",
+    "audit": "Audit journal",
+    "clotureExercice": "Year closing"
   },
   "entete": {
     "langue": "Language",

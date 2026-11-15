@@ -121,6 +121,22 @@ export const routes: RouteObject[] = [
           import('./pages/tableaux/TableauDeBord').then((m) => ({ Component: m.TableauDeBord })),
       },
       {
+        path: 'recherche',
+        handle: fil('menu.recherche'),
+        lazy: () => import('./pages/Recherche').then((m) => ({ Component: m.Recherche })),
+      },
+      {
+        path: 'audit',
+        handle: fil('menu.audit'),
+        lazy: () => import('./pages/Audit').then((m) => ({ Component: m.Audit })),
+      },
+      {
+        path: 'cloture-exercice',
+        handle: fil('menu.clotureExercice'),
+        lazy: () =>
+          import('./pages/ClotureExercice').then((m) => ({ Component: m.ClotureExercice })),
+      },
+      {
         path: 'etats',
         handle: fil('menu.etats'),
         lazy: () => import('./pages/tableaux/Etats').then((m) => ({ Component: m.Etats })),

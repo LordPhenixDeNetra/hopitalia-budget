@@ -780,6 +780,40 @@
               ],
               "title": "Action"
             }
+          },
+          {
+            "name": "du",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Du"
+            }
+          },
+          {
+            "name": "au",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Au"
+            }
           }
         ],
         "responses": {
@@ -791,6 +825,137 @@
                   "$ref": "#/components/schemas/PageCurseur_EntreeJournal_"
                 }
               }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/journal-audit/rapport": {
+      "get": {
+        "tags": [
+          "journal d'audit"
+        ],
+        "summary": "Rapport Audit",
+        "description": "Rapport d'audit (14.4) : le journal filtré, en PDF, tableur ou CSV ; l'export est tracé.",
+        "operationId": "rapport_audit",
+        "parameters": [
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "csv",
+                "xlsx",
+                "pdf"
+              ],
+              "type": "string",
+              "default": "pdf",
+              "title": "Format"
+            }
+          },
+          {
+            "name": "typeObjet",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Typeobjet"
+            }
+          },
+          {
+            "name": "idObjet",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idobjet"
+            }
+          },
+          {
+            "name": "action",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Action"
+            }
+          },
+          {
+            "name": "du",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Du"
+            }
+          },
+          {
+            "name": "au",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Au"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "application/pdf": {},
+              "text/csv": {}
             }
           },
           "422": {
@@ -6543,6 +6708,209 @@
               "text/csv": {},
               "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {},
               "application/pdf": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/exercices/{exercice_id}/clotures": {
+      "post": {
+        "tags": [
+          "exercices"
+        ],
+        "summary": "Cloturer Exercice",
+        "description": "Clôture : reliquats reportés sur l'exercice suivant, historique intact (RG-10).",
+        "operationId": "cloturer_exercice",
+        "parameters": [
+          {
+            "name": "exercice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Exercice Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Cloture"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClotureSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "exercices"
+        ],
+        "summary": "Lister Clotures",
+        "description": "Historique des clôtures et réouvertures, dans les établissements visibles.",
+        "operationId": "lister_clotures",
+        "parameters": [
+          {
+            "name": "exercice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Exercice Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ClotureSortie"
+                  },
+                  "title": "Response Lister Clotures"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/exercices/{exercice_id}/reouvertures": {
+      "post": {
+        "tags": [
+          "exercices"
+        ],
+        "summary": "Reouvrir Exercice",
+        "description": "Réouverture motivée et tracée (T-240) ; les reports déjà faits restent acquis.",
+        "operationId": "reouvrir_exercice",
+        "parameters": [
+          {
+            "name": "exercice_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Exercice Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Reouverture"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClotureSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recherche": {
+      "get": {
+        "tags": [
+          "recherche"
+        ],
+        "summary": "Rechercher",
+        "description": "Pièces correspondantes, au plus 50, des plus récentes aux plus anciennes.",
+        "operationId": "rechercher",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 100,
+              "title": "Q"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Resultat"
+                  },
+                  "title": "Response Rechercher"
+                }
+              }
             }
           },
           "422": {
@@ -13078,6 +13446,33 @@
         ],
         "title": "CircuitSortie"
       },
+      "Cloture": {
+        "properties": {
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "exerciceSuivantId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Exercicesuivantid"
+          },
+          "motif": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Motif"
+          }
+        },
+        "type": "object",
+        "required": [
+          "etablissementId",
+          "exerciceSuivantId",
+          "motif"
+        ],
+        "title": "Cloture"
+      },
       "ClotureCreation": {
         "properties": {
           "motif": {
@@ -13092,6 +13487,105 @@
           "motif"
         ],
         "title": "ClotureCreation"
+      },
+      "ClotureSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "exerciceId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Exerciceid"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "exerciceSuivantId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Exercicesuivantid"
+          },
+          "motif": {
+            "type": "string",
+            "title": "Motif"
+          },
+          "engagementsReportes": {
+            "type": "integer",
+            "title": "Engagementsreportes"
+          },
+          "montantReporte": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantreporte",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "reouvertLe": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reouvertle"
+          },
+          "reouvertParCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reouvertparcode"
+          },
+          "motifReouverture": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motifreouverture"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "exerciceId",
+          "etablissementId",
+          "exerciceSuivantId",
+          "motif",
+          "engagementsReportes",
+          "montantReporte",
+          "creeParCode",
+          "creeLe",
+          "reouvertLe",
+          "reouvertParCode",
+          "motifReouverture"
+        ],
+        "title": "ClotureSortie"
       },
       "CompteComptableSortie": {
         "properties": {
@@ -15462,6 +15956,18 @@
             ],
             "title": "Referencedecision"
           },
+          "engagementOrigineId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Engagementorigineid"
+          },
           "statut": {
             "$ref": "#/components/schemas/StatutEngagement"
           },
@@ -15516,6 +16022,7 @@
           "natureHorsMarche",
           "justification",
           "referenceDecision",
+          "engagementOrigineId",
           "statut",
           "dateValidation",
           "creeParCode",
@@ -20582,6 +21089,27 @@
         ],
         "title": "RegleSortie"
       },
+      "Reouverture": {
+        "properties": {
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "motif": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Motif"
+          }
+        },
+        "type": "object",
+        "required": [
+          "etablissementId",
+          "motif"
+        ],
+        "title": "Reouverture"
+      },
       "Repartition": {
         "properties": {
           "cle": {
@@ -20804,6 +21332,84 @@
           "leveeParCode"
         ],
         "title": "ReserveSortie"
+      },
+      "Resultat": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "Engagement",
+              "Contrat",
+              "BonCommande",
+              "Facture",
+              "Liquidation",
+              "Paiement"
+            ],
+            "title": "Type"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "libelle": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Libelle"
+          },
+          "montant": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montant"
+          },
+          "date": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date"
+          },
+          "lien": {
+            "type": "string",
+            "title": "Lien"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "id",
+          "numero",
+          "libelle",
+          "montant",
+          "date",
+          "lien"
+        ],
+        "title": "Resultat"
       },
       "ResultatControleSortie": {
         "properties": {

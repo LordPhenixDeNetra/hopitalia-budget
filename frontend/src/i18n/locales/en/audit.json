@@ -1,0 +1,29 @@
+{
+  "titre": "Audit journal",
+  "intro": "Every traced operation, read-only: changes, approvals, logins, exports. The audit report uses the chosen filters.",
+  "filtres": {
+    "action": "Action",
+    "typeObjet": "Object type",
+    "idObjet": "Identifier",
+    "du": "From",
+    "au": "To"
+  },
+  "filtrer": "Filter",
+  "rapport": "Audit report:",
+  "plus": "Show more",
+  "formats": {
+    "pdf": "PDF",
+    "xlsx": "Spreadsheet",
+    "csv": "CSV"
+  },
+  "echec": "The report could not be produced.",
+  "colonnes": {
+    "horodatage": "Timestamp",
+    "agent": "Agent",
+    "action": "Action",
+    "objet": "Object",
+    "identifiant": "Identifier",
+    "ip": "IP address",
+    "valeur": "New value"
+  }
+}

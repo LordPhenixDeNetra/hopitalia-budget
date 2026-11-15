@@ -468,12 +468,38 @@ export interface CircuitSortie {
   version: number;
 }
 
+export interface Cloture {
+  etablissementId: string;
+  exerciceSuivantId: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  motif: string;
+}
+
 export interface ClotureCreation {
   /**
      * @minLength 1
      * @maxLength 500
      */
   motif: string;
+}
+
+export interface ClotureSortie {
+  id: string;
+  exerciceId: string;
+  etablissementId: string;
+  exerciceSuivantId: string;
+  motif: string;
+  engagementsReportes: number;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantReporte: string;
+  creeParCode: string;
+  creeLe: string;
+  reouvertLe: string | null;
+  reouvertParCode: string | null;
+  motifReouverture: string | null;
 }
 
 export interface NoeudSortie {
@@ -1048,6 +1074,7 @@ export interface EngagementSortie {
   natureHorsMarche: NatureHorsMarche | null;
   justification: string | null;
   referenceDecision: string | null;
+  engagementOrigineId: string | null;
   statut: StatutEngagement;
   dateValidation: string | null;
   creeParCode: string;
@@ -2266,6 +2293,15 @@ export interface RegleSortie {
   notifierParEmail: boolean;
 }
 
+export interface Reouverture {
+  etablissementId: string;
+  /**
+     * @minLength 1
+     * @maxLength 500
+     */
+  motif: string;
+}
+
 /**
  * Une clé (compte, service, nature ou fournisseur) et ses montants ; clé nulle : non
  * renseignée.
@@ -2301,6 +2337,28 @@ export interface ReserveCreation {
 
 export interface ReserveLevee {
   dateLevee: string;
+}
+
+export type ResultatType = typeof ResultatType[keyof typeof ResultatType];
+
+
+export const ResultatType = {
+  Engagement: 'Engagement',
+  Contrat: 'Contrat',
+  BonCommande: 'BonCommande',
+  Facture: 'Facture',
+  Liquidation: 'Liquidation',
+  Paiement: 'Paiement',
+} as const;
+
+export interface Resultat {
+  type: ResultatType;
+  id: string;
+  numero: string;
+  libelle: string | null;
+  montant: string | null;
+  date: string | null;
+  lien: string;
 }
 
 export type ResultatControleSortieDetails = {[key: string]: string};
@@ -2671,7 +2729,27 @@ export type ListerJournalAuditParams = {
   typeObjet?: string | null;
   idObjet?: string | null;
   action?: string | null;
+  du?: string | null;
+  au?: string | null;
 };
+
+export type RapportAuditParams = {
+  format?: RapportAuditFormat;
+  typeObjet?: string | null;
+  idObjet?: string | null;
+  action?: string | null;
+  du?: string | null;
+  au?: string | null;
+};
+
+export type RapportAuditFormat = typeof RapportAuditFormat[keyof typeof RapportAuditFormat];
+
+
+export const RapportAuditFormat = {
+  csv: 'csv',
+  xlsx: 'xlsx',
+  pdf: 'pdf',
+} as const;
 
 export type ListerNomenclatureParams = {
   niveau?: ListerNomenclatureNiveau;
@@ -2884,6 +2962,14 @@ export const ProduireEtatFormat = {
   xlsx: 'xlsx',
   pdf: 'pdf',
 } as const;
+
+export type RechercherParams = {
+  /**
+   * @minLength 2
+   * @maxLength 100
+   */
+  q: string;
+};
 
 export type ListerSitesParams = {
   /** @minimum 1 */

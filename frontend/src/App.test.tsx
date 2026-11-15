@@ -54,6 +54,9 @@ beforeAll(async () => {
     'paiements',
     'tableaux',
     'alertes',
+    'recherche',
+    'cloture',
+    'audit',
   ])
 })
 
@@ -1108,4 +1111,100 @@ describe('centre d’alertes (lot 6)', () => {
     const urls = appel.mock.calls.map(([url]) => String(url))
     expect(urls.some((u) => u.includes('/api/v1/alertes?nonLues=true'))).toBe(true)
   })
+})
+
+describe('recherche, audit et clôture (lot 6)', () => {
+  const page = (donnees: unknown[]) => ({
+    donnees,
+    pagination: { page: 1, taille: 100, total: donnees.length, suivant: null },
+  })
+
+  test('recherche transverse : pièces trouvées et liens vers leur écran (T-238)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(MOI)],
+      'GET /api/v1/recherche': [
+        json([
+          {
+            type: 'Facture',
+            id: 'f1',
+            numero: 'FAC-001',
+            libelle: 'Livraison de mars',
+            montant: '30000000.00',
+            date: '2026-04-16',
+            lien: '/factures/f1',
+          },
+        ]),
+      ],
+    })
+    afficher('/recherche')
+    await userEvent.type(
+      await screen.findByLabelText('Rechercher', {}, { timeout: 5000 }),
+      'FAC-001{Enter}',
+    )
+    const lien = await screen.findByRole('link', { name: 'FAC-001' })
+    expect(lien.getAttribute('href')).toBe('/factures/f1')
+    expect(screen.getByText('Livraison de mars')).toBeTruthy()
+    expect(
+      appel.mock.calls.some(([url]) => String(url).includes('/api/v1/recherche?q=FAC-001')),
+    ).toBe(true)
+  })
+
+  test('clôture d’exercice : confirmation, report annoncé, réouverture proposée (T-239)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const cloture = {
+      id: 'cl1',
+      exerciceId: 'x1',
+      etablissementId: 'a1',
+      exerciceSuivantId: 'x2',
+      motif: 'Fin de gestion',
+      engagementsReportes: 3,
+      montantReporte: '36000000.00',
+      creeParCode: 'AG004',
+      creeLe: '2026-12-31T18:00:00Z',
+      reouvertLe: null,
+      reouvertParCode: null,
+      motifReouverture: null,
+    }
+    const appel = simulerApi({
+      'GET /api/v1/moi': [
+        json({ ...MOI, habilitations: [{ profil: 'ORD', etablissementId: 'a1' }] }),
+      ],
+      'GET /api/v1/exercices': [
+        json(
+          page([
+            { id: 'x1', code: '2026' },
+            { id: 'x2', code: '2027' },
+          ]),
+        ),
+      ],
+      'GET /api/v1/etablissements': [
+        json(page([{ id: 'a1', code: 'CHU-FANN', nom: 'CHU de Fann' }])),
+      ],
+      'GET /api/v1/exercices/x1/clotures': [json([]), json([cloture])],
+      'POST /api/v1/exercices/x1/clotures': [json(cloture, 201)],
+    })
+    afficher('/cloture-exercice')
+    await userEvent.click(await screen.findByLabelText('Exercice', {}, { timeout: 5000 }))
+    await userEvent.click(await screen.findByTitle('2026'))
+    // Le gabarit a aussi un sélecteur d'établissement : on vise le champ du formulaire.
+    fireEvent.mouseDown(document.querySelector<HTMLInputElement>('#etablissementId')!)
+    await userEvent.click(await screen.findByTitle('CHU-FANN — CHU de Fann'))
+    await userEvent.click(screen.getByLabelText('Exercice suivant'))
+    await userEvent.click((await screen.findAllByTitle('2027')).at(-1)!)
+    await userEvent.type(screen.getByLabelText('Motif'), 'Fin de gestion')
+    await userEvent.click(screen.getByRole('button', { name: "Clôturer l'exercice" }))
+    const confirmation = (await screen.findAllByRole('dialog')).at(-1)!
+    await userEvent.click(within(confirmation).getByRole('button', { name: "Clôturer l'exercice" }))
+    expect(
+      await screen.findByText('Exercice clos : 3 engagement(s) reporté(s), 36000000.00 XOF.'),
+    ).toBeTruthy()
+    const envoi = appel.mock.calls.find(([, o]) => o?.method === 'POST')!
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({
+      etablissementId: 'a1',
+      exerciceSuivantId: 'x2',
+      motif: 'Fin de gestion',
+    })
+    expect(await screen.findByRole('button', { name: 'Rouvrir' })).toBeTruthy()
+  }, 15_000)
 })
