@@ -28,6 +28,49 @@ export const ActionOrdonnancement = {
   PRENDRE_EN_CHARGE: 'PRENDRE_EN_CHARGE',
 } as const;
 
+export type AlerteSortieDetails = {[key: string]: string};
+
+export type TypeAlerte = typeof TypeAlerte[keyof typeof TypeAlerte];
+
+
+export const TypeAlerte = {
+  CREDIT_INSUFFISANT: 'CREDIT_INSUFFISANT',
+  DEPASSEMENT_MARCHE: 'DEPASSEMENT_MARCHE',
+  SEUIL_MARCHE: 'SEUIL_MARCHE',
+  AVENANT_NECESSAIRE: 'AVENANT_NECESSAIRE',
+  FACTURE_DOUBLON: 'FACTURE_DOUBLON',
+  FACTURE_SUP_RECEPTION: 'FACTURE_SUP_RECEPTION',
+  SERVICE_FAIT_MANQUANT: 'SERVICE_FAIT_MANQUANT',
+  PAIEMENT_SUP_LIQUIDE: 'PAIEMENT_SUP_LIQUIDE',
+  FACTURE_ECHUE: 'FACTURE_ECHUE',
+  ECART_RAPPROCHEMENT: 'ECART_RAPPROCHEMENT',
+  ENGAGEMENT_ANCIEN: 'ENGAGEMENT_ANCIEN',
+  ECHEANCE_CONTRAT: 'ECHEANCE_CONTRAT',
+  MODIFICATION_APRES_VALIDATION: 'MODIFICATION_APRES_VALIDATION',
+  CONTROLE_BLOQUANT: 'CONTROLE_BLOQUANT',
+} as const;
+
+export type Gravite = typeof Gravite[keyof typeof Gravite];
+
+
+export const Gravite = {
+  BLOCAGE: 'BLOCAGE',
+  ALERTE: 'ALERTE',
+} as const;
+
+export interface AlerteSortie {
+  id: string;
+  etablissementId: string;
+  type: TypeAlerte;
+  gravite: Gravite;
+  typeObjet: string;
+  idObjet: string;
+  details: AlerteSortieDetails;
+  codeAgent: string | null;
+  creeLe: string;
+  lue: boolean;
+}
+
 export interface AllocationSchema {
   liquidationId: string;
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
@@ -487,6 +530,10 @@ export interface CompteTresorerieSortie {
   version: number;
   typeCompte: string | null;
   numero: string | null;
+}
+
+export interface CompteurAlertes {
+  nonLues: number;
 }
 
 export interface Connexion {
@@ -1328,6 +1375,10 @@ export interface Jetons {
   expireDans: number;
 }
 
+export interface LectureAlerte {
+  lue: boolean;
+}
+
 export interface LigneCreation {
   budgetId: string;
   /**
@@ -1704,6 +1755,11 @@ export interface OrdreServiceSortie {
   id: string;
 }
 
+export interface PageAlertes {
+  donnees: AlerteSortie[];
+  suivant: string | null;
+}
+
 export interface PaginationCurseur {
   taille: number;
   suivant: string | null;
@@ -2040,6 +2096,10 @@ export interface PieceSortie {
   deposeLe: string;
 }
 
+export interface Planification {
+  signaux: number;
+}
+
 export type PreferencesLangue = typeof PreferencesLangue[keyof typeof PreferencesLangue];
 
 
@@ -2189,6 +2249,21 @@ export interface ReferentielCreation {
 export interface ReferentielModification {
   libelle?: string | null;
   actif?: boolean | null;
+}
+
+export interface RegleModification {
+  actif: boolean;
+  seuilPourcent?: number | string | null;
+  delaiJours?: number | null;
+  notifierParEmail?: boolean;
+}
+
+export interface RegleSortie {
+  type: TypeAlerte;
+  actif: boolean;
+  seuilPourcent: string | null;
+  delaiJours: number | null;
+  notifierParEmail: boolean;
 }
 
 /**
@@ -2766,6 +2841,25 @@ export type RestesAPayerParams = {
   contratId?: string | null;
   du?: string | null;
   au?: string | null;
+};
+
+export type ListerAlertesParams = {
+  nonLues?: boolean;
+  type?: TypeAlerte | null;
+  apres?: string | null;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
+
+export type ListerReglesParams = {
+  etablissementId: string;
+};
+
+export type ModifierRegleParams = {
+  etablissementId: string;
 };
 
 export type ListerSitesParams = {

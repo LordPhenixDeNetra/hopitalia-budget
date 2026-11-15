@@ -1,0 +1,61 @@
+{
+  "titre": "Alertes",
+  "intro": "Blocages des contrôles, tentatives refusées et alertes planifiées qui vous concernent. Chaque agent marque ses propres alertes comme lues.",
+  "onglets": {
+    "alertes": "Alertes",
+    "regles": "Règles"
+  },
+  "gravites": {
+    "BLOCAGE": "Blocage",
+    "ALERTE": "Alerte"
+  },
+  "nonLue": "Non lue",
+  "nonLuesSeulement": "Non lues seulement",
+  "aucune": "Aucune alerte.",
+  "marquerLue": "Marquer comme lue",
+  "marquerNonLue": "Marquer comme non lue",
+  "voir": "Voir",
+  "plus": "Afficher les suivantes",
+  "regles": {
+    "etablissement": "Établissement",
+    "type": "Alerte",
+    "actif": "Active",
+    "seuilPourcent": "Seuil (%)",
+    "delaiJours": "Délai (jours)",
+    "enregistree": "Règle enregistrée.",
+    "lancer": "Lancer la détection maintenant",
+    "planifiee": "Détection lancée."
+  },
+  "types": {
+    "CREDIT_INSUFFISANT": "Crédit insuffisant",
+    "DEPASSEMENT_MARCHE": "Dépassement du marché",
+    "SEUIL_MARCHE": "Seuil de consommation du marché",
+    "AVENANT_NECESSAIRE": "Avenant nécessaire",
+    "FACTURE_DOUBLON": "Facture en doublon",
+    "FACTURE_SUP_RECEPTION": "Facturé au-delà du réceptionné ou du dû",
+    "SERVICE_FAIT_MANQUANT": "Service fait manquant",
+    "PAIEMENT_SUP_LIQUIDE": "Paiement au-delà du liquidé",
+    "FACTURE_ECHUE": "Facture échue",
+    "ECART_RAPPROCHEMENT": "Écart de rapprochement",
+    "ENGAGEMENT_ANCIEN": "Engagement ancien",
+    "ECHEANCE_CONTRAT": "Échéance de contrat",
+    "MODIFICATION_APRES_VALIDATION": "Modification après validation",
+    "CONTROLE_BLOQUANT": "Contrôle bloquant"
+  },
+  "messages": {
+    "CREDIT_INSUFFISANT": "Engagement refusé : dépassement de {{depassement}} XOF sur le crédit disponible.",
+    "DEPASSEMENT_MARCHE": "Engagement refusé : dépassement de {{depassement}} XOF sur le reste à engager du marché.",
+    "AVENANT_NECESSAIRE": "Le besoin dépasse le plafond du marché de {{depassement}} XOF : un avenant ou une dérogation est nécessaire.",
+    "SEUIL_MARCHE": "Marché {{numero}} consommé à {{taux}} % (repère de {{seuil}} %).",
+    "FACTURE_DOUBLON": "Facture {{numero}} refusée : doublon de la facture {{reference}}.",
+    "FACTURE_SUP_RECEPTION": "Liquidation au-delà du réceptionné, de la facture ou du reste dû ({{depassement}} XOF).",
+    "SERVICE_FAIT_MANQUANT": "Liquidation refusée : aucune réception validée ne prouve le service fait.",
+    "PAIEMENT_SUP_LIQUIDE": "Paiement refusé sur la liquidation {{numero}} : part de {{part}} XOF pour un reste dû de {{resteDu}} XOF.",
+    "FACTURE_ECHUE": "Facture {{numero}}, reçue le {{recueLe}}, non soldée dans le délai.",
+    "ECART_RAPPROCHEMENT": "Rapprochement de la facture {{numero}} enregistré avec un écart : {{explication}}",
+    "ENGAGEMENT_ANCIEN": "Engagement {{numero}}, validé le {{valideLe}}, toujours non soldé.",
+    "ECHEANCE_CONTRAT": "Contrat {{numero}} : échéance au {{echeance}}.",
+    "MODIFICATION_APRES_VALIDATION": "Tentative de modification refusée sur une opération au statut {{statut}}.",
+    "CONTROLE_BLOQUANT": "Opération refusée par le contrôle {{code}}."
+  }
+}

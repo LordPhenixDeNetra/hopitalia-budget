@@ -16,7 +16,10 @@
     "commandes": "Orders",
     "factures": "Invoices",
     "paiements": "Payments",
-    "tableauDeBord": "Dashboard"
+    "tableauDeBord": "Dashboard",
+    "alertes": "Alerts",
+    "alertesNonLues_one": "{{count}} unread alert",
+    "alertesNonLues_other": "{{count}} unread alerts"
   },
   "entete": {
     "langue": "Language",

@@ -24,6 +24,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  AlerteSortie,
   AnnulationCreation,
   AnnulationSortie,
   AttestationCreation,
@@ -48,6 +49,7 @@ import type {
   CompteTresorerieCreation,
   CompteTresorerieModification,
   CompteTresorerieSortie,
+  CompteurAlertes,
   Connexion,
   ContratChamps,
   ContratCreation,
@@ -89,6 +91,7 @@ import type {
   Health200,
   ImportSortie,
   Jetons,
+  LectureAlerte,
   LigneCreation,
   LigneModification,
   LigneSortie,
@@ -96,6 +99,7 @@ import type {
   LiquidationChamps,
   LiquidationCreation,
   LiquidationSortie,
+  ListerAlertesParams,
   ListerBonsCommandeParams,
   ListerBudgetsParams,
   ListerCentresResponsabiliteParams,
@@ -119,6 +123,7 @@ import type {
   ListerOrdonnancementsParams,
   ListerPaiementsParams,
   ListerProgrammesParams,
+  ListerReglesParams,
   ListerReservesParams,
   ListerRevisionsParams,
   ListerSitesParams,
@@ -129,6 +134,7 @@ import type {
   ListerTypesPiecesParams,
   LotSchema,
   LotSortie,
+  ModifierRegleParams,
   Moi,
   MotifSchema,
   NoeudSortie,
@@ -139,6 +145,7 @@ import type {
   OrdonnancementSortie,
   OrdreServiceSchema,
   OrdreServiceSortie,
+  PageAlertes,
   PageBonCommandeSortie,
   PageBudgetSortie,
   PageCentreSortie,
@@ -170,6 +177,7 @@ import type {
   PaiementSortie,
   ParametresCalculSchema,
   PieceSortie,
+  Planification,
   Preferences,
   ProgrammeCreation,
   ProgrammeModification,
@@ -184,6 +192,8 @@ import type {
   ReferentielCreation,
   ReferentielModification,
   ReferentielSortie,
+  RegleModification,
+  RegleSortie,
   ReserveCreation,
   ReserveLevee,
   ReserveSortie,
@@ -211,6 +221,7 @@ import type {
   TransitionModification,
   TransitionReference,
   TransitionSortie,
+  TypeAlerte,
   TypeDepenseCreation,
   TypeDepenseModification,
   TypeDepenseSortie,
@@ -9718,6 +9729,631 @@ export function useRestesAPayer<TData = Awaited<ReturnType<typeof restesAPayer>>
 
 
 
+
+export const getListerAlertesUrl = (params?: ListerAlertesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/alertes?${stringifiedParams}` : `/api/v1/alertes`
+}
+
+/**
+ * Centre d'alertes, des plus récentes aux plus anciennes, paginé par curseur (11.4).
+ * @summary Lister Alertes
+ */
+export const listerAlertes = async (params?: ListerAlertesParams, options?: Parameters<typeof appelerApi>[1]): Promise<PageAlertes> => {
+
+  return appelerApi<PageAlertes>(getListerAlertesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerAlertesQueryKey = (params?: ListerAlertesParams,) => {
+    return [
+    `/api/v1/alertes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListerAlertesQueryOptions = <TData = Awaited<ReturnType<typeof listerAlertes>>, TError = HTTPValidationError>(params?: ListerAlertesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerAlertes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerAlertesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerAlertes>>> = ({ signal }) => listerAlertes(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerAlertes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerAlertesQueryResult = NonNullable<Awaited<ReturnType<typeof listerAlertes>>>
+export type ListerAlertesQueryError = HTTPValidationError
+
+
+/**
+ * Centre d'alertes, des plus récentes aux plus anciennes, paginé par curseur (11.4).
+ * @summary Lister Alertes
+ */
+export function useListerAlertes<TData = Awaited<ReturnType<typeof listerAlertes>>, TError = HTTPValidationError>(
+ params: undefined |  ListerAlertesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerAlertes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerAlertes>>,
+          TError,
+          Awaited<ReturnType<typeof listerAlertes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Centre d'alertes, des plus récentes aux plus anciennes, paginé par curseur (11.4).
+ * @summary Lister Alertes
+ */
+export function useListerAlertes<TData = Awaited<ReturnType<typeof listerAlertes>>, TError = HTTPValidationError>(
+ params?: ListerAlertesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerAlertes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerAlertes>>,
+          TError,
+          Awaited<ReturnType<typeof listerAlertes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Centre d'alertes, des plus récentes aux plus anciennes, paginé par curseur (11.4).
+ * @summary Lister Alertes
+ */
+export function useListerAlertes<TData = Awaited<ReturnType<typeof listerAlertes>>, TError = HTTPValidationError>(
+ params?: ListerAlertesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerAlertes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Centre d'alertes, des plus récentes aux plus anciennes, paginé par curseur (11.4).
+ * @summary Lister Alertes
+ */
+export function useListerAlertes<TData = Awaited<ReturnType<typeof listerAlertes>>, TError = HTTPValidationError>(
+ params?: ListerAlertesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerAlertes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerAlertesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCompterAlertesUrl = () => {
+
+
+
+
+  return `/api/v1/alertes/compteur`
+}
+
+/**
+ * Nombre d'alertes non lues, pour le badge du menu.
+ * @summary Compter Alertes
+ */
+export const compterAlertes = async ( options?: Parameters<typeof appelerApi>[1]): Promise<CompteurAlertes> => {
+
+  return appelerApi<CompteurAlertes>(getCompterAlertesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getCompterAlertesQueryKey = () => {
+    return [
+    `/api/v1/alertes/compteur`
+    ] as const;
+    }
+
+
+export const getCompterAlertesQueryOptions = <TData = Awaited<ReturnType<typeof compterAlertes>>, TError = unknown>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof compterAlertes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getCompterAlertesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof compterAlertes>>> = ({ signal }) => compterAlertes({ signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof compterAlertes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type CompterAlertesQueryResult = NonNullable<Awaited<ReturnType<typeof compterAlertes>>>
+export type CompterAlertesQueryError = unknown
+
+
+/**
+ * Nombre d'alertes non lues, pour le badge du menu.
+ * @summary Compter Alertes
+ */
+export function useCompterAlertes<TData = Awaited<ReturnType<typeof compterAlertes>>, TError = unknown>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof compterAlertes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof compterAlertes>>,
+          TError,
+          Awaited<ReturnType<typeof compterAlertes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Nombre d'alertes non lues, pour le badge du menu.
+ * @summary Compter Alertes
+ */
+export function useCompterAlertes<TData = Awaited<ReturnType<typeof compterAlertes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof compterAlertes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof compterAlertes>>,
+          TError,
+          Awaited<ReturnType<typeof compterAlertes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Nombre d'alertes non lues, pour le badge du menu.
+ * @summary Compter Alertes
+ */
+export function useCompterAlertes<TData = Awaited<ReturnType<typeof compterAlertes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof compterAlertes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Nombre d'alertes non lues, pour le badge du menu.
+ * @summary Compter Alertes
+ */
+export function useCompterAlertes<TData = Awaited<ReturnType<typeof compterAlertes>>, TError = unknown>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof compterAlertes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getCompterAlertesQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getMarquerAlerteUrl = (alerteId: string,) => {
+
+
+
+
+  return `/api/v1/alertes/${alerteId}`
+}
+
+/**
+ * Marquer comme lue (ou non lue) pour soi seulement.
+ * @summary Marquer Alerte
+ */
+export const marquerAlerte = async (alerteId: string,
+    lectureAlerte: LectureAlerte, options?: Parameters<typeof appelerApi>[1]): Promise<AlerteSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<AlerteSortie>(getMarquerAlerteUrl(alerteId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(lectureAlerte)
+  }
+);}
+
+
+
+
+
+export const getMarquerAlerteMutationKey = () => ['marquerAlerte'] as const;
+
+export const getMarquerAlerteMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof marquerAlerte>>, TError,MarquerAlerteMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof marquerAlerte>>, TError,MarquerAlerteMutationVariables, TContext> => {
+
+const mutationKey = getMarquerAlerteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof marquerAlerte>>, MarquerAlerteMutationVariables> = (props) => {
+          const {alerteId,data} = props ?? {};
+
+          return  marquerAlerte(alerteId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MarquerAlerteMutationResult = NonNullable<Awaited<ReturnType<typeof marquerAlerte>>>
+    export type MarquerAlerteMutationBody = LectureAlerte
+    export type MarquerAlerteMutationError = HTTPValidationError
+    export type MarquerAlerteMutationVariables = {alerteId: string;data: LectureAlerte}
+
+    /**
+ * Marquer comme lue (ou non lue) pour soi seulement.
+ * @summary Marquer Alerte
+ */
+export const useMarquerAlerte = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof marquerAlerte>>, TError,MarquerAlerteMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof marquerAlerte>>,
+        TError,
+        MarquerAlerteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getMarquerAlerteMutationOptions(options), queryClient);
+    }
+
+export const getListerReglesUrl = (params: ListerReglesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/regles-alertes?${stringifiedParams}` : `/api/v1/regles-alertes`
+}
+
+/**
+ * Règles de l'établissement, valeurs par défaut comprises (14.3).
+ * @summary Lister Regles
+ */
+export const listerRegles = async (params: ListerReglesParams, options?: Parameters<typeof appelerApi>[1]): Promise<RegleSortie[]> => {
+
+  return appelerApi<RegleSortie[]>(getListerReglesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerReglesQueryKey = (params?: ListerReglesParams,) => {
+    return [
+    `/api/v1/regles-alertes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListerReglesQueryOptions = <TData = Awaited<ReturnType<typeof listerRegles>>, TError = HTTPValidationError>(params: ListerReglesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerRegles>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerReglesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerRegles>>> = ({ signal }) => listerRegles(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerRegles>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerReglesQueryResult = NonNullable<Awaited<ReturnType<typeof listerRegles>>>
+export type ListerReglesQueryError = HTTPValidationError
+
+
+/**
+ * Règles de l'établissement, valeurs par défaut comprises (14.3).
+ * @summary Lister Regles
+ */
+export function useListerRegles<TData = Awaited<ReturnType<typeof listerRegles>>, TError = HTTPValidationError>(
+ params: ListerReglesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerRegles>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerRegles>>,
+          TError,
+          Awaited<ReturnType<typeof listerRegles>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Règles de l'établissement, valeurs par défaut comprises (14.3).
+ * @summary Lister Regles
+ */
+export function useListerRegles<TData = Awaited<ReturnType<typeof listerRegles>>, TError = HTTPValidationError>(
+ params: ListerReglesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerRegles>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerRegles>>,
+          TError,
+          Awaited<ReturnType<typeof listerRegles>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Règles de l'établissement, valeurs par défaut comprises (14.3).
+ * @summary Lister Regles
+ */
+export function useListerRegles<TData = Awaited<ReturnType<typeof listerRegles>>, TError = HTTPValidationError>(
+ params: ListerReglesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerRegles>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Règles de l'établissement, valeurs par défaut comprises (14.3).
+ * @summary Lister Regles
+ */
+export function useListerRegles<TData = Awaited<ReturnType<typeof listerRegles>>, TError = HTTPValidationError>(
+ params: ListerReglesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerRegles>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerReglesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getModifierRegleUrl = (typeAlerte: TypeAlerte,
+    params: ModifierRegleParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/regles-alertes/${typeAlerte}?${stringifiedParams}` : `/api/v1/regles-alertes/${typeAlerte}`
+}
+
+/**
+ * Seuils, délais et activation propres à l'établissement (T-220), tracés.
+ * @summary Modifier Regle
+ */
+export const modifierRegle = async (typeAlerte: TypeAlerte,
+    regleModification: RegleModification,
+    params: ModifierRegleParams, options?: Parameters<typeof appelerApi>[1]): Promise<RegleSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<RegleSortie>(getModifierRegleUrl(typeAlerte,params),
+  {
+    ...options,
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(regleModification)
+  }
+);}
+
+
+
+
+
+export const getModifierRegleMutationKey = () => ['modifierRegle'] as const;
+
+export const getModifierRegleMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierRegle>>, TError,ModifierRegleMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof modifierRegle>>, TError,ModifierRegleMutationVariables, TContext> => {
+
+const mutationKey = getModifierRegleMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modifierRegle>>, ModifierRegleMutationVariables> = (props) => {
+          const {typeAlerte,data,params} = props ?? {};
+
+          return  modifierRegle(typeAlerte,data,params,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModifierRegleMutationResult = NonNullable<Awaited<ReturnType<typeof modifierRegle>>>
+    export type ModifierRegleMutationBody = RegleModification
+    export type ModifierRegleMutationError = HTTPValidationError
+    export type ModifierRegleMutationVariables = {typeAlerte: TypeAlerte;data: RegleModification;params: ModifierRegleParams}
+
+    /**
+ * Seuils, délais et activation propres à l'établissement (T-220), tracés.
+ * @summary Modifier Regle
+ */
+export const useModifierRegle = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierRegle>>, TError,ModifierRegleMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modifierRegle>>,
+        TError,
+        ModifierRegleMutationVariables,
+        TContext
+      > => {
+      return useMutation(getModifierRegleMutationOptions(options), queryClient);
+    }
+
+export const getLancerAlertesPlanifieesUrl = () => {
+
+
+
+
+  return `/api/v1/alertes/planifications`
+}
+
+/**
+ * Lance la détection planifiée tout de suite, pour les établissements que l'agent paramètre
+ * (la tâche quotidienne fait de même pour tous : `python -m hopitalia_budget.outils.alertes`).
+ * @summary Lancer Alertes Planifiees
+ */
+export const lancerAlertesPlanifiees = async ( options?: Parameters<typeof appelerApi>[1]): Promise<Planification> => {
+
+  return appelerApi<Planification>(getLancerAlertesPlanifieesUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getLancerAlertesPlanifieesMutationKey = () => ['lancerAlertesPlanifiees'] as const;
+
+export const getLancerAlertesPlanifieesMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof lancerAlertesPlanifiees>>, TError,void, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof lancerAlertesPlanifiees>>, TError,void, TContext> => {
+
+const mutationKey = getLancerAlertesPlanifieesMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof lancerAlertesPlanifiees>>, void> = () => {
+
+
+          return  lancerAlertesPlanifiees(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LancerAlertesPlanifieesMutationResult = NonNullable<Awaited<ReturnType<typeof lancerAlertesPlanifiees>>>
+
+    export type LancerAlertesPlanifieesMutationError = unknown
+
+
+    /**
+ * Lance la détection planifiée tout de suite, pour les établissements que l'agent paramètre
+ * (la tâche quotidienne fait de même pour tous : `python -m hopitalia_budget.outils.alertes`).
+ * @summary Lancer Alertes Planifiees
+ */
+export const useLancerAlertesPlanifiees = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof lancerAlertesPlanifiees>>, TError,void, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof lancerAlertesPlanifiees>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getLancerAlertesPlanifieesMutationOptions(options), queryClient);
+    }
 
 export const getListerSitesUrl = (params?: ListerSitesParams,) => {
   const normalizedParams = new URLSearchParams();

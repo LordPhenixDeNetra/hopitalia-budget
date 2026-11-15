@@ -1,5 +1,6 @@
 import {
   ApartmentOutlined,
+  BellOutlined,
   FileDoneOutlined,
   AuditOutlined,
   ContainerOutlined,
@@ -14,10 +15,11 @@ import {
   SwapOutlined,
   WalletOutlined,
 } from '@ant-design/icons'
-import { Breadcrumb, Button, Flex, Layout, Menu, Select, Typography, theme } from 'antd'
+import { useQuery } from '@tanstack/react-query'
+import { Badge, Breadcrumb, Button, Flex, Layout, Menu, Select, Typography, theme } from 'antd'
 import { Link, Outlet, useLocation, useMatches, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import { useModifierPreferences } from '../api/genere/budget'
+import { compterAlertes, useModifierPreferences } from '../api/genere/budget'
 import { useSession } from '../auth/session'
 import { LANGUES, estLangue, memoriserLangue, type Langue } from '../i18n/langue'
 import { useEtablissementCourant } from './etablissementCourant'
@@ -36,6 +38,12 @@ export function Gabarit() {
   const correspondances = useMatches()
   const preferences = useModifierPreferences()
   const { etablissements, courant, choisir } = useEtablissementCourant()
+  // Alertes non lues, rafraîchies chaque minute pour le badge du menu (T-224).
+  const { data: compteur } = useQuery({
+    queryKey: ['compteur-alertes'],
+    queryFn: () => compterAlertes(),
+    refetchInterval: 60_000,
+  })
   // Consulter les habilitations : profils ayant « Paramétrer » dans la matrice validée.
   const voitHabilitations = (moi?.habilitations ?? []).some((h) =>
     ['ADM', 'RB', 'AUD'].includes(h.profil),
@@ -69,6 +77,19 @@ export function Gabarit() {
           onClick={({ key }) => naviguer(key)}
           items={[
             { key: '/', icon: <HomeOutlined aria-hidden />, label: t('menu.accueil') },
+            {
+              key: '/alertes',
+              icon: <BellOutlined aria-hidden />,
+              label: (
+                <Flex justify="space-between" align="center" gap="small">
+                  {t('menu.alertes')}
+                  <Badge
+                    count={compteur?.nonLues ?? 0}
+                    aria-label={t('menu.alertesNonLues', { count: compteur?.nonLues ?? 0 })}
+                  />
+                </Flex>
+              ),
+            },
             {
               key: '/tableau-de-bord',
               icon: <DashboardOutlined aria-hidden />,
