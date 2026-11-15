@@ -15,6 +15,7 @@ from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.habilitations import Profil
 from hopitalia_budget.domaine.workflow import (
     CIRCUIT_PAR_DEFAUT,
+    JUSTIFIABLES_SANS_CIRCUIT,
     TRANSITIONS_REFERENCE,
     Circuit,
     CircuitParametre,
@@ -97,7 +98,7 @@ def _etat(client: TestClient, utilisateur: int, revision: dict[str, Any]) -> dic
 
 
 def test_types_validables_alignes_sur_le_domaine() -> None:
-    assert set(get_args(TypeObjet)) == set(TRANSITIONS_REFERENCE)
+    assert set(get_args(TypeObjet)) == set(TRANSITIONS_REFERENCE) | JUSTIFIABLES_SANS_CIRCUIT
     assert set(get_args(Ressource)) == set(VALIDABLES)
 
 

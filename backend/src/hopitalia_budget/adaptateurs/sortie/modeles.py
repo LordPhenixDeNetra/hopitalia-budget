@@ -803,3 +803,103 @@ class AttestationServiceFaitModele(Base):
     livrable: Mapped[str] = mapped_column(String(500))
     conforme: Mapped[bool]
     cree_par_code: Mapped[str] = mapped_column(String(20))
+
+
+class FactureModele(Base):
+    """Facture du fournisseur, rattachée à un engagement (RG-05) ; un avoir est négatif."""
+
+    __tablename__ = "facture"
+    __table_args__ = (Index("ix_facture_fournisseur_numero", "fournisseur_id", "numero"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    engagement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("engagement.id"), index=True)
+    fournisseur_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("fournisseur.id"))
+    bon_commande_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("bon_commande.id"))
+    facture_origine_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("facture.id"))
+    numero: Mapped[str] = mapped_column(String(50))
+    type: Mapped[str] = mapped_column(String(20))
+    objet: Mapped[str] = mapped_column(String(500))
+    date_emission: Mapped[date]
+    date_reception: Mapped[date]
+    date_echeance: Mapped[date | None]
+    date_limite_traitement: Mapped[date | None]
+    periode_rattachement: Mapped[str | None] = mapped_column(String(50))
+    montant_ht: Mapped[Decimal] = mapped_column(MONTANT)
+    montant_taxes: Mapped[Decimal] = mapped_column(MONTANT)
+    montant_ttc: Mapped[Decimal] = mapped_column(MONTANT)
+    numero_decompte: Mapped[int | None]
+    statut: Mapped[str] = mapped_column(String(30), index=True)
+    motif_statut: Mapped[str | None] = mapped_column(String(500))  # retour ou rejet
+    motif_levee_doublon: Mapped[str | None] = mapped_column(String(500))
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class LiquidationModele(Base):
+    """Liquidation d'une facture sur une seule imputation d'engagement (RG-17)."""
+
+    __tablename__ = "liquidation"
+    __table_args__ = (UniqueConstraint("etablissement_id", "numero"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    facture_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("facture.id"), index=True)
+    imputation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("imputation_engagement.id"), index=True
+    )
+    numero: Mapped[str] = mapped_column(String(30))
+    date_liquidation: Mapped[date]
+    montant_base: Mapped[Decimal] = mapped_column(MONTANT)
+    observations: Mapped[str | None] = mapped_column(String(1000))
+    statut: Mapped[str] = mapped_column(String(20), index=True)
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class DeductionModele(Base):
+    __tablename__ = "deduction"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    liquidation_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("liquidation.id"), index=True)
+    type: Mapped[str] = mapped_column(String(30))
+    montant: Mapped[Decimal] = mapped_column(MONTANT)
+    taux: Mapped[Decimal | None] = mapped_column(MONTANT)
+    motif: Mapped[str | None] = mapped_column(String(500))
+    base_calcul: Mapped[str | None] = mapped_column(String(300))
+
+
+class LiquidationReceptionModele(Base):
+    """Réceptions qui prouvent le service fait d'une liquidation (RG-06)."""
+
+    __tablename__ = "liquidation_reception"
+
+    liquidation_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("liquidation.id"), primary_key=True
+    )
+    reception_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("reception.id"), primary_key=True)
+
+
+class RapprochementModele(Base):
+    """Rapprochement commande / réception / facture / paiement d'une facture (section 9.1)."""
+
+    __tablename__ = "rapprochement"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    facture_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("facture.id"), index=True)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"))
+    date_rapprochement: Mapped[date]
+    ecart_commande_reception: Mapped[Decimal] = mapped_column(MONTANT)
+    ecart_reception_facture: Mapped[Decimal] = mapped_column(MONTANT)
+    ecart_facture_paiement: Mapped[Decimal] = mapped_column(MONTANT)
+    explication: Mapped[str | None] = mapped_column(String(1000))
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))

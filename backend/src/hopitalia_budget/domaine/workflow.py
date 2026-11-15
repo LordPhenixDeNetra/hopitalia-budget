@@ -114,6 +114,11 @@ TRANSITIONS_REFERENCE: dict[str, tuple[Transition, ...]] = {
         *_circuit("SOUMIS", "EN_CONTROLE", "VALIDE", "REJETE", "A_CORRIGER"),
     ),
     "Derogation": _circuit("SOUMIS", "EN_VALIDATION", "VALIDE", "REJETE", "A_CORRIGER"),
+    # Liquidation : saisie en brouillon (base, déductions, réceptions), puis circuit (point 16).
+    "Liquidation": (
+        Transition("BROUILLON", Action.SOUMETTRE, "SOUMIS"),
+        *_circuit("SOUMIS", "EN_VALIDATION", "VALIDE", "REJETE", "A_CORRIGER"),
+    ),
     # Réception : saisie en brouillon (quantités, réserves, pièces), puis service fait validé.
     "Reception": (
         Transition("BROUILLON", Action.SOUMETTRE, "SOUMIS"),
@@ -134,11 +139,24 @@ OPERATIONS: dict[str, tuple[Operation, tuple[Operation, ...]]] = {
     ),
     "Derogation": (Operation.DEMANDER_ENGAGEMENT, (Operation.ACCORDER_DEROGATION,)),
     "Reception": (Operation.ENREGISTRER_RECEPTION, (Operation.VALIDER_SERVICE_FAIT,)),
+    "Liquidation": (Operation.LIQUIDER, (Operation.VALIDER_LIQUIDATION,)),
+    # Justifiable sans circuit : la facture porte ses pièces, ses liquidations sont validées.
+    "Facture": (Operation.ENREGISTRER_FACTURE, (Operation.VALIDER_LIQUIDATION,)),
 }
+
+# Objets qui portent des pièces sans être validés eux-mêmes.
+JUSTIFIABLES_SANS_CIRCUIT = {"Facture"}
 
 # Section 17, point 16 : l'ordonnateur valide toujours en dernier ces objets-là ; le service
 # fait d'une réception, lui, revient au valideur du service (matrice des habilitations).
-ORDONNATEUR_FINAL = {"RevisionBudgetaire", "Contrat", "Avenant", "Engagement", "Derogation"}
+ORDONNATEUR_FINAL = {
+    "RevisionBudgetaire",
+    "Contrat",
+    "Avenant",
+    "Engagement",
+    "Derogation",
+    "Liquidation",
+}
 
 
 def statuts_reference(type_objet: str) -> set[str]:

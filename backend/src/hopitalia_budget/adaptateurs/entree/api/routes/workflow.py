@@ -47,7 +47,9 @@ from hopitalia_budget.adaptateurs.entree.api.schemas import Montant, Schema, Typ
 from hopitalia_budget.adaptateurs.sortie.budget_sql import DepotRevisionsSql
 from hopitalia_budget.adaptateurs.sortie.commandes_sql import DepotReceptionsSql
 from hopitalia_budget.adaptateurs.sortie.contrats_sql import DepotContratsSql
+from hopitalia_budget.adaptateurs.sortie.derogations_sql import DepotDerogationsSql
 from hopitalia_budget.adaptateurs.sortie.engagements_sql import DepotEngagementsSql
+from hopitalia_budget.adaptateurs.sortie.factures_sql import DepotFacturesSql
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     CentreResponsabiliteModele,
     CircuitValidationModele,
@@ -61,7 +63,16 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
 )
 from hopitalia_budget.adaptateurs.sortie.systeme import StockagePiecesLocal
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import DepotWorkflowSql
-from hopitalia_budget.application import contrats, engagements, receptions, revisions, workflow
+from hopitalia_budget.application import (
+    contrats,
+    derogations,
+    engagements,
+    factures,
+    receptions,
+    revisions,
+    workflow,
+)
+from hopitalia_budget.domaine.derogations import Porteur
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.habilitations import Droit, Operation, Profil
 from hopitalia_budget.domaine.ports import Horloge
@@ -81,19 +92,61 @@ from hopitalia_budget.domaine.workflow import (
 
 router = APIRouter(tags=["workflow"])
 
+
 # Ressources validables : chemin d'URL -> chargement de l'objet (cloisonnement compris).
+def _derogation(session: Session, utilisateur: Utilisateur, identifiant: UUID) -> Validable:
+    """Une dérogation se lit avec l'objet qu'elle couvre (établissement, cloisonnement)."""
+    depot = DepotDerogationsSql(session)
+    derogation = depot.derogation(identifiant)
+    if derogation is None or derogation.type_objet not in PORTEURS:
+        raise ErreurMetier("RESSOURCE_INTROUVABLE")
+    porteur = PORTEURS[derogation.type_objet](session, utilisateur, derogation.id_objet)
+    return derogations.DerogationValidable(depot, derogation, porteur)
+
+
+# Objets dérogeables : type d'objet -> chargement de l'objet couvert (cloisonnement compris).
+PORTEURS: dict[str, Callable[[Session, Utilisateur, UUID], Porteur]] = {
+    "Engagement": lambda s, u, i: engagements.porteur(
+        engagements.obtenir(DepotEngagementsSql(s), u, i)
+    ),
+    "Liquidation": lambda s, u, i: factures.porteur(factures.obtenir(DepotFacturesSql(s), u, i)),
+}
+
 VALIDABLES: dict[str, Callable[[Session, Utilisateur, UUID, Horloge], Validable]] = {
     "revisions-budgetaires": lambda s, u, i, h: revisions.validable(DepotRevisionsSql(s), u, i),
     "contrats": lambda s, u, i, h: contrats.validable(DepotContratsSql(s), u, i),
     "avenants": lambda s, u, i, h: contrats.avenant_validable(DepotContratsSql(s), u, i),
     "engagements": lambda s, u, i, h: engagements.validable(DepotEngagementsSql(s), h, u, i),
     "receptions": lambda s, u, i, h: receptions.validable(DepotReceptionsSql(s), u, i),
-    "derogations": lambda s, u, i, h: engagements.derogation_validable(
-        DepotEngagementsSql(s), u, i
+    "derogations": lambda s, u, i, h: _derogation(s, u, i),
+    "liquidations": lambda s, u, i, h: factures.validable(
+        DepotFacturesSql(s), DepotDerogationsSql(s), u, i
     ),
 }
 Ressource = Literal[
-    "revisions-budgetaires", "contrats", "avenants", "engagements", "derogations", "receptions"
+    "revisions-budgetaires",
+    "contrats",
+    "avenants",
+    "engagements",
+    "derogations",
+    "receptions",
+    "liquidations",
+]
+
+# Ressources qui portent des pièces : les validables, et la facture (sans circuit propre).
+JUSTIFIABLES: dict[str, Callable[[Session, Utilisateur, UUID, Horloge], Any]] = {
+    **VALIDABLES,
+    "factures": lambda s, u, i, h: factures.justifiable(DepotFacturesSql(s), u, i),
+}
+RessourcePieces = Literal[
+    "revisions-budgetaires",
+    "contrats",
+    "avenants",
+    "engagements",
+    "derogations",
+    "receptions",
+    "liquidations",
+    "factures",
 ]
 
 
@@ -249,13 +302,13 @@ class PieceSortie(Schema):
 
 @router.get("/{ressource}/{identifiant}/pieces", response_model=list[PieceSortie])
 def lister_pieces(
-    ressource: Ressource,
+    ressource: RessourcePieces,
     identifiant: UUID,
     session: SessionDep,
     utilisateur: UtilisateurDep,
     horloge: HorlogeDep,
 ) -> list[PieceSortie]:
-    o = VALIDABLES[ressource](session, utilisateur, identifiant, horloge).objet()
+    o = JUSTIFIABLES[ressource](session, utilisateur, identifiant, horloge).objet()
     m = PieceJustificativeModele
     pieces = session.scalars(
         select(m).where(m.type_objet == o.type_objet, m.id_objet == o.id).order_by(m.depose_le)
@@ -265,7 +318,7 @@ def lister_pieces(
 
 @router.post("/{ressource}/{identifiant}/pieces", response_model=PieceSortie, status_code=201)
 async def deposer_piece(
-    ressource: Ressource,
+    ressource: RessourcePieces,
     identifiant: UUID,
     fichier: Annotated[UploadFile, File()],
     type_piece_id: Annotated[UUID, Form(alias="typePieceId")],
@@ -276,7 +329,7 @@ async def deposer_piece(
     stockage: Annotated[StockagePiecesLocal, Depends(obtenir_stockage)],
 ) -> PieceSortie:
     """Dépôt par l'auteur ou un valideur ; contenu rangé sous son empreinte SHA-256."""
-    o = VALIDABLES[ressource](session, utilisateur, identifiant, horloge).objet()
+    o = JUSTIFIABLES[ressource](session, utilisateur, identifiant, horloge).objet()
     saisie, validations = OPERATIONS[o.type_objet]
     if not (
         utilisateur.peut(saisie, Droit.SAISIR, o.etablissement_id)

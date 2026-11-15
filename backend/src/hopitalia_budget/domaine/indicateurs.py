@@ -232,6 +232,45 @@ def calculer_avance_retenue(
     )
 
 
+# --- 6.3 : par liquidation et par facture -----------------------------------------------------
+
+# Pénalités et réfactions diminuent le montant liquidé ; les autres natures sont des déductions
+# du net à payer (section 18.4, note sous TypeDeduction).
+REDUISENT_LE_LIQUIDE = {"PENALITE", "REFACTION"}
+
+
+@dataclass(frozen=True)
+class MontantsLiquidation:
+    montant_liquide: Decimal  # reconnu dû, après pénalités et réfactions
+    deductions: Decimal  # retenue de garantie + retenue à la source + avance récupérée + autres
+    net_a_payer: Decimal
+    consommation_budgetaire: Decimal  # ce que la liquidation consomme sur la ligne (6.1 : liquidé)
+
+
+def calculer_liquidation(
+    montant_base: Decimal, deductions: list[Deduction], parametres: ParametresCalcul | None = None
+) -> MontantsLiquidation:
+    """6.3. L'avance a déjà consommé le crédit à sa propre liquidation : sa récupération ne le
+    consomme pas une seconde fois (paramétrable, section 17, point 6)."""
+    p = parametres or ParametresCalcul()
+    reductions = sum((d.montant for d in deductions if d.nature in REDUISENT_LE_LIQUIDE), ZERO)
+    liquide = montant_base - reductions
+    retenues = sum((d.montant for d in deductions if d.nature not in REDUISENT_LE_LIQUIDE), ZERO)
+    avance = sum((d.montant for d in deductions if d.nature == "AVANCE_RECUPEREE"), ZERO)
+    return MontantsLiquidation(
+        montant_liquide=liquide,
+        deductions=retenues,
+        net_a_payer=liquide - retenues,
+        consommation_budgetaire=liquide
+        - (avance if p.consommation_deduit_avance_recuperee else ZERO),
+    )
+
+
+def reste_a_payer_facture(nets_valides: list[Decimal], allocations: list[Decimal]) -> Decimal:
+    """6.3 : nets à payer des liquidations validées de la facture, moins les allocations reçues."""
+    return sum(nets_valides, ZERO) - sum(allocations, ZERO)
+
+
 def parametres_depuis_valeurs(valeurs: dict[str, str]) -> ParametresCalcul:
     """Construit les paramètres d'un établissement depuis ses valeurs enregistrées (par code)."""
     defaut = ParametresCalcul()
