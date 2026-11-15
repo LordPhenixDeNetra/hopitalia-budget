@@ -32,12 +32,12 @@
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
-| P1 | 47 | 2 | 33 | 0 | 0 | 0 | 82 |
+| P1 | 55 | 2 | 25 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **116** | **4** | **87** | **0** | **0** | **2** | **209** |
+| **Total** | **124** | **4** | **79** | **0** | **0** | **2** | **209** |
 
-Avancement : 116 / 207 tâches actives terminées (56 %), hors 2 abandonnées.
+Avancement : 124 / 207 tâches actives terminées (60 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -234,14 +234,14 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-160 | Bons de commande, tranches et ordres de service, avec lignes. | EF-CMD-01 | T-140 | À faire | Commande impossible sur un engagement non validé. |
-| T-161 | Réceptions totales et partielles, en plusieurs étapes. | EF-REC-01 | T-160 | À faire | Plusieurs réceptions pour une commande. |
-| T-162 | Lignes de réception : quantités reçues, acceptées, rejetées. | EF-REC-02 | T-161 | À faire | Acceptée + rejetée ≤ reçue. |
-| T-163 | Réserves et levée des réserves. | EF-REC-03 | T-161 | À faire | Réserves non levées listées. |
-| T-164 | Attestation de service fait et pièces (BL, PV). | EF-REC-04 | T-161, T-119 | À faire | Pièces obligatoires contrôlées. |
-| T-165 | Validation de la réception par le service réceptionnaire. | EF-REC-05 | T-161, T-113 | À faire | Réception non validée inutilisable comme preuve. |
-| T-166 | Suivi des retards et des prestations non réalisées. | EF-REC-06 | T-161 | À faire | Liste des commandes en retard. |
-| T-167 | Écrans : commandes, réceptions, service fait. | — | T-165, T-120 | À faire | Parcours Playwright REC-05 vert. |
+| T-160 | Bons de commande, tranches et ordres de service, avec lignes. | EF-CMD-01 | T-140 | Fait | Commande impossible sur un engagement non validé. Bons de commande, tranches et ordres de service avec lignes ; commande refusée sur un engagement non validé, total limité au montant net (`test_commande_seulement_sur_engagement_valide`). |
+| T-161 | Réceptions totales et partielles, en plusieurs étapes. | EF-REC-01 | T-160 | Fait | Plusieurs réceptions pour une commande. Deux réceptions sur une commande, partielle puis totale (`test_receptions_partielles_puis_totale`). |
+| T-162 | Lignes de réception : quantités reçues, acceptées, rejetées. | EF-REC-02 | T-161 | Fait | Acceptée + rejetée ≤ reçue. Acceptée + rejetée ≤ reçue ; cumul accepté ≤ commandé, contrôlé à la saisie et sous verrou à la validation. |
+| T-163 | Réserves et levée des réserves. | EF-REC-03 | T-161 | Fait | Réserves non levées listées. Réserves émises et levées ; réserves non levées listées (`test_reserves_et_levee`). |
+| T-164 | Attestation de service fait et pièces (BL, PV). | EF-REC-04 | T-161, T-119 | Fait | Pièces obligatoires contrôlées. Attestation de service fait (une par réception) ; procès-verbal obligatoire contrôlé avant validation (`test_pieces_obligatoires_et_attestation`). |
+| T-165 | Validation de la réception par le service réceptionnaire. | EF-REC-05 | T-161, T-113 | Fait | Réception non validée inutilisable comme preuve. Circuit « Service fait » (VAL) ; une réception non validée ne réduit pas le reste à recevoir ni le réceptionné du marché. |
+| T-166 | Suivi des retards et des prestations non réalisées. | EF-REC-06 | T-161 | Fait | Liste des commandes en retard. Commandes en retard listées (`GET /bons-commande?enRetard=true`) ; reste à recevoir par ligne (`test_commandes_en_retard`). |
+| T-167 | Écrans : commandes, réceptions, service fait. | — | T-165, T-120 | Fait | Parcours Playwright REC-05 vert. Page Commandes (retards, réserves), fiche commande (réceptions, réserves, attestation, service fait, pièces), onglet Commandes de l'engagement ; parcours Playwright REC-05 vert. |
 
 ### P1.F — Lot 4 : factures, liquidations, rapprochement
 
@@ -429,3 +429,4 @@ flowchart LR
 | 15/11/2026 | T-117, T-118 | À faire | Fait | Annulations (contre-opérations par imputation) et dérogations validées par le circuit. |
 | 15/11/2026 | T-116 | En cours | Fait | API-04 vérifié sur l'engagement validé. |
 | 15/11/2026 | T-148 | À faire | En cours | Annulation partielle et totale faites ; clôture à vérifier avec les liquidations (lot 4). |
+| 15/11/2026 | T-160 à T-167 (P1.E) | À faire | Fait | Commandes, réceptions, réserves, attestation et service fait ; migration 0007 ; 165 tests backend, 37 tests Vitest, parcours REC-05. |
