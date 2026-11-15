@@ -52,10 +52,10 @@ def _references(depot: DepotWorkflow, o: ObjetValidable) -> dict[str, str]:
 
 
 def _circuit(depot: DepotWorkflow, o: ObjetValidable) -> Circuit:
-    circuit = depot.circuit_fige(o.type_objet, o.id)
-    if circuit is None:
-        raise ErreurMetier("RESSOURCE_INTROUVABLE")
-    return circuit
+    """Circuit figé ; avant la première soumission, celui qui s'appliquerait (aperçu)."""
+    return depot.circuit_fige(o.type_objet, o.id) or choisir_circuit(
+        depot.circuits(o.etablissement_id, o.type_objet), o.montant, o.centre_id
+    )
 
 
 def _statut(depot: DepotWorkflow, o: ObjetValidable) -> str:
@@ -79,11 +79,8 @@ def profils_effectifs(
 
 
 def engager(depot: DepotWorkflow, o: ObjetValidable) -> None:
-    """À la soumission : le circuit applicable est figé pour toute la vie de l'objet."""
-    circuit = choisir_circuit(
-        depot.circuits(o.etablissement_id, o.type_objet), o.montant, o.centre_id
-    )
-    depot.figer(o.type_objet, o.id, circuit, o.statut_reference)
+    """À la première soumission : le circuit applicable est figé pour toute la vie de l'objet."""
+    depot.figer(o.type_objet, o.id, _circuit(depot, o), o.statut_reference)
 
 
 def etat(
@@ -200,17 +197,21 @@ def _changer(depot: DepotWorkflow, o: ObjetValidable, cible: Validable, nouveau:
     cible.changer_statut(_references(depot, o)[nouveau])
 
 
-def resoumettre(
+def soumettre(
     depot: DepotWorkflow,
     journal: JournaliseurAudit,
     horloge: Horloge,
     utilisateur: Utilisateur,
     cible: Validable,
 ) -> EtatValidation:
-    """Après correction, l'objet repart au début du même circuit."""
+    """Par l'auteur : première soumission d'un brouillon (le circuit est alors figé), ou renvoi
+    au début du même circuit après correction."""
     o = cible.objet()
     if utilisateur.id_hopitalia != o.createur_id:
         raise ErreurMetier("ACCES_REFUSE")
+    cible.controler_soumission()
+    if depot.circuit_fige(o.type_objet, o.id) is None:
+        engager(depot, o)
     statut = _statut(depot, o)
     profils = set(profils_effectifs(depot, horloge, utilisateur, o))
     nouveau = appliquer(_transitions(depot, o), statut, Action.SOUMETTRE, profils)

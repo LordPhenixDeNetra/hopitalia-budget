@@ -1,6 +1,6 @@
 # Cahier des tâches — Module de suivi budgétaire Hopitalia
 
-**Projet :** `hopitalia-budget` · **Dépôt :** https://github.com/LordPhenixDeNetra/hopitalia-budget · **Référence :** [cahier des charges V3](docs/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) · **Pile :** FastAPI, PostgreSQL (à confirmer), React, TypeScript, Ant Design · **Mise à jour :** 14/11/2026
+**Projet :** `hopitalia-budget` · **Dépôt :** https://github.com/LordPhenixDeNetra/hopitalia-budget · **Référence :** [cahier des charges V3](docs/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) · **Pile :** FastAPI, PostgreSQL (à confirmer), React, TypeScript, Ant Design · **Mise à jour :** 15/11/2026
 
 ## Légende
 
@@ -32,12 +32,12 @@
 | Priorité | Fait | En cours | À faire | Bloqué | En attente | Abandonné | Total |
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
-| P1 | 25 | 2 | 55 | 0 | 0 | 0 | 82 |
+| P1 | 34 | 2 | 46 | 0 | 0 | 0 | 82 |
 | P2 | 0 | 0 | 32 | 0 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **94** | **4** | **109** | **0** | **0** | **2** | **209** |
+| **Total** | **103** | **4** | **100** | **0** | **0** | **2** | **209** |
 
-Avancement : 94 / 207 tâches actives terminées (45 %), hors 2 abandonnées.
+Avancement : 103 / 207 tâches actives terminées (50 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -204,15 +204,15 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-130 | Contrats et marchés (fiche complète, date de signature ou de notification obligatoire). | EF-CTR-01, 02, RG-03 | T-085, T-110 | À faire | Contrat sans date de signature ni de notification refusé. |
-| T-131 | Ventilation du contrat sur les lignes (`ImputationContrat`, somme = montant). | EF-CTR-03, RG-15 | T-130 | À faire | Ventilation incohérente refusée à la validation. |
-| T-132 | Avenants : montant antérieur, variation, nouveau plafond, effet après validation. | EF-CTR-04, RG-11, REC-04 | T-130, T-113 | À faire | Test REC-04 vert. |
-| T-133 | Échéancier, lots et tranches, ordres de service. | EF-CTR-05 | T-130 | À faire | CRUD + affichage dans la fiche. |
-| T-134 | Avance, retenue de garantie, révisions de prix (montants calculés, pas stockés). | EF-CTR-05, RG-14 | T-130 | À faire | Montants recalculés depuis les déductions. |
-| T-135 | Calculs contrat (6.2) dans le service unique d'indicateurs. | §6.2, ARC-S | T-093, T-130 | À faire | Tests unitaires de chaque formule. |
-| T-136 | Endpoint `/contrats/{id}/synthese`. | EF-CTR-06, §18.1 | T-135 | À faire | Fiche de synthèse complète en JSON. |
-| T-137 | Tests de substitution : les tests de `Contrat` passent avec `Marche`. | ARC-L | T-130 | À faire | Suite paramétrée verte. |
-| T-138 | Écrans : liste des contrats (filtres, niveau de consommation) et fiche à onglets. | §18.1 | T-136, T-120 | À faire | Parcours Playwright REC-02 vert. |
+| T-130 | Contrats et marchés (fiche complète, date de signature ou de notification obligatoire). | EF-CTR-01, 02, RG-03 | T-085, T-110 | Fait | Contrat sans date de signature ni de notification refusé. Fiche complète, brouillon puis soumission ; contrat sans date de signature ni de notification refusé (`test_rg03_...`, contrat et marché). |
+| T-131 | Ventilation du contrat sur les lignes (`ImputationContrat`, somme = montant). | EF-CTR-03, RG-15 | T-130 | Fait | Ventilation incohérente refusée à la validation. Ventilation dans le contrat, remplacée en bloc ; contrôlée à la soumission et à la validation (`test_rg15_ventilation_incoherente_refusee`). |
+| T-132 | Avenants : montant antérieur, variation, nouveau plafond, effet après validation. | EF-CTR-04, RG-11, REC-04 | T-130, T-113 | Fait | Test REC-04 vert. Avenant soumis, sans effet avant validation ; montant avant et nouveau plafond relevés ; plafond sous l'engagé refusé (`test_rec04_avenant_effectif_apres_validation`). |
+| T-133 | Échéancier, lots et tranches, ordres de service. | EF-CTR-05 | T-130 | Fait | CRUD + affichage dans la fiche. Échéancier, lots et tranches (total contrôlé, figés après validation), ordres de service, révisions de prix ; onglet Exécution de la fiche. |
+| T-134 | Avance, retenue de garantie, révisions de prix (montants calculés, pas stockés). | EF-CTR-05, RG-14 | T-130 | Fait | Montants recalculés depuis les déductions. Taux et conditions sur le contrat ; avance, récupéré, retenu et libéré calculés depuis les déductions (`test_avance_et_retenue_recalculees_depuis_les_deductions`). Les déductions réelles viendront des liquidations (lot 4). |
+| T-135 | Calculs contrat (6.2) dans le service unique d'indicateurs. | §6.2, ARC-S | T-093, T-130 | Fait | Tests unitaires de chaque formule. `calculer_indicateurs_contrat` dans `domaine/indicateurs.py` ; chaque formule testée sur le jeu d'essai de l'annexe 18.2. |
+| T-136 | Endpoint `/contrats/{id}/synthese`. | EF-CTR-06, §18.1 | T-135 | Fait | Fiche de synthèse complète en JSON. Synthèse complète en JSON (annexe 18.1, plus avance, retenue et révisions de prix) ; testée. |
+| T-137 | Tests de substitution : les tests de `Contrat` passent avec `Marche`. | ARC-L | T-130 | Fait | Suite paramétrée verte. Tests d'API paramétrés contrat et marché, et règle de domaine testée avec `Contrat` et `Marche` : verts. |
+| T-138 | Écrans : liste des contrats (filtres, niveau de consommation) et fiche à onglets. | §18.1 | T-136, T-120 | Fait | Parcours Playwright REC-02 vert. Liste filtrable (dont consommation) et fiche à onglets ; parcours Playwright REC-02 vert sur ordinateur et téléphone. |
 
 ### P1.D — Lot 2 : engagements et contrôles
 
@@ -424,3 +424,4 @@ flowchart LR
 | 14/11/2026 | T-110 à T-113, T-115, T-119, T-120 | À faire | Fait | Workflow transverse : circuits paramétrés, visas, retour pour correction, délégations, statuts personnalisés, pièces avec empreinte ; migration 0004 ; 121 tests backend, 30 tests Vitest. Révisions passées sur ce workflow. |
 | 14/11/2026 | T-114, T-116 | À faire | En cours | Fait et testé sur les révisions ; le payeur (REC-13) et l'engagement validé (API-04) arrivent avec les lots 2 et 5. |
 | 14/11/2026 | T-117, T-118 | À faire | À faire | Dépendance à T-140 ajoutée : aucun objet annulable ni dérogeable n'existe avant les engagements. |
+| 15/11/2026 | T-130 à T-138 (P1.C) | À faire | Fait | Contrats et marchés : fiche, ventilation, avenants, échéancier, lots, ordres de service, révisions de prix, synthèse 18.1, écrans ; migration 0005 ; 138 tests backend, 33 tests Vitest, parcours REC-02. |

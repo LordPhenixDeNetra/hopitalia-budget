@@ -47,6 +47,10 @@ class ObjetValidable:
 class Validable(Protocol):
     def objet(self) -> ObjetValidable: ...
 
+    def controler_soumission(self) -> None:
+        """Contrôles à chaque soumission (cohérence du dossier) ; lève une erreur."""
+        ...
+
     def controler_validation_finale(self) -> None:
         """Contrôles au moment où l'opération prend effet (crédits, plafonds) ; lève une erreur."""
         ...
@@ -98,12 +102,20 @@ def _circuit(
 # ces statuts ; les statuts personnalisés d'un établissement s'y rattachent.
 TRANSITIONS_REFERENCE: dict[str, tuple[Transition, ...]] = {
     "RevisionBudgetaire": _circuit("SOUMISE", "EN_VALIDATION", "VALIDEE", "REJETEE", "A_CORRIGER"),
+    # Un contrat se prépare en brouillon (ventilation, pièces) avant d'entrer dans le circuit.
+    "Contrat": (
+        Transition("BROUILLON", Action.SOUMETTRE, "SOUMIS"),
+        *_circuit("SOUMIS", "EN_VALIDATION", "VALIDE", "REJETE", "A_CORRIGER"),
+    ),
+    "Avenant": _circuit("SOUMIS", "EN_VALIDATION", "VALIDE", "REJETE", "A_CORRIGER"),
 }
 
 
 # Opérations de la matrice des habilitations : saisie de l'objet, puis sa validation.
 OPERATIONS: dict[str, tuple[Operation, Operation]] = {
     "RevisionBudgetaire": (Operation.DEMANDER_REVISION, Operation.VALIDER_REVISION),
+    "Contrat": (Operation.ENREGISTRER_CONTRAT, Operation.VALIDER_CONTRAT),
+    "Avenant": (Operation.ENREGISTRER_CONTRAT, Operation.VALIDER_CONTRAT),
 }
 
 

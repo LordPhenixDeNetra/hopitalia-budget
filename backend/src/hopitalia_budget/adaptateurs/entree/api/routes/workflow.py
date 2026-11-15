@@ -45,6 +45,7 @@ from hopitalia_budget.adaptateurs.entree.api.pagination import (
 )
 from hopitalia_budget.adaptateurs.entree.api.schemas import Montant, Schema, TypeObjet
 from hopitalia_budget.adaptateurs.sortie.budget_sql import DepotRevisionsSql
+from hopitalia_budget.adaptateurs.sortie.contrats_sql import DepotContratsSql
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     CentreResponsabiliteModele,
     CircuitValidationModele,
@@ -58,7 +59,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
 )
 from hopitalia_budget.adaptateurs.sortie.systeme import StockagePiecesLocal
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import DepotWorkflowSql
-from hopitalia_budget.application import revisions, workflow
+from hopitalia_budget.application import contrats, revisions, workflow
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.habilitations import Droit, Operation, Profil
 from hopitalia_budget.domaine.utilisateur import Utilisateur
@@ -80,8 +81,10 @@ router = APIRouter(tags=["workflow"])
 # Ressources validables : chemin d'URL -> chargement de l'objet (cloisonnement compris).
 VALIDABLES: dict[str, Callable[[Session, Utilisateur, UUID], Validable]] = {
     "revisions-budgetaires": lambda s, u, i: revisions.validable(DepotRevisionsSql(s), u, i),
+    "contrats": lambda s, u, i: contrats.validable(DepotContratsSql(s), u, i),
+    "avenants": lambda s, u, i: contrats.avenant_validable(DepotContratsSql(s), u, i),
 }
-Ressource = Literal["revisions-budgetaires"]
+Ressource = Literal["revisions-budgetaires", "contrats", "avenants"]
 
 
 def obtenir_stockage(request: Request) -> StockagePiecesLocal:
@@ -204,9 +207,9 @@ def resoumettre(
     journal: JournalDep,
     horloge: HorlogeDep,
 ) -> EtatValidationSortie:
-    """Après correction, l'auteur renvoie l'opération au début de son circuit."""
+    """Par l'auteur : soumission d'un brouillon, ou renvoi au circuit après correction."""
     cible = VALIDABLES[ressource](session, utilisateur, identifiant)
-    etat = workflow.resoumettre(DepotWorkflowSql(session), journal, horloge, utilisateur, cible)
+    etat = workflow.soumettre(DepotWorkflowSql(session), journal, horloge, utilisateur, cible)
     session.commit()
     return _etat(etat)
 

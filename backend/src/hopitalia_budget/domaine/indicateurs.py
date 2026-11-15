@@ -1,7 +1,8 @@
-"""Calcul unique des indicateurs d'une ligne budgétaire (cahier des charges, section 6.1).
+"""Calcul unique des indicateurs (cahier des charges, section 6) : ligne budgétaire (6.1),
+contrat (6.2), avance et retenue de garantie.
 
 Seul endroit où ces formules sont écrites (ARC-S) : écrans, états, contrôles et tableaux de
-bord appellent `calculer_indicateurs_ligne`. Les indicateurs ne sont jamais stockés (RG-14).
+bord appellent les fonctions `calculer_*`. Les indicateurs ne sont jamais stockés (RG-14).
 Engagé, liquidé et payé sont des étapes d'une même dépense : jamais additionnés entre eux.
 """
 
@@ -112,6 +113,122 @@ def calculer_indicateurs_ligne(
         taux_engagement=_taux(m.engage, base),
         taux_liquidation=_taux(m.liquide, base),
         taux_paiement=_taux(m.paye, base),
+    )
+
+
+# --- 6.2 : par contrat ---------------------------------------------------------------------------
+
+
+@dataclass(frozen=True)
+class MouvementsContrat:
+    """Montants agrégés des pièces d'un contrat (chaque montant est une somme de pièces)."""
+
+    montant_initial: Decimal
+    avenants_positifs: Decimal = ZERO  # variations des avenants validés > 0
+    avenants_negatifs: Decimal = ZERO  # valeur absolue des variations validées < 0
+    engage: Decimal = ZERO  # engagements validés rattachés, nets des annulations
+    commande: Decimal = ZERO  # bons de commande émis
+    receptionne: Decimal = ZERO  # quantités acceptées des réceptions validées
+    facture: Decimal = ZERO  # factures enregistrées (y compris en contrôle), nettes des avoirs
+    liquide: Decimal = ZERO
+    net_a_payer: Decimal = ZERO  # nets à payer des liquidations validées
+    transmis: Decimal = ZERO  # montants ordonnancés
+    paye: Decimal = ZERO
+
+
+@dataclass(frozen=True)
+class IndicateursContrat:
+    montant_initial: Decimal
+    avenants_valides: Decimal  # incidence nette des avenants validés
+    montant_actualise: Decimal
+    engage: Decimal
+    reste_a_engager: Decimal
+    commande: Decimal
+    receptionne: Decimal
+    facture: Decimal
+    liquide: Decimal
+    transmis: Decimal
+    paye: Decimal
+    engage_non_facture: Decimal
+    reste_a_payer_sur_liquide: Decimal
+    reste_contractuel_a_payer: Decimal
+    # En pourcentage, deux décimales ; None si le montant actualisé est nul.
+    taux_consommation: Decimal | None
+
+
+def calculer_indicateurs_contrat(
+    mouvements: MouvementsContrat, parametres: ParametresCalcul | None = None
+) -> IndicateursContrat:
+    p = parametres or ParametresCalcul()
+    m = mouvements
+    avenants = m.avenants_positifs - m.avenants_negatifs
+    actualise = m.montant_initial + avenants
+    consomme = (
+        m.engage if p.base_taux_consommation_marche is BaseConsommationMarche.ENGAGE else m.liquide
+    )
+    return IndicateursContrat(
+        montant_initial=m.montant_initial,
+        avenants_valides=avenants,
+        montant_actualise=actualise,
+        engage=m.engage,
+        reste_a_engager=actualise - m.engage,
+        commande=m.commande,
+        receptionne=m.receptionne,
+        facture=m.facture,
+        liquide=m.liquide,
+        transmis=m.transmis,
+        paye=m.paye,
+        engage_non_facture=m.engage - m.facture,
+        reste_a_payer_sur_liquide=m.net_a_payer - m.paye,
+        reste_contractuel_a_payer=actualise - m.paye,
+        taux_consommation=_taux(consomme, actualise),
+    )
+
+
+# --- Avance et retenue de garantie (EF-CTR-05) : montants recalculés depuis les déductions ------
+
+
+@dataclass(frozen=True)
+class Deduction:
+    """Déduction opérée sur une liquidation validée (6.3) ; « LIBERATION » rend une retenue."""
+
+    nature: str  # AVANCE_RECUPEREE, RETENUE_GARANTIE, LIBERATION_RETENUE, ...
+    montant: Decimal
+
+
+@dataclass(frozen=True)
+class SuiviAvanceRetenue:
+    montant_avance: Decimal
+    avance_recuperee: Decimal
+    avance_restant_a_recuperer: Decimal
+    retenue_operee: Decimal
+    retenue_liberee: Decimal
+    retenue_a_liberer: Decimal
+
+
+def calculer_avance_retenue(
+    montant_actualise: Decimal, taux_avance: Decimal | None, deductions: list[Deduction]
+) -> SuiviAvanceRetenue:
+    """Avance : taux appliqué au montant actualisé. Récupéré, retenu, libéré : sommes des
+    déductions des liquidations validées."""
+
+    def somme(nature: str) -> Decimal:
+        return sum((d.montant for d in deductions if d.nature == nature), ZERO)
+
+    avance = (
+        (montant_actualise * taux_avance / 100).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
+        if taux_avance
+        else ZERO
+    )
+    recuperee = somme("AVANCE_RECUPEREE")
+    operee, liberee = somme("RETENUE_GARANTIE"), somme("LIBERATION_RETENUE")
+    return SuiviAvanceRetenue(
+        montant_avance=avance,
+        avance_recuperee=recuperee,
+        avance_restant_a_recuperer=avance - recuperee,
+        retenue_operee=operee,
+        retenue_liberee=liberee,
+        retenue_a_liberer=operee - liberee,
     )
 
 

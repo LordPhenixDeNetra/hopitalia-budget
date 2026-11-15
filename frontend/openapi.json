@@ -1760,6 +1760,1065 @@
         }
       }
     },
+    "/api/v1/contrats": {
+      "post": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Creer Contrat",
+        "description": "Contrat déjà signé ou notifié (RG-03), enregistré en brouillon jusqu'à sa soumission.",
+        "operationId": "creer_contrat",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContratCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContratSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Lister Contrats",
+        "description": "Filtres de l'annexe 18.1, dont le niveau de consommation (taux en %, au moins).",
+        "operationId": "lister_contrats",
+        "parameters": [
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TypeContrat"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "fournisseurId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fournisseurid"
+            }
+          },
+          {
+            "name": "centreId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Centreid"
+            }
+          },
+          {
+            "name": "statut",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/Statut"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Statut"
+            }
+          },
+          {
+            "name": "consommationMin",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "minimum": 0.0
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Consommationmin"
+            }
+          },
+          {
+            "name": "tri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Tri"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_ContratResume_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contrats/{contrat_id}": {
+      "get": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Obtenir Contrat",
+        "operationId": "obtenir_contrat",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContratSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Modifier Contrat",
+        "description": "Brouillon ou retour pour correction seulement : sinon 409 (RG-18).",
+        "operationId": "modifier_contrat",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContratChamps"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContratSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contrats/{contrat_id}/synthese": {
+      "get": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Obtenir Synthese Contrat",
+        "description": "Fiche de synthèse financière (annexe 18.1), recalculée à chaque lecture (RG-14).",
+        "operationId": "obtenir_synthese_contrat",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SyntheseContrat"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contrats/{contrat_id}/avenants": {
+      "post": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Creer Avenant",
+        "description": "Avenant soumis dès sa création ; le plafond change seulement à sa validation (RG-11).",
+        "operationId": "creer_avenant",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvenantCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvenantSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Lister Avenants",
+        "description": "Historique complet, dans l'ordre des numéros (REC-04).",
+        "operationId": "lister_avenants",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AvenantSortie"
+                  },
+                  "title": "Response Lister Avenants"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/avenants/{avenant_id}": {
+      "patch": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Corriger Avenant",
+        "description": "Correction après retour, par son auteur (RG-18).",
+        "operationId": "corriger_avenant",
+        "parameters": [
+          {
+            "name": "avenant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Avenant Id"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvenantCorrection"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AvenantSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contrats/{contrat_id}/echeances": {
+      "get": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Lister Echeances",
+        "operationId": "lister_echeances",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EcheanceSortie"
+                  },
+                  "title": "Response Lister Echeances"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Ajouter Echeance",
+        "operationId": "ajouter_echeance",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EcheanceSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EcheanceSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contrats/{contrat_id}/echeances/{element_id}": {
+      "delete": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Supprimer Echeance",
+        "operationId": "supprimer_echeance",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          },
+          {
+            "name": "element_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Element Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contrats/{contrat_id}/lots": {
+      "get": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Lister Lots",
+        "operationId": "lister_lots",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LotSortie"
+                  },
+                  "title": "Response Lister Lots"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Ajouter Lot",
+        "operationId": "ajouter_lot",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LotSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LotSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contrats/{contrat_id}/lots/{element_id}": {
+      "delete": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Supprimer Lot",
+        "operationId": "supprimer_lot",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          },
+          {
+            "name": "element_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Element Id"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful Response"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contrats/{contrat_id}/ordres-service": {
+      "get": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Lister Ordres Service",
+        "operationId": "lister_ordres_service",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/OrdreServiceSortie"
+                  },
+                  "title": "Response Lister Ordres Service"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Ajouter Ordre Service",
+        "operationId": "ajouter_ordre_service",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdreServiceSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdreServiceSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/contrats/{contrat_id}/revisions-prix": {
+      "get": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Lister Revisions Prix",
+        "operationId": "lister_revisions_prix",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RevisionPrixSortie"
+                  },
+                  "title": "Response Lister Revisions Prix"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "contrats"
+        ],
+        "summary": "Ajouter Revision Prix",
+        "operationId": "ajouter_revision_prix",
+        "parameters": [
+          {
+            "name": "contrat_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Contrat Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RevisionPrixSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RevisionPrixSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sites": {
       "get": {
         "tags": [
@@ -5412,7 +6471,11 @@
             "in": "path",
             "required": true,
             "schema": {
-              "const": "revisions-budgetaires",
+              "enum": [
+                "revisions-budgetaires",
+                "contrats",
+                "avenants"
+              ],
               "type": "string",
               "title": "Ressource"
             }
@@ -5464,7 +6527,11 @@
             "in": "path",
             "required": true,
             "schema": {
-              "const": "revisions-budgetaires",
+              "enum": [
+                "revisions-budgetaires",
+                "contrats",
+                "avenants"
+              ],
               "type": "string",
               "title": "Ressource"
             }
@@ -5520,7 +6587,7 @@
           "workflow"
         ],
         "summary": "Resoumettre",
-        "description": "Après correction, l'auteur renvoie l'opération au début de son circuit.",
+        "description": "Par l'auteur : soumission d'un brouillon, ou renvoi au circuit après correction.",
         "operationId": "resoumettre",
         "parameters": [
           {
@@ -5528,7 +6595,11 @@
             "in": "path",
             "required": true,
             "schema": {
-              "const": "revisions-budgetaires",
+              "enum": [
+                "revisions-budgetaires",
+                "contrats",
+                "avenants"
+              ],
               "type": "string",
               "title": "Ressource"
             }
@@ -5581,7 +6652,11 @@
             "in": "path",
             "required": true,
             "schema": {
-              "const": "revisions-budgetaires",
+              "enum": [
+                "revisions-budgetaires",
+                "contrats",
+                "avenants"
+              ],
               "type": "string",
               "title": "Ressource"
             }
@@ -5637,7 +6712,11 @@
             "in": "path",
             "required": true,
             "schema": {
-              "const": "revisions-budgetaires",
+              "enum": [
+                "revisions-budgetaires",
+                "contrats",
+                "avenants"
+              ],
               "type": "string",
               "title": "Ressource"
             }
@@ -6072,7 +7151,11 @@
             "in": "path",
             "required": true,
             "schema": {
-              "const": "RevisionBudgetaire",
+              "enum": [
+                "RevisionBudgetaire",
+                "Contrat",
+                "Avenant"
+              ],
               "type": "string",
               "title": "Type Objet"
             }
@@ -6855,6 +7938,179 @@
         ],
         "title": "Anomalie"
       },
+      "AvenantCorrection": {
+        "properties": {
+          "objet": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objet"
+          },
+          "variation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Variation"
+          },
+          "dateEffet": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateeffet"
+          }
+        },
+        "type": "object",
+        "title": "AvenantCorrection"
+      },
+      "AvenantCreation": {
+        "properties": {
+          "objet": {
+            "type": "string",
+            "maxLength": 500,
+            "minLength": 1,
+            "title": "Objet"
+          },
+          "variation": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Variation",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "dateEffet": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateeffet"
+          }
+        },
+        "type": "object",
+        "required": [
+          "objet",
+          "variation",
+          "dateEffet"
+        ],
+        "title": "AvenantCreation"
+      },
+      "AvenantSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "contratId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Contratid"
+          },
+          "numero": {
+            "type": "integer",
+            "title": "Numero"
+          },
+          "objet": {
+            "type": "string",
+            "title": "Objet"
+          },
+          "variation": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Variation",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "dateEffet": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateeffet"
+          },
+          "montantAvant": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montantavant"
+          },
+          "nouveauPlafond": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nouveauplafond"
+          },
+          "statut": {
+            "$ref": "#/components/schemas/Statut"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "contratId",
+          "numero",
+          "objet",
+          "variation",
+          "dateEffet",
+          "montantAvant",
+          "nouveauPlafond",
+          "statut",
+          "creeParCode",
+          "creeLe",
+          "version"
+        ],
+        "title": "AvenantSortie"
+      },
       "BaseConsommationMarche": {
         "type": "string",
         "enum": [
@@ -7264,7 +8520,11 @@
           },
           "typeObjet": {
             "type": "string",
-            "const": "RevisionBudgetaire",
+            "enum": [
+              "RevisionBudgetaire",
+              "Contrat",
+              "Avenant"
+            ],
             "title": "Typeobjet"
           },
           "libelle": {
@@ -7698,6 +8958,1184 @@
         ],
         "title": "Connexion"
       },
+      "ContratChamps": {
+        "properties": {
+          "numero": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numero"
+          },
+          "intitule": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Intitule"
+          },
+          "nature": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NatureMarche"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "numeroLot": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 30
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numerolot"
+          },
+          "fournisseurId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fournisseurid"
+          },
+          "objet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objet"
+          },
+          "perimetre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Perimetre"
+          },
+          "referenceDossier": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencedossier"
+          },
+          "dateNotification": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datenotification"
+          },
+          "dateSignature": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datesignature"
+          },
+          "dateDemarrage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datedemarrage"
+          },
+          "dureeMois": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 600.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dureemois"
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "devise": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[A-Z]{3}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Devise"
+          },
+          "montantInitialHt": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montantinitialht"
+          },
+          "tauxTaxe": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxtaxe"
+          },
+          "periodicite": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Periodicite"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "modaliteFacturation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modalitefacturation"
+          },
+          "siteId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Siteid"
+          },
+          "centreId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Centreid"
+          },
+          "sourceId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sourceid"
+          },
+          "familleAchatId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Familleachatid"
+          },
+          "responsableCode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsablecode"
+          },
+          "tauxAvance": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxavance"
+          },
+          "modeRecuperationAvance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moderecuperationavance"
+          },
+          "tauxRetenueGarantie": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxretenuegarantie"
+          },
+          "conditionLiberationRetenue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conditionliberationretenue"
+          },
+          "dateLiberationRetenue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateliberationretenue"
+          },
+          "imputations": {
+            "anyOf": [
+              {
+                "items": {
+                  "$ref": "#/components/schemas/ImputationSchema"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Imputations"
+          }
+        },
+        "type": "object",
+        "title": "ContratChamps",
+        "description": "Champs modifiables tant que le contrat est en brouillon ou retourné pour correction."
+      },
+      "ContratCreation": {
+        "properties": {
+          "numero": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Numero"
+          },
+          "intitule": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Intitule"
+          },
+          "nature": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NatureMarche"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "numeroLot": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 30
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numerolot"
+          },
+          "fournisseurId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Fournisseurid"
+          },
+          "objet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objet"
+          },
+          "perimetre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Perimetre"
+          },
+          "referenceDossier": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencedossier"
+          },
+          "dateNotification": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datenotification"
+          },
+          "dateSignature": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datesignature"
+          },
+          "dateDemarrage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datedemarrage"
+          },
+          "dureeMois": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 600.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dureemois"
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "devise": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$",
+            "title": "Devise",
+            "default": "XOF"
+          },
+          "montantInitialHt": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantinitialht",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "tauxTaxe": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              }
+            ],
+            "title": "Tauxtaxe",
+            "default": "0"
+          },
+          "periodicite": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Periodicite"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "modaliteFacturation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modalitefacturation"
+          },
+          "siteId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Siteid"
+          },
+          "centreId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Centreid"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Sourceid"
+          },
+          "familleAchatId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Familleachatid"
+          },
+          "responsableCode": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 20
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsablecode"
+          },
+          "tauxAvance": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxavance"
+          },
+          "modeRecuperationAvance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moderecuperationavance"
+          },
+          "tauxRetenueGarantie": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 100.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxretenuegarantie"
+          },
+          "conditionLiberationRetenue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conditionliberationretenue"
+          },
+          "dateLiberationRetenue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateliberationretenue"
+          },
+          "imputations": {
+            "items": {
+              "$ref": "#/components/schemas/ImputationSchema"
+            },
+            "type": "array",
+            "title": "Imputations"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeContrat"
+          }
+        },
+        "type": "object",
+        "required": [
+          "numero",
+          "intitule",
+          "fournisseurId",
+          "montantInitialHt",
+          "centreId",
+          "sourceId",
+          "etablissementId",
+          "type"
+        ],
+        "title": "ContratCreation"
+      },
+      "ContratResume": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeContrat"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "intitule": {
+            "type": "string",
+            "title": "Intitule"
+          },
+          "fournisseurId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Fournisseurid"
+          },
+          "fournisseur": {
+            "type": "string",
+            "title": "Fournisseur"
+          },
+          "centreId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Centreid"
+          },
+          "statut": {
+            "$ref": "#/components/schemas/Statut"
+          },
+          "dateSignature": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datesignature"
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "montantActualise": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantactualise",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "engage": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Engage",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "tauxConsommation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxconsommation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "type",
+          "numero",
+          "intitule",
+          "fournisseurId",
+          "fournisseur",
+          "centreId",
+          "statut",
+          "dateSignature",
+          "dateEcheance",
+          "montantActualise",
+          "engage",
+          "tauxConsommation"
+        ],
+        "title": "ContratResume"
+      },
+      "ContratSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeContrat"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "intitule": {
+            "type": "string",
+            "title": "Intitule"
+          },
+          "nature": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/NatureMarche"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "numeroLot": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Numerolot"
+          },
+          "fournisseurId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Fournisseurid"
+          },
+          "objet": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objet"
+          },
+          "perimetre": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Perimetre"
+          },
+          "referenceDossier": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencedossier"
+          },
+          "dateNotification": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datenotification"
+          },
+          "dateSignature": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datesignature"
+          },
+          "dateDemarrage": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datedemarrage"
+          },
+          "dureeMois": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dureemois"
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "devise": {
+            "type": "string",
+            "title": "Devise"
+          },
+          "montantInitialHt": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantinitialht",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "tauxTaxe": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Tauxtaxe",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "montantInitialTtc": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantinitialttc",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "periodicite": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/Periodicite"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "modaliteFacturation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Modalitefacturation"
+          },
+          "siteId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Siteid"
+          },
+          "centreId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Centreid"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Sourceid"
+          },
+          "familleAchatId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Familleachatid"
+          },
+          "responsableCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Responsablecode"
+          },
+          "tauxAvance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxavance"
+          },
+          "modeRecuperationAvance": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Moderecuperationavance"
+          },
+          "tauxRetenueGarantie": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxretenuegarantie"
+          },
+          "conditionLiberationRetenue": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conditionliberationretenue"
+          },
+          "dateLiberationRetenue": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateliberationretenue"
+          },
+          "statut": {
+            "$ref": "#/components/schemas/Statut"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          },
+          "imputations": {
+            "items": {
+              "$ref": "#/components/schemas/ImputationSortie"
+            },
+            "type": "array",
+            "title": "Imputations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "type",
+          "numero",
+          "intitule",
+          "nature",
+          "numeroLot",
+          "fournisseurId",
+          "objet",
+          "perimetre",
+          "referenceDossier",
+          "dateNotification",
+          "dateSignature",
+          "dateDemarrage",
+          "dureeMois",
+          "dateEcheance",
+          "devise",
+          "montantInitialHt",
+          "tauxTaxe",
+          "montantInitialTtc",
+          "periodicite",
+          "modaliteFacturation",
+          "siteId",
+          "centreId",
+          "sourceId",
+          "familleAchatId",
+          "responsableCode",
+          "tauxAvance",
+          "modeRecuperationAvance",
+          "tauxRetenueGarantie",
+          "conditionLiberationRetenue",
+          "dateLiberationRetenue",
+          "statut",
+          "creeParCode",
+          "creeLe",
+          "version",
+          "imputations"
+        ],
+        "title": "ContratSortie"
+      },
       "CoordonneeCreation": {
         "properties": {
           "etablissementId": {
@@ -7933,6 +10371,72 @@
           "indicateurs"
         ],
         "title": "DisponibiliteSortie"
+      },
+      "EcheanceSchema": {
+        "properties": {
+          "libelle": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Libelle"
+          },
+          "dateEcheance": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateecheance"
+          },
+          "montantPrevu": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantprevu",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "libelle",
+          "dateEcheance",
+          "montantPrevu"
+        ],
+        "title": "EcheanceSchema"
+      },
+      "EcheanceSortie": {
+        "properties": {
+          "libelle": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Libelle"
+          },
+          "dateEcheance": {
+            "type": "string",
+            "format": "date",
+            "title": "Dateecheance"
+          },
+          "montantPrevu": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantprevu",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "libelle",
+          "dateEcheance",
+          "montantPrevu",
+          "id"
+        ],
+        "title": "EcheanceSortie"
       },
       "EntreeJournal": {
         "properties": {
@@ -8660,6 +11164,58 @@
         ],
         "title": "ImportSortie"
       },
+      "ImputationSchema": {
+        "properties": {
+          "ligneId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ligneid"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "ligneId",
+          "montant"
+        ],
+        "title": "ImputationSchema"
+      },
+      "ImputationSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "ligneId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Ligneid"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "ligneId",
+          "montant"
+        ],
+        "title": "ImputationSortie"
+      },
       "IndicateursSortie": {
         "properties": {
           "budgetInitial": {
@@ -9077,6 +11633,74 @@
         ],
         "title": "LigneSortie"
       },
+      "LotSchema": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "libelle": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Libelle"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "libelle",
+          "montant"
+        ],
+        "title": "LotSchema"
+      },
+      "LotSortie": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 30,
+            "minLength": 1,
+            "title": "Code"
+          },
+          "libelle": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Libelle"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "libelle",
+          "montant",
+          "id"
+        ],
+        "title": "LotSortie"
+      },
       "Moi": {
         "properties": {
           "idHopitalia": {
@@ -9128,6 +11752,16 @@
           "langue"
         ],
         "title": "Moi"
+      },
+      "NatureMarche": {
+        "type": "string",
+        "enum": [
+          "FOURNITURES",
+          "TRAVAUX",
+          "SERVICES",
+          "PRESTATIONS_INTELLECTUELLES"
+        ],
+        "title": "NatureMarche"
       },
       "NoeudSortie": {
         "properties": {
@@ -9328,6 +11962,90 @@
         ],
         "title": "NotificationSortie"
       },
+      "OrdreServiceSchema": {
+        "properties": {
+          "reference": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Reference"
+          },
+          "type": {
+            "type": "string",
+            "pattern": "^(DEMARRAGE|ARRET|REPRISE|MODIFICATION|AUTRE)$",
+            "title": "Type"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "objet": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objet"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reference",
+          "type",
+          "date"
+        ],
+        "title": "OrdreServiceSchema"
+      },
+      "OrdreServiceSortie": {
+        "properties": {
+          "reference": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Reference"
+          },
+          "type": {
+            "type": "string",
+            "pattern": "^(DEMARRAGE|ARRET|REPRISE|MODIFICATION|AUTRE)$",
+            "title": "Type"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "objet": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Objet"
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "reference",
+          "type",
+          "date",
+          "id"
+        ],
+        "title": "OrdreServiceSortie"
+      },
       "PageCurseur_EntreeJournal_": {
         "properties": {
           "donnees": {
@@ -9427,6 +12145,26 @@
           "pagination"
         ],
         "title": "Page[CompteTresorerieSortie]"
+      },
+      "Page_ContratResume_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/ContratResume"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[ContratResume]"
       },
       "Page_DelegationSortie_": {
         "properties": {
@@ -9833,6 +12571,18 @@
           "consommationDeduitAvanceRecuperee"
         ],
         "title": "ParametresCalculSchema"
+      },
+      "Periodicite": {
+        "type": "string",
+        "enum": [
+          "PONCTUELLE",
+          "A_LA_LIVRAISON",
+          "MENSUELLE",
+          "TRIMESTRIELLE",
+          "SEMESTRIELLE",
+          "ANNUELLE"
+        ],
+        "title": "Periodicite"
       },
       "PieceSortie": {
         "properties": {
@@ -10318,6 +13068,96 @@
         ],
         "title": "RevisionCreation"
       },
+      "RevisionPrixSchema": {
+        "properties": {
+          "formule": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Formule"
+          },
+          "indice": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Indice"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "incidence": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Incidence",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "formule",
+          "date",
+          "incidence"
+        ],
+        "title": "RevisionPrixSchema"
+      },
+      "RevisionPrixSortie": {
+        "properties": {
+          "formule": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Formule"
+          },
+          "indice": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Indice"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "incidence": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Incidence",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "formule",
+          "date",
+          "incidence",
+          "id"
+        ],
+        "title": "RevisionPrixSortie"
+      },
       "RevisionSortie": {
         "properties": {
           "id": {
@@ -10727,6 +13567,19 @@
         ],
         "title": "SourceSortie"
       },
+      "Statut": {
+        "type": "string",
+        "enum": [
+          "BROUILLON",
+          "SOUMIS",
+          "EN_VALIDATION",
+          "A_CORRIGER",
+          "VALIDE",
+          "REJETE"
+        ],
+        "title": "Statut",
+        "description": "Statuts de référence d'un contrat et d'un avenant (un avenant naît soumis)."
+      },
       "StatutCreation": {
         "properties": {
           "etablissementId": {
@@ -10736,7 +13589,11 @@
           },
           "typeObjet": {
             "type": "string",
-            "const": "RevisionBudgetaire",
+            "enum": [
+              "RevisionBudgetaire",
+              "Contrat",
+              "Avenant"
+            ],
             "title": "Typeobjet"
           },
           "code": {
@@ -10845,6 +13702,239 @@
         ],
         "title": "StatutSortie"
       },
+      "SyntheseContrat": {
+        "properties": {
+          "contratId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Contratid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "intitule": {
+            "type": "string",
+            "title": "Intitule"
+          },
+          "statut": {
+            "$ref": "#/components/schemas/Statut"
+          },
+          "montantInitial": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantinitial",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "avenantsValides": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Avenantsvalides",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "montantActualise": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantactualise",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "engage": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Engage",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteAEngager": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Resteaengager",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "commande": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Commande",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "receptionne": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Receptionne",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "facture": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Facture",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "liquide": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Liquide",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "transmis": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Transmis",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "paye": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Paye",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "engageNonFacture": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Engagenonfacture",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteAPayerSurLiquide": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Resteapayersurliquide",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteContractuelAPayer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Restecontractuelapayer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "tauxConsommation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxconsommation"
+          },
+          "montantAvance": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantavance",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "avanceRecuperee": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Avancerecuperee",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "avanceRestantARecuperer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Avancerestantarecuperer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "retenueOperee": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Retenueoperee",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "retenueLiberee": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Retenueliberee",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "retenueALiberer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Retenuealiberer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "incidenceRevisionsPrix": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Incidencerevisionsprix",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "contratId",
+          "numero",
+          "intitule",
+          "statut",
+          "montantInitial",
+          "avenantsValides",
+          "montantActualise",
+          "engage",
+          "resteAEngager",
+          "commande",
+          "receptionne",
+          "facture",
+          "liquide",
+          "transmis",
+          "paye",
+          "engageNonFacture",
+          "resteAPayerSurLiquide",
+          "resteContractuelAPayer",
+          "tauxConsommation",
+          "montantAvance",
+          "avanceRecuperee",
+          "avanceRestantARecuperer",
+          "retenueOperee",
+          "retenueLiberee",
+          "retenueALiberer",
+          "incidenceRevisionsPrix"
+        ],
+        "title": "SyntheseContrat"
+      },
       "TransitionCreation": {
         "properties": {
           "etablissementId": {
@@ -10854,7 +13944,11 @@
           },
           "typeObjet": {
             "type": "string",
-            "const": "RevisionBudgetaire",
+            "enum": [
+              "RevisionBudgetaire",
+              "Contrat",
+              "Avenant"
+            ],
             "title": "Typeobjet"
           },
           "depuis": {
@@ -10998,6 +14092,17 @@
           "version"
         ],
         "title": "TransitionSortie"
+      },
+      "TypeContrat": {
+        "type": "string",
+        "enum": [
+          "MARCHE",
+          "CONVENTION",
+          "MAINTENANCE",
+          "PRESTATION",
+          "AUTRE"
+        ],
+        "title": "TypeContrat"
       },
       "TypeDepenseCreation": {
         "properties": {
@@ -11157,7 +14262,11 @@
           "typesObjets": {
             "items": {
               "type": "string",
-              "const": "RevisionBudgetaire"
+              "enum": [
+                "RevisionBudgetaire",
+                "Contrat",
+                "Avenant"
+              ]
             },
             "type": "array",
             "title": "Typesobjets"
@@ -11214,7 +14323,11 @@
               {
                 "items": {
                   "type": "string",
-                  "const": "RevisionBudgetaire"
+                  "enum": [
+                    "RevisionBudgetaire",
+                    "Contrat",
+                    "Avenant"
+                  ]
                 },
                 "type": "array"
               },
@@ -11267,7 +14380,11 @@
               {
                 "items": {
                   "type": "string",
-                  "const": "RevisionBudgetaire"
+                  "enum": [
+                    "RevisionBudgetaire",
+                    "Contrat",
+                    "Avenant"
+                  ]
                 },
                 "type": "array"
               },

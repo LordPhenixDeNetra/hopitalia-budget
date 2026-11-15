@@ -47,6 +47,22 @@ export const routes: RouteObject[] = [
       },
       { path: 'habilitations', element: <Habilitations />, handle: fil('menu.habilitations') },
       {
+        path: 'contrats',
+        handle: fil('menu.contrats'),
+        children: [
+          {
+            index: true,
+            lazy: () =>
+              import('./pages/contrats/Contrats').then((m) => ({ Component: m.Contrats })),
+          },
+          {
+            path: ':id',
+            lazy: () =>
+              import('./pages/contrats/FicheContrat').then((m) => ({ Component: m.FicheContrat })),
+          },
+        ],
+      },
+      {
         path: 'delegations',
         lazy: () => import('./pages/Delegations').then((m) => ({ Component: m.Delegations })),
         handle: fil('menu.delegations'),

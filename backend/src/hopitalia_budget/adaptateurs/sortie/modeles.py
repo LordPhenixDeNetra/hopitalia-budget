@@ -478,3 +478,134 @@ class ParametreCalculModele(Base):
     )
     code: Mapped[str] = mapped_column(String(50), primary_key=True)
     valeur: Mapped[str] = mapped_column(String(50))
+
+
+class ContratModele(Base):
+    """Contrat signé ou marché attribué (type MARCHE : nature et lot en plus), section 7.3."""
+
+    __tablename__ = "contrat"
+    __table_args__ = (UniqueConstraint("etablissement_id", "numero"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    numero: Mapped[str] = mapped_column(String(50))
+    intitule: Mapped[str] = mapped_column(String(300))
+    type: Mapped[str] = mapped_column(String(20), index=True)
+    nature: Mapped[str | None] = mapped_column(String(30))
+    numero_lot: Mapped[str | None] = mapped_column(String(30))
+    fournisseur_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("fournisseur.id"), index=True)
+    objet: Mapped[str | None] = mapped_column(Text)
+    perimetre: Mapped[str | None] = mapped_column(Text)
+    reference_dossier: Mapped[str | None] = mapped_column(String(100))
+    date_notification: Mapped[date | None]
+    date_signature: Mapped[date | None]
+    date_demarrage: Mapped[date | None]
+    duree_mois: Mapped[int | None]
+    date_echeance: Mapped[date | None]
+    devise: Mapped[str] = mapped_column(String(3), default="XOF")
+    montant_initial_ht: Mapped[Decimal] = mapped_column(MONTANT)
+    taux_taxe: Mapped[Decimal] = mapped_column(MONTANT)
+    montant_initial_ttc: Mapped[Decimal] = mapped_column(MONTANT)
+    periodicite: Mapped[str | None] = mapped_column(String(20))
+    modalite_facturation: Mapped[str | None] = mapped_column(String(500))
+    site_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("site.id"))
+    centre_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("centre_responsabilite.id"), index=True)
+    source_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("referentiel.id"))
+    famille_achat_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("referentiel.id"))
+    responsable_code: Mapped[str | None] = mapped_column(String(20))
+    # Avance et retenue de garantie : conditions ; les montants se calculent (RG-14).
+    taux_avance: Mapped[Decimal | None] = mapped_column(MONTANT)
+    mode_recuperation_avance: Mapped[str | None] = mapped_column(String(300))
+    taux_retenue_garantie: Mapped[Decimal | None] = mapped_column(MONTANT)
+    condition_liberation_retenue: Mapped[str | None] = mapped_column(String(300))
+    date_liberation_retenue: Mapped[date | None]
+    statut: Mapped[str] = mapped_column(String(20), index=True)
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class ImputationContratModele(Base):
+    """Ventilation du contrat sur une ligne budgétaire (RG-15)."""
+
+    __tablename__ = "imputation_contrat"
+    __table_args__ = (UniqueConstraint("contrat_id", "ligne_id"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    contrat_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("contrat.id"), index=True)
+    ligne_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("ligne_budgetaire.id"), index=True)
+    montant: Mapped[Decimal] = mapped_column(MONTANT)
+
+
+class AvenantModele(Base):
+    """Avenant : n'a d'effet sur le plafond qu'une fois validé (RG-11). Montant avant et nouveau
+    plafond sont relevés au moment de la validation, pour l'historique."""
+
+    __tablename__ = "avenant"
+    __table_args__ = (UniqueConstraint("contrat_id", "numero"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    contrat_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("contrat.id"), index=True)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"))
+    numero: Mapped[int]
+    objet: Mapped[str] = mapped_column(String(500))
+    variation: Mapped[Decimal] = mapped_column(MONTANT)
+    date_effet: Mapped[date]
+    montant_avant: Mapped[Decimal | None] = mapped_column(MONTANT)
+    nouveau_plafond: Mapped[Decimal | None] = mapped_column(MONTANT)
+    statut: Mapped[str] = mapped_column(String(20), index=True)
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class EcheanceContratModele(Base):
+    __tablename__ = "echeance_contrat"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    contrat_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("contrat.id"), index=True)
+    libelle: Mapped[str] = mapped_column(String(200))
+    date_echeance: Mapped[date]
+    montant_prevu: Mapped[Decimal] = mapped_column(MONTANT)
+
+
+class LotTrancheModele(Base):
+    __tablename__ = "lot_tranche"
+    __table_args__ = (UniqueConstraint("contrat_id", "code"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    contrat_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("contrat.id"), index=True)
+    code: Mapped[str] = mapped_column(String(30))
+    libelle: Mapped[str] = mapped_column(String(200))
+    montant: Mapped[Decimal] = mapped_column(MONTANT)
+
+
+class OrdreServiceModele(Base):
+    __tablename__ = "ordre_service"
+    __table_args__ = (UniqueConstraint("contrat_id", "reference"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    contrat_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("contrat.id"), index=True)
+    reference: Mapped[str] = mapped_column(String(50))
+    type: Mapped[str] = mapped_column(String(20))
+    date: Mapped[date]
+    objet: Mapped[str | None] = mapped_column(String(500))
+
+
+class RevisionPrixModele(Base):
+    """Révision de prix : formule, indice, incidence (hors montant actualisé, section 6.2)."""
+
+    __tablename__ = "revision_prix"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    contrat_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("contrat.id"), index=True)
+    formule: Mapped[str] = mapped_column(String(300))
+    indice: Mapped[str | None] = mapped_column(String(100))
+    date: Mapped[date]
+    incidence: Mapped[Decimal] = mapped_column(MONTANT)
