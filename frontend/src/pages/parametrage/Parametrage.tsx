@@ -196,6 +196,7 @@ export function Parametrage() {
       ) : (
         <PageReferentiel
           key={ressource}
+          niveau={2}
           definition={RESSOURCES[ressource]!}
           actionsLigne={
             ressource === 'fournisseurs'

@@ -35,7 +35,7 @@ export function Connexion() {
   return (
     <Flex justify="center" align="center" style={{ minHeight: '100vh', padding: 16 }}>
       <Card style={{ width: '100%', maxWidth: 400 }}>
-        <Typography.Title level={2}>{t('application.nom')}</Typography.Title>
+        <Typography.Title level={1}>{t('application.nom')}</Typography.Title>
         <Typography.Paragraph type="secondary">{t('connexion.sousTitre')}</Typography.Paragraph>
         {expiree && <Alert type="warning" showIcon title={t('connexion.sessionExpiree')} />}
         {erreur && <Alert type="error" showIcon title={erreur} role="alert" />}

@@ -204,12 +204,15 @@ export function PageReferentiel({
   definition,
   fixes = {},
   titre = true,
+  niveau = 1,
   actionsLigne,
 }: {
   definition: DefinitionRessource
   /** Filtres imposés (ex. budgetId) : appliqués à la liste et posés en création. */
   fixes?: Record<string, string>
   titre?: boolean
+  /** Niveau du titre : 1 en page seule, 2 dans une page qui a déjà le sien (IHM-07). */
+  niveau?: 1 | 2
   actionsLigne?: (element: Enregistrement) => ReactNode
 }) {
   const { t } = useTranslation('parametrage')
@@ -278,7 +281,7 @@ export function PageReferentiel({
     <Flex vertical gap="middle">
       <Flex justify="space-between" align="center" wrap gap="small">
         {titre && (
-          <Typography.Title level={2} style={{ margin: 0 }}>
+          <Typography.Title level={niveau} style={{ margin: 0 }}>
             {t(`ressources.${definition.chemin}`)}
           </Typography.Title>
         )}
