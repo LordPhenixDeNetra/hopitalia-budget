@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session, sessionmaker
 from hopitalia_budget.adaptateurs.entree.api.limitation import LimitationDebit
 from hopitalia_budget.adaptateurs.entree.api.problemes import installer_gestionnaires
 from hopitalia_budget.adaptateurs.entree.api.routes import (
+    alertes,
     audit,
     auth,
     budget,
@@ -101,6 +102,7 @@ def creer_application(
         factures,
         paiements,
         tableaux_de_bord,
+        alertes,
     ):
         v1.include_router(module.router)
     for routeur in [*parametrage.routeurs(), *workflow.routeurs()]:

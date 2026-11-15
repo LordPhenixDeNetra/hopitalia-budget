@@ -508,7 +508,7 @@ def modifier_reception(
     m = _reception(session, utilisateur, reception_id)
     receptions.exiger(utilisateur, Operation.ENREGISTRER_RECEPTION, m.etablissement_id)
     cible = receptions.validable(DepotReceptionsSql(session), utilisateur, reception_id)
-    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet())
+    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet(), utilisateur.code_agent)
     if m.version != version_attendue(if_match):
         raise ErreurMetier("PRECONDITION_ECHOUEE")
     avant = _sortie_reception(session, m)
@@ -655,7 +655,7 @@ def attester_service_fait(
     m = _reception(session, utilisateur, reception_id)
     receptions.exiger(utilisateur, Operation.ENREGISTRER_RECEPTION, m.etablissement_id)
     cible = receptions.validable(DepotReceptionsSql(session), utilisateur, reception_id)
-    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet())
+    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet(), utilisateur.code_agent)
     attestation = AttestationServiceFaitModele(
         reception_id=m.id, cree_par_code=utilisateur.code_agent, **corps.model_dump()
     )

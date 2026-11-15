@@ -44,6 +44,7 @@ from hopitalia_budget.adaptateurs.entree.api.schemas import (
     ResultatControleSortie,
     Schema,
 )
+from hopitalia_budget.adaptateurs.sortie.alertes_sql import mettre_en_attente
 from hopitalia_budget.adaptateurs.sortie.commandes_sql import (
     accepte_valide,
     lignes_commande,
@@ -65,6 +66,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
 from hopitalia_budget.adaptateurs.sortie.paiements_sql import paye_par_liquidation
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import DepotWorkflowSql
 from hopitalia_budget.application import derogations, engagements, factures, workflow
+from hopitalia_budget.domaine.alertes import Signal, TypeAlerte
 from hopitalia_budget.domaine.commandes import montant_ttc
 from hopitalia_budget.domaine.controles import NatureDerogation
 from hopitalia_budget.domaine.erreurs import ErreurMetier
@@ -248,6 +250,17 @@ def _controler_facture(session: Session, d: dict[str, Any], sauf: UUID | None) -
             )
             and not (d.get("motif_levee_doublon") or "").strip()
         ):
+            mettre_en_attente(
+                session,
+                Signal(
+                    TypeAlerte.FACTURE_DOUBLON,
+                    "Facture",
+                    autre.id,
+                    autre.etablissement_id,
+                    cle=str(d["numero"]),
+                    details={"numero": str(d["numero"]), "reference": autre.numero},
+                ),
+            )
             raise ErreurMetier("FACTURE_DOUBLON", reference=autre.numero, factureId=str(autre.id))
     return d
 
@@ -694,7 +707,7 @@ def corriger_liquidation(
     cible = factures.validable(
         DepotFacturesSql(session), DepotDerogationsSql(session), utilisateur, m.id
     )
-    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet())
+    workflow.exiger_modifiable(DepotWorkflowSql(session), cible.objet(), utilisateur.code_agent)
     if m.version != version_attendue(if_match):
         raise ErreurMetier("PRECONDITION_ECHOUEE")
     avant = _sortie_liquidation(session, m)
@@ -894,6 +907,22 @@ def valider_rapprochement(
         Ecarts(e.ecart_commande_reception, e.ecart_reception_facture, e.ecart_facture_paiement),
         corps.explication,
     )
+    if not e.sans_ecart:
+        mettre_en_attente(
+            session,
+            Signal(
+                TypeAlerte.ECART_RAPPROCHEMENT,
+                "Facture",
+                m.id,
+                m.etablissement_id,
+                cle=None,
+                details={
+                    "numero": m.numero,
+                    "explication": corps.explication or "",
+                },
+                code_agent=utilisateur.code_agent,
+            ),
+        )
     r = RapprochementModele(
         facture_id=m.id,
         etablissement_id=m.etablissement_id,

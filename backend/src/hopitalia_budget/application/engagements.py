@@ -8,6 +8,7 @@ Annulation partielle ou totale, clôture avec désengagement du reliquat (EF-ENG
 from decimal import Decimal
 from uuid import UUID
 
+from hopitalia_budget.application.workflow import signaler
 from hopitalia_budget.domaine.controles import (
     MoteurControles,
     ResultatControle,
@@ -60,11 +61,17 @@ class EngagementValidable:
         )
 
     def controler_soumission(self) -> None:
-        exiger_conformite(controler(self.depot, self.engagement))
+        exiger_conformite(
+            signaler(self.depot, self.objet(), controler(self.depot, self.engagement))
+        )
 
     def controler_validation_finale(self) -> None:
         # Lignes et contrat verrouillés jusqu'à la fin de la transaction (RG-20, ENF-08).
-        exiger_conformite(controler(self.depot, self.engagement, verrouiller=True))
+        exiger_conformite(
+            signaler(
+                self.depot, self.objet(), controler(self.depot, self.engagement, verrouiller=True)
+            )
+        )
 
     def changer_statut(self, statut_reference: str) -> None:
         self.depot.changer_statut(

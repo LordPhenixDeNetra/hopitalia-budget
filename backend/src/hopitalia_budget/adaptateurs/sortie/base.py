@@ -18,9 +18,13 @@ def creer_fabrique_sessions(database_url: str) -> sessionmaker[Session]:
 
 def ouvrir_session(fabrique: sessionmaker[Session]) -> Iterator[Session]:
     """Une session par requête ; les routes valident explicitement (session.commit())."""
+    # Import différé : alertes_sql dépend des modèles, qui dépendent de ce module.
+    from hopitalia_budget.adaptateurs.sortie.alertes_sql import persister_apres_echec
+
     with fabrique() as session:
         try:
             yield session
         except Exception:
             session.rollback()
+            persister_apres_echec(session)
             raise

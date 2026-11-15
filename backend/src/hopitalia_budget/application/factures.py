@@ -9,6 +9,8 @@ from decimal import Decimal
 from typing import Protocol
 from uuid import UUID
 
+from hopitalia_budget.application.workflow import signaler
+from hopitalia_budget.domaine.alertes import Signal
 from hopitalia_budget.domaine.controles import MoteurControles, ResultatControle, exiger_conformite
 from hopitalia_budget.domaine.derogations import DepotDerogations, Porteur
 from hopitalia_budget.domaine.engagements import Engagement, StatutEngagement
@@ -48,6 +50,8 @@ class DepotFactures(Protocol):
     def changer_statut(self, liquidation_id: UUID, statut: StatutLiquidation) -> None: ...
 
     def pieces_obligatoires_presentes(self, type_objet: str, id_objet: UUID) -> bool: ...
+
+    def signaler(self, signal: Signal) -> None: ...
 
 
 def exiger(utilisateur: Utilisateur, operation: Operation, etablissement_id: UUID) -> None:
@@ -97,10 +101,20 @@ class LiquidationValidable:
         )
 
     def controler_soumission(self) -> None:
-        exiger_conformite(controler(self.depot, self.derogations, self.liquidation))
+        exiger_conformite(
+            signaler(
+                self.depot, self.objet(), controler(self.depot, self.derogations, self.liquidation)
+            )
+        )
 
     def controler_validation_finale(self) -> None:
-        exiger_conformite(controler(self.depot, self.derogations, self.liquidation, True))
+        exiger_conformite(
+            signaler(
+                self.depot,
+                self.objet(),
+                controler(self.depot, self.derogations, self.liquidation, True),
+            )
+        )
 
     def changer_statut(self, statut_reference: str) -> None:
         self.depot.changer_statut(self.liquidation.id, StatutLiquidation(statut_reference))

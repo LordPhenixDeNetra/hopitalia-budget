@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
+from hopitalia_budget.adaptateurs.sortie.alertes_sql import mettre_en_attente
 from hopitalia_budget.adaptateurs.sortie.commandes_sql import accepte_valide, lignes_commande
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     AnnulationLigneModele,
@@ -22,6 +23,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
     ReceptionModele,
 )
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import pieces_obligatoires_presentes
+from hopitalia_budget.domaine.alertes import Signal
 from hopitalia_budget.domaine.commandes import StatutReception, montant_ttc
 from hopitalia_budget.domaine.engagements import StatutEngagement
 from hopitalia_budget.domaine.erreurs import ErreurMetier
@@ -317,3 +319,6 @@ class DepotFacturesSql:
 
     def pieces_obligatoires_presentes(self, type_objet: str, id_objet: UUID) -> bool:
         return pieces_obligatoires_presentes(self.session, type_objet, id_objet)
+
+    def signaler(self, signal: Signal) -> None:
+        mettre_en_attente(self.session, signal)

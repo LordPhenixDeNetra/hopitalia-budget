@@ -276,7 +276,8 @@ def test_retour_pour_correction_puis_validation(client: TestClient, socle: dict[
     journal = client.get(
         f"/api/v1/journal-audit?idObjet={revision['id']}", headers=entetes(AUDITEUR)
     ).json()
-    assert [e["action"] for e in journal["donnees"]] == [
+    actions = [e["action"] for e in journal["donnees"]]
+    assert [a for a in actions if a != "TENTATIVE_MODIFICATION"] == [
         "CREATION",
         "RETOUR",
         "MODIFICATION",
@@ -284,6 +285,8 @@ def test_retour_pour_correction_puis_validation(client: TestClient, socle: dict[
         "VALIDATION",
         "VALIDATION",
     ]
+    # T-223 : les deux modifications refusées (en circuit, puis validée) restent tracées.
+    assert actions.count("TENTATIVE_MODIFICATION") == 2
 
 
 def test_rejet_definitif(client: TestClient, socle: dict[str, Any]) -> None:

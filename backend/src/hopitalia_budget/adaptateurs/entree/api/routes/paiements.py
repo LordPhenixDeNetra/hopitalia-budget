@@ -43,6 +43,7 @@ from hopitalia_budget.adaptateurs.entree.api.pagination import (
 )
 from hopitalia_budget.adaptateurs.entree.api.routes.factures import MotifSchema
 from hopitalia_budget.adaptateurs.entree.api.schemas import Montant, Schema
+from hopitalia_budget.adaptateurs.sortie.alertes_sql import mettre_en_attente
 from hopitalia_budget.adaptateurs.sortie.factures_sql import montants
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     AllocationPaiementModele,
@@ -61,6 +62,7 @@ from hopitalia_budget.adaptateurs.sortie.paiements_sql import (
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import DepotWorkflowSql
 from hopitalia_budget.application import engagements
 from hopitalia_budget.application.factures import exiger
+from hopitalia_budget.domaine.alertes import Signal, TypeAlerte
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.factures import StatutLiquidation
 from hopitalia_budget.domaine.habilitations import Operation
@@ -337,6 +339,18 @@ def modifier_ordonnancement(
     m = _ordonnancement(session, utilisateur, ordonnancement_id)
     exiger(utilisateur, Operation.ORDONNANCER, m.etablissement_id)
     if m.statut != StatutOrdonnancement.PREPARE:
+        mettre_en_attente(
+            session,
+            Signal(
+                TypeAlerte.MODIFICATION_APRES_VALIDATION,
+                "Ordonnancement",
+                m.id,
+                m.etablissement_id,
+                cle=None,
+                details={"statut": m.statut, "reference": m.reference_piece},
+                code_agent=utilisateur.code_agent,
+            ),
+        )
         raise ErreurMetier("OPERATION_NON_MODIFIABLE", statut=m.statut)
     if m.version != version_attendue(if_match):
         raise ErreurMetier("PRECONDITION_ECHOUEE")
@@ -626,7 +640,26 @@ def enregistrer_paiement(
             verifier_separation(
                 utilisateur.id_hopitalia, _intervenants(session, lq, ordonnancement)
             )
-            verifier_solde(lq.numero, soldes[lq.id], parts[lq.id])
+            try:
+                verifier_solde(lq.numero, soldes[lq.id], parts[lq.id])
+            except ErreurMetier:
+                mettre_en_attente(
+                    session,
+                    Signal(
+                        TypeAlerte.PAIEMENT_SUP_LIQUIDE,
+                        "Liquidation",
+                        lq.id,
+                        lq.etablissement_id,
+                        cle=None,
+                        details={
+                            "numero": lq.numero,
+                            "resteDu": format(soldes[lq.id], "f"),
+                            "part": format(parts[lq.id], "f"),
+                        },
+                        code_agent=utilisateur.code_agent,
+                    ),
+                )
+                raise
         rang = 1 + (
             session.scalar(select(func.count()).where(P.etablissement_id == etablissement_id)) or 0
         )
