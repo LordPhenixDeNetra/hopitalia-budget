@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.9 · 15 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.10 · 15 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -16,6 +16,7 @@
 | 3.7 | 15/11/2026 | Factures, liquidations et rapprochement (lot P1.F) : cycle et règles de la facture et de la liquidation (8.2), dérogations communes à l'engagement et à la liquidation (8.1), facture justifiable sans circuit (10.2), ressources d'API précisées (11.2). |
 | 3.8 | 15/11/2026 | Ordonnancement et paiements (lot P1.G) : règles de l'ordonnancement et du paiement (8.3), ordonnancement et paiement sans circuit de visa (10.2), ressources d'API précisées (11.2). |
 | 3.9 | 15/11/2026 | Tableaux de bord (lot P2.A) : périmètre et filtres du tableau de bord de la direction (14.1), définitions des indicateurs opérationnels (14.2), ressources d'API (11.2). |
+| 3.10 | 15/11/2026 | Alertes (lot P2.B) : création, destinataires, lecture par agent, règles par établissement et tâche planifiée (14.3), type `CONTROLE_BLOQUANT`, ressources d'API (11.2). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1631,7 +1632,8 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/pieces/{id}/contenu` | GET | Fichier vérifié par son empreinte ; `409 PIECE_ALTEREE` sinon. |
 | `/circuits-validation`, `/statuts-personnalises`, `/transitions-statuts` | GET, POST, PATCH | Paramétrage du workflow par établissement ; `DELETE` sur les transitions. `GET /statuts-reference/{typeObjet}` donne le cycle de référence. |
 | `/delegations` | GET, POST, PATCH | `PATCH` raccourcit ou révoque. |
-| `/alertes` | GET, PATCH | `PATCH` pour marquer comme lue. |
+| `/alertes` | GET, PATCH | Pagination par curseur, filtres `nonLues`, `type` ; `PATCH` pour marquer comme lue (par agent) ; `GET /alertes/compteur` ; `POST /alertes/planifications` (administrateur). |
+| `/regles-alertes` | GET, PUT | Filtre `etablissementId` obligatoire ; `PUT /regles-alertes/{type}` (administrateur). |
 | `/journal-audit` | GET | Lecture seule, pagination par curseur. |
 | `/tableaux-de-bord/{code}` | GET | |
 | `/etats/{code}` | GET | `Accept: application/pdf`, tableur ou JSON. |
@@ -1814,6 +1816,15 @@ Facture en attente : reçue, en contrôle, retournée, liquidée, mise en paieme
 | `ENGAGEMENT_ANCIEN` | Engagement ou liquidation non soldé depuis N jours. | Alerte. |
 | `ECHEANCE_CONTRAT` | Contrat proche de son échéance. | Alerte. |
 | `MODIFICATION_APRES_VALIDATION` | Tentative de modification d'une opération validée. | Blocage et trace. |
+| `CONTROLE_BLOQUANT` | Autre contrôle bloquant (cohérence engagement et contrat, doublon d'engagement, seuil hors marché). | Blocage. |
+
+**Règles des alertes (lot P2.B).**
+
+- Une alerte naît d'un écart ouvert d'un contrôle automatique (à la soumission ou à la validation), d'une opération refusée (doublon de facture, paiement au-delà du solde dû, modification après validation, rapprochement avec écart) ou de la tâche planifiée. Un refus annule l'opération, pas son alerte : celle-ci est écrite dans une transaction à part.
+- Une alerte de même type, sur le même objet et pour la même raison (code du contrôle, repère de seuil, numéro de facture) n'est créée qu'une fois. Chaque tentative de modification refusée crée la sienne, et une ligne `TENTATIVE_MODIFICATION` au journal d'audit.
+- Destinataires : les profils qui saisissent ou valident l'opération concernée, dans l'établissement de l'objet (crédit : RB et AF ; marché, seuil, avenant, échéance : GMC et VAL, plus ORD pour les seuils ; factures et liquidations : AF, avec VAL, REC ou CPT selon le cas ; paiement : CPT et AF ; modification après validation : VAL, ORD et AUD ; contrôle bloquant : AF et VAL). Chaque agent marque ses propres alertes comme lues.
+- Règles par établissement, valeurs par défaut sinon : chaque type actif ; seuil des marchés à 80 %, puis repères à 90 et 100 % ; facture échue à sa date d'échéance, ou 30 jours après sa réception ; engagement ancien après 90 jours ; échéance de contrat dans les 60 jours. Seul l'administrateur les modifie ; chaque modification est tracée.
+- La tâche planifiée (seuils, factures échues, engagements anciens, échéances) tourne une fois par jour ; l'administrateur peut la lancer à la demande.
 
 ### 14.4. États et éditions
 
