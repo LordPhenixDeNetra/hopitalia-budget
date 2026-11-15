@@ -4982,6 +4982,681 @@
         }
       }
     },
+    "/api/v1/ordonnancements": {
+      "post": {
+        "tags": [
+          "paiements"
+        ],
+        "summary": "Ordonnancer",
+        "description": "Dossier de liquidations préparé par l'ordonnateur, puis transmis au comptable.",
+        "operationId": "ordonnancer",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdonnancementCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdonnancementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "paiements"
+        ],
+        "summary": "Lister Ordonnancements",
+        "operationId": "lister_ordonnancements",
+        "parameters": [
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "statut",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/StatutOrdonnancement"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Statut"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_OrdonnancementSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ordonnancements/{ordonnancement_id}": {
+      "get": {
+        "tags": [
+          "paiements"
+        ],
+        "summary": "Obtenir Ordonnancement",
+        "operationId": "obtenir_ordonnancement",
+        "parameters": [
+          {
+            "name": "ordonnancement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ordonnancement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdonnancementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "paiements"
+        ],
+        "summary": "Modifier Ordonnancement",
+        "description": "Modification tant que l'ordonnancement n'est pas transmis.",
+        "operationId": "modifier_ordonnancement",
+        "parameters": [
+          {
+            "name": "ordonnancement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ordonnancement Id"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrdonnancementChamps"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdonnancementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ordonnancements/{ordonnancement_id}/decisions": {
+      "post": {
+        "tags": [
+          "paiements"
+        ],
+        "summary": "Decider Ordonnancement",
+        "description": "Section 8.3 : transmission, complément, suspension, rejet (liquidations libérées), prise\nen charge ; les factures suivent (mise en paiement, retour à liquidée).",
+        "operationId": "decider_ordonnancement",
+        "parameters": [
+          {
+            "name": "ordonnancement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Ordonnancement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DecisionOrdonnancement"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrdonnancementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/liquidations": {
+      "get": {
+        "tags": [
+          "paiements"
+        ],
+        "summary": "Lister Liquidations A Traiter",
+        "description": "Liquidations validées à ordonnancer (facture liquidée, aucun ordonnancement actif), ou à\npayer (ordonnancement pris en charge, solde dû positif).",
+        "operationId": "lister_liquidations_a_traiter",
+        "parameters": [
+          {
+            "name": "etape",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "enum": [
+                "A_ORDONNANCER",
+                "A_PAYER"
+              ],
+              "type": "string",
+              "title": "Etape"
+            }
+          },
+          {
+            "name": "fournisseurId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fournisseurid"
+            }
+          },
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/LiquidationAPayerSortie"
+                  },
+                  "title": "Response Lister Liquidations A Traiter"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paiements": {
+      "post": {
+        "tags": [
+          "paiements"
+        ],
+        "summary": "Enregistrer Paiement",
+        "description": "Paiement partiel ou groupé, ventilé par liquidation, sans dépasser le solde dû (RG-07) ;\nclé d'idempotence obligatoire (section 9.2).",
+        "operationId": "enregistrer_paiement",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PaiementCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaiementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "paiements"
+        ],
+        "summary": "Lister Paiements",
+        "operationId": "lister_paiements",
+        "parameters": [
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "fournisseurId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fournisseurid"
+            }
+          },
+          {
+            "name": "factureId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Factureid"
+            }
+          },
+          {
+            "name": "statut",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/StatutPaiement"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Statut"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_PaiementSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paiements/{paiement_id}": {
+      "get": {
+        "tags": [
+          "paiements"
+        ],
+        "summary": "Obtenir Paiement",
+        "operationId": "obtenir_paiement",
+        "parameters": [
+          {
+            "name": "paiement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Paiement Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaiementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/paiements/{paiement_id}/annulations": {
+      "post": {
+        "tags": [
+          "paiements"
+        ],
+        "summary": "Annuler Paiement",
+        "description": "RG-18 : un paiement ne se modifie pas ; il s'annule, motivé et tracé, et les soldes des\nliquidations et le statut des factures sont recalculés.",
+        "operationId": "annuler_paiement",
+        "parameters": [
+          {
+            "name": "paiement_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Paiement Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MotifSchema"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PaiementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sites": {
       "get": {
         "tags": [
@@ -10105,6 +10780,81 @@
         ],
         "title": "Action"
       },
+      "ActionOrdonnancement": {
+        "type": "string",
+        "enum": [
+          "TRANSMETTRE",
+          "DEMANDER_COMPLEMENT",
+          "FOURNIR_COMPLEMENT",
+          "SUSPENDRE",
+          "REPRENDRE",
+          "REJETER",
+          "PRENDRE_EN_CHARGE"
+        ],
+        "title": "ActionOrdonnancement"
+      },
+      "AllocationSchema": {
+        "properties": {
+          "liquidationId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Liquidationid"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "liquidationId",
+          "montant"
+        ],
+        "title": "AllocationSchema"
+      },
+      "AllocationSortie": {
+        "properties": {
+          "liquidationId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Liquidationid"
+          },
+          "liquidationNumero": {
+            "type": "string",
+            "title": "Liquidationnumero"
+          },
+          "factureId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Factureid"
+          },
+          "factureNumero": {
+            "type": "string",
+            "title": "Facturenumero"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "liquidationId",
+          "liquidationNumero",
+          "factureId",
+          "factureNumero",
+          "montant"
+        ],
+        "title": "AllocationSortie"
+      },
       "AnnulationCreation": {
         "properties": {
           "motif": {
@@ -12782,6 +13532,30 @@
         ],
         "title": "DecisionCreation"
       },
+      "DecisionOrdonnancement": {
+        "properties": {
+          "action": {
+            "$ref": "#/components/schemas/ActionOrdonnancement"
+          },
+          "motif": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motif"
+          }
+        },
+        "type": "object",
+        "required": [
+          "action"
+        ],
+        "title": "DecisionOrdonnancement"
+      },
       "DeductionSchema": {
         "properties": {
           "type": {
@@ -15414,6 +16188,45 @@
         "title": "LigneModification",
         "description": "La dotation ne change plus après création : on passe par une révision (EF-BUD-04)."
       },
+      "LigneOrdonnancementSortie": {
+        "properties": {
+          "liquidationId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Liquidationid"
+          },
+          "liquidationNumero": {
+            "type": "string",
+            "title": "Liquidationnumero"
+          },
+          "factureId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Factureid"
+          },
+          "factureNumero": {
+            "type": "string",
+            "title": "Facturenumero"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "liquidationId",
+          "liquidationNumero",
+          "factureId",
+          "factureNumero",
+          "montant"
+        ],
+        "title": "LigneOrdonnancementSortie"
+      },
       "LigneReceptionSchema-Input": {
         "properties": {
           "ligneCommandeId": {
@@ -15601,6 +16414,82 @@
           "version"
         ],
         "title": "LigneSortie"
+      },
+      "LiquidationAPayerSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "factureId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Factureid"
+          },
+          "factureNumero": {
+            "type": "string",
+            "title": "Facturenumero"
+          },
+          "fournisseurId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Fournisseurid"
+          },
+          "netAPayer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Netapayer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "paye": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Paye",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteAPayer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Resteapayer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "ordonnancementId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ordonnancementid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "numero",
+          "factureId",
+          "factureNumero",
+          "fournisseurId",
+          "netAPayer",
+          "paye",
+          "resteAPayer",
+          "ordonnancementId"
+        ],
+        "title": "LiquidationAPayerSortie"
       },
       "LiquidationChamps": {
         "properties": {
@@ -16231,6 +17120,196 @@
         ],
         "title": "NotificationSortie"
       },
+      "OrdonnancementChamps": {
+        "properties": {
+          "referencePiece": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 50,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencepiece"
+          },
+          "typePiece": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TypePieceMandat"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "serviceDestinataire": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Servicedestinataire"
+          },
+          "liquidationIds": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "type": "array",
+                "minItems": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Liquidationids"
+          }
+        },
+        "type": "object",
+        "title": "OrdonnancementChamps"
+      },
+      "OrdonnancementCreation": {
+        "properties": {
+          "referencePiece": {
+            "type": "string",
+            "maxLength": 50,
+            "minLength": 1,
+            "title": "Referencepiece"
+          },
+          "typePiece": {
+            "$ref": "#/components/schemas/TypePieceMandat",
+            "default": "MANDAT"
+          },
+          "serviceDestinataire": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Servicedestinataire"
+          },
+          "liquidationIds": {
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Liquidationids"
+          }
+        },
+        "type": "object",
+        "required": [
+          "referencePiece",
+          "serviceDestinataire",
+          "liquidationIds"
+        ],
+        "title": "OrdonnancementCreation"
+      },
+      "OrdonnancementSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "referencePiece": {
+            "type": "string",
+            "title": "Referencepiece"
+          },
+          "typePiece": {
+            "$ref": "#/components/schemas/TypePieceMandat"
+          },
+          "serviceDestinataire": {
+            "type": "string",
+            "title": "Servicedestinataire"
+          },
+          "dateTransmission": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Datetransmission"
+          },
+          "statut": {
+            "$ref": "#/components/schemas/StatutOrdonnancement"
+          },
+          "motifStatut": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motifstatut"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "lignes": {
+            "items": {
+              "$ref": "#/components/schemas/LigneOrdonnancementSortie"
+            },
+            "type": "array",
+            "title": "Lignes"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "referencePiece",
+          "typePiece",
+          "serviceDestinataire",
+          "dateTransmission",
+          "statut",
+          "motifStatut",
+          "montant",
+          "lignes",
+          "creeParCode",
+          "creeLe",
+          "version"
+        ],
+        "title": "OrdonnancementSortie"
+      },
       "OrdreServiceSchema": {
         "properties": {
           "reference": {
@@ -16644,6 +17723,46 @@
         ],
         "title": "Page[NotificationSortie]"
       },
+      "Page_OrdonnancementSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/OrdonnancementSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[OrdonnancementSortie]"
+      },
+      "Page_PaiementSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/PaiementSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[PaiementSortie]"
+      },
       "Page_ProgrammeSortie_": {
         "properties": {
           "donnees": {
@@ -16883,6 +18002,214 @@
           "suivant"
         ],
         "title": "PaginationCurseur"
+      },
+      "PaiementCreation": {
+        "properties": {
+          "datePaiement": {
+            "type": "string",
+            "format": "date",
+            "title": "Datepaiement"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "modeReglementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Modereglementid"
+          },
+          "compteTresorerieId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Comptetresorerieid"
+          },
+          "referenceTransaction": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencetransaction"
+          },
+          "pieceCaisse": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Piececaisse"
+          },
+          "retenueSource": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Retenuesource",
+            "default": "0",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/AllocationSchema"
+            },
+            "type": "array",
+            "minItems": 1,
+            "title": "Allocations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "datePaiement",
+          "montant",
+          "modeReglementId",
+          "compteTresorerieId",
+          "allocations"
+        ],
+        "title": "PaiementCreation"
+      },
+      "PaiementSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "fournisseurId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Fournisseurid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "datePaiement": {
+            "type": "string",
+            "format": "date",
+            "title": "Datepaiement"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "modeReglementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Modereglementid"
+          },
+          "compteTresorerieId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Comptetresorerieid"
+          },
+          "referenceTransaction": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Referencetransaction"
+          },
+          "pieceCaisse": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Piececaisse"
+          },
+          "retenueSource": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Retenuesource",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "statut": {
+            "$ref": "#/components/schemas/StatutPaiement"
+          },
+          "motifAnnulation": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motifannulation"
+          },
+          "allocations": {
+            "items": {
+              "$ref": "#/components/schemas/AllocationSortie"
+            },
+            "type": "array",
+            "title": "Allocations"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "fournisseurId",
+          "numero",
+          "datePaiement",
+          "montant",
+          "modeReglementId",
+          "compteTresorerieId",
+          "referenceTransaction",
+          "pieceCaisse",
+          "retenueSource",
+          "statut",
+          "motifAnnulation",
+          "allocations",
+          "creeParCode",
+          "creeLe",
+          "version"
+        ],
+        "title": "PaiementSortie"
       },
       "ParametresCalculSchema": {
         "properties": {
@@ -18484,6 +19811,27 @@
         "type": "object",
         "title": "StatutModification"
       },
+      "StatutOrdonnancement": {
+        "type": "string",
+        "enum": [
+          "PREPARE",
+          "TRANSMIS",
+          "COMPLEMENT_DEMANDE",
+          "SUSPENDU",
+          "REJETE",
+          "PRIS_EN_CHARGE"
+        ],
+        "title": "StatutOrdonnancement"
+      },
+      "StatutPaiement": {
+        "type": "string",
+        "enum": [
+          "ENREGISTRE",
+          "EXECUTE",
+          "ANNULE"
+        ],
+        "title": "StatutPaiement"
+      },
       "StatutReception": {
         "type": "string",
         "enum": [
@@ -19172,6 +20520,14 @@
           "libelle"
         ],
         "title": "TypePieceCreation"
+      },
+      "TypePieceMandat": {
+        "type": "string",
+        "enum": [
+          "MANDAT",
+          "ORDRE_PAIEMENT"
+        ],
+        "title": "TypePieceMandat"
       },
       "TypePieceModification": {
         "properties": {

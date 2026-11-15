@@ -829,3 +829,212 @@ test('REC-12 : facture retournée, corrigée puis rejetée avec motif', async ({
   expect(JSON.parse(ecritures[1].corps)).toMatchObject({ numero: 'FA-779' })
   expect(JSON.parse(ecritures[2].corps)).toEqual({ motif: 'Prix non conformes' })
 })
+
+/**
+ * API simulée du lot 5 : liquidations à ordonnancer puis à payer, ordonnancement et paiements,
+ * avec leur état (statuts, payé) mis à jour à chaque écriture, comme le serveur.
+ */
+async function simulerPaiements(page: Page, nets: Record<string, string>) {
+  const liquidations = Object.entries(nets).map(([n, net], i) => ({
+    id: `l${i + 1}`,
+    numero: `LIQ-2026-0000${i + 1}`,
+    factureId: `f${i + 1}`,
+    factureNumero: n,
+    fournisseurId: 'fo1',
+    netAPayer: net,
+    paye: '0.00',
+    resteAPayer: net,
+    ordonnancementId: null as string | null,
+  }))
+  let ordonnancement: Record<string, unknown> | null = null
+  const paiements: Record<string, unknown>[] = []
+  const envois: { chemin: string; corps: Record<string, unknown> }[] = []
+  const centimes = (m: string) => Math.round(Number(m) * 100)
+  await page.route('**/api/v1/**', async (route) => {
+    const requete = route.request()
+    const url = new URL(requete.url())
+    const chemin = url.pathname
+    const corps = requete.postData() ? JSON.parse(requete.postData()!) : {}
+    if (requete.method() === 'POST' && !chemin.startsWith('/api/v1/auth')) {
+      envois.push({ chemin, corps })
+    }
+    if (chemin === '/api/v1/ordonnancements' && requete.method() === 'POST') {
+      ordonnancement = {
+        id: 'o1',
+        etablissementId: 'a1',
+        referencePiece: corps.referencePiece,
+        typePiece: corps.typePiece,
+        serviceDestinataire: corps.serviceDestinataire,
+        dateTransmission: null,
+        statut: 'PREPARE',
+        motifStatut: null,
+        montant: '0.00',
+        lignes: liquidations
+          .filter((lq) => corps.liquidationIds.includes(lq.id))
+          .map((lq) => ({
+            liquidationId: lq.id,
+            liquidationNumero: lq.numero,
+            factureId: lq.factureId,
+            factureNumero: lq.factureNumero,
+            montant: lq.netAPayer,
+          })),
+        creeParCode: 'AG030',
+        creeLe: '2026-05-01T10:00:00Z',
+        version: 1,
+      }
+      for (const lq of liquidations) {
+        if (corps.liquidationIds.includes(lq.id)) lq.ordonnancementId = 'o1'
+      }
+      await route.fulfill({ status: 201, json: ordonnancement })
+      return
+    }
+    if (chemin === '/api/v1/ordonnancements/o1/decisions') {
+      const statuts: Record<string, string> = {
+        TRANSMETTRE: 'TRANSMIS',
+        PRENDRE_EN_CHARGE: 'PRIS_EN_CHARGE',
+      }
+      ordonnancement = {
+        ...ordonnancement,
+        statut: statuts[corps.action],
+        dateTransmission: '2026-05-02',
+      }
+      await route.fulfill({ status: 201, json: ordonnancement })
+      return
+    }
+    if (chemin === '/api/v1/paiements' && requete.method() === 'POST') {
+      const paiement = {
+        id: `p${paiements.length + 1}`,
+        numero: `PAI-2026-0000${paiements.length + 1}`,
+        datePaiement: corps.datePaiement,
+        montant: corps.montant,
+        statut: 'EXECUTE',
+        allocations: corps.allocations.map((a: { liquidationId: string; montant: string }) => {
+          const lq = liquidations.find((l) => l.id === a.liquidationId)!
+          const paye = centimes(lq.paye) + centimes(a.montant)
+          lq.paye = (paye / 100).toFixed(2)
+          lq.resteAPayer = ((centimes(lq.netAPayer) - paye) / 100).toFixed(2)
+          return { ...a, factureId: lq.factureId, factureNumero: lq.factureNumero }
+        }),
+      }
+      paiements.unshift(paiement)
+      await route.fulfill({ status: 201, json: paiement })
+      return
+    }
+    const etape = url.searchParams.get('etape')
+    const reponses: Record<string, unknown> = {
+      '/api/v1/auth/connexion': { jetonAcces: 'a', jetonRafraichissement: 'r', expireDans: 900 },
+      '/api/v1/moi': {
+        ...MOI,
+        habilitations: [
+          { profil: 'ORD', etablissementId: 'a1' },
+          { profil: 'CPT', etablissementId: 'a1' },
+        ],
+      },
+      '/api/v1/fournisseurs': pageDe([{ id: 'fo1', code: 'F01', raisonSociale: 'Medipharm' }]),
+      '/api/v1/modes-reglement': pageDe([{ id: 'vir', code: 'VIR', libelle: 'Virement' }]),
+      '/api/v1/comptes-tresorerie': pageDe([{ id: 'bq', code: 'BQ1', libelle: 'Banque' }]),
+      '/api/v1/ordonnancements': pageDe(ordonnancement ? [ordonnancement] : []),
+      '/api/v1/paiements': pageDe(paiements),
+      '/api/v1/liquidations': liquidations.filter((lq) =>
+        etape === 'A_ORDONNANCER'
+          ? lq.ordonnancementId === null
+          : ordonnancement?.statut === 'PRIS_EN_CHARGE' &&
+            lq.ordonnancementId &&
+            lq.resteAPayer !== '0.00',
+      ),
+    }
+    await route.fulfill({ json: reponses[chemin] ?? pageDe([]) })
+  })
+  return envois
+}
+
+async function ordonnancerEtPrendreEnCharge(page: Page, factures: string[]) {
+  await page.getByRole('button', { name: 'Préparer un ordonnancement' }).click()
+  const tiroir = page.getByRole('dialog')
+  await tiroir.getByLabel('Référence du mandat').fill('MD-2026-014')
+  await tiroir.getByLabel('Service destinataire').fill('Agence comptable')
+  for (const facture of factures) {
+    await tiroir.getByRole('checkbox', { name: new RegExp(facture) }).check()
+  }
+  await tiroir.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page.getByText('Ordonnancement préparé.')).toBeVisible()
+  await page.getByRole('button', { name: 'Détail' }).click()
+  await page.getByRole('button', { name: 'Transmettre au comptable' }).click()
+  await expect(page.getByRole('dialog').getByText('Transmis', { exact: true })).toBeVisible()
+  await page.getByRole('button', { name: 'Prendre en charge' }).click()
+  await expect(page.getByRole('dialog').getByText('Pris en charge', { exact: true })).toBeVisible()
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: /close|fermer/i })
+    .click()
+}
+
+async function payer(page: Page, parts: Record<string, string>) {
+  await page.getByRole('button', { name: 'Enregistrer un paiement' }).click()
+  const tiroir = page.getByRole('dialog')
+  await tiroir.getByLabel('Bénéficiaire').click()
+  await page.getByTitle('F01 — Medipharm').click()
+  await tiroir.getByLabel('Date du paiement').fill('2026-05-10')
+  await tiroir.getByLabel('Mode de règlement').click()
+  await page.getByTitle('VIR — Virement').click()
+  await tiroir.getByLabel('Compte de trésorerie').click()
+  await page.getByTitle('BQ1 — Banque').click()
+  for (const [liquidation, montant] of Object.entries(parts)) {
+    await tiroir.getByLabel(`Part payée — ${liquidation}`).fill(montant)
+  }
+  await tiroir.getByRole('button', { name: 'Enregistrer' }).click()
+  // Deux paiements rapprochés laissent deux messages à l'écran : le tiroir fermé fait foi.
+  await expect(page.getByText('Paiement enregistré.').first()).toBeVisible()
+  await expect(page.getByRole('dialog')).toHaveCount(0)
+}
+
+test('REC-08 et REC-09 : ordonnancer, payer en partie, puis solder', async ({ page }) => {
+  const envois = await simulerPaiements(page, { 'FA-778': '6000000.00' })
+  await connecterAgentFinancier(page, '/paiements')
+  await ordonnancerEtPrendreEnCharge(page, ['FA-778'])
+
+  await ouvrirOnglet(page, 'Paiements')
+  await payer(page, { 'LIQ-2026-00001': '2000000' })
+  // REC-09 : le second paiement part du solde restant, recalculé.
+  await page.getByRole('button', { name: 'Enregistrer un paiement' }).click()
+  const tiroir = page.getByRole('dialog')
+  await tiroir.getByLabel('Bénéficiaire').click()
+  await page.getByTitle('F01 — Medipharm').click()
+  await expect(tiroir.getByRole('cell', { name: /4\s?000\s?000/ })).toBeVisible()
+  await tiroir.getByRole('button', { name: /close|fermer/i }).click()
+  await payer(page, { 'LIQ-2026-00001': '4000000' })
+  await expect(page.getByText('PAI-2026-00002')).toBeVisible()
+
+  const paiementsEnvoyes = envois.filter((e) => e.chemin === '/api/v1/paiements')
+  expect(paiementsEnvoyes.map((e) => e.corps.montant)).toEqual(['2000000.00', '4000000.00'])
+  expect(envois.find((e) => e.chemin === '/api/v1/ordonnancements')!.corps).toMatchObject({
+    referencePiece: 'MD-2026-014',
+    typePiece: 'MANDAT',
+    liquidationIds: ['l1'],
+  })
+  expect(envois.filter((e) => e.chemin.endsWith('/decisions')).map((e) => e.corps.action)).toEqual([
+    'TRANSMETTRE',
+    'PRENDRE_EN_CHARGE',
+  ])
+})
+
+test('REC-10 : paiement groupé ventilé facture par facture', async ({ page }) => {
+  const envois = await simulerPaiements(page, { 'FA-778': '6000000.00', 'FA-779': '4000000.00' })
+  await connecterAgentFinancier(page, '/paiements')
+  await ordonnancerEtPrendreEnCharge(page, ['FA-778', 'FA-779'])
+
+  await ouvrirOnglet(page, 'Paiements')
+  await payer(page, { 'LIQ-2026-00001': '6000000', 'LIQ-2026-00002': '1500000.50' })
+  const ligne = page.getByRole('row', { name: /PAI-2026-00001/ })
+  await expect(ligne.getByRole('link', { name: 'FA-778' })).toBeVisible()
+  await expect(ligne.getByRole('link', { name: 'FA-779' })).toBeVisible()
+
+  const paiement = envois.find((e) => e.chemin === '/api/v1/paiements')!.corps
+  expect(paiement).toMatchObject({
+    montant: '7500000.50',
+    allocations: [
+      { liquidationId: 'l1', montant: '6000000' },
+      { liquidationId: 'l2', montant: '1500000.50' },
+    ],
+  })
+})

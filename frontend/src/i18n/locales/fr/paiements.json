@@ -1,0 +1,72 @@
+{
+  "titre": "Ordonnancement et paiements",
+  "intro": "L'ordonnateur transmet les liquidations validées au comptable ; le comptable les prend en charge, puis enregistre les paiements, ventilés par liquidation.",
+  "onglets": {
+    "ordonnancements": "Ordonnancements",
+    "paiements": "Paiements"
+  },
+  "valeurs": {
+    "PREPARE": "Préparé",
+    "TRANSMIS": "Transmis",
+    "COMPLEMENT_DEMANDE": "Complément demandé",
+    "SUSPENDU": "Suspendu",
+    "REJETE": "Rejeté",
+    "PRIS_EN_CHARGE": "Pris en charge",
+    "MANDAT": "Mandat",
+    "ORDRE_PAIEMENT": "Ordre de paiement",
+    "ENREGISTRE": "Enregistré",
+    "EXECUTE": "Exécuté",
+    "ANNULE": "Annulé"
+  },
+  "actions": {
+    "TRANSMETTRE": "Transmettre au comptable",
+    "DEMANDER_COMPLEMENT": "Demander un complément",
+    "FOURNIR_COMPLEMENT": "Complément fourni",
+    "SUSPENDRE": "Suspendre",
+    "REPRENDRE": "Reprendre",
+    "REJETER": "Rejeter",
+    "PRENDRE_EN_CHARGE": "Prendre en charge"
+  },
+  "ordonnancements": {
+    "preparer": "Préparer un ordonnancement",
+    "prepare": "Ordonnancement préparé.",
+    "referencePiece": "Référence du mandat",
+    "typePiece": "Type de pièce",
+    "serviceDestinataire": "Service destinataire",
+    "liquidations": "Liquidations à ordonnancer",
+    "aucuneLiquidation": "Aucune liquidation validée à ordonnancer.",
+    "montant": "Montant",
+    "statut": "Statut",
+    "dateTransmission": "Transmis le",
+    "detail": "Détail",
+    "liquidation": "Liquidation",
+    "facture": "Facture",
+    "motif": "Motif",
+    "decision": "Décision enregistrée."
+  },
+  "paiements": {
+    "enregistrer": "Enregistrer un paiement",
+    "enregistre": "Paiement enregistré.",
+    "fournisseur": "Bénéficiaire",
+    "datePaiement": "Date du paiement",
+    "modeReglementId": "Mode de règlement",
+    "compteTresorerieId": "Compte de trésorerie",
+    "referenceTransaction": "Référence bancaire ou de transaction",
+    "pieceCaisse": "Pièce de caisse",
+    "retenueSource": "Retenue à la source",
+    "ventilation": "Ventilation par liquidation",
+    "aide": "Liquidations prises en charge par le comptable. Saisissez la part payée de chacune, sans dépasser son reste à payer : le montant du paiement est leur somme.",
+    "aucuneLiquidation": "Aucune liquidation à payer pour ce bénéficiaire.",
+    "resteAPayer": "Reste à payer",
+    "part": "Part payée",
+    "total": "Montant du paiement",
+    "numero": "Numéro",
+    "date": "Date",
+    "montant": "Montant",
+    "statut": "Statut",
+    "allocations": "Liquidations réglées",
+    "annuler": "Annuler",
+    "annule": "Paiement annulé.",
+    "motifAnnulation": "Motif de l'annulation"
+  }
+}

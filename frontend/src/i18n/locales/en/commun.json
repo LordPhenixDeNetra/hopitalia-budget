@@ -14,7 +14,8 @@
     "contrats": "Contracts",
     "engagements": "Commitments",
     "commandes": "Orders",
-    "factures": "Invoices"
+    "factures": "Invoices",
+    "paiements": "Payments"
   },
   "entete": {
     "langue": "Language",

@@ -32,3 +32,24 @@ export function formaterDateHeure(iso: string, langue: string): string {
     timeStyle: 'short',
   }).format(new Date(iso))
 }
+
+const DECIMAL = /^-?\d+(\.\d{1,2})?$/
+
+/**
+ * Somme exacte de montants saisis (chaînes décimales, deux décimales au plus), calculée en
+ * centimes entiers : jamais de nombre flottant. Les saisies vides ou invalides sont ignorées.
+ */
+export function additionnerMontants(valeurs: (string | null | undefined)[]): string {
+  const centimes = valeurs
+    .map((v) => v?.trim() ?? '')
+    .filter((v) => DECIMAL.test(v))
+    .reduce((total, v) => {
+      const negatif = v.startsWith('-')
+      const [entier, decimales = ''] = v.replace('-', '').split('.')
+      const montant = BigInt(entier) * 100n + BigInt(decimales.padEnd(2, '0'))
+      return total + (negatif ? -montant : montant)
+    }, 0n)
+  const signe = centimes < 0n ? '-' : ''
+  const absolu = centimes < 0n ? -centimes : centimes
+  return `${signe}${absolu / 100n}.${String(absolu % 100n).padStart(2, '0')}`
+}

@@ -118,7 +118,7 @@ def porteur(engagement: Engagement) -> Porteur:
 # --- Annulations et clôture (T-117, T-148) --------------------------------------------------------
 
 
-def _exiger_annulation(utilisateur: Utilisateur, etablissement_id: UUID) -> None:
+def exiger_annulation(utilisateur: Utilisateur, etablissement_id: UUID) -> None:
     if not (
         utilisateur.peut(Operation.ANNULER_OPERATION_VALIDEE, Droit.SAISIR, etablissement_id)
         or utilisateur.peut(Operation.ANNULER_OPERATION_VALIDEE, Droit.VALIDER, etablissement_id)
@@ -165,7 +165,7 @@ def annuler(
     """Contre-opération : l'engagement validé reste intact, l'annulation s'y ajoute (RG-18).
     Sans détail par imputation, tout le reliquat est annulé (annulation totale)."""
     engagement = obtenir(depot, utilisateur, engagement_id)
-    _exiger_annulation(utilisateur, engagement.etablissement_id)
+    exiger_annulation(utilisateur, engagement.etablissement_id)
     restes = reliquats(
         engagement,
         depot.annule_par_imputation(engagement_id),
@@ -204,7 +204,7 @@ def cloturer(
 ) -> UUID:
     """EF-ENG-05 : à la clôture, le reliquat non liquidé est désengagé automatiquement."""
     engagement = obtenir(depot, utilisateur, engagement_id)
-    _exiger_annulation(utilisateur, engagement.etablissement_id)
+    exiger_annulation(utilisateur, engagement.etablissement_id)
     if engagement.statut not in CLOTURABLES:
         raise ErreurMetier("ANNULATION_IMPOSSIBLE", statut=engagement.statut.value, reste="")
     restes = reliquats(

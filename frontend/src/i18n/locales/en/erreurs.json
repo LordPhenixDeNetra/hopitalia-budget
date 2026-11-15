@@ -59,6 +59,12 @@
   "FACTURE_NON_TRAITABLE": "This action is not possible on the invoice in its current state.",
   "DEDUCTION_INCALCULABLE": "Give the amount or rate of the deduction: the contract does not provide it.",
   "ECART_NON_EXPLIQUE": "The reconciliation shows a gap: explain it to validate it.",
+  "LIQUIDATION_NON_ORDONNANCABLE": "This settlement cannot be ordered for payment: its invoice is not fully settled, or it is already in an active payment order.",
+  "LIQUIDATION_NON_PAYABLE": "This settlement is not in a payment order taken over by the accountant.",
+  "VENTILATION_PAIEMENT": "Each share must be positive and their sum must equal the payment amount.",
+  "PAIEMENT_SUP_SOLDE": "A share exceeds the amount left to pay on its settlement.",
+  "SEPARATION_PAIEMENT": "You approved or ordered this settlement for payment: someone else must pay it.",
+  "PAIEMENT_DEJA_ANNULE": "This payment is already cancelled.",
   "champ": {
     "missing": "This field is required.",
     "string_too_short": "This field is too short.",

@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.7 · 15 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.8 · 15 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -14,6 +14,7 @@
 | 3.5 | 15/11/2026 | Engagements et contrôles (lot P1.D) : règles de l'engagement, des contrôles, des dérogations et des annulations (8.1), nature de dérogation `SEUIL_HORS_MARCHE` (18.4), ressources d'API précisées (11.2). |
 | 3.6 | 15/11/2026 | Commandes, réceptions et service fait (lot P1.E) : cycle de la réception (8.6), bon de commande émis sans circuit (10.2), ordonnateur final limité aux objets du point 16 (7.6), ressources d'API précisées (11.2). |
 | 3.7 | 15/11/2026 | Factures, liquidations et rapprochement (lot P1.F) : cycle et règles de la facture et de la liquidation (8.2), dérogations communes à l'engagement et à la liquidation (8.1), facture justifiable sans circuit (10.2), ressources d'API précisées (11.2). |
+| 3.8 | 15/11/2026 | Ordonnancement et paiements (lot P1.G) : règles de l'ordonnancement et du paiement (8.3), ordonnancement et paiement sans circuit de visa (10.2), ressources d'API précisées (11.2). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1262,6 +1263,17 @@ stateDiagram-v2
   PRIS_EN_CHARGE --> [*]
 ```
 
+**Règles de l'ordonnancement et du paiement (lot P1.G).**
+
+- L'ordonnateur (profil ORD) prépare l'ordonnancement : référence du mandat ou de l'ordre de paiement, service destinataire, liquidations validées de factures entièrement liquidées. Chaque ligne porte le solde dû de sa liquidation. Une liquidation n'est que dans un seul ordonnancement actif ; un rejet la libère et elle se retransmet dans un nouvel ordonnancement, l'ancien restant consultable (EF-ORD-03).
+- L'ordonnateur transmet et fournit les compléments ; le comptable (profil CPT) demande un complément, suspend, reprend, rejette ou prend en charge. Complément, suspension et rejet sont motivés. La matrice ne donne à personne le droit de viser un ordonnancement : il n'a pas de circuit.
+- À la transmission, la facture passe à `MISE_EN_PAIEMENT` ; au rejet, elle revient à `LIQUIDEE`. Le montant « transmis » (6.2) compte les ordonnancements transmis, en complément, suspendus ou pris en charge.
+- Le comptable enregistre le paiement d'un bénéficiaire, partiel ou groupé, ventilé par liquidation : chaque part est positive, leur somme égale le montant (EF-PAI-02). Seules les liquidations d'un ordonnancement pris en charge se paient, sans dépasser leur solde dû (RG-07 ; la dérogation de paiement n'est pas ouverte, le paiement n'ayant pas de circuit). Les liquidations sont verrouillées pendant l'enregistrement. La clé d'idempotence est obligatoire (9.2).
+- Le paiement est enregistré à l'état `EXECUTE` : le comptable le saisit une fois exécuté. `ENREGISTRE` reste réservé à un import des relevés bancaires.
+- Séparation des tâches (RG-13), quand le circuit de la liquidation l'exige : qui a visé la liquidation, préparé ou transmis son ordonnancement ne la paie pas.
+- Statut de la facture recalculé à chaque paiement ou annulation (RG-08) : partiellement payée tant que les paiements ne couvrent pas les nets à payer de ses liquidations validées, payée ensuite.
+- Un paiement ne se modifie pas : il s'annule, motivé et tracé, par un agent habilité à annuler une opération validée (AF, VAL ou ORD) ; il reste visible, et les soldes et statuts sont recalculés (RG-18).
+
 ### 8.4. Révision budgétaire
 
 Une révision (budget modificatif, virement, réallocation) n'a d'effet sur les crédits qu'au statut `VALIDEE` (EF-BUD-04).
@@ -1514,8 +1526,8 @@ Un objet n'implémente que les capacités qu'il possède. Le `Validable` unique 
 | Réception | Oui | Oui | | |
 | Facture | | Oui | Oui | |
 | Liquidation | Oui | Oui | Oui | Oui |
-| Ordonnancement, Rapprochement | Oui | | | |
-| Paiement | Oui | Oui | Oui | Oui |
+| Ordonnancement, Rapprochement | | | | |
+| Paiement | | | Oui | |
 
 **Exigence ARC-I :** aucune classe n'implémente une méthode d'interface par une exception « non supporté ».
 
@@ -1609,8 +1621,8 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/bons-commande/{id}/receptions` | GET, POST | `PATCH /receptions/{id}` en brouillon ou à corriger ; `/receptions/{id}/reserves`, `/attestations` ; `PATCH /reserves/{id}` (levée) ; `GET /reserves?nonLevees=true`. |
 | `/factures` | GET, POST, PATCH | Filtres `engagementId`, `statut`, `type`. Détection de doublon à la création (`409` + référence du doublon, levée par `motifLeveeDoublon`). `POST /factures/{id}/retours`, `/rejets` (motif). |
 | `/factures/{id}/liquidations` | GET, POST | `PATCH /liquidations/{id}` en brouillon ou à corriger ; `GET /liquidations/{id}/controles` ; `POST /liquidations/{id}/derogations` ; circuit par `/liquidations/{id}/validations`. |
-| `/ordonnancements` | GET, POST | |
-| `/paiements` | GET, POST | Allocations dans le corps de la requête. |
+| `/ordonnancements` | GET, POST, PATCH | `PATCH` tant que préparé ; `POST /ordonnancements/{id}/decisions` (transmettre, complément, suspension, reprise, rejet, prise en charge). `GET /liquidations?etape=A_ORDONNANCER` ou `A_PAYER` : liquidations à traiter. |
+| `/paiements` | GET, POST | Allocations dans le corps de la requête ; filtres `fournisseurId`, `factureId`, `statut`. `POST /paiements/{id}/annulations` (motif). |
 | `/factures/{id}/rapprochements` | GET, POST | `GET /factures/{id}/rapprochement` donne les montants et les écarts à l'instant. |
 | `/{ressource}/{id}/validations`, `/annulations`, `/derogations`, `/pieces` | GET, POST | Sur les ressources qui implémentent l'interface correspondante. `GET .../validations` donne le circuit figé, les visas, les étapes ouvertes et si l'agent peut décider. |
 | `/{ressource}/{id}/soumissions` | POST | Renvoi au circuit après un retour pour correction. |

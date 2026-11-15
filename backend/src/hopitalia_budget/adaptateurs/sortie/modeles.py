@@ -903,3 +903,77 @@ class RapprochementModele(Base):
     explication: Mapped[str | None] = mapped_column(String(1000))
     cree_par_code: Mapped[str] = mapped_column(String(20))
     cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class OrdonnancementModele(Base):
+    """Dossier de liquidations transmis au comptable (EF-ORD-01, EF-ORD-02)."""
+
+    __tablename__ = "ordonnancement"
+    __table_args__ = (UniqueConstraint("etablissement_id", "reference_piece"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    reference_piece: Mapped[str] = mapped_column(String(50))
+    type_piece: Mapped[str] = mapped_column(String(20))
+    service_destinataire: Mapped[str] = mapped_column(String(200))
+    date_transmission: Mapped[date | None]
+    statut: Mapped[str] = mapped_column(String(20), index=True)
+    motif_statut: Mapped[str | None] = mapped_column(String(500))
+    transmis_par_id: Mapped[int | None] = mapped_column(BigInteger)
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class LigneOrdonnancementModele(Base):
+    """Une liquidation dans un ordonnancement ; l'historique des rejets est conservé (EF-ORD-03)."""
+
+    __tablename__ = "ligne_ordonnancement"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    ordonnancement_id: Mapped[uuid.UUID] = mapped_column(
+        ForeignKey("ordonnancement.id"), index=True
+    )
+    liquidation_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("liquidation.id"), index=True)
+    montant: Mapped[Decimal] = mapped_column(MONTANT)
+
+
+class PaiementModele(Base):
+    """Paiement d'un fournisseur, ventilé par liquidation (EF-PAI-01, EF-PAI-02)."""
+
+    __tablename__ = "paiement"
+    __table_args__ = (UniqueConstraint("etablissement_id", "numero"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    fournisseur_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("fournisseur.id"), index=True)
+    numero: Mapped[str] = mapped_column(String(30))
+    date_paiement: Mapped[date]
+    montant: Mapped[Decimal] = mapped_column(MONTANT)
+    mode_reglement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("referentiel.id"))
+    compte_tresorerie_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("referentiel.id"))
+    reference_transaction: Mapped[str | None] = mapped_column(String(100))
+    piece_caisse: Mapped[str | None] = mapped_column(String(100))
+    retenue_source: Mapped[Decimal] = mapped_column(MONTANT, default=0)
+    statut: Mapped[str] = mapped_column(String(20), index=True)
+    motif_annulation: Mapped[str | None] = mapped_column(String(500))
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class AllocationPaiementModele(Base):
+    """Part d'un paiement affectée à une liquidation (section 17, point 12)."""
+
+    __tablename__ = "allocation_paiement"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    paiement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("paiement.id"), index=True)
+    liquidation_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("liquidation.id"), index=True)
+    montant: Mapped[Decimal] = mapped_column(MONTANT)

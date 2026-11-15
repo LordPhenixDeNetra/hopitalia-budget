@@ -59,6 +59,12 @@
   "FACTURE_NON_TRAITABLE": "Cette action n'est pas possible sur la facture dans son état actuel.",
   "DEDUCTION_INCALCULABLE": "Indiquez le montant ou le taux de la déduction : le contrat ne le donne pas.",
   "ECART_NON_EXPLIQUE": "Le rapprochement présente un écart : expliquez-le pour le valider.",
+  "LIQUIDATION_NON_ORDONNANCABLE": "Cette liquidation ne peut pas être ordonnancée : sa facture n'est pas entièrement liquidée, ou elle est déjà dans un ordonnancement en cours.",
+  "LIQUIDATION_NON_PAYABLE": "Cette liquidation n'est pas dans un ordonnancement pris en charge par le comptable.",
+  "VENTILATION_PAIEMENT": "Chaque part doit être positive et leur somme égaler le montant du paiement.",
+  "PAIEMENT_SUP_SOLDE": "Une part dépasse le reste à payer de sa liquidation.",
+  "SEPARATION_PAIEMENT": "Vous avez validé ou ordonnancé cette liquidation : une autre personne doit la payer.",
+  "PAIEMENT_DEJA_ANNULE": "Ce paiement est déjà annulé.",
   "champ": {
     "missing": "Ce champ est obligatoire.",
     "string_too_short": "Ce champ est trop court.",

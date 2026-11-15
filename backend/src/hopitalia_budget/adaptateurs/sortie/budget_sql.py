@@ -18,6 +18,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
     ParametreCalculModele,
     RevisionBudgetaireModele,
 )
+from hopitalia_budget.adaptateurs.sortie.paiements_sql import transmis_et_paye_par_ligne
 from hopitalia_budget.adaptateurs.sortie.workflow_sql import pieces_obligatoires_presentes
 from hopitalia_budget.domaine.indicateurs import (
     ZERO,
@@ -102,6 +103,7 @@ def mouvements_lignes(session: Session, ligne_ids: list[UUID]) -> dict[UUID, Mou
     engage = engage_par_ligne(session, ligne_ids)
     en_cours = en_cours_par_ligne(session, ligne_ids)
     liquide, net = liquide_et_net_par_ligne(session, ligne_ids)
+    _, paye = transmis_et_paye_par_ligne(session, ligne_ids)
     return {
         ligne: MouvementsLigne(
             dotation_initiale=dotation,
@@ -111,6 +113,7 @@ def mouvements_lignes(session: Session, ligne_ids: list[UUID]) -> dict[UUID, Mou
             en_cours_validation=en_cours.get(ligne, ZERO),
             liquide=liquide.get(ligne, ZERO),
             net_a_payer=net.get(ligne, ZERO),
+            paye=paye.get(ligne, ZERO),
         )
         for ligne, dotation in dotations.items()
     }
