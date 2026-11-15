@@ -111,6 +111,7 @@ def test_preference_de_langue_conservee(client: TestClient, donnees: dict[str, s
 
 
 def test_operation_non_autorisee_refusee(client: TestClient, donnees: dict[str, str]) -> None:
+    """REC-13 : un agent non habilité ne peut pas agir (403)."""
     reponse = client.post(
         "/api/v1/etablissements",
         json={"code": "CHU-X", "nom": "X"},
@@ -120,10 +121,19 @@ def test_operation_non_autorisee_refusee(client: TestClient, donnees: dict[str, 
 
 
 def test_lecteur_ne_voit_que_son_etablissement(client: TestClient, donnees: dict[str, str]) -> None:
+    """REC-17 et API-10 : un agent ne voit rien d'un autre établissement ; l'objet d'un
+    autre établissement répond 404."""
     liste = client.get("/api/v1/etablissements", headers=entetes(LECTEUR_A)).json()
     assert [e["code"] for e in liste["donnees"]] == ["CHU-A"]
     autre = client.get(f"/api/v1/etablissements/{donnees['b']}", headers=entetes(LECTEUR_A))
     assert (autre.status_code, autre.json()["code"]) == (404, "RESSOURCE_INTROUVABLE")
+
+
+def test_api09_version_inconnue(client: TestClient, donnees: dict[str, str]) -> None:
+    """API-09 : `/api/v2/…` n'existe pas (404), `/api/v1/…` répond normalement."""
+    inconnue = client.get("/api/v2/etablissements", headers=entetes(ADMIN))
+    assert inconnue.status_code == 404
+    assert client.get("/api/v1/etablissements", headers=entetes(ADMIN)).status_code == 200
 
 
 # --- T-047, T-048 : pagination, tri, filtres sur liste blanche --------------------------------
@@ -157,6 +167,7 @@ def test_taille_maximale_et_filtres(client: TestClient, donnees: dict[str, str])
 def test_champ_non_documente_refuse(
     client: TestClient, donnees: dict[str, str], requete: str, code: str
 ) -> None:
+    """API-07 : tri ou filtre sur un champ non documenté, 400."""
     reponse = client.get(f"/api/v1/etablissements{requete}", headers=entetes(ADMIN))
     assert (reponse.status_code, reponse.json()["code"]) == (400, code)
 
@@ -167,6 +178,7 @@ def test_champ_non_documente_refuse(
 def test_rejeu_avec_la_meme_cle_ne_cree_rien(
     client: TestClient, donnees: dict[str, str], session: Session
 ) -> None:
+    """API-01 : rejeu avec la même clé, même réponse, une seule création."""
     corps = {"code": "CHU-D", "nom": "CHU D"}
     en_tetes = entetes(ADMIN, **{"Idempotency-Key": "cle-1"})
     premiere = client.post("/api/v1/etablissements", json=corps, headers=en_tetes)
@@ -179,6 +191,7 @@ def test_rejeu_avec_la_meme_cle_ne_cree_rien(
 
 
 def test_meme_cle_corps_different(client: TestClient, donnees: dict[str, str]) -> None:
+    """API-02 : même clé, corps différent, 422."""
     en_tetes = entetes(ADMIN, **{"Idempotency-Key": "cle-2"})
     client.post("/api/v1/etablissements", json={"code": "CHU-E", "nom": "E"}, headers=en_tetes)
     autre = client.post(
@@ -188,6 +201,7 @@ def test_meme_cle_corps_different(client: TestClient, donnees: dict[str, str]) -
 
 
 def test_post_financier_sans_cle_refuse(client: TestClient, donnees: dict[str, str]) -> None:
+    """API-03 : POST financier sans clé, 400."""
     reponse = client.post(
         "/api/v1/etablissements", json={"code": "CHU-G", "nom": "G"}, headers=entetes(ADMIN)
     )
@@ -240,6 +254,7 @@ def test_creation_echouee_libere_la_cle(client: TestClient, donnees: dict[str, s
 
 
 def test_modification_exige_if_match_a_jour(client: TestClient, donnees: dict[str, str]) -> None:
+    """API-05 : If-Match absent (428) ou périmé (412)."""
     url = f"/api/v1/etablissements/{donnees['a']}"
     lecture = client.get(url, headers=entetes(ADMIN))
     etag = lecture.headers["ETag"]
@@ -345,6 +360,7 @@ def test_curseur_illisible_refuse(client: TestClient, donnees: dict[str, str]) -
 
 
 def test_limite_de_debit(session: Session, parametres: Parametres, donnees: dict[str, str]) -> None:
+    """API-08 : au-delà de la limite de débit, 429 avec Retry-After."""
     application = creer_application(parametres.model_copy(update={"limite_requetes_par_minute": 2}))
     application.dependency_overrides[obtenir_session] = lambda: session
     client = TestClient(application)

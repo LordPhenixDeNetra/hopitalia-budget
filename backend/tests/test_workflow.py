@@ -302,6 +302,7 @@ def test_rejet_definitif(client: TestClient, socle: dict[str, Any]) -> None:
 def test_rg13_separation_des_taches_selon_le_circuit(
     client: TestClient, session: Session, socle: dict[str, Any]
 ) -> None:
+    """REC-13."""
     from hopitalia_budget.adaptateurs.sortie.modeles import EtablissementModele
 
     a = session.get_one(EtablissementModele, uuid.UUID(socle["a"]))

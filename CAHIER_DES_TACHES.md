@@ -33,11 +33,11 @@
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
-| P2 | 21 | 0 | 10 | 1 | 0 | 0 | 32 |
+| P2 | 25 | 0 | 6 | 1 | 0 | 0 | 32 |
 | P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **170** | **4** | **32** | **1** | **0** | **2** | **209** |
+| **Total** | **174** | **4** | **28** | **1** | **0** | **2** | **209** |
 
-Avancement : 170 / 207 tâches actives terminées (82 %), hors 2 abandonnées.
+Avancement : 174 / 207 tâches actives terminées (84 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -330,10 +330,10 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-245 | Couverture de tests des règles RG-01 à RG-20 (une règle, au moins un test nommé). | ENF-11 | T-195 | À faire | Tableau règle → test complet. |
-| T-246 | Automatisation des scénarios REC-01 à REC-18. | §15.1 | T-195 | À faire | Tous verts en CI. |
-| T-247 | Automatisation des scénarios API-01 à API-11. | §15.2 | T-193 | À faire | Tous verts en CI. |
-| T-248 | Vérification de conformité OpenAPI publiée / API réelle. | API-11 | T-045 | À faire | Test de contrat en CI. |
+| T-245 | Couverture de tests des règles RG-01 à RG-20 (une règle, au moins un test nommé). | ENF-11 | T-195 | Fait | Tableau règle → test complet. Chaque règle RG-01 à RG-20 nommée par au moins un test ; tableau `docs/recette/tracabilite-tests.md` produit à partir des tests et vérifié par `test_tracabilite.py` (complet et à jour) ; tests ajoutés pour RG-01 et RG-14. |
+| T-246 | Automatisation des scénarios REC-01 à REC-18. | §15.1 | T-195 | Fait | Tous verts en CI. REC-01 à REC-18 nommés par des tests backend, Vitest ou Playwright, tous verts ; leur présence est vérifiée par `test_tracabilite.py`, que la CI lance aussi quand les tests du frontend changent. |
+| T-247 | Automatisation des scénarios API-01 à API-11. | §15.2 | T-193 | Fait | Tous verts en CI. API-01 à API-11 nommés et verts ; ajout d'API-09 (version inconnue) et d'API-11 (contrat OpenAPI). |
+| T-248 | Vérification de conformité OpenAPI publiée / API réelle. | API-11 | T-045 | Fait | Test de contrat en CI. `test_contrat_openapi.py` : document publié identique à celui de l'application, et chaque `GET` documenté appelé sur le jeu d'essai, réponse validée contre le schéma publié (types, champs obligatoires, aucun champ non documenté, énumérations, montants). |
 | T-249 | Audit d'accessibilité (contraste, clavier, focus, libellés). | IHM-07 | T-193 | À faire | Aucun défaut bloquant. |
 | T-250 | Tests responsive à 375, 768, 1024 et 1440 px. | IHM-08 | T-193 | À faire | Captures Playwright sans débordement. |
 | T-251 | Tests de performance à volumétrie d'un exercice. | ENF-07 | T-195 | À faire | Lectures < 1 s (95 %), tableaux de bord < 3 s. |
@@ -442,3 +442,4 @@ flowchart LR
 | 15/11/2026 | T-225 | À faire | Bloqué | Adresses électroniques des agents et serveur SMTP de l'hôpital manquants. |
 | 15/11/2026 | T-230 à T-235 (P2.C) | À faire | Fait | Moteur d'états (JSON, CSV, XLSX, PDF, fr et en) et onze états de la section 14.4, totaux égaux au tableau de bord ; écran États ; parcours REC-18 (PDF). |
 | 15/11/2026 | T-236 à T-240 (P2.C) | À faire | Fait | Rapport d'audit et auditeur en lecture seule, connexions et exports tracés, recherche transverse, clôture d'exercice avec report des reliquats, réouverture ; migration 0011. |
+| 15/11/2026 | T-245 à T-248 (P2.D) | À faire | Fait | Traçabilité RG, REC et API vers les tests vérifiée automatiquement, tests RG-01, RG-14, API-09 ajoutés, contrat d'API OpenAPI. |
