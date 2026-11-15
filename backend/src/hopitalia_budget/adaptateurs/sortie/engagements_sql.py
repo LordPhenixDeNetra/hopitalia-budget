@@ -13,11 +13,11 @@ from uuid import UUID
 from sqlalchemy import ColumnElement, func, select
 from sqlalchemy.orm import Session
 
+from hopitalia_budget.adaptateurs.sortie.derogations_sql import accordees
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     AnnulationLigneModele,
     AnnulationModele,
     ContratModele,
-    DerogationModele,
     EngagementModele,
     ImputationEngagementModele,
     LigneBudgetaireModele,
@@ -28,7 +28,6 @@ from hopitalia_budget.domaine.controles import NatureDerogation
 from hopitalia_budget.domaine.engagements import (
     EN_COURS,
     DepenseHorsMarche,
-    Derogation,
     Engagement,
     ImputationEngagement,
     InfosContrat,
@@ -202,17 +201,7 @@ class DepotEngagementsSql:
         self.session.flush()
 
     def derogations_accordees(self, engagement_id: UUID) -> dict[NatureDerogation, Decimal]:
-        d = DerogationModele
-        return {
-            NatureDerogation(nature): montant
-            for nature, montant in self.session.execute(
-                select(d.nature, func.max(d.montant_depassement))
-                .where(
-                    d.type_objet == "Engagement", d.id_objet == engagement_id, d.statut == "VALIDE"
-                )
-                .group_by(d.nature)
-            )
-        }
+        return accordees(self.session, "Engagement", engagement_id)
 
     def annule_par_imputation(self, engagement_id: UUID) -> dict[UUID, Decimal]:
         return dict(
@@ -225,8 +214,12 @@ class DepotEngagementsSql:
         )
 
     def liquide_par_imputation(self, engagement_id: UUID) -> dict[UUID, Decimal]:
-        # ponytail: aucune liquidation avant le lot 4 ; elles se liront ici (RG-17).
-        return {}
+        from hopitalia_budget.adaptateurs.sortie.factures_sql import liquide_par_imputation
+
+        imputations = list(
+            self.session.scalars(select(Imp.id).where(Imp.engagement_id == engagement_id))
+        )
+        return dict(liquide_par_imputation(self.session, imputations))
 
     def ajouter_annulation(
         self,
@@ -260,41 +253,3 @@ class DepotEngagementsSql:
 
     def pieces_obligatoires_presentes(self, type_objet: str, id_objet: UUID) -> bool:
         return pieces_obligatoires_presentes(self.session, type_objet, id_objet)
-
-    def derogation(self, derogation_id: UUID) -> Derogation | None:
-        d = self.session.get(DerogationModele, derogation_id)
-        if d is None or d.type_objet != "Engagement":
-            return None
-        return Derogation(
-            d.id,
-            d.id_objet,
-            NatureDerogation(d.nature),
-            d.montant_depassement,
-            d.statut,
-            d.cree_par_id,
-        )
-
-    def ajouter_derogation(
-        self, derogation: Derogation, engagement: Engagement, motif: str, maintenant: datetime
-    ) -> None:
-        code = self.session.get_one(E, engagement.id).cree_par_code
-        self.session.add(
-            DerogationModele(
-                id=derogation.id,
-                type_objet="Engagement",
-                id_objet=engagement.id,
-                etablissement_id=engagement.etablissement_id,
-                nature=derogation.nature,
-                montant_depassement=derogation.montant_depassement,
-                motif=motif,
-                statut=derogation.statut,
-                cree_par_id=derogation.createur_id,
-                cree_par_code=code if derogation.createur_id == engagement.createur_id else "",
-                cree_le=maintenant,
-            )
-        )
-        self.session.flush()
-
-    def changer_statut_derogation(self, derogation_id: UUID, statut: str) -> None:
-        self.session.get_one(DerogationModele, derogation_id).statut = statut
-        self.session.flush()
