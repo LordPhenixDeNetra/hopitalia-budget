@@ -632,6 +632,8 @@ class EngagementModele(Base):
     )
     centre_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("centre_responsabilite.id"))
     type_depense_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("referentiel.id"))
+    # Engagement de report (EF-BUD-09) : engagement de l'exercice clos dont il reprend le reliquat.
+    engagement_origine_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("engagement.id"))
     nature_hors_marche: Mapped[str | None] = mapped_column(String(30))
     justification: Mapped[str | None] = mapped_column(String(1000))
     reference_decision: Mapped[str | None] = mapped_column(String(100))
@@ -1024,3 +1026,27 @@ class LectureAlerteModele(Base):
     alerte_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("alerte.id"), primary_key=True)
     utilisateur_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
     lue_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+# --- Lot 6 : clôture d'exercice ----------------------------------------------------------------
+
+
+class ClotureExerciceModele(Base):
+    """Clôture d'un exercice pour un établissement (EF-BUD-09) ; une réouverture motivée la
+    lève sans l'effacer (T-240). L'exercice est ouvert pour l'établissement tant qu'aucune
+    clôture n'est en vigueur."""
+
+    __tablename__ = "cloture_exercice"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    exercice_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("exercice.id"), index=True)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    exercice_suivant_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("exercice.id"))
+    motif: Mapped[str] = mapped_column(String(500))
+    engagements_reportes: Mapped[int]
+    montant_reporte: Mapped[Decimal] = mapped_column(MONTANT)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    reouvert_le: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    reouvert_par_code: Mapped[str | None] = mapped_column(String(20))
+    motif_reouverture: Mapped[str | None] = mapped_column(String(500))

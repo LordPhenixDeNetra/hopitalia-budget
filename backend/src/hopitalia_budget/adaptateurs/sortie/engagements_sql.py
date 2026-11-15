@@ -202,6 +202,12 @@ class DepotEngagementsSql:
             m.date_validation = maintenant
         self.session.flush()
 
+    def exercice_ouvert(self, engagement: Engagement) -> bool:
+        from hopitalia_budget.adaptateurs.sortie.exercices_sql import exercice_ouvert
+
+        m = self.session.get_one(E, engagement.id)
+        return exercice_ouvert(self.session, m.exercice_id, m.etablissement_id)
+
     def signaler(self, signal: Signal) -> None:
         mettre_en_attente(self.session, signal)
 
