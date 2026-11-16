@@ -13,6 +13,8 @@ services:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s
       retries: 10
+    # Redémarre avec le serveur (plan d'exploitation, section 4).
+    restart: unless-stopped
 
   api:
     build: ./backend
@@ -35,6 +37,7 @@ services:
         condition: service_healthy
     ports:
       - "127.0.0.1:8000:8000"
+    restart: unless-stopped
 
   # Tâche quotidienne des alertes planifiées (T-222), avec l'image de l'API.
   alertes:
@@ -92,6 +95,7 @@ services:
       - api
     ports:
       - "127.0.0.1:8080:80"
+    restart: unless-stopped
 
 volumes:
   db-data:
