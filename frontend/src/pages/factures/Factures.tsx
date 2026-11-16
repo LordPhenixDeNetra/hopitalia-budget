@@ -189,13 +189,13 @@ export function Factures() {
     {
       title: t('champs.montantTtc'),
       dataIndex: 'montantTtc',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     {
       title: t('champs.resteAPayer'),
       dataIndex: 'resteAPayer',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     { title: t('champs.statut'), key: 'statut', render: (_, f) => statut(f) },
@@ -239,6 +239,7 @@ export function Factures() {
         />
       </Flex>
       <TableauServeur<FactureSortie>
+        nom="factures"
         colonnes={colonnes}
         donnees={data?.donnees ?? []}
         total={data?.pagination.total ?? 0}

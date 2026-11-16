@@ -80,5 +80,21 @@
     "seuil90": "90% threshold reached",
     "seuil100": "100% reached or exceeded",
     "sansBase": "No calculation base"
+  },
+  "affichage": {
+    "titre": "Display",
+    "theme": "Theme",
+    "densite": "Density",
+    "themes": {
+      "CLAIR": "Light",
+      "SOMBRE": "Dark",
+      "SYSTEME": "System"
+    },
+    "densites": {
+      "COMPACTE": "Compact",
+      "CONFORTABLE": "Comfortable"
+    },
+    "colonnes": "Columns",
+    "colonnesAide": "Visible columns"
   }
 }

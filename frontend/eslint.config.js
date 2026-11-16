@@ -42,5 +42,25 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // Prêt pour la droite à gauche (I18N-10) : propriétés logiques (début, fin) plutôt que
+    // gauche et droite, qui ne s'inversent pas avec la direction d'écriture.
+    files: ['src/**/*.tsx'],
+    ignores: ['src/**/*.test.tsx'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector:
+            'Property[key.name=/^(left|right|marginLeft|marginRight|paddingLeft|paddingRight|borderLeft|borderRight)$/]',
+          message: 'Propriété physique : utiliser insetInlineStart, marginInlineEnd… (I18N-10).',
+        },
+        {
+          selector: 'Property[key.name=/^(align|textAlign)$/][value.value=/^(left|right)$/]',
+          message: "Alignement physique : utiliser 'start' ou 'end' (I18N-10).",
+        },
+      ],
+    },
+  },
   prettier,
 )

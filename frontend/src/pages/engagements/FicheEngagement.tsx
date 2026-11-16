@@ -114,7 +114,7 @@ function Controles({
     {
       title: t('controles.depassement'),
       dataIndex: 'depassement',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     { title: t('controles.etat'), key: 'etat', render: (_, r) => etat(r) },
@@ -140,7 +140,7 @@ function Controles({
     {
       title: t('derogations.montantDepassement'),
       dataIndex: 'montantDepassement',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     { title: t('derogations.motif'), dataIndex: 'motif' },
@@ -296,7 +296,7 @@ function Annulations({
           {
             title: t('annulations.montant'),
             dataIndex: 'montant',
-            align: 'right',
+            align: 'end',
             render: (v: string) => <Montant valeur={v} />,
           },
           { title: t('annulations.motif'), dataIndex: 'motif' },
@@ -465,13 +465,13 @@ export function FicheEngagement() {
               {
                 title: t('champs.montant'),
                 dataIndex: 'montant',
-                align: 'right',
+                align: 'end',
                 render: (v: string) => <Montant valeur={v} />,
               },
               {
                 title: t('champs.annule'),
                 dataIndex: 'annule',
-                align: 'right',
+                align: 'end',
                 render: (v: string) => <Montant valeur={v} />,
               },
             ]}

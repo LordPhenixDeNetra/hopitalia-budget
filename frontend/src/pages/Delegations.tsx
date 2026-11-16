@@ -119,6 +119,7 @@ export function Delegations() {
         </Form>
       </Card>
       <TableauServeur<DelegationSortie>
+        nom="delegations"
         colonnes={colonnes}
         donnees={data?.donnees ?? []}
         total={data?.pagination.total ?? 0}

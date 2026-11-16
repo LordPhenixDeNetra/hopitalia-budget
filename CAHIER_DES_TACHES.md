@@ -34,10 +34,10 @@
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
 | P2 | 30 | 0 | 0 | 2 | 0 | 0 | 32 |
-| P3 | 4 | 8 | 9 | 1 | 0 | 1 | 23 |
-| **Total** | **183** | **12** | **9** | **3** | **0** | **2** | **209** |
+| P3 | 8 | 8 | 5 | 1 | 0 | 1 | 23 |
+| **Total** | **187** | **12** | **5** | **3** | **0** | **2** | **209** |
 
-Avancement : 183 / 207 tâches actives terminées (88 %), hors 2 abandonnées.
+Avancement : 187 / 207 tâches actives terminées (90 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -373,10 +373,10 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-270 | Thème sombre (algorithme sombre d'Ant Design). | IHM-01 | T-061 | À faire | Contrastes conformes en mode sombre. |
-| T-271 | Préférences utilisateur (densité, colonnes visibles des tableaux). | IHM-02 | T-070 | À faire | Préférences conservées entre les sessions. |
-| T-272 | Traduction anglaise complète et relue de tous les écrans. | I18N-01 | T-193 | À faire | Aucune clé `en` manquante (contrôle automatique). |
-| T-273 | Compatibilité écriture de droite à gauche (propriétés CSS logiques, `direction` d'Ant Design). | I18N-10 | T-061 | À faire | Gabarit affiché correctement en mode droite à gauche de test. |
+| T-270 | Thème sombre (algorithme sombre d'Ant Design). | IHM-01 | T-061 | Fait | Contrastes conformes en mode sombre. Thème sombre (algorithme sombre d'Ant Design et palette propre, spec 3.16) ; audit axe (WCAG 2.1 AA) de la connexion et des 21 écrans en mode sombre sans défaut grave ni critique (test Playwright T-270). |
+| T-271 | Préférences utilisateur (densité, colonnes visibles des tableaux). | IHM-02 | T-070 | Fait | Préférences conservées entre les sessions. Thème, densité et colonnes masquées enregistrés sur le profil (migration 0013, `PUT /moi/preferences` partiel) ; colonne masquée encore masquée après rechargement (test Playwright T-271), préférences conservées (`test_t271_preferences_d_affichage_conservees`). |
+| T-272 | Traduction anglaise complète et relue de tous les écrans. | I18N-01 | T-193 | Fait | Aucune clé `en` manquante (contrôle automatique). Contrôle automatique : mêmes clés en français et en anglais, aucun texte anglais vide ou resté en français (`i18n.test.ts`) ; relecture faite par l'équipe projet. |
+| T-273 | Compatibilité écriture de droite à gauche (propriétés CSS logiques, `direction` d'Ant Design). | I18N-10 | T-061 | Fait | Gabarit affiché correctement en mode droite à gauche de test. Direction suivant la langue, propriétés logiques partout (règle de lint I18N-10) ; en mode droite à gauche de test, menu et titres à droite, sans débordement, sur les 21 écrans à 375 et 1440 px (test Playwright T-273, captures jointes). |
 
 ### P3.D — Livrables documentaires
 
@@ -452,3 +452,4 @@ flowchart LR
 | 16/11/2026 | T-280 (P3.D) | À faire | Fait | Dictionnaire des données produit depuis le modèle et vérifié par un test. |
 | 16/11/2026 | T-281 à T-285 (P3.D) | À faire | En cours | Workflows et matrice, guide d'intégration et publication, guides utilisateur et d'administration, plan d'exploitation rédigés ; validations attendues. |
 | 16/11/2026 | T-286 (P3.D) | À faire | Bloqué | Modèle de procès-verbal prêt ; séance de recette finale à tenir. |
+| 16/11/2026 | T-270 à T-273 (P3.C) | À faire | Fait | Thème sombre audité, préférences d'affichage sur le profil, traduction anglaise contrôlée, mode droite à gauche. |

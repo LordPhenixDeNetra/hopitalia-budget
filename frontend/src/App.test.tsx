@@ -1315,3 +1315,27 @@ describe('intégrations (lot 7)', () => {
     expect(new Headers(envoi[1]!.headers).get('Idempotency-Key')).toMatch(/[0-9a-f-]{36}/)
   }, 15_000)
 })
+
+describe('options d’interface (lot P3.C)', () => {
+  test('T-270, T-271 : thème et densité choisis puis envoyés au profil', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(MOI)],
+      'PUT /api/v1/moi/preferences': [json({ ...MOI, theme: 'SOMBRE' })],
+    })
+    afficher('/')
+    await userEvent.click(
+      await screen.findByRole('button', { name: /Affichage/ }, { timeout: 5000 }),
+    )
+    await userEvent.click(await screen.findByText('Sombre'))
+    await userEvent.click(screen.getByText('Confortable'))
+    const corps = appel.mock.calls
+      .filter(([, options]) => options?.method === 'PUT')
+      .map(([, options]) => JSON.parse(String(options!.body)))
+    expect(corps).toEqual([{ theme: 'SOMBRE' }, { densite: 'CONFORTABLE' }])
+    expect(JSON.parse(localStorage.getItem('hopitalia-budget.affichage')!)).toEqual({
+      theme: 'SOMBRE',
+      densite: 'CONFORTABLE',
+    })
+  }, 15_000)
+})

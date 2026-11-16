@@ -112,13 +112,13 @@ function Situation({ budgetId }: { budgetId: string }) {
     ...COLONNES.map((c) => ({
       title: t(`indicateurs.${c}`),
       key: c,
-      align: 'right' as const,
+      align: 'end' as const,
       render: (_: unknown, l: DisponibiliteSortie) => <Montant valeur={l.indicateurs[c]} />,
     })),
     {
       title: t('indicateurs.tauxEngagement'),
       key: 'taux',
-      align: 'right',
+      align: 'end',
       render: (_, l) => taux(l.indicateurs.tauxEngagement),
     },
   ]
@@ -270,7 +270,7 @@ function Notifications({ budgetId }: { budgetId: string }) {
           {
             title: t('notifications.montant'),
             dataIndex: 'montant',
-            align: 'right',
+            align: 'end',
             render: (v: string) => <Montant valeur={v} />,
           },
         ]}

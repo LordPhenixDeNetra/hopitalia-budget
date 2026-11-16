@@ -171,6 +171,7 @@ export function Etablissements() {
         options={STATUTS.map((s) => ({ value: s, label: t(`filtres.${s}`) }))}
       />
       <TableauServeur<EtablissementSortie>
+        nom="etablissements"
         colonnes={colonnes}
         donnees={donnees}
         total={data?.pagination.total ?? 0}

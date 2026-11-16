@@ -72,7 +72,7 @@ export function ListeCommandes({
     {
       title: t('champs.montantTtc'),
       dataIndex: 'montantTtc',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     { title: t('champs.enRetard'), key: 'retard', render: (_, c) => <Delai commande={c} /> },

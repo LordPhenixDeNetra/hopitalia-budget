@@ -1,5 +1,6 @@
 import {
   ApiOutlined,
+  BgColorsOutlined,
   LockOutlined,
   MedicineBoxOutlined,
   SearchOutlined,
@@ -21,12 +22,25 @@ import {
   WalletOutlined,
 } from '@ant-design/icons'
 import { useQuery } from '@tanstack/react-query'
-import { Badge, Breadcrumb, Button, Flex, Layout, Menu, Select, Typography, theme } from 'antd'
+import {
+  Badge,
+  Breadcrumb,
+  Button,
+  Flex,
+  Layout,
+  Menu,
+  Popover,
+  Segmented,
+  Select,
+  Typography,
+  theme,
+} from 'antd'
 import { Link, Outlet, useLocation, useMatches, useNavigate } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import { compterAlertes, useModifierPreferences } from '../api/genere/budget'
 import { useSession } from '../auth/session'
 import { LANGUES, estLangue, memoriserLangue, type Langue } from '../i18n/langue'
+import { usePreferencesAffichage } from '../theme/preferences'
 import { useEtablissementCourant } from './etablissementCourant'
 
 export interface Poignee {
@@ -220,6 +234,7 @@ export function Gabarit() {
               onChange={changerLangue}
               options={LANGUES.map((l) => ({ value: l, label: t(`langues.${l}`) }))}
             />
+            <ReglagesAffichage />
             <Typography.Text>{moi?.nom}</Typography.Text>
             <Button icon={<LogoutOutlined aria-hidden />} onClick={() => void deconnecter()}>
               {t('entete.deconnexion')}
@@ -232,5 +247,40 @@ export function Gabarit() {
         </Layout.Content>
       </Layout>
     </Layout>
+  )
+}
+
+const THEMES = ['CLAIR', 'SOMBRE', 'SYSTEME'] as const
+const DENSITES = ['COMPACTE', 'CONFORTABLE'] as const
+
+/** Thème et densité (T-270, T-271), conservés sur le profil de l'agent. */
+function ReglagesAffichage() {
+  const { t } = useTranslation()
+  const { theme, densite, modifier } = usePreferencesAffichage()
+  return (
+    <Popover
+      trigger="click"
+      title={t('affichage.titre')}
+      content={
+        <Flex vertical gap="small">
+          <Typography.Text id="affichage-theme">{t('affichage.theme')}</Typography.Text>
+          <Segmented
+            aria-labelledby="affichage-theme"
+            value={theme}
+            onChange={(valeur) => modifier({ theme: valeur })}
+            options={THEMES.map((v) => ({ value: v, label: t(`affichage.themes.${v}`) }))}
+          />
+          <Typography.Text id="affichage-densite">{t('affichage.densite')}</Typography.Text>
+          <Segmented
+            aria-labelledby="affichage-densite"
+            value={densite}
+            onChange={(valeur) => modifier({ densite: valeur })}
+            options={DENSITES.map((v) => ({ value: v, label: t(`affichage.densites.${v}`) }))}
+          />
+        </Flex>
+      }
+    >
+      <Button icon={<BgColorsOutlined aria-hidden />}>{t('affichage.titre')}</Button>
+    </Popover>
   )
 }

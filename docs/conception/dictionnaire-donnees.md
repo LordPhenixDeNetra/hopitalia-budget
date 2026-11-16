@@ -6,7 +6,7 @@ Produit depuis le modèle (`backend/src/hopitalia_budget/adaptateurs/sortie/mode
 
 Conventions : montants en `Numeric(18,2)` (francs CFA) ; indicateurs (engagé, liquidé, payé, restes, disponibles) jamais stockés, toujours calculés (RG-14) ; toute modification de donnée financière est tracée dans `journal_audit`.
 
-62 tables, 568 colonnes.
+62 tables, 571 colonnes.
 
 ## Tables
 
@@ -104,12 +104,15 @@ Unicité : `utilisateur_id`, `profil`, `etablissement_id`.
 
 ## preference-utilisateur
 
-Table `preference_utilisateur`. Préférences d'un agent dans le module (langue de l'interface).
+Table `preference_utilisateur`. Préférences d'un agent dans le module : langue, thème, densité et colonnes masquées des tableaux ; conservées entre les sessions et d'un poste à l'autre.
 
 | Colonne | Type | Obligatoire | Clé | Description |
 |---|---|---|---|---|
 | `utilisateur_id` | BIGINT | Oui | primaire | Identifiant Hopitalia (`userId`) de l'agent. |
-| `langue` | VARCHAR(5) | Oui |  | Langue de l'interface choisie par l'agent (`fr`, `en`). |
+| `langue` | VARCHAR(5) | Non |  | Langue de l'interface choisie par l'agent (`fr`, `en`). |
+| `theme` | VARCHAR(10) | Non |  | Thème choisi par l'agent : clair, sombre ou celui du système (IHM-01). |
+| `densite` | VARCHAR(12) | Non |  | Densité de l'affichage choisie par l'agent : compacte ou confortable (IHM-02). |
+| `colonnes_masquees` | JSONB | Non |  | Colonnes masquées par l'agent, par tableau (JSON : nom du tableau -> clés des colonnes). |
 
 ## cle-idempotence
 

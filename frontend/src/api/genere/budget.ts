@@ -737,6 +737,7 @@ export const getModifierPreferencesUrl = () => {
 }
 
 /**
+ * Préférences conservées sur le profil de l'agent, d'une session et d'un poste à l'autre.
  * @summary Modifier Preferences
  */
 export const modifierPreferences = async (preferences: Preferences, options?: Parameters<typeof appelerApi>[1]): Promise<Moi> => {
@@ -802,7 +803,10 @@ const {mutation: mutationOptions, request: requestOptions} = options ?
     export type ModifierPreferencesMutationError = HTTPValidationError
     export type ModifierPreferencesMutationVariables = {data: Preferences}
 
-    /** @summary Modifier Preferences */
+    /**
+ * Préférences conservées sur le profil de l'agent, d'une session et d'un poste à l'autre.
+ * @summary Modifier Preferences
+ */
 export const useModifierPreferences = <TError = HTTPValidationError,
     TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierPreferences>>, TError,ModifierPreferencesMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
  , queryClient?: QueryClient): UseMutationResult<

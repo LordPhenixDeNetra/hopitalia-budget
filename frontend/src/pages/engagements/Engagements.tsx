@@ -76,7 +76,7 @@ export function Engagements() {
     {
       title: t('champs.montant'),
       dataIndex: 'montant',
-      align: 'right',
+      align: 'end',
       sorter: true,
       render: (v: string) => <Montant valeur={v} />,
     },
@@ -121,6 +121,7 @@ export function Engagements() {
         />
       </Flex>
       <TableauServeur<EngagementSortie>
+        nom="engagements"
         colonnes={colonnes}
         donnees={data?.donnees ?? []}
         total={data?.pagination.total ?? 0}

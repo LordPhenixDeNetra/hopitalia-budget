@@ -1,5 +1,5 @@
 import AxeBuilder from '@axe-core/playwright'
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Locator, type Page } from '@playwright/test'
 
 const MOI = {
   idHopitalia: 1,
@@ -16,6 +16,27 @@ const ETABLISSEMENTS = {
     { id: 'b2', code: 'HOP-PRINCIPAL', nom: 'Hôpital Principal', actif: false, version: 3 },
   ],
   pagination: { page: 1, taille: 25, total: 2, suivant: null },
+}
+
+/**
+ * Choisit une option d'une liste Ant Design au clavier : flèches jusqu'à l'option, puis Entrée.
+ * Sur téléphone (émulation tactile), un clic sur une option se perdait parfois pendant
+ * l'ouverture de la liste ; le clavier ne dépend pas de la position de la liste.
+ */
+async function choisirOption(page: Page, champ: Locator, option: string) {
+  await champ.focus()
+  await champ.press('ArrowDown')
+  // La liste de ce champ (`aria-controls`) : celle du champ précédent peut être encore affichée
+  // pendant qu'elle se ferme.
+  const id = await champ.getAttribute('aria-controls')
+  const liste = page.locator('.ant-select-dropdown', { has: page.locator(`[id="${id}"]`) })
+  await expect(liste.getByTitle(option)).toBeAttached()
+  for (let rang = 0; rang < 50; rang++) {
+    if ((await liste.locator('.ant-select-item-option-active').getAttribute('title')) === option)
+      break
+    await champ.press('ArrowDown')
+  }
+  await champ.press('Enter')
 }
 
 /**
@@ -267,10 +288,8 @@ test('REC-02 : enregistrer un marché avec ventilation, échéance et pièce', a
   await page.getByRole('button', { name: 'Enregistrer un contrat' }).click()
 
   const tiroir = page.getByRole('dialog')
-  const choisir = async (libelle: string, option: string) => {
-    await tiroir.getByLabel(libelle, { exact: true }).click()
-    await page.getByTitle(option).click()
-  }
+  const choisir = (libelle: string, option: string) =>
+    choisirOption(page, tiroir.getByLabel(libelle, { exact: true }), option)
   await choisir('Établissement', 'CHU-A — CHU A')
   await tiroir.getByLabel('Numéro', { exact: true }).fill('M-2026-001')
   await tiroir.getByLabel('Intitulé').fill('Fournitures médicales')
@@ -403,10 +422,8 @@ test('REC-03 : engagement lié au marché, crédits et plafond contrôlés', asy
   await page.getByRole('button', { name: 'Demander un engagement' }).click()
 
   const tiroir = page.getByRole('dialog')
-  const choisir = async (libelle: string, option: string) => {
-    await tiroir.getByLabel(libelle, { exact: true }).click()
-    await page.getByTitle(option).click()
-  }
+  const choisir = (libelle: string, option: string) =>
+    choisirOption(page, tiroir.getByLabel(libelle, { exact: true }), option)
   await choisir('Établissement', 'CHU-A — CHU A')
   await choisir('Marché ou contrat', 'M-2026-001 — Fournitures médicales')
   await tiroir.getByLabel('Date', { exact: true }).fill('2026-04-01')
@@ -1232,7 +1249,7 @@ const ECRANS = [
 ]
 
 /** API simulée minimale : un agent qui voit tous les écrans, des listes vides ou typiques. */
-async function simulerToutesLesPages(page: Page) {
+async function simulerToutesLesPages(page: Page, preferences: Record<string, unknown> = {}) {
   const m = (n: string) => `${n}000000.00`
   const indicateurs = {
     budgetInitial: m('130'),
@@ -1254,6 +1271,7 @@ async function simulerToutesLesPages(page: Page) {
       '/api/v1/auth/connexion': { jetonAcces: 'a', jetonRafraichissement: 'r', expireDans: 900 },
       '/api/v1/moi': {
         ...MOI,
+        ...preferences,
         habilitations: ['ADM', 'RB', 'VAL', 'ORD', 'AF', 'GMC', 'CPT', 'AUD'].map((profil) => ({
           profil,
           etablissementId: profil === 'ADM' ? null : 'a1',
@@ -1305,13 +1323,7 @@ async function simulerToutesLesPages(page: Page) {
   })
 }
 
-test('T-249 : aucun défaut d’accessibilité bloquant, sur chaque écran (IHM-07)', async ({
-  page,
-}, infos) => {
-  test.skip(infos.project.name !== 'ordinateur', 'Audit fait une fois, à la largeur ordinateur')
-  test.setTimeout(180_000)
-  await simulerToutesLesPages(page)
-  await page.goto('/connexion')
+async function auditerTousLesEcrans(page: Page) {
   const bloquants = async (ecran: string) =>
     (
       await new AxeBuilder({ page })
@@ -1321,7 +1333,12 @@ test('T-249 : aucun défaut d’accessibilité bloquant, sur chaque écran (IHM-
         .analyze()
     ).violations
       .filter((v) => v.impact === 'serious' || v.impact === 'critical')
-      .map((v) => `${ecran} : ${v.id} (${v.nodes.map((n) => n.target.join(' ')).join(', ')})`)
+      // Le résumé d'axe (couleurs, rapport mesuré) aide à corriger depuis le rapport de la CI.
+      .map(
+        (v) =>
+          `${ecran} : ${v.id} (${v.nodes.map((n) => n.target.join(' ')).join(', ')}) ${v.nodes[0]?.failureSummary ?? ''}`,
+      )
+  await page.goto('/connexion')
   const defauts = await bloquants('/connexion')
   await page.getByLabel('Identifiant').fill('agent')
   await page.getByLabel('Mot de passe').fill('secret')
@@ -1330,10 +1347,34 @@ test('T-249 : aucun défaut d’accessibilité bloquant, sur chaque écran (IHM-
   for (const ecran of ECRANS) {
     await page.goto(ecran)
     await page.waitForLoadState('networkidle')
-    await expect(page.getByRole('heading', { level: 1 }), ecran).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
     defauts.push(...(await bloquants(ecran)))
   }
-  expect(defauts).toEqual([])
+  return defauts
+}
+
+test('T-249 : aucun défaut d’accessibilité bloquant, sur chaque écran (IHM-07)', async ({
+  page,
+}, infos) => {
+  test.skip(infos.project.name !== 'ordinateur', 'Audit fait une fois, à la largeur ordinateur')
+  test.setTimeout(180_000)
+  await simulerToutesLesPages(page)
+  expect(await auditerTousLesEcrans(page)).toEqual([])
+})
+
+test('T-270 : thème sombre, contrastes conformes sur chaque écran (IHM-01, IHM-07)', async ({
+  page,
+}, infos) => {
+  test.skip(infos.project.name !== 'ordinateur', 'Audit fait une fois, à la largeur ordinateur')
+  test.setTimeout(180_000)
+  // Thème mémorisé sur le poste (écran de connexion) et sur le profil (après connexion).
+  await page.addInitScript(() =>
+    localStorage.setItem('hopitalia-budget.affichage', JSON.stringify({ theme: 'SOMBRE' })),
+  )
+  await simulerToutesLesPages(page, { theme: 'SOMBRE' })
+  expect(await auditerTousLesEcrans(page)).toEqual([])
+  const fond = await page.evaluate(() => getComputedStyle(document.body).backgroundColor)
+  expect(fond).toBe('rgb(2, 6, 23)')
 })
 
 test('T-249 : navigation au clavier, focus visible (IHM-07)', async ({ page }, infos) => {
@@ -1392,4 +1433,76 @@ test('T-250 : chaque écran tient en 375, 768, 1024 et 1440 px (IHM-08)', async 
     }
   }
   expect(debordements).toEqual([])
+})
+
+test('T-273 : gabarit en écriture de droite à gauche (I18N-10)', async ({ page }, infos) => {
+  test.skip(infos.project.name !== 'ordinateur', 'Largeurs fixées par le test')
+  test.setTimeout(180_000)
+  // Mode de test : aucune langue de droite à gauche n'est prévue.
+  await page.addInitScript(() =>
+    localStorage.setItem('hopitalia-budget.direction', JSON.stringify('rtl')),
+  )
+  await simulerToutesLesPages(page)
+  await connecterAgentFinancier(page, '/')
+  await expect(page.getByText('Bienvenue, Awa Diop')).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.dir)).toBe('rtl')
+  const defauts: string[] = []
+  for (const largeur of [375, 1440]) {
+    await page.setViewportSize({ width: largeur, height: 900 })
+    for (const ecran of ECRANS) {
+      await page.goto(ecran)
+      await page.waitForLoadState('networkidle')
+      await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+      const etat = await page.evaluate(() => {
+        const menu = document.querySelector('.ant-layout-sider')!.getBoundingClientRect()
+        const titre = document.querySelector('h1')!.getBoundingClientRect()
+        return {
+          deborde: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+          // Menu à droite (visible sur grand écran) ; titre calé sur le bord droit du contenu.
+          menuADroite: menu.width === 0 || menu.left >= window.innerWidth / 2,
+          titreADroite: titre.right > window.innerWidth / 2,
+        }
+      })
+      if (etat.deborde) defauts.push(`${ecran} à ${largeur} px : débordement`)
+      if (!etat.menuADroite) defauts.push(`${ecran} à ${largeur} px : menu à gauche`)
+      if (!etat.titreADroite) defauts.push(`${ecran} à ${largeur} px : titre à gauche`)
+      await infos.attach(`rtl${ecran.replaceAll('/', '_') || '_accueil'}-${largeur}`, {
+        body: await page.screenshot({ fullPage: true }),
+        contentType: 'image/png',
+      })
+    }
+  }
+  expect(defauts).toEqual([])
+})
+
+test('T-271 : colonnes masquées conservées d’une session à l’autre (IHM-02)', async ({
+  page,
+}, infos) => {
+  test.skip(infos.project.name !== 'ordinateur', 'Tableau affiché en colonnes sur grand écran')
+  await simulerToutesLesPages(page)
+  // Profil simulé : les préférences envoyées sont relues à la session suivante.
+  let preferences: Record<string, unknown> = {}
+  await page.route('**/api/v1/moi**', async (route) => {
+    if (route.request().method() === 'PUT') {
+      preferences = { ...preferences, ...route.request().postDataJSON() }
+    }
+    await route.fulfill({
+      json: { ...MOI, ...preferences, habilitations: [{ profil: 'ADM', etablissementId: null }] },
+    })
+  })
+  await connecterAgentFinancier(page, '/etablissements')
+  const entete = page.getByRole('columnheader', { name: 'Nom' })
+  await expect(entete).toBeVisible()
+  await page.getByRole('button', { name: 'Colonnes' }).click()
+  // La case suit la préférence, mise à jour au rendu suivant : clic, puis attente de l'état
+  // (uncheck() vérifie l'état aussitôt et échoue sur une machine lente).
+  const caseNom = page.getByRole('checkbox', { name: 'Nom' })
+  await caseNom.click()
+  await expect(caseNom).not.toBeChecked()
+  await expect(entete).toHaveCount(0)
+  await expect.poll(() => preferences).toEqual({ colonnesMasquees: { etablissements: ['nom'] } })
+
+  await page.reload()
+  await expect(page.getByRole('columnheader', { name: 'Code' })).toBeVisible()
+  await expect(entete).toHaveCount(0)
 })
