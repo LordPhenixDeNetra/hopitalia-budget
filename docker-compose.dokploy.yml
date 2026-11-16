@@ -1,11 +1,152 @@
-# Démonstration en ligne, déployée par Dokploy (documentation : installer/dokploy) : le module complet
-# (docker-compose.yml), un Hopitalia simulé et un serveur de courrier de test, puis le jeu de
-# démonstration chargé au premier démarrage. Variables : .env.dokploy.example, à recopier dans
-# l'onglet « Environment » de Dokploy. Jamais face à un vrai Hopitalia ni avec de vraies données.
-include:
-  - docker-compose.yml
+# Démonstration en ligne, déployée par Dokploy (documentation : installer/dokploy) : le module complet,
+# un Hopitalia simulé et un serveur de courrier de test, puis le jeu de démonstration chargé au premier
+# démarrage. Variables : .env.dokploy.example, à recopier dans l'onglet « Environment » de Dokploy.
+# Jamais face à un vrai Hopitalia ni avec de vraies données.
+#
+# Fichier autonome : Dokploy ne suit pas `include`, et ne verrait alors ni `web` ni `api` pour leurs
+# domaines. Les services du module sont donc recopiés de docker-compose.yml, à l'identique : la CI
+# vérifie qu'ils ne divergent pas (simulation/verifier_dokploy.py). Modifier d'abord
+# docker-compose.yml, puis reporter ici.
 
 services:
+  # --- Module (copie de docker-compose.yml) -------------------------------------------------------
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-hopitalia}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env}
+      POSTGRES_DB: ${POSTGRES_DB:-hopitalia_budget}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      retries: 10
+    # Redémarre avec le serveur (plan d'exploitation, section 4).
+    restart: unless-stopped
+
+  api:
+    build: ./backend
+    image: hopitalia-budget-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-hopitalia}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-hopitalia_budget}
+      HOPITALIA_API_URL: ${HOPITALIA_API_URL:-}
+      HOPITALIA_JWT_CLE: ${HOPITALIA_JWT_CLE:-}
+      HOPITALIA_COMPTE_TECHNIQUE: ${HOPITALIA_COMPTE_TECHNIQUE:-}
+      HOPITALIA_COMPTE_TECHNIQUE_MOT_DE_PASSE: ${HOPITALIA_COMPTE_TECHNIQUE_MOT_DE_PASSE:-}
+      HOPITALIA_ETABLISSEMENT: ${HOPITALIA_ETABLISSEMENT:-}
+      COORDONNEES_CLE: ${COORDONNEES_CLE:-}
+      # Adresse du client transmise par nginx (limitation de débit par adresse, T-252). Toute
+      # source est admise : l'API n'est joignable que par nginx et depuis le serveur lui-même.
+      FORWARDED_ALLOW_IPS: "*"
+    volumes:
+      - pieces:/app/pieces
+    depends_on:
+      db:
+        condition: service_healthy
+    # Adresse publiée sur le serveur (ADRESSE_API) : changer le port s'il est déjà pris (Dokploy).
+    ports:
+      - "${ADRESSE_API:-127.0.0.1:8000}:8000"
+    # Sain quand les migrations sont appliquées et que l'API répond : les autres services l'attendent.
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
+      interval: 10s
+      timeout: 6s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  # Tâche quotidienne des alertes planifiées (T-222), avec l'image de l'API.
+  alertes:
+    image: hopitalia-budget-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-hopitalia}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-hopitalia_budget}
+      HOPITALIA_API_URL: ${HOPITALIA_API_URL:-}
+      HOPITALIA_JWT_CLE: ${HOPITALIA_JWT_CLE:-}
+      COORDONNEES_CLE: ${COORDONNEES_CLE:-}
+    command: ["sh", "-c", "while true; do python -m hopitalia_budget.outils.alertes; sleep 86400; done"]
+    # L'API applique les migrations à son démarrage : la tâche attend qu'elle soit saine.
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Courriels d'alerte (T-225) : file envoyée chaque minute ; sans SMTP_HOTE, elle attend.
+  courriels:
+    image: hopitalia-budget-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-hopitalia}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-hopitalia_budget}
+      SMTP_HOTE: ${SMTP_HOTE:-}
+      SMTP_PORT: ${SMTP_PORT:-25}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-false}
+      SMTP_UTILISATEUR: ${SMTP_UTILISATEUR:-}
+      SMTP_MOT_DE_PASSE: ${SMTP_MOT_DE_PASSE:-}
+      SMTP_EXPEDITEUR: ${SMTP_EXPEDITEUR:-hopitalia-budget@localhost}
+      URL_APPLICATION: ${URL_APPLICATION:-}
+    command: ["sh", "-c", "while true; do python -m hopitalia_budget.outils.courriels; sleep 60; done"]
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Échanges quotidiens avec Hopitalia (lot 7) : fournisseurs, services, pharmacie, puis reprise
+  # des échanges en échec. Hopitalia est lu par le compte technique, jamais écrit.
+  integrations:
+    image: hopitalia-budget-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-hopitalia}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-hopitalia_budget}
+      HOPITALIA_API_URL: ${HOPITALIA_API_URL:-}
+      HOPITALIA_COMPTE_TECHNIQUE: ${HOPITALIA_COMPTE_TECHNIQUE:-}
+      HOPITALIA_COMPTE_TECHNIQUE_MOT_DE_PASSE: ${HOPITALIA_COMPTE_TECHNIQUE_MOT_DE_PASSE:-}
+      HOPITALIA_ETABLISSEMENT: ${HOPITALIA_ETABLISSEMENT:-}
+      INTEGRATIONS_QUOTIDIENNES: ${INTEGRATIONS_QUOTIDIENNES:-oui}
+    # INTEGRATIONS_QUOTIDIENNES=non : la tâche ne tourne pas (démonstration, qui lance ses échanges).
+    command: ["sh", "-c", "if [ \"$${INTEGRATIONS_QUOTIDIENNES:-oui}\" = non ]; then exec sleep infinity; fi; while true; do python -m hopitalia_budget.outils.integrations; sleep 86400; done"]
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Sauvegarde quotidienne de la base et des pièces (T-253 ; documentation : installer/sauvegarde).
+  sauvegarde:
+    image: postgres:16-alpine
+    environment:
+      PGHOST: db
+      PGUSER: ${POSTGRES_USER:-hopitalia}
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: ${POSTGRES_DB:-hopitalia_budget}
+      RETENTION_JOURS: ${RETENTION_JOURS:-30}
+    volumes:
+      - ./exploitation:/exploitation:ro
+      - sauvegardes:/sauvegardes
+      - pieces:/pieces
+    command: ["sh", "-c", "while true; do sh /exploitation/sauvegarder.sh; sleep 86400; done"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  web:
+    # Contexte à la racine : l'image embarque l'interface et la documentation (site/).
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    image: hopitalia-budget-web
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - "${ADRESSE_WEB:-127.0.0.1:8080}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # --- Démonstration -----------------------------------------------------------------------------
+
   # Connexion des agents, annuaire, fournisseurs, services et pharmacie, avec une clé de signature et
   # un mot de passe secrets : ceux des tests sont publics.
   hopitalia-simule:
@@ -49,3 +190,10 @@ services:
       courrier-test:
         condition: service_started
     restart: "no"
+
+volumes:
+  db-data:
+  pieces:
+  # Copier ce volume hors du serveur (documentation : installer/sauvegarde) : sur le même disque, il ne
+  # protège pas d'une panne du serveur.
+  sauvegardes:

@@ -147,6 +147,7 @@ jobs:
           SIMULATION_MOT_DE_PASSE: ci
         run: |
           docker compose -f docker-compose.dokploy.yml config -q
+          python3 simulation/verifier_dokploy.py
           docker compose -f docker-compose.dokploy.yml build hopitalia-simule
       - if: failure()
         run: docker compose ps && docker compose logs --tail 50
