@@ -36,7 +36,11 @@ services:
     depends_on:
       - hopitalia-simule
 
+  # Tâche quotidienne des échanges non démarrée : la répétition et la démonstration lancent chaque
+  # échange elles-mêmes. Sinon, son premier import (une minute après le démarrage) devancerait le
+  # paramétrage de la répétition, selon le moment où on la lance.
   integrations:
+    scale: 0
     environment:
       <<: *simulation
 
