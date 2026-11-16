@@ -13,5 +13,12 @@
     "isolatedModules": true,
     "noEmit": true
   },
-  "include": ["vite.config.ts", "playwright.config.ts", "orval.config.ts", "e2e"]
+  "include": [
+    "vite.config.ts",
+    "playwright.config.ts",
+    "playwright.recette.config.ts",
+    "orval.config.ts",
+    "e2e",
+    "e2e-recette"
+  ]
 }
