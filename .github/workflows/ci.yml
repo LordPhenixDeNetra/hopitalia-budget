@@ -15,6 +15,7 @@ jobs:
     outputs:
       backend: ${{ steps.filtre.outputs.backend }}
       frontend: ${{ steps.filtre.outputs.frontend }}
+      site: ${{ steps.filtre.outputs.site }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,12 +25,14 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           # Sans base exploitable (premier push d'une branche), tout est vérifié.
-          if fichiers=$(git diff --name-only "$BASE" "$GITHUB_SHA" 2>/dev/null); then :; else fichiers="backend/ frontend/"; fi
+          if fichiers=$(git diff --name-only "$BASE" "$GITHUB_SHA" 2>/dev/null); then :; else fichiers=$'backend/\nfrontend/\nsite/'; fi
           echo "$fichiers"
           # Le backend vérifie aussi la traçabilité (titres des tests du frontend) et les documents
           # produits depuis le code (docs/conception/).
           grep -qE '^(backend/|frontend/src/i18n/locales/|frontend/openapi\.json|frontend/src/App\.test\.tsx|frontend/e2e/|docs/cadrage/matrice|docs/recette/tracabilite|docs/conception/|\.github/workflows/)' <<<"$fichiers" && echo "backend=true" >> "$GITHUB_OUTPUT" || echo "backend=false" >> "$GITHUB_OUTPUT"
           grep -qE '^(frontend/|\.github/workflows/)' <<<"$fichiers" && echo "frontend=true" >> "$GITHUB_OUTPUT" || echo "frontend=false" >> "$GITHUB_OUTPUT"
+          # La documentation vérifie aussi les noms des captures du scénario (frontend/e2e-captures/).
+          grep -qE '^(site/|frontend/e2e-captures/|\.github/workflows/)' <<<"$fichiers" && echo "site=true" >> "$GITHUB_OUTPUT" || echo "site=false" >> "$GITHUB_OUTPUT"
 
   backend:
     name: backend
@@ -96,6 +99,26 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run e2e
 
+  site:
+    name: site
+    needs: changements
+    if: needs.changements.outputs.site == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: site
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - run: npm ci
+      # Construction : liens internes vérifiés, puis en-têtes de sécurité de /docs/.
+      - run: npm run build
+      - run: npm test
+
   dco:
     name: dco
     if: github.event_name == 'pull_request'
@@ -120,7 +143,7 @@ jobs:
   ci-ok:
     name: ci-ok
     if: always()
-    needs: [changements, backend, frontend, dco]
+    needs: [changements, backend, frontend, site, dco]
     runs-on: ubuntu-latest
     steps:
       - env:
