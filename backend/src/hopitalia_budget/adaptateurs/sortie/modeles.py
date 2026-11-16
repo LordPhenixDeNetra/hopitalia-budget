@@ -24,6 +24,9 @@ from hopitalia_budget.adaptateurs.sortie.base import MONTANT, Base
 
 
 class EtablissementModele(Base):
+    """Établissement hospitalier : unité de cloisonnement des données (chaque requête est
+    filtrée par établissement)."""
+
     __tablename__ = "etablissement"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -54,6 +57,8 @@ class HabilitationModele(Base):
 
 
 class PreferenceUtilisateurModele(Base):
+    """Préférences d'un agent dans le module (langue de l'interface)."""
+
     __tablename__ = "preference_utilisateur"
 
     utilisateur_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -61,6 +66,9 @@ class PreferenceUtilisateurModele(Base):
 
 
 class CleIdempotenceModele(Base):
+    """Clé d'idempotence d'un `POST` financier et réponse rendue, conservée 24 heures (section
+    11.3)."""
+
     __tablename__ = "cle_idempotence"
 
     utilisateur_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
@@ -95,6 +103,8 @@ class JournalAuditModele(Base):
 
 
 class SiteModele(Base):
+    """Site géographique d'un établissement."""
+
     __tablename__ = "site"
     __table_args__ = (UniqueConstraint("etablissement_id", "code"),)
 
@@ -162,6 +172,9 @@ class ReferentielModele(Base):
 
 
 class FournisseurModele(Base):
+    """Fournisseur, commun à tous les établissements ; importé d'Hopitalia (code Hopitalia) ou
+    saisi dans le module (EF-REF-05)."""
+
     __tablename__ = "fournisseur"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -192,6 +205,8 @@ class CoordonneePaiementModele(Base):
 
 
 class CompteComptableModele(Base):
+    """Compte du plan SYSCOHADA révisé, rattaché aux comptes budgétaires de la nomenclature."""
+
     __tablename__ = "compte_comptable"
 
     code: Mapped[str] = mapped_column(String(10), primary_key=True)
@@ -214,6 +229,8 @@ class NoeudNomenclatureModele(Base):
 
 
 class ExerciceModele(Base):
+    """Exercice budgétaire (année), ouvert puis clos par établissement."""
+
     __tablename__ = "exercice"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -227,6 +244,8 @@ class ExerciceModele(Base):
 
 
 class PeriodeModele(Base):
+    """Période d'un exercice (année, trimestre, mois), créée avec l'exercice, pour les filtres."""
+
     __tablename__ = "periode"
     __table_args__ = (UniqueConstraint("exercice_id", "code"),)
 
@@ -239,6 +258,8 @@ class PeriodeModele(Base):
 
 
 class BudgetModele(Base):
+    """Budget d'un établissement pour un exercice (primitif ou modificatif)."""
+
     __tablename__ = "budget"
     __table_args__ = (
         # Un seul budget primitif par exercice et par établissement (T-088).
@@ -285,6 +306,9 @@ class LigneBudgetaireModele(Base):
 
 
 class ImportDotationsModele(Base):
+    """Import asynchrone des dotations d'un budget depuis un fichier CSV, avec son rapport
+    d'anomalies (EF-BUD-02)."""
+
     __tablename__ = "import_dotations"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -301,6 +325,8 @@ class ImportDotationsModele(Base):
 
 
 class NotificationCreditModele(Base):
+    """Notification de crédits reçue de la tutelle pour un budget (T-091)."""
+
     __tablename__ = "notification_credit"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -314,6 +340,8 @@ class NotificationCreditModele(Base):
 
 
 class NotificationLigneModele(Base):
+    """Montant notifié pour une ligne budgétaire dans une notification de crédits."""
+
     __tablename__ = "notification_ligne"
 
     notification_id: Mapped[uuid.UUID] = mapped_column(
@@ -404,6 +432,9 @@ class CircuitValidationModele(Base):
 
 
 class StatutPersonnaliseModele(Base):
+    """Statut propre à un établissement, rattaché à un statut de référence du cycle de
+    validation."""
+
     __tablename__ = "statut_personnalise"
     __table_args__ = (UniqueConstraint("etablissement_id", "type_objet", "code"),)
 
@@ -419,6 +450,9 @@ class StatutPersonnaliseModele(Base):
 
 
 class TransitionStatutModele(Base):
+    """Transition autorisée entre deux statuts pour un type d'objet, et profil qui peut la
+    faire."""
+
     __tablename__ = "transition_statut"
     __table_args__ = (UniqueConstraint("etablissement_id", "type_objet", "depuis", "action"),)
 
@@ -571,6 +605,8 @@ class AvenantModele(Base):
 
 
 class EcheanceContratModele(Base):
+    """Échéance prévue d'un contrat (date et montant), pour le suivi des échéances."""
+
     __tablename__ = "echeance_contrat"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -581,6 +617,8 @@ class EcheanceContratModele(Base):
 
 
 class LotTrancheModele(Base):
+    """Lot ou tranche d'un contrat, avec son montant."""
+
     __tablename__ = "lot_tranche"
     __table_args__ = (UniqueConstraint("contrat_id", "code"),)
 
@@ -592,6 +630,8 @@ class LotTrancheModele(Base):
 
 
 class OrdreServiceModele(Base):
+    """Ordre de service d'un contrat (démarrage, arrêt, reprise, modification des prestations)."""
+
     __tablename__ = "ordre_service"
     __table_args__ = (UniqueConstraint("contrat_id", "reference"),)
 
@@ -653,6 +693,9 @@ class EngagementModele(Base):
 
 
 class ImputationEngagementModele(Base):
+    """Part d'un engagement imputée sur une ligne budgétaire ; la somme des imputations égale
+    le montant de l'engagement (RG-15)."""
+
     __tablename__ = "imputation_engagement"
     __table_args__ = (UniqueConstraint("engagement_id", "ligne_id"),)
 
@@ -704,6 +747,8 @@ class AnnulationModele(Base):
 
 
 class AnnulationLigneModele(Base):
+    """Part d'une annulation d'engagement imputée sur une ligne budgétaire."""
+
     __tablename__ = "annulation_ligne"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -738,6 +783,8 @@ class BonCommandeModele(Base):
 
 
 class LigneCommandeModele(Base):
+    """Ligne d'un bon de commande : désignation, quantité, prix unitaire et taux de taxe."""
+
     __tablename__ = "ligne_commande"
     __table_args__ = (UniqueConstraint("bon_commande_id", "rang"),)
 
@@ -775,6 +822,8 @@ class ReceptionModele(Base):
 
 
 class LigneReceptionModele(Base):
+    """Quantités reçues, acceptées et rejetées d'une ligne de commande dans une réception."""
+
     __tablename__ = "ligne_reception"
     __table_args__ = (UniqueConstraint("reception_id", "ligne_commande_id"),)
 
@@ -789,6 +838,8 @@ class LigneReceptionModele(Base):
 
 
 class ReserveReceptionModele(Base):
+    """Réserve émise sur une réception, puis levée."""
+
     __tablename__ = "reserve_reception"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -801,6 +852,8 @@ class ReserveReceptionModele(Base):
 
 
 class AttestationServiceFaitModele(Base):
+    """Attestation de service fait pour une prestation sans livraison physique."""
+
     __tablename__ = "attestation_service_fait"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
@@ -872,6 +925,9 @@ class LiquidationModele(Base):
 
 
 class DeductionModele(Base):
+    """Déduction appliquée à une liquidation : avance récupérée, retenue de garantie, pénalité,
+    réfaction, retenue à la source ou autre."""
+
     __tablename__ = "deduction"
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
