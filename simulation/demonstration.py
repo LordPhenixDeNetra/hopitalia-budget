@@ -178,8 +178,8 @@ def engagements_pharmacie() -> None:
 
 def echange_a_reprendre() -> None:
     """Un échange Hopitalia en échec, à reprendre devant l'assistance (écran Intégrations). La
-    tâche quotidienne reprendrait l'échec d'elle-même : elle est mise en pause pour la séance."""
-    compose("stop", "integrations")
+    tâche quotidienne, qui reprendrait l'échec d'elle-même, ne tourne pas dans la pile de
+    simulation (docker-compose.simulation.yml)."""
     httpx.post(f"{SIMULE}/simulation/panne?active=true", timeout=30).raise_for_status()
     echec = client.post(
         "/api/v1/journal-integration",

@@ -1,0 +1,13 @@
+# Contexte de l'image de l'interface (frontend/Dockerfile) : seuls frontend/ et site/ servent.
+**/node_modules
+**/dist
+**/.astro
+**/coverage
+**/test-results
+**/playwright-report*
+.git
+backend
+docs
+simulation
+exploitation
+site/en-tetes-docs.conf

@@ -1,0 +1,36 @@
+---
+title: Règles d'alerte
+description: Activer chaque type d'alerte par établissement, régler les seuils et les délais, choisir les alertes envoyées par courriel.
+sidebar:
+  order: 6
+---
+
+import Capture from "../../../components/Capture.astro";
+
+**Alertes**, onglet **Règles** (administrateur).
+
+<Capture nom="alertes-regles" alt="L'onglet Règles de l'écran Alertes : pour chaque type d'alerte, l'établissement, l'interrupteur Active, le seuil en pourcentage ou le délai en jours, la case Par courriel, et le bouton Lancer la détection maintenant." />
+
+Pour chaque établissement et chaque type d'alerte :
+
+- **Active** : l'alerte est émise ou non ;
+- **Seuil (%)** ou **Délai (jours)**, selon le type ;
+- **Par courriel** : l'alerte part aussi par courriel.
+
+| Réglage | Valeur par défaut |
+|---|---|
+| Seuil de consommation des marchés | 80 %, puis repères à 90 et 100 %. |
+| Facture échue | À sa date d'échéance, ou 30 jours après sa réception. |
+| Engagement ancien | 90 jours après sa validation. |
+| Échéance de contrat | 60 jours avant. |
+
+Les alertes planifiées (seuils, factures échues, engagements anciens, échéances) sont détectées une fois par jour. **Lancer la détection maintenant** les recalcule sans attendre. Chaque modification de règle est tracée.
+
+## Courriels
+
+Une règle « Par courriel » envoie l'alerte aux agents des profils destinataires, dans l'établissement de l'alerte, **qui ont donné leur adresse** dans l'écran [Alertes](/docs/utiliser/alertes/#recevoir-ses-alertes-par-courriel). Le courriel est dans la langue de chaque agent, avec le texte de l'écran Alertes.
+
+- L'alerte est enregistrée avec l'opération ; l'envoi se fait ensuite, chaque minute. Une panne de messagerie ne bloque aucune opération.
+- Un courriel en échec est repris, jusqu'à cinq tentatives.
+- Le serveur de messagerie se règle sur le serveur (`SMTP_*`, voir [Configuration](/docs/installer/configuration/)) ; sans lui, les courriels attendent.
+- Les alertes antérieures à la mise en service des courriels ne sont pas envoyées.

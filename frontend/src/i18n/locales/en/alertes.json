@@ -22,6 +22,7 @@
     "actif": "Active",
     "seuilPourcent": "Threshold (%)",
     "delaiJours": "Delay (days)",
+    "parCourriel": "By email",
     "enregistree": "Rule saved.",
     "lancer": "Run detection now",
     "planifiee": "Detection started."

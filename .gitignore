@@ -43,6 +43,10 @@ playwright-report-recette/
 blob-report/
 playwright/.cache/
 
+# Site de documentation (site/) : cache d'Astro et en-têtes produits à la construction
+.astro/
+site/en-tetes-docs.conf
+
 # Données locales (Docker, fichiers déposés, exports)
 .data/
 uploads/

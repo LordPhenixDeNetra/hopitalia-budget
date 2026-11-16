@@ -2,7 +2,7 @@
 
 **Projet :** Hopitalia Budget · **Date :** 16/11/2026 · **Références :** T-198, T-201, T-202, T-225, T-254
 
-La recette blanche répète la recette avant la séance réelle avec la DAF. Elle s'exécute sur un poste, avec la pile Docker complète : base PostgreSQL, API, interface servie par nginx et tâches planifiées. Deux éléments extérieurs sont remplacés par des doublures :
+La recette blanche répète la recette avant la séance réelle avec la DAF. Elle s'exécute sur un poste, avec la pile Docker complète : base PostgreSQL, API, interface servie par nginx et tâches planifiées. Seule la tâche quotidienne des échanges avec Hopitalia n'y démarre pas : la répétition lance chaque échange elle-même, au moment voulu. Deux éléments extérieurs sont remplacés par des doublures :
 - **Hopitalia simulé** : connexion des agents, annuaire, fournisseurs, services, commandes et approvisionnements de la pharmacie, avec un volume réaliste ;
 - **serveur de courrier de test** : une boîte de réception consultable dans le navigateur.
 

@@ -1,0 +1,40 @@
+---
+title: Clôture d'exercice
+description: Clôturer l'exercice d'un établissement, reporter les reliquats d'engagements sur l'exercice suivant, et rouvrir si besoin.
+sidebar:
+  order: 16
+---
+
+import Capture from "../../../components/Capture.astro";
+
+| Action | Profils |
+|---|---|
+| Clôturer ou rouvrir un exercice | RB, ORD |
+| Consulter | AUD |
+
+La clôture se fait **par établissement**. Rien n'est supprimé (RG-10) :
+
+- le reliquat non liquidé de chaque engagement validé est **reporté** sur l'exercice suivant, sur la ligne de même code ;
+- les liquidations non payées restent payables.
+
+<Capture nom="cloture-exercice" alt="L'écran Clôture d'exercice : le choix de l'exercice, de l'établissement et de l'exercice suivant, le motif et le bouton Clôturer l'exercice, puis l'historique des clôtures avec les engagements et le montant reportés." />
+
+## Clôturer
+
+1. Choisir l'**Exercice**, l'**Établissement** et l'**Exercice suivant**.
+2. Saisir un **Motif**.
+3. **Clôturer l'exercice**, puis confirmer.
+
+La clôture est refusée tant que :
+
+- des engagements de l'exercice sont encore dans leur circuit de validation : les valider ou les rejeter d'abord ;
+- l'exercice suivant n'est pas ouvert pour l'établissement ;
+- une ligne d'un reliquat n'a pas d'équivalent de même code au budget de l'exercice suivant : le message cite la ligne et l'engagement.
+
+Le message de réussite donne le nombre d'engagements reportés et le montant reporté. Chaque reliquat devient un engagement de l'exercice suivant. L'historique garde la date de clôture, les engagements et le montant reportés.
+
+## Rouvrir
+
+**Rouvrir**, avec un motif, rouvre l'exercice de l'établissement. Une réouverture **n'annule pas** les reports déjà faits. Chaque clôture et chaque réouverture sont tracées.
+
+Fenêtre conseillée : jamais pendant une mise à jour du module.

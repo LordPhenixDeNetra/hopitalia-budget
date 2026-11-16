@@ -1,7 +1,8 @@
 name: Publication
 
 # Publication d'une version (T-282) : à chaque étiquette `vX.Y.Z` poussée sur `main`, le document
-# OpenAPI de cette version et le guide d'intégration sont joints à une version GitHub.
+# OpenAPI de cette version et sa documentation construite (site/, la même que celle servie sous
+# /docs/) sont joints à une version GitHub.
 on:
   push:
     tags: ["v*"]
@@ -17,15 +18,33 @@ jobs:
       - name: Version de l'étiquette égale à celle du code
         run: |
           attendue="${GITHUB_REF_NAME#v}"
-          for trouvee in             "$(grep -m1 '^version' backend/pyproject.toml | cut -d'"' -f2)"             "$(jq -r .version frontend/package.json)"             "$(jq -r .info.version frontend/openapi.json)"; do
+          for trouvee in \
+            "$(grep -m1 '^version' backend/pyproject.toml | cut -d'"' -f2)" \
+            "$(jq -r .version frontend/package.json)" \
+            "$(jq -r .info.version frontend/openapi.json)"; do
             if [ "$trouvee" != "$attendue" ]; then
               echo "Version $trouvee trouvée, $attendue attendue (étiquette $GITHUB_REF_NAME)."
               exit 1
             fi
           done
-      - name: Version GitHub avec le document OpenAPI et le guide d'intégration
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+      - name: Documentation construite
+        working-directory: site
+        run: |
+          npm ci
+          npm run build
+          (cd dist && zip -qr "../../documentation-$GITHUB_REF_NAME.zip" .)
+      - name: Version GitHub avec le document OpenAPI et la documentation
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           cp frontend/openapi.json "openapi-$GITHUB_REF_NAME.json"
-          gh release create "$GITHUB_REF_NAME"             "openapi-$GITHUB_REF_NAME.json"             docs/integration/guide-integration.md             --title "Hopitalia Budget $GITHUB_REF_NAME"             --notes "Document OpenAPI de l'API /api/v1 de cette version et guide d'intégration. Changements : demandes de fusion depuis la version précédente."
+          gh release create "$GITHUB_REF_NAME" \
+            "openapi-$GITHUB_REF_NAME.json" \
+            "documentation-$GITHUB_REF_NAME.zip" \
+            --title "Hopitalia Budget $GITHUB_REF_NAME" \
+            --notes "Document OpenAPI de l'API /api/v1 de cette version et sa documentation (à ouvrir sous /docs/ d'un serveur web). Notes de version : partie « Notes de version » de la documentation."

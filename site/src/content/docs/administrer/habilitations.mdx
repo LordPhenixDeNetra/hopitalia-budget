@@ -1,0 +1,32 @@
+---
+title: Habilitations
+description: Attribuer et retirer les profils budgétaires des agents Hopitalia, pour un établissement ou pour tous.
+sidebar:
+  order: 3
+---
+
+import Capture from "../../../components/Capture.astro";
+
+La connexion passe par Hopitalia ; les droits dans le module sont attribués ici, par les administrateurs.
+
+<Capture nom="habilitations" alt="L'écran Habilitations : la liste des agents avec leur code, leur nom, leur profil et leur établissement, des filtres par profil et par établissement, et le bouton Attribuer un profil." />
+
+## Attribuer un profil
+
+**Attribuer un profil** :
+
+1. **Code agent Hopitalia**, par exemple `AG042` : le module lit le nom de l'agent dans l'annuaire Hopitalia.
+2. **Profil** : voir [Profils et droits](/docs/decouvrir/profils/).
+3. **Établissement** : celui où le profil s'applique. « Tous les établissements » est réservé aux administrateurs globaux.
+
+Un agent peut cumuler des profils ; la séparation des tâches s'applique quand même.
+
+## Retirer un profil
+
+**Retirer**, puis confirmer. Le retrait prend effet à la requête suivante de l'agent.
+
+## Règles
+
+- Un administrateur ne peut pas modifier ses propres profils : « Vos propres droits ne sont modifiables que par un autre administrateur. »
+- Chaque attribution et chaque retrait sont tracés dans le journal d'audit.
+- Un compte d'intégration (un autre système qui appelle l'API) reçoit ses profils de la même façon : le plus étroit qui suffit (voir [Authentification](/docs/integrer/authentification/)).

@@ -1,0 +1,13 @@
+/* Le bleu de l'application (frontend/src/theme/theme.ts : colorPrimary) sur l'échelle d'accent de
+   Starlight ; sombre d'abord (le défaut de Starlight), puis clair. */
+:root {
+  --sl-color-accent-low: #172554;
+  --sl-color-accent: #3b82f6;
+  --sl-color-accent-high: #bfdbfe;
+}
+
+:root[data-theme="light"] {
+  --sl-color-accent-low: #dbeafe;
+  --sl-color-accent: #1e40af;
+  --sl-color-accent-high: #172554;
+}

@@ -1,0 +1,59 @@
+---
+title: Budgets et révisions
+description: Créer le budget de l'exercice, importer les dotations, enregistrer les notifications de crédits, demander une révision et suivre la situation ligne par ligne.
+sidebar:
+  order: 3
+---
+
+import Capture from "../../../components/Capture.astro";
+
+| Action | Profils |
+|---|---|
+| Créer un budget, importer les dotations, enregistrer une notification de crédits | RB |
+| Demander une révision | RB |
+| Viser une révision | VAL, puis ORD |
+| Consulter | RB, AF, VAL, ORD, AUD |
+
+## Le budget de l'exercice
+
+L'écran **Budgets** liste les budgets par exercice et par établissement. Un budget est **primitif** (le budget voté) ou **modificatif**. Sa fiche a cinq onglets.
+
+<Capture nom="budget-situation" alt="La fiche d'un budget, onglet Situation : pour chaque ligne et pour le total, budget initial, modifications, budget révisé, engagé, en cours de validation, disponible, liquidé, payé, reste à payer et taux." />
+
+### Situation
+
+Pour chaque ligne et pour le total du budget : budget initial, modifications (+) et (−), budget révisé, engagé, en cours de validation, disponible après engagements, disponible prévisionnel, liquidé, payé, engagé restant à liquider, reste à payer, taux d'engagement, de liquidation et de paiement.
+
+Ces chiffres sont **recalculés à chaque affichage** depuis les pièces : ils ne se saisissent pas. Leurs définitions sont dans [Concepts](/docs/decouvrir/concepts/#des-indicateurs-calculés-jamais-saisis).
+
+Un clic sur une ligne ouvre sa fiche et sa **Disponibilité**.
+
+### Lignes
+
+Les lignes du budget : code, libellé, compte budgétaire, centre de responsabilité, source de financement, programme et dotation initiale.
+
+### Import des dotations
+
+Un fichier CSV séparé par des points-virgules, en UTF-8, colonnes `code;libelle;compte;centre;source;programme;dotation` (format détaillé dans [Fichiers d'import et d'export](/docs/integrer/fichiers/#dotations-dun-budget)).
+
+1. **Choisir un fichier CSV**.
+2. L'import tourne (« En cours »), puis affiche « Lignes importées : N ».
+3. Les lignes refusées sont listées avec leur **Ligne du fichier**, l'**Anomalie** (code déjà utilisé, compte inconnu, montant invalide…) et la **Valeur** en cause. Corriger le fichier et réimporter : les lignes déjà créées ne sont pas dupliquées.
+
+Les lignes et dotations s'exportent au même format, en **CSV** ou **JSON**, pour être modifiées puis réimportées.
+
+### Notifications de crédits
+
+**Enregistrer une notification** : la notification de crédits reçue de la tutelle, avec sa référence, sa date, son montant, son objet, sa source de financement et sa **Répartition par ligne**.
+
+### Révisions
+
+**Demander une révision** :
+
+| Type | Effet une fois validée |
+|---|---|
+| Virement, réallocation | Débite la **Ligne débitée** et crédite la **Ligne créditée** du même montant. |
+| Augmentation, budget modificatif | Crédite une ligne. |
+| Diminution | Débite une ligne. |
+
+Une révision n'a **aucun effet** sur les crédits avant la décision de l'ordonnateur. Elle suit le circuit de validation (visa DAF, puis ordonnateur) : voir [Valider une pièce](/docs/utiliser/valider/). Une révision retournée se corrige, puis se **Renvoie au circuit**.

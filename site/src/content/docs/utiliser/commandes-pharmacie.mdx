@@ -1,0 +1,38 @@
+---
+title: Commandes de la pharmacie
+description: Rattacher les commandes saisies dans la pharmacie d'Hopitalia à un engagement validé, sans ressaisie ; leurs livraisons deviennent des réceptions validées.
+sidebar:
+  order: 7
+---
+
+import Capture from "../../../components/Capture.astro";
+
+| Action | Profils |
+|---|---|
+| Rattacher une commande à un engagement | AF |
+| Consulter | GMC, AUD |
+
+La pharmacie saisit ses commandes et ses livraisons (approvisionnements) dans Hopitalia. Le module les importe chaque jour, **sans ressaisie**. L'agent financier rattache chaque commande à un engagement validé du même fournisseur.
+
+<Capture nom="commandes-pharmacie" alt="L'écran Commandes de la pharmacie, vue À rattacher : chaque commande avec son numéro Hopitalia, sa date, son fournisseur, son service, son montant, ses approvisionnements en attente, et soit une liste d'engagements proposés avec le bouton Rattacher, soit le message « Aucun engagement validé du fournisseur ne couvre cette commande. »" />
+
+## Rattacher une commande
+
+1. Vue **À rattacher** : les commandes importées pas encore rattachées. Le **+** d'une ligne déplie ses produits.
+2. Dans **Rattachement**, le module propose les engagements validés du même fournisseur dont le reste couvre la commande.
+3. Choisir l'engagement, puis **Rattacher**.
+
+Le rattachement crée le bon de commande dans le module. Les approvisionnements déjà livrés deviennent des **réceptions validées**, avec le bon de livraison pour preuve ; les suivants le deviennent à leur import.
+
+« Aucun engagement validé du fournisseur ne couvre cette commande. » : il faut d'abord un engagement (voir [Engagements](/docs/utiliser/engagements/)).
+
+La vue **Rattachées** liste les commandes déjà rattachées, avec le lien **Voir le bon de commande**.
+
+## Quand Hopitalia change une livraison
+
+| Changement dans Hopitalia | Effet dans le module |
+|---|---|
+| Approvisionnement modifié après sa réception | Une alerte « Écart de rapprochement » demande de vérifier la réception et la facture. |
+| Approvisionnement supprimé | La réception est annulée (« Annulée (supprimée dans Hopitalia) ») et une alerte demande de vérifier les liquidations de la commande. |
+
+Les imports se relancent sans créer de doublon (voir [Intégrations](/docs/administrer/integrations/)).

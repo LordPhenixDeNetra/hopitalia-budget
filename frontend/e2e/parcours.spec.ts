@@ -1586,3 +1586,40 @@ test('T-261 : saisir un encaissement sur une recette (EF-RCT-02)', async ({ page
     },
   ])
 })
+
+test('T-225 : l’administrateur choisit les alertes envoyées par courriel (I18N-08)', async ({
+  page,
+}, infos) => {
+  test.skip(infos.project.name !== 'ordinateur', 'Parcours de saisie testé à la largeur ordinateur')
+  await simulerToutesLesPages(page)
+  const envois: unknown[] = []
+  await page.route('**/api/v1/regles-alertes**', async (route) => {
+    const requete = route.request()
+    const regle = {
+      type: 'SEUIL_MARCHE',
+      actif: true,
+      seuilPourcent: '80',
+      delaiJours: null,
+      notifierParEmail: false,
+    }
+    if (requete.method() === 'PUT') {
+      envois.push(requete.postDataJSON())
+      await route.fulfill({ json: { ...regle, ...requete.postDataJSON() } })
+    } else {
+      await route.fulfill({ json: [regle] })
+    }
+  })
+  await connecterAgentFinancier(page, '/alertes')
+  await ouvrirOnglet(page, 'Règles')
+  await choisirOption(
+    page,
+    page.getByRole('tabpanel', { name: 'Règles' }).getByLabel('Établissement'),
+    'CHU-FANN — CHU de Fann',
+  )
+  await page.getByRole('switch', { name: 'Par courriel — Seuil de consommation du marché' }).click()
+  await page.getByRole('button', { name: 'Enregistrer', exact: true }).click()
+  await expect(page.getByText('Règle enregistrée.')).toBeVisible()
+  expect(envois).toEqual([
+    { actif: true, seuilPourcent: '80', delaiJours: null, notifierParEmail: true },
+  ])
+})

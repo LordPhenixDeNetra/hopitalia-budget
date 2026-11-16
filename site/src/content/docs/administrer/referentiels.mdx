@@ -1,0 +1,38 @@
+---
+title: Nomenclature et référentiels
+description: Importer la nomenclature budgétaire SYSCOHADA, puis créer les référentiels et l'exercice.
+sidebar:
+  order: 4
+---
+
+import Capture from "../../../components/Capture.astro";
+
+## Nomenclature budgétaire
+
+L'écran **Nomenclature** montre l'arbre des sections, chapitres, articles et paragraphes (les comptes budgétaires), construits sur le plan SYSCOHADA révisé. Un clic sur un élément affiche son **Compte comptable SYSCOHADA** et ses comptes budgétaires rattachés.
+
+**Importer un fichier CSV** : le projet de nomenclature est fourni dans le dépôt, `docs/cadrage/nomenclature-budgetaire.csv`, colonnes `niveau;code;libelle;code_parent;compte_syscohada` (voir [Fichiers d'import et d'export](/docs/integrer/fichiers/#nomenclature)). Le rapport donne le nombre d'éléments créés, mis à jour et en anomalie. Un import se relance sans créer de doublon.
+
+## Référentiels
+
+<Capture nom="parametrage" alt="L'écran Paramétrage, référentiel Centres de responsabilité : le sélecteur du référentiel en haut, puis ses éléments avec leur code, leur libellé, leur type et leur statut, et le bouton Ajouter." />
+
+L'écran **Paramétrage** montre un référentiel à la fois, choisi dans le sélecteur en haut de l'écran : **Ajouter** un élément, le **Modifier**, le **Désactiver**.
+
+| Référentiel | À savoir |
+|---|---|
+| Sites | Sites de chaque établissement. |
+| Centres de responsabilité | Services de l'établissement, avec leur type (clinique, médico-technique, administratif, logistique) et leur centre parent. Importés d'Hopitalia avec l'intégration ; un centre déjà saisi avec le même code est rattaché, pas dupliqué. |
+| Sources de financement | Budget de l'État, ressources propres, bailleur. |
+| Programmes et projets | Utilisés par les lignes budgétaires et les filtres. |
+| Familles d'achats | Classent les contrats. |
+| Types de dépenses | Portent le **Seuil hors marché** au-delà duquel un achat hors marché est refusé. Sans seuil, la dérogation est exigée. |
+| Modes de règlement | Virement, chèque, espèces… |
+| Comptes de trésorerie | Type banque, caisse ou trésor ; le type sert aussi à l'export comptable. |
+| Types de pièces | Pour chaque type, les objets qui exigent la pièce avant validation (**Obligatoire pour**) et sa durée de conservation. |
+| Fournisseurs | Importés d'Hopitalia ; compléter les identifiants administratifs, le contact et les **Coordonnées bancaires** (numéro chiffré, jamais réaffiché en entier). |
+| Débiteurs | Organismes qui doivent les recettes : État, collectivité, assurance, mutuelle, entreprise, particulier. |
+| Exercices budgétaires | L'exercice crée ses périodes (année, trimestres, mois). |
+| Circuits de validation | Voir [Circuits de validation](/docs/administrer/circuits/). |
+
+Les référentiels sont communs à tous les établissements, sauf les sites et les centres de responsabilité. Un élément ne se supprime pas : il se **Désactive** et reste visible dans l'historique. Chaque modification est tracée.

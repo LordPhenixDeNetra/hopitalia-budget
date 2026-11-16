@@ -1,0 +1,72 @@
+---
+title: Engagements
+description: Demander un engagement sur marché, sur décision autorisée ou hors marché, lire ses contrôles, demander une dérogation, l'annuler ou le clôturer.
+sidebar:
+  order: 5
+---
+
+import Capture from "../../../components/Capture.astro";
+
+| Action | Profils |
+|---|---|
+| Demander un engagement | GMC, SD |
+| Contrôler (première étape du circuit) | AF |
+| Viser | VAL, puis ORD |
+| Annuler tout ou partie d'un engagement validé, le clôturer | AF, VAL, ORD |
+| Consulter | AF, GMC, SD, VAL, ORD, AUD |
+
+<Capture nom="engagements" alt="La liste des engagements : numéro, date, objet, origine, montant et statut, avec des engagements validés, en contrôle, en brouillon et partiellement exécutés." />
+
+## Demander un engagement
+
+**Demander un engagement** :
+
+1. **Origine** :
+   - **Sur marché ou contrat** : choisir le marché ; le **Bénéficiaire** doit être son titulaire ;
+   - **Sur décision autorisée** : donner la **Référence de la décision** ;
+   - **Hors marché** : choisir le **Type de dépense** et la **Nature** (mission, petit achat, eau, électricité et télécoms, fonctionnement, prestation ponctuelle, autre), avec une **Justification**.
+2. Date, objet, montant, service demandeur, bénéficiaire.
+3. **Imputations** : la répartition sur les lignes budgétaires. Le montant doit égaler la somme des imputations (RG-15).
+4. **Soumettre au circuit**.
+
+Le circuit par défaut : contrôle financier (agent financier), visa DAF, ordonnateur. Voir [Valider une pièce](/docs/utiliser/valider/).
+
+## Contrôles
+
+L'onglet **Contrôles** est relancé à chaque lecture de la fiche. Il liste chaque écart, avec son dépassement et son détail :
+
+| Écart | Ce qui est comparé |
+|---|---|
+| Crédit insuffisant | Le montant imputé et le disponible de chaque ligne. |
+| Plafond du marché dépassé | Le montant et le reste à engager du marché. |
+| Contrat non validé ou d'un autre établissement | Le statut et l'établissement du contrat. |
+| Bénéficiaire différent du titulaire | Le bénéficiaire et l'attributaire du marché. |
+| Doublon probable | Un engagement du même bénéficiaire, du même montant et du même objet à moins de 30 jours. |
+| Seuil hors marché dépassé | Le montant et le seuil du type de dépense. |
+
+« Aucun écart : l'engagement peut être soumis. » signifie que rien ne bloque.
+
+Un écart bloquant se **corrige**, ou se **couvre** par une dérogation : **Demander une dérogation**, avec le montant couvert et un motif. La dérogation suit son propre circuit (visa DAF, ordonnateur) ; une fois validée, l'écart passe à « Couvert par une dérogation ». Un écart « Non dérogeable » doit être corrigé.
+
+Les contrôles sont refaits à la validation finale, et le crédit est réservé dans la même opération : deux engagements simultanés ne consomment jamais le même crédit.
+
+## Après la validation
+
+| Statut | Signification |
+|---|---|
+| Validé | Le crédit est engagé. |
+| Partiellement exécuté | Une partie est liquidée. |
+| Exécuté | Tout est liquidé. |
+| Clôturé | Le reliquat a été désengagé. |
+| Annulé | L'engagement a été annulé en entier. |
+
+L'onglet **Commandes** liste les bons de commande émis sur l'engagement.
+
+## Annuler ou clôturer
+
+Onglet **Annulations** : une annulation ne modifie pas l'engagement ; elle s'y ajoute et désengage le montant annulé.
+
+- **Annuler** avec un motif : sans détail, tout le reliquat est annulé ; une **Annulation partielle** précise le montant par imputation.
+- **Clôturer** désengage le reliquat non liquidé d'un engagement exécuté.
+
+Chaque annulation est tracée, avec sa date et son auteur.
