@@ -1,0 +1,33 @@
+---
+title: Établissements
+description: Créer un établissement, régler ses paramètres de calcul, activer le volet recettes.
+sidebar:
+  order: 2
+---
+
+import Capture from "../../../components/Capture.astro";
+
+L'écran **Établissements** liste les établissements, actifs ou inactifs. **Nouvel établissement** : un **Code** (majuscules, chiffres et tirets, par exemple `CHU-FANN`) et un **Nom**. Un établissement ne se supprime pas : il se **Désactive**, et se **Réactive**.
+
+Les **sites** de l'établissement se créent dans [Paramétrage](/docs/administrer/referentiels/), référentiel « Sites ».
+
+<Capture nom="etablissement" alt="La fiche d'un établissement : son code et son nom, les paramètres de calcul des indicateurs, et le volet recettes avec son état et le bouton pour l'activer ou le désactiver." />
+
+## Paramètres de calcul
+
+Sur la fiche de l'établissement, **Paramètres de calcul** règle quatre définitions d'indicateurs :
+
+| Paramètre | Choix | Par défaut |
+|---|---|---|
+| Déduire les engagements en cours du disponible prévisionnel | Oui ou non | Oui |
+| Base des taux d'exécution (engagement, liquidation, paiement) | Budget révisé ou budget initial | Budget révisé |
+| Base du taux de consommation des marchés | Engagé ou liquidé | Engagé |
+| Déduire l'avance récupérée de la consommation budgétaire | Oui ou non | Oui |
+
+Un changement s'applique à tous les affichages, y compris passés : les indicateurs sont recalculés, jamais stockés.
+
+## Volet recettes
+
+**Activer le volet recettes** fait apparaître l'écran [Recettes](/docs/utiliser/recettes/) pour les agents de l'établissement. Désactivé, le volet est invisible et refusé par le serveur ; les recettes déjà saisies sont conservées.
+
+Les **Débiteurs** (organismes qui doivent les recettes) se créent dans [Paramétrage](/docs/administrer/referentiels/), communs à tous les établissements.

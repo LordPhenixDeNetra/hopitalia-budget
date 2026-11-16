@@ -86,7 +86,7 @@ services:
       - api
     restart: unless-stopped
 
-  # Sauvegarde quotidienne de la base et des pièces (T-253, exploitation/sauvegarde.md).
+  # Sauvegarde quotidienne de la base et des pièces (T-253 ; documentation : installer/sauvegarde).
   sauvegarde:
     image: postgres:16-alpine
     environment:
@@ -106,7 +106,10 @@ services:
     restart: unless-stopped
 
   web:
-    build: ./frontend
+    # Contexte à la racine : l'image embarque l'interface et la documentation (site/).
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     image: hopitalia-budget-web
     depends_on:
       - api
@@ -117,6 +120,6 @@ services:
 volumes:
   db-data:
   pieces:
-  # Copier ce volume hors du serveur (exploitation/sauvegarde.md) : sur le même disque, il ne
+  # Copier ce volume hors du serveur (documentation : installer/sauvegarde) : sur le même disque, il ne
   # protège pas d'une panne du serveur.
   sauvegardes:

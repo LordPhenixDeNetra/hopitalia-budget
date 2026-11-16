@@ -1,0 +1,20 @@
+---
+title: Journal d'audit
+description: Consulter toutes les opérations tracées, filtrer, et produire le rapport d'audit.
+sidebar:
+  order: 17
+---
+
+import Capture from "../../../components/Capture.astro";
+
+Le **Journal d'audit** est consulté par les profils VAL, ORD et AUD, en lecture seule.
+
+<Capture nom="journal-audit" alt="Le journal d'audit : filtres par action, type d'objet, identifiant et période, boutons du rapport d'audit en PDF, tableur et CSV, puis la liste des opérations avec l'horodatage, l'agent, l'action, l'objet, l'identifiant, l'adresse IP et la nouvelle valeur." />
+
+Il retrace chaque modification de donnée financière, chaque validation, chaque connexion et chaque export, avec l'**Horodatage**, l'**Agent**, l'**Action**, l'**Objet**, son **Identifiant**, l'**Adresse IP** et la **Nouvelle valeur**. Une ligne écrite ne se modifie jamais.
+
+- **Filtrer** par action, type d'objet, identifiant et période (**Du**, **Au**).
+- **Afficher les suivantes** charge les opérations plus anciennes.
+- **Rapport d'audit** : PDF, tableur ou CSV, avec les filtres choisis.
+
+Chaque fiche de référentiel garde aussi son propre historique, visible par l'administrateur.

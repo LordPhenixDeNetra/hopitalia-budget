@@ -1,0 +1,72 @@
+---
+title: Factures et liquidations
+description: Enregistrer une facture, la liquider imputation par imputation avec ses déductions, rapprocher commande, réception, facture et paiement.
+sidebar:
+  order: 8
+---
+
+import Capture from "../../../components/Capture.astro";
+
+| Action | Profils |
+|---|---|
+| Enregistrer, corriger, retourner ou rejeter une facture | AF |
+| Liquider une facture | AF |
+| Viser une liquidation | VAL, puis ORD |
+| Consulter | GMC (factures), AUD |
+
+<Capture nom="factures" alt="La liste des factures : numéro du fournisseur, type, objet, date de réception, montant TTC, reste à payer et statut, avec une facture payée, une partiellement payée et une en contrôle." />
+
+## Enregistrer une facture
+
+**Enregistrer une facture**, rattachée à un engagement validé (et, s'il y a lieu, à un bon de commande) :
+
+- **Type** : avance, acompte, partielle, définitive, décompte ou avoir (un avoir cite sa **Facture d'origine**) ;
+- numéro du fournisseur, objet, dates d'émission, de réception et d'échéance, période de rattachement ;
+- montants HT, taxes et TTC ; pour un décompte, son numéro et le cumul des décomptes.
+
+**Doublon** : une facture du même fournisseur qui a le même numéro, ou la même date d'émission et le même montant, qu'une facture déjà enregistrée est **bloquée** (RG-16). Si elle est bien distincte, remplir **Motif de levée de doublon** ; la levée est tracée.
+
+Une facture se **Corrige** tant qu'elle n'est pas liquidée, se **Retourne pour correction** au fournisseur ou se **Rejette**, avec un motif. L'onglet **Facture numérisée** reçoit le document du fournisseur.
+
+## Liquider
+
+Onglet **Liquidations**, **Liquider** :
+
+1. **Imputation de l'engagement** : une liquidation porte sur une seule imputation (RG-17).
+2. **Montant facturé imputé**, puis le **Liquidé** (montant reconnu dû, après pénalités et réfactions).
+3. **Réceptions (service fait)** : les réceptions validées qui prouvent le service fait.
+4. **Déductions** : avance récupérée, retenue de garantie, pénalité, réfaction, retenue à la source, autre retenue. Montant laissé vide : la retenue de garantie et l'avance récupérée se calculent depuis le contrat.
+5. **Soumettre au circuit** (visa DAF, puis ordonnateur).
+
+La liquidation affiche le **Net à payer** (liquidé moins déductions) et la **Consommation budgétaire** (liquidé moins avance récupérée).
+
+### Contrôles
+
+| Contrôle | Effet |
+|---|---|
+| Service fait manquant | Bloquant : aucune réception validée ne prouve le service fait. |
+| Au-delà du reste dû | Bloquant : le liquidé dépasse ce qui reste dû sur l'imputation. |
+| Au-delà du montant de la facture | Bloquant. |
+| Facturé au-delà du réceptionné | Alerte. |
+
+Un contrôle bloquant se corrige, ou se couvre par une dérogation (**Demander une dérogation**).
+
+## Rapprochement
+
+<Capture nom="facture-rapprochement" alt="L'onglet Rapprochement d'une facture : commandé, réceptionné, facturé et payé, les écarts commande / réception, réception / facture et facture / paiement, la zone d'explication et le bouton Valider le rapprochement." />
+
+L'onglet **Rapprochement** compare le **Commandé**, le **Réceptionné**, le **Facturé** et le **Payé**, et calcule trois écarts. « Écart à expliquer » : écrire l'**Explication des écarts**, puis **Valider le rapprochement**. Les rapprochements enregistrés restent dans l'historique ; un rapprochement validé avec un écart émet une alerte.
+
+## Statuts d'une facture
+
+Une facture n'a pas de circuit propre : son statut suit ses liquidations et ses paiements.
+
+| Statut | Signification |
+|---|---|
+| Reçue | Enregistrée, pas encore liquidée. |
+| En contrôle | Une liquidation est saisie. |
+| Retournée, Rejetée | Renvoyée au fournisseur, ou refusée. |
+| Liquidée | Ses liquidations sont validées. |
+| Mise en paiement | Ordonnancée et transmise au comptable. |
+| Partiellement payée | Une partie est payée ; la facture reste ouverte (RG-08). |
+| Payée | Soldée. |

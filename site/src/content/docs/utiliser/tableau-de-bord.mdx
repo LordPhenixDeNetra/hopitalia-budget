@@ -1,0 +1,39 @@
+---
+title: Tableau de bord
+description: Lire l'exécution du budget de l'exercice, les étapes de la dépense, la consommation des crédits et des marchés, et les restes à payer.
+sidebar:
+  order: 11
+---
+
+import Capture from "../../../components/Capture.astro";
+
+Tous les profils sauf le réceptionnaire consultent le tableau de bord, dans leur périmètre.
+
+<Capture nom="tableau-de-bord" alt="Le tableau de bord : filtres en haut, indicateurs budget révisé, engagé, disponible, liquidé, payé et reste à payer avec leurs taux, puis les étapes de la dépense, la consommation des crédits par ligne, les indicateurs opérationnels et les principaux marchés." />
+
+Les montants sont **recalculés à chaque affichage**, depuis les pièces.
+
+## Filtres
+
+Exercice, établissement, service, compte, source de financement, fournisseur, marché, et période d'engagement (**Engagé à partir du**, **Engagé jusqu'au**). Les mêmes filtres servent aux [États](/docs/utiliser/etats/) : un total d'état égale celui du tableau de bord.
+
+## Ce qu'il montre
+
+| Bloc | Contenu |
+|---|---|
+| Indicateurs | Budget révisé, engagé, disponible, liquidé, payé, reste à payer ; taux d'engagement, de liquidation et de paiement ; engagements en cours de validation. |
+| Étapes de la dépense | Engagé, commandé, réceptionné, facturé, liquidé, transmis en paiement, payé. |
+| Consommation des crédits | Une jauge par ligne et pour l'ensemble des lignes. |
+| Indicateurs opérationnels | Reste à engager sur marchés, reste contractuel à payer, reste à payer sur factures, factures en attente (nombre, montant, âge moyen), délai moyen de traitement. |
+| Principaux marchés en cours | Consommation, montant actualisé, engagé, payé, reste à engager, échéance. |
+| Répartition | Par compte, par service, par nature et par fournisseur. |
+
+:::caution[Les étapes ne s'additionnent pas]
+Engagé, commandé, réceptionné, facturé, liquidé, transmis et payé sont les étapes successives d'une même dépense.
+:::
+
+Chaque jauge dit aussi son niveau en toutes lettres (« Seuil de 80 % atteint »…), sans s'en remettre à la seule couleur.
+
+## Restes à payer
+
+L'écran **Restes à payer** liste les factures reçues et pas encore soldées, avec leur reste à payer sur liquidé et leur âge depuis la réception. **Exporter (CSV)** les télécharge.

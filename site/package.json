@@ -1,0 +1,21 @@
+{
+  "name": "@hopitalia/budget-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && node scripts/csp.mjs",
+    "preview": "astro preview",
+    "test": "node --test \"test/*.test.mjs\""
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.42.7",
+    "astro": "7.4.1",
+    "sharp": "0.35.5",
+    "starlight-links-validator": "0.27.0"
+  },
+  "devDependencies": {
+    "axe-core": "4.14.0",
+    "jsdom": "30.0.1"
+  }
+}

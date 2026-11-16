@@ -17,8 +17,10 @@
     "vite.config.ts",
     "playwright.config.ts",
     "playwright.recette.config.ts",
+    "playwright.captures.config.ts",
     "orval.config.ts",
     "e2e",
-    "e2e-recette"
+    "e2e-recette",
+    "e2e-captures"
   ]
 }

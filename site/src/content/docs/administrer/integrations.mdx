@@ -1,0 +1,39 @@
+---
+title: Intégrations
+description: Suivre les échanges avec Hopitalia (fournisseurs, services, pharmacie), lancer un échange et reprendre un échec.
+sidebar:
+  order: 7
+---
+
+import Capture from "../../../components/Capture.astro";
+
+| Action | Profils |
+|---|---|
+| Lancer un échange, reprendre un échec | ADM |
+| Consulter | RB, AUD |
+
+Le module importe d'Hopitalia les **fournisseurs**, les **services** (centres de responsabilité) et les **commandes et approvisionnements de la pharmacie**. Chaque échange est journalisé.
+
+<Capture nom="integrations" alt="L'écran Intégrations : les boutons Importer les fournisseurs, Importer les services et Importer la pharmacie, puis le journal des échanges avec la dernière tentative, les données, la période, le statut, le nombre de tentatives, le résultat, qui l'a lancé, et le bouton Reprendre sur un échange en échec." />
+
+## Le journal
+
+Pour chaque échange : la **Dernière tentative**, les **Données**, la **Période**, le **Statut** (« En cours », « Réussi », « En échec »), le nombre de **Tentatives**, le **Résultat** (lus, créés, modifiés, désactivés, commandes, approvisionnements, réceptions, écarts, annulations) et qui l'a **Lancé**. Filtres : type de données et statut.
+
+## Ce que fait chaque échange
+
+| Échange | Effet |
+|---|---|
+| Fournisseurs | Crée les nouveaux, met à jour les autres ; un fournisseur déjà saisi dans le module avec le même identifiant est rattaché, pas dupliqué ; un fournisseur retiré d'Hopitalia est **désactivé**, jamais supprimé. |
+| Services | Crée ou met à jour les centres de responsabilité. |
+| Pharmacie | Importe les commandes et leurs approvisionnements des 30 derniers jours (`INTEGRATION_FENETRE_JOURS`) ; voir [Commandes de la pharmacie](/docs/utiliser/commandes-pharmacie/). |
+
+Relancer un échange ne crée **jamais de doublon**.
+
+## Échecs et reprises
+
+- La tâche quotidienne lance les trois échanges et reprend d'elle-même un échec, jusqu'à cinq tentatives.
+- Au-delà, corriger la cause (indiquée dans **Résultat**, par exemple « Le service de connexion Hopitalia ne répond pas »), puis **Reprendre** : l'échange est relancé avec ses paramètres d'origine, sur la même ligne.
+- **Importer…** lance un échange sans attendre la tâche quotidienne.
+
+Prérequis côté serveur : le compte technique Hopitalia et l'établissement cible (`HOPITALIA_*`, voir [Configuration](/docs/installer/configuration/)).

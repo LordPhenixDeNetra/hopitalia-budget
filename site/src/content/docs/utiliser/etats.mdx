@@ -1,0 +1,29 @@
+---
+title: États
+description: Les douze états de suivi, à imprimer en PDF ou à exporter en tableur, CSV ou JSON, avec les filtres du tableau de bord.
+sidebar:
+  order: 12
+---
+
+import Capture from "../../../components/Capture.astro";
+
+Tous les profils qui consultent le tableau de bord produisent les états, dans leur périmètre.
+
+<Capture nom="etats" alt="L'écran États : les filtres exercice, établissement, service, compte, source de financement, fournisseur, marché et période, puis la liste des états avec, pour chacun, les boutons PDF, Tableur, CSV et JSON." />
+
+Choisir les filtres, puis le format de l'état : **PDF** (à imprimer), **Tableur**, **CSV** ou **JSON**. Les totaux sont ceux du [tableau de bord](/docs/utiliser/tableau-de-bord/) pour les mêmes filtres. Un état est produit dans la langue de l'agent ; chaque export est tracé dans le journal d'audit.
+
+| État | Contenu |
+|---|---|
+| Budget primitif et révisé, crédits disponibles | Par ligne : budget initial, modifications, budget révisé, engagé, en cours, disponible. |
+| Restes à engager, à liquider et à payer | Par ligne : disponible, engagé restant à liquider, transmis, payé, reste à payer. |
+| Engagements | Engagements validés, avec fournisseur, marché, liquidé et payé. |
+| Exécution financière des contrats | Par marché : engagé, commandé, réceptionné, facturé, liquidé, payé, reste à engager. |
+| Commandes et réceptions | Bons de commande et valeur réceptionnée. |
+| Factures | Factures reçues, rejetées, liquidées et payées, avec leur reste à payer. |
+| Liquidations | Liquidé, déductions et net à payer. |
+| Paiements | Paiements, part affectée au périmètre et statut. |
+| Rapprochements | Écarts commande, réception, facture et paiement, avec leur explication. |
+| Dépenses par service, compte, nature et fournisseur | Engagé, liquidé et payé, sur la période choisie. |
+| Contrats par date d'échéance | Échéance, jours restants et consommation. |
+| Écritures pour la comptabilité | Liquidations validées et paiements exécutés en écritures équilibrées, à importer dans le logiciel comptable (voir [Fichiers d'import et d'export](/docs/integrer/fichiers/#écritures-pour-la-comptabilité)). |

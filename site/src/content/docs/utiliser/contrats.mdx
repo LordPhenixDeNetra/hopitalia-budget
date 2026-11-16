@@ -1,0 +1,54 @@
+---
+title: Contrats et avenants
+description: Enregistrer un marché déjà attribué ou un contrat déjà signé, le ventiler sur les lignes budgétaires, suivre son exécution financière et ses avenants.
+sidebar:
+  order: 4
+---
+
+import Capture from "../../../components/Capture.astro";
+
+| Action | Profils |
+|---|---|
+| Enregistrer un contrat ou un avenant | GMC |
+| Viser un contrat ou un avenant | VAL, puis ORD |
+| Consulter | RB, AF, GMC, VAL, ORD, AUD |
+
+L'écran **Contrats et marchés** enregistre des contrats **déjà signés** et des marchés **déjà attribués**. Le module n'en fait ni la passation ni l'attribution.
+
+<Capture nom="contrats" alt="La liste des contrats et marchés : numéro, intitulé, type, attributaire, statut, montant actualisé, consommation avec sa jauge et son pourcentage, échéance ; filtres par type, statut, fournisseur, service et consommation minimale." />
+
+La liste se filtre par type, statut, fournisseur, service et **Consommation d'au moins (%)**, pour repérer les marchés proches de leur plafond. Chaque jauge de consommation porte son pourcentage.
+
+## Enregistrer un contrat
+
+**Enregistrer un contrat**, en six sections :
+
+1. **Identification** : établissement, type (marché, convention, maintenance, prestation, autre), numéro, intitulé, nature du marché (fournitures, travaux, services, prestations intellectuelles), numéro de lot, **Attributaire**, objet, périmètre, référence du dossier.
+2. **Dates** : notification, signature (l'une des deux est obligatoire), démarrage, durée, échéance.
+3. **Montants et facturation** : devise, montant initial HT, taux de taxe, montant initial TTC, périodicité et modalités de facturation.
+4. **Rattachements** : site, service bénéficiaire, source de financement, famille d'achats, responsable du suivi.
+5. **Avance et retenue de garantie** : taux d'avance et mode de récupération, taux de retenue de garantie et condition de libération.
+6. **Ventilation** : répartition du montant TTC sur les lignes budgétaires. La somme des imputations doit égaler le montant TTC (RG-15).
+
+Puis **Soumettre au circuit** (visa DAF, puis ordonnateur). Un contrat validé ne se modifie plus : il évolue par avenant.
+
+## La fiche d'un contrat
+
+<Capture nom="contrat-synthese" alt="La fiche d'un marché, onglet Synthèse : montant initial, avenants validés, montant actualisé, engagements validés, solde non engagé, commandé, réceptionné, facturé, liquidé, transmis, payé, restes et taux de consommation." />
+
+| Onglet | Contenu |
+|---|---|
+| Synthèse | Exécution financière : montant initial, avenants validés, montant contractuel actualisé, engagé, solde non engagé, commandé, réceptionné, facturé, liquidé, transmis, payé, engagé non facturé, reste à payer sur liquidé, reste contractuel à payer, taux de consommation, avance et retenue de garantie. |
+| Informations | Les données saisies. |
+| Ventilation | Les imputations sur les lignes budgétaires. |
+| Avenants | Les avenants, leur variation et le nouveau plafond. |
+| Exécution | Échéancier, lots et tranches, ordres de service (démarrage, arrêt, reprise), révisions de prix. |
+| Validation et pièces | Le circuit et les pièces justificatives. |
+
+## Avenants
+
+Sur un contrat validé, **Ajouter un avenant** : objet, **Variation** (positive ou négative), date d'effet. L'avenant est soumis à son circuit dès son enregistrement. Le plafond du contrat ne change **qu'une fois l'avenant validé** (RG-11) ; l'historique reste consultable.
+
+## Plafond et alertes
+
+Le montant engagé sur un marché ne dépasse pas son montant actualisé (RG-04), sauf avenant ou dérogation. Une alerte est émise à 80, 90 et 100 % de consommation, et à l'approche de l'échéance (voir [Alertes](/docs/utiliser/alertes/)).

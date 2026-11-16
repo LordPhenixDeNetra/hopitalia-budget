@@ -1,0 +1,52 @@
+---
+title: Ordonnancement et paiements
+description: Ordonnancer les liquidations validées, les transmettre au comptable, prendre en charge, enregistrer et annuler un paiement.
+sidebar:
+  order: 9
+---
+
+import Capture from "../../../components/Capture.astro";
+
+| Action | Profils |
+|---|---|
+| Préparer et transmettre un ordonnancement | ORD |
+| Prendre en charge, demander un complément, suspendre, rejeter | CPT |
+| Enregistrer ou annuler un paiement | CPT |
+| Consulter | AF, ORD, CPT, AUD |
+
+L'ordonnateur transmet les liquidations validées au comptable ; le comptable les prend en charge, puis enregistre les paiements, ventilés par liquidation. L'écran a deux onglets.
+
+<Capture nom="paiements" alt="L'écran Ordonnancement et paiements, onglet Ordonnancements : chaque ordonnancement avec sa référence de mandat, son montant, son statut et sa date de transmission, et le bouton Préparer un ordonnancement." />
+
+## Ordonnancements
+
+**Préparer un ordonnancement** (ordonnateur) :
+
+1. Type de pièce : **Mandat** ou **Ordre de paiement**, et sa **Référence**.
+2. Service destinataire.
+3. **Liquidations à ordonnancer** : cocher les liquidations validées à regrouper.
+
+Puis **Transmettre au comptable**. Le comptable décide :
+
+| Action du comptable | Statut | Suite |
+|---|---|---|
+| Prendre en charge | Pris en charge | Les liquidations deviennent payables. |
+| Demander un complément | Complément demandé | Avec un motif ; l'ordonnateur répond par **Complément fourni**, et l'ordonnancement revient au comptable. |
+| Suspendre | Suspendu | Avec un motif ; le comptable le relance par **Reprendre**. |
+| Rejeter | Rejeté | Avec un motif ; les liquidations sont libérées pour un autre ordonnancement. |
+
+## Paiements
+
+**Enregistrer un paiement** (comptable), une fois le paiement exécuté :
+
+1. **Bénéficiaire**, date du paiement, mode de règlement, compte de trésorerie, référence bancaire ou pièce de caisse, retenue à la source.
+2. **Ventilation par liquidation** : pour chaque liquidation prise en charge du bénéficiaire, la **Part payée**, sans dépasser son **Reste à payer**.
+3. Le **Montant du paiement** est la somme des parts.
+
+Un paiement peut solder plusieurs factures, ou une partie d'une facture. Il ne dépasse jamais le solde dû (RG-07).
+
+Celui qui a validé une liquidation ne la paie pas, et l'ordonnateur n'enregistre pas le paiement de ce qu'il a ordonnancé (séparation des tâches).
+
+## Annuler un paiement
+
+**Annuler**, avec un **Motif de l'annulation**. Le paiement reste visible, au statut « Annulé » ; les restes à payer et les statuts des factures sont recalculés (RG-18).

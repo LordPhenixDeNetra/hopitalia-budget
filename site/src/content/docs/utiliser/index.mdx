@@ -1,0 +1,59 @@
+---
+title: Utiliser le module
+description: Se connecter, se repérer dans l'écran, régler l'affichage, et trouver la page de chaque écran du module.
+sidebar:
+  order: 1
+---
+
+import Capture from "../../../components/Capture.astro";
+
+## Se connecter
+
+Avec son identifiant et son mot de passe **Hopitalia** : le module n'a pas de mot de passe propre. Un agent sans profil budgétaire est refusé ; il demande un profil à l'administrateur du module.
+
+<Capture nom="connexion" alt="L'écran de connexion : champs Identifiant et Mot de passe, bouton Se connecter, et rappel « Utilisez votre compte Hopitalia »." />
+
+Quand la session expire, l'écran de connexion revient avec le message « Votre session a expiré. Reconnectez-vous. », puis ramène à la page où l'on était.
+
+## L'écran
+
+<Capture nom="accueil" alt="L'accueil après connexion : menu à gauche, en haut le sélecteur d'établissement, la langue, Affichage et Se déconnecter ; au centre, le message de bienvenue et les profils budgétaires de l'agent." />
+
+- Le **menu**, à gauche, ne montre que ce que vos profils permettent. Le nombre à côté d'« Alertes » compte vos alertes non lues.
+- En haut, le sélecteur d'**établissement** limite l'affichage à un établissement ; « Tous les établissements » montre tout votre périmètre.
+- Le sélecteur de **langue** passe l'interface en français ou en anglais. Les données ne changent pas.
+- **Affichage** : thème clair, sombre ou celui de votre ordinateur, et densité compacte ou confortable. Dans les listes, le bouton **Colonnes** masque les colonnes inutiles. Ces choix suivent votre profil, d'un poste à l'autre.
+- L'**accueil** rappelle vos profils et les établissements où ils s'appliquent.
+
+Sur un téléphone, le menu s'ouvre par le bouton « Ouvrir le menu ».
+
+## Les écrans, par activité
+
+| Activité | Écrans |
+|---|---|
+| Crédits | [Budgets et révisions](/docs/utiliser/budgets/) |
+| Marchés | [Contrats et avenants](/docs/utiliser/contrats/) |
+| Dépense | [Engagements](/docs/utiliser/engagements/), [Commandes et réceptions](/docs/utiliser/commandes/), [Commandes de la pharmacie](/docs/utiliser/commandes-pharmacie/), [Factures et liquidations](/docs/utiliser/factures/), [Ordonnancement et paiements](/docs/utiliser/paiements/) |
+| Recettes | [Recettes](/docs/utiliser/recettes/) |
+| Pilotage | [Tableau de bord](/docs/utiliser/tableau-de-bord/), [États](/docs/utiliser/etats/), [Alertes](/docs/utiliser/alertes/), [Recherche](/docs/utiliser/recherche/) |
+| Pour tous | [Valider une pièce](/docs/utiliser/valider/), [Délégations](/docs/utiliser/delegations/) |
+| Fin d'exercice et contrôle | [Clôture d'exercice](/docs/utiliser/cloture-exercice/), [Journal d'audit](/docs/utiliser/journal-audit/) |
+
+## Par profil
+
+| Profil | Pages utiles |
+|---|---|
+| Responsable budgétaire | Budgets, Recettes, Tableau de bord, États, Clôture d'exercice |
+| Gestionnaire de marchés | Contrats, Engagements, Commandes |
+| Service demandeur | Engagements, Commandes |
+| Agent financier | Engagements (contrôle), Commandes de la pharmacie, Factures, Recettes |
+| Réceptionnaire | Commandes et réceptions |
+| Valideur (DAF) | Valider une pièce, Commandes (service fait), Journal d'audit |
+| Ordonnateur | Valider une pièce, Ordonnancement et paiements, Clôture d'exercice |
+| Comptable | Ordonnancement et paiements, Recettes |
+| Auditeur | Journal d'audit, et toutes les pages en lecture |
+| Lecteur | Tableau de bord, États |
+
+## Quand un message d'erreur s'affiche
+
+Le message dit quelle règle est en cause : crédit insuffisant, plafond du marché dépassé, doublon, service fait manquant… Corriger la saisie, ou demander une dérogation à qui de droit. Une pièce validée ne se modifie plus : une correction passe par une annulation tracée.

@@ -1,0 +1,43 @@
+---
+title: Circuits de validation
+description: Les circuits par défaut, et comment paramétrer un circuit par établissement, par service et par tranche de montant.
+sidebar:
+  order: 5
+---
+
+import Capture from "../../../components/Capture.astro";
+
+Sans circuit paramétré, chaque objet suit son **circuit par défaut** :
+
+| Objet | Circuit par défaut |
+|---|---|
+| Engagement | Contrôle financier (AF), visa DAF (VAL), ordonnateur (ORD). |
+| Réception (service fait) | Valideur du service (VAL). |
+| Révision budgétaire, contrat, avenant, dérogation, liquidation | Visa DAF (VAL), ordonnateur (ORD). |
+
+<Capture nom="circuits" alt="L'écran Paramétrage, référentiel Circuits de validation : le rappel du circuit par défaut, le bouton Ajouter un circuit et la liste des circuits (libellé, objet, seuil, séparation des tâches, étapes, statut), vide tant qu'aucun circuit n'est paramétré." />
+
+## Paramétrer un circuit
+
+**Paramétrage**, « Circuits de validation », **Ajouter un circuit** :
+
+1. **Libellé**, **Établissement**, **Objet** (révision budgétaire, contrat, avenant, engagement, dérogation, réception, liquidation).
+2. **Service** (facultatif) : le circuit ne vaut que pour ce service.
+3. Tranche de montant : **À partir de** et **Jusqu'à (exclu)**.
+4. **Étapes** : pour chacune, un **Profil** et la case **Obligatoire**. **Ajouter une étape**, **Retirer l'étape**.
+5. **Séparation des tâches** : laisser à « Oui ».
+
+## Quel circuit s'applique
+
+- Le circuit du service l'emporte sur celui de l'établissement.
+- À montant égal, le seuil le plus élevé l'emporte.
+- Sans circuit qui correspond, le circuit par défaut s'applique.
+
+## Règles imposées
+
+- Chaque étape est un profil qui a le droit de valider l'objet dans la [matrice](/docs/decouvrir/profils/#matrice-des-habilitations).
+- La dernière étape est obligatoire.
+- Pour les révisions, contrats, avenants, engagements, dérogations et liquidations, la dernière étape revient à l'**ordonnateur**.
+- « Séparation des tâches » empêche l'auteur de viser sa propre pièce.
+
+Le circuit est **figé à la soumission** : le modifier ne change pas les pièces déjà en validation.

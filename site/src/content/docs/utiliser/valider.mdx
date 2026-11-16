@@ -1,0 +1,52 @@
+---
+title: Valider une pièce
+description: Viser, rejeter ou retourner une pièce dans son circuit, joindre des pièces justificatives, et corriger une pièce retournée.
+sidebar:
+  order: 2
+---
+
+import Capture from "../../../components/Capture.astro";
+
+Les révisions, contrats, avenants, engagements, dérogations, réceptions et liquidations passent un **circuit de validation**. Chaque fiche a un onglet **Validation et pièces**.
+
+<Capture nom="engagement-validation" alt="L'onglet Validation et pièces d'un engagement en contrôle : le circuit avec ses étapes, le visa déjà donné par l'agent financier, l'étape en attente, les boutons Viser, Rejeter et Retourner pour correction, puis les pièces justificatives." />
+
+## Viser
+
+1. Ouvrir la pièce depuis sa liste, depuis une alerte ou depuis la [Recherche](/docs/utiliser/recherche/).
+2. Onglet **Validation et pièces** : le **Circuit de validation** montre l'étape en attente (« En attente de l'étape 2 ») et les visas déjà donnés, avec leur auteur, y compris « par délégation de … ».
+3. Choisir :
+   - **Viser** : votre étape est validée ; une **Mention du visa** est facultative ;
+   - **Rejeter** : la pièce est refusée définitivement ; un **Motif** est obligatoire ;
+   - **Retourner pour correction** : la pièce revient à son auteur, au statut « À corriger » ; un motif est obligatoire.
+
+À la dernière étape, l'opération prend effet : un engagement consomme le crédit, une révision modifie les crédits, un avenant change le plafond.
+
+:::note[Séparation des tâches]
+On ne vise jamais une pièce que l'on a saisie, et un même agent ne vise qu'une étape d'un même passage dans le circuit. Sinon, le visa est refusé avec le message « Séparation des tâches ».
+:::
+
+## Joindre des pièces justificatives
+
+Dans le même onglet, **Pièces justificatives** : choisir le **Type de pièce**, puis **Déposer un fichier**.
+
+- Formats : PDF, PNG, JPEG, Word ou Excel ; 20 Mo au plus.
+- Une pièce déposée ne se modifie plus. Son **Empreinte SHA-256** est vérifiée à chaque téléchargement.
+- Certains types de pièces sont obligatoires (réglage de l'administrateur) : tant qu'il en manque une, la validation est refusée avec le message « Pièces manquantes ».
+
+## Corriger une pièce retournée
+
+Une pièce « À corriger » revient à son auteur. Il la modifie, puis la renvoie au circuit (**Soumettre au circuit**, ou **Renvoyer au circuit** pour une révision). Le circuit repart de sa première étape.
+
+## Statuts
+
+| Statut | Signification |
+|---|---|
+| Brouillon | Saisie, pas encore soumise ; modifiable. |
+| Soumis | Dans le circuit, aucune étape visée. |
+| En contrôle, En cours de validation | Une partie du circuit est visée. |
+| À corriger | Retournée à son auteur. |
+| Validé | Le circuit est terminé ; l'opération a pris effet et ne se modifie plus. |
+| Rejeté | Refusée ; elle reste visible, sans effet. |
+
+Le circuit d'une pièce est figé à sa soumission : un changement de paramétrage ne touche pas les pièces déjà dans un circuit.

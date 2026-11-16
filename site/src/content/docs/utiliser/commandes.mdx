@@ -1,0 +1,57 @@
+---
+title: Commandes et réceptions
+description: Émettre un bon de commande sur un engagement validé, enregistrer une réception, émettre et lever des réserves, faire valider le service fait.
+sidebar:
+  order: 6
+---
+
+import Capture from "../../../components/Capture.astro";
+
+| Action | Profils |
+|---|---|
+| Émettre un bon de commande | GMC |
+| Enregistrer une réception, émettre une réserve | REC |
+| Valider le service fait | VAL |
+| Consulter | AF, GMC, SD, REC, VAL, AUD |
+
+<Capture nom="commandes" alt="L'écran Commandes et réceptions : les bons de commande avec numéro, type, date d'émission, livraison prévue, montant TTC et délai, l'interrupteur En retard seulement, et le cadre des réserves à lever." />
+
+L'écran **Commandes et réceptions** liste les **Bons de commande**. L'interrupteur **En retard seulement** garde ceux dont la livraison prévue est dépassée. Le cadre **Réserves à lever** rappelle les réserves encore ouvertes.
+
+## Émettre une commande
+
+Depuis la fiche d'un engagement validé, onglet **Commandes** : **Émettre une commande**.
+
+- Type : bon de commande, tranche ou ordre de service.
+- Lieu de livraison, livraison prévue.
+- **Lignes** : désignation, quantité, prix unitaire, taxe.
+
+Le montant de la commande ne dépasse pas ce qui reste de l'engagement. Une commande émise n'a pas de circuit de validation.
+
+## Enregistrer une réception
+
+Sur la fiche du bon de commande, **Enregistrer une réception** :
+
+1. Date de réception, service réceptionnaire, agent responsable, observations.
+2. Pour chaque ligne : quantité **Reçue**, puis **Acceptée** et **Rejetée** (acceptée plus rejetée au plus égale à la reçue).
+3. Onglet **Validation et pièces** : joindre le bon de livraison ou le procès-verbal.
+4. **Soumettre au service**.
+
+La réception est d'abord un brouillon. Le **service fait n'est acquis qu'après validation** par le valideur du service : c'est elle qui permet ensuite de liquider la facture (RG-06).
+
+| Statut d'une réception | Signification |
+|---|---|
+| Brouillon, Soumise, En cours de validation | Pas encore une preuve. |
+| Service fait validé | La réception prouve le service fait. |
+| Rejetée | Elle ne prouve rien. |
+| Annulée (supprimée dans Hopitalia) | Réception de la pharmacie annulée parce que son approvisionnement a été supprimé dans Hopitalia. |
+
+Le module classe la réception **totale**, **partielle** ou **refusée** d'après les quantités acceptées. La fiche du bon de commande montre, ligne par ligne, la quantité acceptée et le **Reste à recevoir**.
+
+## Réserves
+
+Une réserve note un défaut constaté à la livraison. **Émettre une réserve** sur une réception, puis **Lever** quand le défaut est corrigé ; la date de levée est conservée.
+
+## Attestation de service fait
+
+Une réception peut porter une attestation : **Attester le service fait**, avec la date, le livrable, et la mention **Conforme** ou **Non conforme**. Elle sert surtout aux prestations, où il n'y a pas de quantités à compter.

@@ -1,0 +1,42 @@
+---
+title: Alertes
+description: Lire ses alertes, les marquer comme lues, ouvrir la pièce concernée, et les recevoir aussi par courriel.
+sidebar:
+  order: 13
+---
+
+import Capture from "../../../components/Capture.astro";
+
+L'écran **Alertes** montre les blocages des contrôles, les tentatives refusées et les alertes planifiées qui vous concernent, selon vos profils et votre périmètre. Le nombre à côté d'« Alertes », dans le menu, compte celles que vous n'avez pas lues.
+
+<Capture nom="alertes" alt="L'écran Alertes : le champ pour recevoir ses alertes par courriel, puis la liste des alertes avec leur gravité, leur type, leur message, leur date, l'indication Non lue et les boutons Voir et Marquer comme lue." />
+
+## Lire ses alertes
+
+- Chaque alerte a une **gravité** (« Blocage » ou « Alerte »), un type et un message ; **Voir** ouvre la pièce concernée.
+- **Marquer comme lue** (ou **non lue**) : chaque agent marque ses propres alertes.
+- **Non lues seulement** filtre la liste ; **Afficher les suivantes** charge les plus anciennes.
+
+## Types d'alerte
+
+| Alerte | Quand |
+|---|---|
+| Crédit insuffisant | Un engagement dépasse le crédit disponible. |
+| Dépassement du marché, avenant nécessaire | Un engagement dépasse le reste à engager du marché. |
+| Seuil de consommation du marché | Un marché atteint 80, 90 ou 100 % de consommation. |
+| Facture en doublon | Une facture est refusée comme doublon. |
+| Facturé au-delà du réceptionné ou du dû | Une liquidation dépasse le réceptionné, la facture ou le reste dû. |
+| Service fait manquant | Une liquidation n'a aucune réception validée. |
+| Paiement au-delà du liquidé | Un paiement dépasse le reste dû d'une liquidation. |
+| Facture échue | Une facture n'est pas soldée dans le délai. |
+| Écart de rapprochement | Un rapprochement est validé avec un écart, ou Hopitalia a modifié ou supprimé un approvisionnement déjà reçu. |
+| Engagement ancien | Un engagement validé n'est toujours pas soldé. |
+| Échéance de contrat | Un contrat arrive à échéance. |
+| Modification après validation | Une modification d'une pièce validée a été tentée. |
+| Contrôle bloquant | Une opération a été refusée par un contrôle. |
+
+Les alertes planifiées (seuils, factures échues, engagements anciens, échéances) sont détectées une fois par jour. L'administrateur règle les seuils et les délais (voir [Règles d'alerte](/docs/administrer/alertes/)).
+
+## Recevoir ses alertes par courriel
+
+En haut de l'écran, **Recevoir mes alertes par courriel à :** saisir son adresse, puis **Enregistrer l'adresse**. Vous recevez alors par courriel, **dans votre langue**, les alertes que l'administrateur a choisi d'envoyer. Hopitalia ne fournissant pas d'adresse, chaque agent donne la sienne ; vider le champ arrête les envois.

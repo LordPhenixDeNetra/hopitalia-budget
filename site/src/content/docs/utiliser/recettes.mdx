@@ -1,0 +1,44 @@
+---
+title: Recettes
+description: Enregistrer les recettes prévues, leur facturé et leur encaissé, corriger par contre-mouvement, suivre le reste à recouvrer.
+sidebar:
+  order: 10
+---
+
+import Capture from "../../../components/Capture.astro";
+
+| Action | Profils |
+|---|---|
+| Créer une recette, enregistrer un mouvement | RB, AF, CPT |
+| Consulter | VAL, ORD, AUD |
+
+Le menu **Recettes** n'apparaît que si le volet est activé dans votre établissement (voir [Établissements](/docs/administrer/etablissements/#volet-recettes)).
+
+<Capture nom="recettes" alt="L'écran Recettes : chaque recette avec son numéro, son libellé, sa nature, son débiteur, son service, son prévu, son facturé, son encaissé, son reste à recouvrer et son taux de recouvrement." />
+
+## Enregistrer une recette
+
+**Nouvelle recette** : exercice, **Nature** (subvention ou dotation, recette propre, remboursement d'assurance, prestation hospitalière, autre), libellé, **Montant prévu**, échéance, source de financement, service, **Débiteur** (État, collectivité, assurance, mutuelle, entreprise, particulier).
+
+## Facturé et encaissé
+
+Sur la fiche d'une recette, **Enregistrer un mouvement** :
+
+- **Type** : facturé ou encaissé ;
+- date, montant, référence.
+
+Un mouvement enregistré **ne se modifie pas**. Une erreur se corrige par un **contre-mouvement** : un montant négatif, avec un **Motif** obligatoire. Les deux mouvements restent visibles.
+
+| Indicateur | Calcul |
+|---|---|
+| Facturé | Somme des mouvements « facturé », contre-mouvements compris. |
+| Encaissé | Somme des mouvements « encaissé ». |
+| Reste à recouvrer | Facturé − encaissé. |
+| Taux de recouvrement | Encaissé / facturé. |
+| Taux de réalisation | Facturé / prévu. |
+
+L'**Origine** d'un mouvement indique s'il a été saisi dans le module ou importé d'Hopitalia.
+
+## Tableau de bord des recettes
+
+L'onglet **Tableau de bord** totalise prévu, facturé, encaissé et reste à recouvrer, **par nature**, **par service** et **par mois**, avec les filtres exercice, nature, service et période. Les taux sont recalculés sur les totaux : un taux ne s'additionne jamais.
