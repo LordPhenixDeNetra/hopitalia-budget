@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.16 · 16 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.17 · 16 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -23,6 +23,7 @@
 | 3.14 | 16/11/2026 | Intégrations (lot P3.A) : journal des échanges et reprises, import des fournisseurs, des services et de la pharmacie, rattachement des commandes de la pharmacie (ligne ajoutée à la matrice), export comptable, import et export structurés (13) ; ressources d'API (11.2) ; état `ecritures` (14.4). |
 | 3.15 | 16/11/2026 | Livrables documentaires (lot P3.D) : emplacement de chaque livrable, documents produits depuis le code (16) ; publication du document OpenAPI avec chaque version. |
 | 3.16 | 16/11/2026 | Options d'interface (lot P3.C) : palette du thème sombre (IHM-03), préférences d'affichage sur le profil (IHM-01, IHM-02), contrôle de la traduction anglaise (I18N-01), mode droite à gauche de test (I18N-10). |
+| 3.17 | 16/11/2026 | Volet recettes (lot P3.B) : activation par établissement, débiteurs, mouvements de facturé et d'encaissé, formules (6.4), tableau de bord, ressources d'API (11.2), ligne ajoutée à la matrice des habilitations. |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -256,6 +257,15 @@ Chaque exigence porte un identifiant stable, repris dans la recette (section 15)
 | EF-RCT-01 | Recettes par nature (subventions et dotations, recettes propres, remboursements des assurances, prestations hospitalières, autres), service, source de financement et période. |
 | EF-RCT-02 | Montants prévus, facturés, encaissés et restant à recouvrer ; facturé et encaissé proviennent des modules Hopitalia par interface. |
 
+**Mise en œuvre (lot P3.B).**
+
+- **Activation.** Le volet est désactivé par défaut et activé par établissement par l'administrateur (`voletRecettesActif`). Désactivé, il n'apparaît pas dans le menu et l'API le refuse (`409 VOLET_RECETTES_INACTIF`) ; les recettes déjà saisies sont conservées.
+- **Recette.** Numéro `RCT-ANNEE-RANG` ; nature, libellé, montant prévu, échéance, exercice, période, source de financement, service, ligne de prévision et débiteur facultatifs. La prévision se modifie (`If-Match`), avec trace ; une recette ne se supprime pas.
+- **Débiteurs.** Référentiel commun à tous les établissements (État, collectivité, assurance, mutuelle, entreprise, particulier, autre), géré par l'administrateur.
+- **Mouvements.** Le facturé et l'encaissé sont des mouvements datés, jamais modifiés : une correction est un contre-mouvement négatif, motivé, qui ne rend pas le cumul négatif (RG-18). En attendant l'interface avec la facturation d'Hopitalia (INT-02), ils sont saisis dans le module, notamment pour les subventions et remboursements, qui ne passent pas par Hopitalia ; un mouvement importé portera l'origine `HOPITALIA` et son identifiant externe, unique.
+- **Droits.** Le responsable budgétaire, l'agent financier et le comptable saisissent ; le valideur, l'ordonnateur et l'auditeur consultent (matrice des habilitations, ligne ajoutée à confirmer par la DAF). Le tableau de bord des recettes suit le droit de consulter les tableaux de bord.
+- **Tableau de bord.** Prévu, facturé, encaissé, reste à recouvrer et taux, au total et par nature, service et mois ; la période borne les mouvements, le prévu compte en entier.
+
 ### 4.9. Gestion documentaire et traçabilité (transverse)
 
 | Réf. | Exigence |
@@ -343,6 +353,18 @@ Chaque indicateur a **une seule définition**, documentée ici et implémentée 
 | Consommation budgétaire | Montant liquidé − avance récupérée *(paramétrable)* : l'avance a déjà consommé le crédit lors de sa propre liquidation, elle n'est pas comptée deux fois. |
 | Reste à payer (facture) | Somme des nets à payer de ses liquidations validées − somme des allocations reçues. |
 | Retenues de garantie à libérer | Retenues opérées − retenues libérées. |
+
+### 6.4. Par recette (volet recettes)
+
+| Indicateur | Formule |
+|---|---|
+| Facturé | Somme des mouvements « facturé » de la recette (contre-mouvements compris). |
+| Encaissé | Somme des mouvements « encaissé » de la recette. |
+| Reste à recouvrer | Facturé − encaissé. |
+| Taux de recouvrement | Encaissé / facturé × 100 ; sans valeur si rien n'est facturé. |
+| Taux de réalisation | Facturé / prévu × 100 ; sans valeur si rien n'est prévu. |
+
+Sur un ensemble de recettes (tableau de bord), les montants s'additionnent puis les taux se recalculent : un taux ne s'additionne jamais. Aucun de ces indicateurs n'est stocké (RG-14).
 
 ## 7. Modèle de données
 
@@ -1651,7 +1673,8 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/journal-integration` | GET, POST | Pagination par curseur, filtres `typeDonnees`, `statut` ; `POST` lance l'échange du jour (`typeDonnees`) ; `POST /journal-integration/{id}/reprises` reprend un échange en échec (administrateur). |
 | `/commandes-pharmacie` | GET | Commandes importées de la pharmacie, filtre `rattachee` ; `POST /commandes-pharmacie/{id}/rattachement` (`engagementId`, idempotent). |
 | `/budgets/{id}/export` | GET | Lignes et dotations initiales au format de l'import des dotations, `?format=csv|json`. |
-| `/recettes` | GET, POST | Si le volet est actif. |
+| `/recettes` | GET, POST, PATCH | Si le volet est actif. Filtres `exerciceId`, `etablissementId`, `nature`, `centreId`, `debiteurId` ; `POST` idempotent ; `PATCH /recettes/{id}` avec `If-Match` (prévision). `GET`, `POST /recettes/{id}/mouvements` (facturé, encaissé, idempotent). `GET /tableaux-de-bord/recettes`. |
+| `/debiteurs` | GET, POST, PATCH | Référentiel des débiteurs des recettes. |
 
 ### 11.3. Idempotence
 
@@ -2044,6 +2067,8 @@ Le tableau de bord doit faire ressortir les 15 000 000 liquidés non payés, sig
 | `StatutPaiement` | ENREGISTRE, EXECUTE, ANNULE |
 | `NatureDerogation` | CREDIT, PLAFOND_CONTRAT, SEUIL_HORS_MARCHE, LIQUIDATION_SUP_DU, PAIEMENT_SUP_SOLDE, DOUBLON |
 | `TypeRecette` | SUBVENTION_DOTATION, RECETTE_PROPRE, REMBOURSEMENT_ASSURANCE, PRESTATION_HOSPITALIERE, AUTRE |
+| `TypeDebiteur` | ETAT, COLLECTIVITE, ASSURANCE, MUTUELLE, ENTREPRISE, PARTICULIER, AUTRE |
+| `TypeMouvementRecette` | FACTURE, ENCAISSEMENT |
 | `TypeAlerte` | voir 14.3 |
 
 Les pénalités et réfactions diminuent le montant liquidé ; elles figurent dans `TypeDeduction` pour la traçabilité de leur calcul.

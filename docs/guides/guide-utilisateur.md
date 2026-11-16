@@ -103,6 +103,14 @@ Ce guide explique, profil par profil, ce que chaque agent fait dans le module de
 
 - **Tableau de bord** et **États** de son établissement, en lecture seule.
 
+## Recettes (RB, AF, CPT ; VAL, ORD, AUD en lecture)
+
+Le menu « Recettes » n'apparaît que si le volet est activé dans votre établissement.
+
+- **Recettes** : enregistrer une recette prévue (nature, libellé, montant prévu, échéance, source, service, débiteur).
+- **Fiche d'une recette** : enregistrer le facturé et l'encaissé. Une erreur se corrige par un mouvement négatif, avec un motif ; un mouvement enregistré ne se modifie pas.
+- **Tableau de bord** : prévu, facturé, encaissé, reste à recouvrer et taux, par nature, par service et par mois.
+
 ## Tableau de bord et états (tous les profils qui y ont accès)
 
 - **Tableau de bord** : les étapes de la dépense (engagé, commandé, réceptionné, facturé, liquidé, transmis, payé), les jauges de consommation, les principaux marchés et les factures en attente. Filtres : exercice, période, service, compte, fournisseur, marché, source de financement.
