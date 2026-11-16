@@ -24,7 +24,7 @@ MOT_DE_PASSE = "recette"
 DEBUT = date.today() - timedelta(days=28)
 
 app = FastAPI(title="Hopitalia simulé (recette blanche)")
-etat: dict[str, Any] = {"jour": 0, "rafraichissement": {}}
+etat: dict[str, Any] = {"jour": 0, "rafraichissement": {}, "panne": False}
 
 
 # --- Connexion et annuaire ------------------------------------------------------------------
@@ -88,7 +88,16 @@ def deconnexion(corps: dict[str, str]) -> dict[str, str]:
     return {}
 
 
+@app.post("/simulation/panne")
+def panne(active: bool = True) -> dict[str, bool]:
+    """Panne des données (pas de la connexion) : un échange échoue, puis se reprend."""
+    etat["panne"] = active
+    return {"panne": active}
+
+
 def _verifier(authorization: str | None) -> None:
+    if etat["panne"]:
+        raise HTTPException(503)
     try:
         jwt.decode((authorization or "")[7:], CLE, algorithms=["HS512"])
     except jwt.PyJWTError as exc:

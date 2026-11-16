@@ -57,4 +57,5 @@ Les comptes, le mot de passe `recette` et la clé de signature de `docker-compos
 
 1. Lancer la répétition sur la version à recetter, et corriger chaque étape non conforme.
 2. Apporter à la séance [repetition-recette.md](repetition-recette.md) et les captures de la suite Playwright.
-3. Pendant la séance, dérouler [recette-lots-1-a-5.md](recette-lots-1-a-5.md) sur l'environnement de recette de l'hôpital (T-254), avec les agents.
+3. Pour présenter la proposition et faire valider chaque point, compléter la répétition par l'environnement de démonstration : [parcours de validation](../presentation/parcours-de-validation.md).
+4. Pendant la séance, dérouler [recette-lots-1-a-5.md](recette-lots-1-a-5.md) sur l'environnement de recette de l'hôpital (T-254), avec les agents.

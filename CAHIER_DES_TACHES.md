@@ -456,3 +456,4 @@ flowchart LR
 | 16/11/2026 | T-282 (P3.D) | En cours | Fait | Version v0.1.0 publiée avec son document OpenAPI et le guide d'intégration. |
 | 16/11/2026 | T-225 (P2.B) | Bloqué | Fait | Courriels d'alerte dans la langue du destinataire, reçus en environnement de test. |
 | 16/11/2026 | T-198, T-254 | — | — | Recette blanche sur un poste (Hopitalia simulé, serveur de courrier de test) : 11 étapes conformes ; séance réelle et serveur de l'hôpital toujours attendus. |
+| 16/11/2026 | T-198, T-205, T-281, T-283 à T-286 | — | — | Présentation de la proposition préparée : environnement de démonstration (`simulation/demonstration.py`), parcours de validation et fiche de décision (`docs/presentation/`) ; statuts inchangés en attendant les décisions. |
