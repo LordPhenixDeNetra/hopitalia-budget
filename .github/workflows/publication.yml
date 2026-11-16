@@ -1,0 +1,31 @@
+name: Publication
+
+# Publication d'une version (T-282) : à chaque étiquette `vX.Y.Z` poussée sur `main`, le document
+# OpenAPI de cette version et le guide d'intégration sont joints à une version GitHub.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  publier:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Version de l'étiquette égale à celle du code
+        run: |
+          attendue="${GITHUB_REF_NAME#v}"
+          for trouvee in             "$(grep -m1 '^version' backend/pyproject.toml | cut -d'"' -f2)"             "$(jq -r .version frontend/package.json)"             "$(jq -r .info.version frontend/openapi.json)"; do
+            if [ "$trouvee" != "$attendue" ]; then
+              echo "Version $trouvee trouvée, $attendue attendue (étiquette $GITHUB_REF_NAME)."
+              exit 1
+            fi
+          done
+      - name: Version GitHub avec le document OpenAPI et le guide d'intégration
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp frontend/openapi.json "openapi-$GITHUB_REF_NAME.json"
+          gh release create "$GITHUB_REF_NAME"             "openapi-$GITHUB_REF_NAME.json"             docs/integration/guide-integration.md             --title "Hopitalia Budget $GITHUB_REF_NAME"             --notes "Document OpenAPI de l'API /api/v1 de cette version et guide d'intégration. Changements : demandes de fusion depuis la version précédente."

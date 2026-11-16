@@ -34,10 +34,10 @@
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
 | P2 | 30 | 0 | 0 | 2 | 0 | 0 | 32 |
-| P3 | 3 | 3 | 16 | 0 | 0 | 1 | 23 |
-| **Total** | **182** | **7** | **16** | **2** | **0** | **2** | **209** |
+| P3 | 4 | 8 | 9 | 1 | 0 | 1 | 23 |
+| **Total** | **183** | **12** | **9** | **3** | **0** | **2** | **209** |
 
-Avancement : 182 / 207 tâches actives terminées (88 %), hors 2 abandonnées.
+Avancement : 183 / 207 tâches actives terminées (88 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -45,6 +45,7 @@ Avancement : 182 / 207 tâches actives terminées (88 %), hors 2 abandonnées.
 |---|---|---|
 | T-225 (courriels d'alerte) | Adresses électroniques des agents, absentes de l'API Hopitalia utilisée ; serveur SMTP de l'hôpital. | Équipe Hopitalia (adresses), DSI de l'hôpital (serveur de messagerie). |
 | T-254 (environnement de recette), donc aussi la séance de recette T-198 | Serveur, nom d'hôte et certificat TLS ; accès à l'API Hopitalia de recette. | DSI de l'hôpital (serveur), équipe Hopitalia (accès). |
+| T-286 (procès-verbal de recette final) | Séance de recette finale, après T-198 et T-254. | DAF et direction de l'établissement. |
 
 ## Ordre de réalisation
 
@@ -381,13 +382,13 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-280 | Dictionnaire des données (généré depuis le modèle). | §16 | T-195 | À faire | Chaque table et champ documenté. |
-| T-281 | Description des workflows et matrice des habilitations finale. | §16 | T-112, T-016 | À faire | Validée par la DAF. |
-| T-282 | Documentation OpenAPI publiée et guide d'intégration. | §16 | T-248 | À faire | Publiée avec la version. |
-| T-283 | Guide utilisateur (par profil). | §16 | T-198 | À faire | Relu par un utilisateur de chaque profil. |
-| T-284 | Guide d'administration (paramétrage, circuits, alertes). | §16 | T-198 | À faire | Un administrateur paramètre un établissement seul. |
-| T-285 | Plan de déploiement, de sauvegarde, de reprise et de maintenance. | §16 | T-253 | À faire | Validé par l'exploitation. |
-| T-286 | Procès-verbal de recette final. | §15.4 | T-246, T-198 | À faire | Signé par les représentants de l'établissement. |
+| T-280 | Dictionnaire des données (généré depuis le modèle). | §16 | T-195 | Fait | Chaque table et champ documenté. `docs/conception/dictionnaire-donnees.md` produit depuis le modèle : 62 tables et 568 colonnes décrites (type, obligation, clés, description) ; `test_dictionnaire.py` échoue si une table ou une colonne n'est pas décrite ou si le document n'est plus à jour. |
+| T-281 | Description des workflows et matrice des habilitations finale. | §16 | T-112, T-016 | En cours | Validée par la DAF. `docs/conception/workflows-et-habilitations.md` produit depuis le domaine (cycles, circuits par défaut, matrice) et vérifié par `test_doc_workflows.py`. Reste : validation par la DAF. |
+| T-282 | Documentation OpenAPI publiée et guide d'intégration. | §16 | T-248 | En cours | Publiée avec la version. Guide `docs/integration/guide-integration.md` ; version de l'API = version du paquet ; workflow `publication.yml` qui joint le document OpenAPI et le guide à la version GitHub de chaque étiquette `vX.Y.Z`. Reste : première étiquette de version poussée. |
+| T-283 | Guide utilisateur (par profil). | §16 | T-198 | En cours | Relu par un utilisateur de chaque profil. `docs/guides/guide-utilisateur.md`, par profil. Reste : relecture par un utilisateur de chaque profil (recette T-198). |
+| T-284 | Guide d'administration (paramétrage, circuits, alertes). | §16 | T-198 | En cours | Un administrateur paramètre un établissement seul. `docs/guides/guide-administration.md`, dans l'ordre de mise en service. Reste : un administrateur paramètre seul un établissement de recette avec ce guide (T-254). |
+| T-285 | Plan de déploiement, de sauvegarde, de reprise et de maintenance. | §16 | T-253 | En cours | Validé par l'exploitation. `docs/exploitation/plan-exploitation.md` (services, secrets, déploiement et mise à jour, sauvegarde, reprise par incident, surveillance, maintenance, responsabilités) ; redémarrage automatique de `db`, `api` et `web`. Reste : validation par la DSI. |
+| T-286 | Procès-verbal de recette final. | §15.4 | T-246, T-198 | Bloqué | Signé par les représentants de l'établissement. Bloqué : séance de recette finale avec les représentants de l'établissement, après la recette des lots 1 à 5 (T-198) et l'environnement de recette (T-254). Modèle prêt : `docs/recette/proces-verbal-final.md`. |
 
 ---
 
@@ -448,3 +449,6 @@ flowchart LR
 | 15/11/2026 | T-254 (P2.D) | À faire | Bloqué | Serveur de recette attendu de la DSI ; déploiement documenté. |
 | 16/11/2026 | T-200, T-206, T-207 (P3.A) | À faire | Fait | Journal d'intégration et reprises, export et import structurés, identifiants partagés. |
 | 16/11/2026 | T-201, T-202, T-205 (P3.A) | À faire | En cours | Imports Hopitalia et export comptable faits et testés ; restent la vérification sur des données Hopitalia réelles et la validation du service comptable. |
+| 16/11/2026 | T-280 (P3.D) | À faire | Fait | Dictionnaire des données produit depuis le modèle et vérifié par un test. |
+| 16/11/2026 | T-281 à T-285 (P3.D) | À faire | En cours | Workflows et matrice, guide d'intégration et publication, guides utilisateur et d'administration, plan d'exploitation rédigés ; validations attendues. |
+| 16/11/2026 | T-286 (P3.D) | À faire | Bloqué | Modèle de procès-verbal prêt ; séance de recette finale à tenir. |

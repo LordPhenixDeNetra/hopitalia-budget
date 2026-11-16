@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.14 · 16 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.15 · 16 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -21,6 +21,7 @@
 | 3.12 | 15/11/2026 | Audit, recherche et clôture (lot P2.C, seconde partie) : clôture d'exercice par établissement et engagements de report (8.1), journalisation des connexions et des exports, rapport d'audit, recherche transverse (4.9), ressources d'API (11.2). |
 | 3.13 | 15/11/2026 | Qualité et exploitation (lot P2.D) : teintes de texte des statuts pour le contraste de 4,5:1 (IHM-03), sauvegarde quotidienne, rétention et copie hors du serveur (ENF-06). |
 | 3.14 | 16/11/2026 | Intégrations (lot P3.A) : journal des échanges et reprises, import des fournisseurs, des services et de la pharmacie, rattachement des commandes de la pharmacie (ligne ajoutée à la matrice), export comptable, import et export structurés (13) ; ressources d'API (11.2) ; état `ecritures` (14.4). |
+| 3.15 | 16/11/2026 | Livrables documentaires (lot P3.D) : emplacement de chaque livrable, documents produits depuis le code (16) ; publication du document OpenAPI avec chaque version. |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1919,6 +1920,8 @@ Données budgétaires exactes et rapprochées des référentiels validés ; marc
 ## 16. Livrables et lots
 
 **Livrables :** module intégré à Hopitalia ; document de conception et règles de gestion détaillées ; modèle de données et dictionnaire des champs ; workflows et matrice des habilitations ; documentation OpenAPI et des interfaces d'import et d'export ; états et modèles d'impression ; jeux d'essai et procès-verbal de recette ; guides utilisateur et administrateur ; plan de déploiement, sauvegarde, reprise et maintenance.
+
+**Emplacement des livrables (lot P3.D).** Le dictionnaire des données (`docs/conception/dictionnaire-donnees.md`) et la description des workflows avec la matrice des habilitations (`docs/conception/workflows-et-habilitations.md`) sont produits depuis le code ; un test échoue s'ils ne sont plus à jour. Le document OpenAPI de chaque version est joint, avec le guide d'intégration (`docs/integration/`), à la version GitHub créée par l'étiquette `vX.Y.Z`. Guides utilisateur et d'administration : `docs/guides/` ; plan de déploiement, de sauvegarde, de reprise et de maintenance : `docs/exploitation/plan-exploitation.md` ; procès-verbal de recette final : `docs/recette/proces-verbal-final.md`.
 
 | Lot | Contenu | Résultat |
 |---|---|---|

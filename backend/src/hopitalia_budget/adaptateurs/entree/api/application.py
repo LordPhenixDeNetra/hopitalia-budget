@@ -2,6 +2,7 @@ import logging
 import time
 import uuid
 from collections.abc import Awaitable, Callable
+from importlib.metadata import version
 
 from fastapi import APIRouter, FastAPI, Request, Response
 from sqlalchemy.orm import Session, sessionmaker
@@ -46,7 +47,8 @@ def creer_application(
 ) -> FastAPI:
     application = FastAPI(
         title="Hopitalia Budget",
-        version="0.1.0",
+        # Version du paquet (pyproject.toml) : celle publiée avec le document OpenAPI (T-282).
+        version=version("hopitalia-budget"),
         openapi_url="/api/v1/openapi.json",
         docs_url="/api/v1/docs",
         redoc_url=None,
