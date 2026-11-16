@@ -23,7 +23,9 @@
     "etats": "Reports",
     "recherche": "Search",
     "audit": "Audit journal",
-    "clotureExercice": "Year closing"
+    "clotureExercice": "Year closing",
+    "integrations": "Integrations",
+    "commandesPharmacie": "Pharmacy orders"
   },
   "entete": {
     "langue": "Language",

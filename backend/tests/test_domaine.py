@@ -33,6 +33,9 @@ LIBELLES = {
     "Contrôler un engagement (imputation, crédits)": Operation.CONTROLER_ENGAGEMENT,
     "Valider un engagement": Operation.VALIDER_ENGAGEMENT,
     "Émettre un bon de commande": Operation.EMETTRE_COMMANDE,
+    "Rattacher une commande de la pharmacie à un engagement": (
+        Operation.RATTACHER_COMMANDE_PHARMACIE
+    ),
     "Enregistrer une réception": Operation.ENREGISTRER_RECEPTION,
     "Valider le service fait": Operation.VALIDER_SERVICE_FAIT,
     "Enregistrer une facture": Operation.ENREGISTRER_FACTURE,

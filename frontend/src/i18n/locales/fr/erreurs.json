@@ -73,5 +73,8 @@
     "string_too_short": "Ce champ est trop court.",
     "string_too_long": "Ce champ est trop long.",
     "string_pattern_mismatch": "Format invalide."
-  }
+  },
+  "COMMANDE_DEJA_RATTACHEE": "Cette commande de la pharmacie est déjà rattachée à un engagement.",
+  "FOURNISSEUR_DIFFERENT": "Le fournisseur de l'engagement n'est pas celui de la commande.",
+  "ECHANGE_NON_REPRENABLE": "Seul un échange en échec peut être repris."
 }

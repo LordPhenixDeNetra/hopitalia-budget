@@ -1227,6 +1227,8 @@ const ECRANS = [
   '/habilitations',
   '/audit',
   '/cloture-exercice',
+  '/integrations',
+  '/commandes-pharmacie',
 ]
 
 /** API simulée minimale : un agent qui voit tous les écrans, des listes vides ou typiques. */
@@ -1265,6 +1267,7 @@ async function simulerToutesLesPages(page: Page) {
       '/api/v1/alertes': { donnees: [], suivant: null },
       '/api/v1/alertes/compteur': { nonLues: 2 },
       '/api/v1/journal-audit': { donnees: [], pagination: { taille: 50, suivant: null } },
+      '/api/v1/journal-integration': { donnees: [], pagination: { taille: 50, suivant: null } },
       '/api/v1/tableaux-de-bord/restes-a-payer': [],
       '/api/v1/tableaux-de-bord/direction': {
         indicateurs,

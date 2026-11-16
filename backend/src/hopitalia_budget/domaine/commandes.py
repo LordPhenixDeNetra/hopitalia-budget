@@ -37,6 +37,8 @@ class StatutReception(StrEnum):
     A_CORRIGER = "A_CORRIGER"
     VALIDE = "VALIDE"  # seule une réception validée prouve le service fait
     REJETE = "REJETE"
+    # Approvisionnement supprimé dans Hopitalia : la réception importée est annulée (EF-REC-07).
+    ANNULE = "ANNULE"
 
 
 @dataclass(frozen=True)

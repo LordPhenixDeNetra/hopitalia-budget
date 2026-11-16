@@ -502,6 +502,38 @@ export interface ClotureSortie {
   motifReouverture: string | null;
 }
 
+export interface LignePharmacie {
+  codeProduit: string;
+  nomProduit: string;
+  quantite: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+}
+
+export interface PropositionEngagement {
+  engagementId: string;
+  numero: string;
+  objet: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteACommander: string;
+}
+
+export interface CommandePharmacieSortie {
+  id: string;
+  etablissementId: string;
+  numero: string;
+  dateCommande: string;
+  codeFournisseur: string | null;
+  fournisseurId: string | null;
+  service: string | null;
+  lignes: LignePharmacie[];
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  bonCommandeId: string | null;
+  approvisionnementsEnAttente: number;
+  propositions: PropositionEngagement[];
+}
+
 export interface NoeudSortie {
   id: string;
   niveau: string;
@@ -946,6 +978,49 @@ export interface EcartsSortie {
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
   ecartFacturePaiement: string;
   sansEcart: boolean;
+}
+
+export type TypeEchange = typeof TypeEchange[keyof typeof TypeEchange];
+
+
+export const TypeEchange = {
+  FOURNISSEURS: 'FOURNISSEURS',
+  SERVICES: 'SERVICES',
+  PHARMACIE: 'PHARMACIE',
+} as const;
+
+export interface EchangeLancement {
+  typeDonnees: TypeEchange;
+}
+
+export type EchangeSortieParametres = {[key: string]: string};
+
+export type EchangeSortieResultat = {[key: string]: number} | null;
+
+export type StatutEchange = typeof StatutEchange[keyof typeof StatutEchange];
+
+
+export const StatutEchange = {
+  EN_COURS: 'EN_COURS',
+  SUCCES: 'SUCCES',
+  ECHEC: 'ECHEC',
+} as const;
+
+export interface EchangeSortie {
+  id: number;
+  systemeExterne: string;
+  direction: string;
+  typeDonnees: TypeEchange;
+  identifiantUnique: string;
+  etablissementId: string | null;
+  parametres: EchangeSortieParametres;
+  statut: StatutEchange;
+  erreur: string | null;
+  resultat: EchangeSortieResultat;
+  tentatives: number;
+  declencheParCode: string | null;
+  creeLe: string;
+  date: string;
 }
 
 export interface EcheanceSchema {
@@ -1792,6 +1867,11 @@ export interface PaginationCurseur {
   suivant: string | null;
 }
 
+export interface PageCurseurEchangeSortie {
+  donnees: EchangeSortie[];
+  pagination: PaginationCurseur;
+}
+
 export interface PageCurseurEntreeJournal {
   donnees: EntreeJournal[];
   pagination: PaginationCurseur;
@@ -1821,6 +1901,11 @@ export interface PageCentreSortie {
 
 export interface PageCircuitSortie {
   donnees: CircuitSortie[];
+  pagination: Pagination;
+}
+
+export interface PageCommandePharmacieSortie {
+  donnees: CommandePharmacieSortie[];
   pagination: Pagination;
 }
 
@@ -2189,6 +2274,10 @@ export interface RapprochementSortie {
   creeParCode: string;
 }
 
+export interface Rattachement {
+  engagementId: string;
+}
+
 export interface ReceptionChamps {
   dateReception?: string | null;
   centreId?: string | null;
@@ -2229,6 +2318,7 @@ export const StatutReception = {
   A_CORRIGER: 'A_CORRIGER',
   VALIDE: 'VALIDE',
   REJETE: 'REJETE',
+  ANNULE: 'ANNULE',
 } as const;
 
 export interface ReserveSortie {
@@ -2766,6 +2856,18 @@ export const ListerNomenclatureNiveau = {
   PARAGRAPHE: 'PARAGRAPHE',
 } as const;
 
+export type ExporterBudgetParams = {
+  format?: ExporterBudgetFormat;
+};
+
+export type ExporterBudgetFormat = typeof ExporterBudgetFormat[keyof typeof ExporterBudgetFormat];
+
+
+export const ExporterBudgetFormat = {
+  csv: 'csv',
+  json: 'json',
+} as const;
+
 export type ListerNotificationsCreditsParams = {
   budgetId: string;
   /** @minimum 1 */
@@ -2969,6 +3071,28 @@ export type RechercherParams = {
    * @maxLength 100
    */
   q: string;
+};
+
+export type ListerEchangesParams = {
+  apres?: string | null;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  typeDonnees?: TypeEchange | null;
+  statut?: StatutEchange | null;
+};
+
+export type ListerCommandesPharmacieParams = {
+  rattachee?: boolean | null;
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
 };
 
 export type ListerSitesParams = {

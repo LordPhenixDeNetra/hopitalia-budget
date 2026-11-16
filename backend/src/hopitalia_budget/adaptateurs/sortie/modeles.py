@@ -113,7 +113,11 @@ class CentreResponsabiliteModele(Base):
     """Service hospitalier ou centre de responsabilité, hiérarchique, propre à un établissement."""
 
     __tablename__ = "centre_responsabilite"
-    __table_args__ = (UniqueConstraint("etablissement_id", "code"),)
+    __table_args__ = (
+        UniqueConstraint("etablissement_id", "code"),
+        # INT-06 : un service Hopitalia correspond à un seul centre par établissement.
+        UniqueConstraint("etablissement_id", "code_hopitalia", name="uq_centre_code_hopitalia"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
     etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
@@ -1050,3 +1054,74 @@ class ClotureExerciceModele(Base):
     reouvert_le: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
     reouvert_par_code: Mapped[str | None] = mapped_column(String(20))
     motif_reouverture: Mapped[str | None] = mapped_column(String(500))
+
+
+# --- Lot 7 : intégrations ----------------------------------------------------------------------
+
+
+class JournalIntegrationModele(Base):
+    """Un échange avec un système externe (INT-07). Une reprise rejoue l'échange sur la même
+    ligne (même identifiant unique) : tentatives et statut changent, jamais de doublon."""
+
+    __tablename__ = "journal_integration"
+
+    id: Mapped[int] = mapped_column(BigInteger, Identity(), primary_key=True)
+    systeme_externe: Mapped[str] = mapped_column(String(30))
+    direction: Mapped[str] = mapped_column(String(10))
+    type_donnees: Mapped[str] = mapped_column(String(40))
+    identifiant_unique: Mapped[str] = mapped_column(String(120), unique=True)
+    etablissement_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("etablissement.id"), index=True
+    )
+    parametres: Mapped[dict[str, Any]] = mapped_column(JSONB)
+    statut: Mapped[str] = mapped_column(String(10), index=True)
+    erreur: Mapped[str | None] = mapped_column(String(1000))
+    resultat: Mapped[dict[str, Any] | None] = mapped_column(JSONB)
+    tentatives: Mapped[int]
+    declenche_par_code: Mapped[str | None] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    date: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class CommandePharmacieModele(Base):
+    """Bon de commande de la pharmacie Hopitalia, importé tel quel (INT-03), en attente de
+    rattachement à un engagement ; le rattachement crée le bon de commande du module."""
+
+    __tablename__ = "commande_pharmacie"
+    __table_args__ = (UniqueConstraint("etablissement_id", "id_hopitalia"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    id_hopitalia: Mapped[int] = mapped_column(BigInteger)
+    numero: Mapped[str] = mapped_column(String(30), index=True)
+    date_commande: Mapped[date]
+    code_fournisseur: Mapped[str | None] = mapped_column(String(20))
+    fournisseur_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("fournisseur.id"))
+    service: Mapped[str | None] = mapped_column(String(200))
+    lignes: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
+    montant: Mapped[Decimal] = mapped_column(MONTANT)
+    bon_commande_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("bon_commande.id"), unique=True
+    )
+    importe_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class ApprovisionnementPharmacieModele(Base):
+    """Approvisionnement de la pharmacie Hopitalia (INT-03) : devient une réception validée de
+    la commande rattachée. L'empreinte du contenu détecte une modification dans Hopitalia."""
+
+    __tablename__ = "approvisionnement_pharmacie"
+    __table_args__ = (UniqueConstraint("etablissement_id", "id_hopitalia"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    id_hopitalia: Mapped[int] = mapped_column(BigInteger)
+    numero_bl: Mapped[str | None] = mapped_column(String(50))
+    numero_commande: Mapped[str | None] = mapped_column(String(30), index=True)
+    date_approvisionnement: Mapped[date]
+    code_fournisseur: Mapped[str | None] = mapped_column(String(20))
+    lignes: Mapped[list[dict[str, Any]]] = mapped_column(JSONB)
+    empreinte: Mapped[str] = mapped_column(String(64))
+    reception_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("reception.id"), unique=True)
+    supprime: Mapped[bool] = mapped_column(default=False)
+    importe_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))

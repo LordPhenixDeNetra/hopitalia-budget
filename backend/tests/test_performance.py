@@ -45,13 +45,18 @@ M = Decimal
 
 @pytest.fixture
 def exercice_complet(session: Session, lot5: dict[str, Any]) -> dict[str, Any]:
+    return charger_exercice(session, lot5, VOLUME)
+
+
+def charger_exercice(session: Session, lot5: dict[str, Any], volume: int) -> dict[str, Any]:
+    """Engagements validés avec toute leur chaîne ; un paiement exécuté pour un sur deux."""
     a, exercice = uuid.UUID(lot5["a"]), uuid.UUID(lot5["exercice"]["id"])
     centre, fournisseur = uuid.UUID(lot5["centre"]["id"]), uuid.UUID(lot5["fournisseur"]["id"])
     lignes = [uuid.UUID(lot5["med"]["id"]), uuid.UUID(lot5["cmd"]["id"])]
     instant = datetime(2026, 6, 1, tzinfo=UTC)
     commun = {"cree_par_id": 1, "cree_par_code": "AG001", "cree_le": instant}
     objets: list[Any] = []
-    for rang in range(VOLUME):
+    for rang in range(volume):
         montant = M(10_000 + rang)
         e, i, bc, lc = uuid.uuid4(), uuid.uuid4(), uuid.uuid4(), uuid.uuid4()
         r, f, lq = uuid.uuid4(), uuid.uuid4(), uuid.uuid4()

@@ -73,5 +73,8 @@
     "string_too_short": "This field is too short.",
     "string_too_long": "This field is too long.",
     "string_pattern_mismatch": "Invalid format."
-  }
+  },
+  "COMMANDE_DEJA_RATTACHEE": "This pharmacy order is already linked to a commitment.",
+  "FOURNISSEUR_DIFFERENT": "The commitment's supplier is not the order's supplier.",
+  "ECHANGE_NON_REPRENABLE": "Only a failed exchange can be retried."
 }

@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.13 · 15 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.14 · 16 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -20,6 +20,7 @@
 | 3.11 | 15/11/2026 | États (lot P2.C, première partie) : liste des états, formats et règles de production (14.4), ressource `/etats/{code}` (11.2). |
 | 3.12 | 15/11/2026 | Audit, recherche et clôture (lot P2.C, seconde partie) : clôture d'exercice par établissement et engagements de report (8.1), journalisation des connexions et des exports, rapport d'audit, recherche transverse (4.9), ressources d'API (11.2). |
 | 3.13 | 15/11/2026 | Qualité et exploitation (lot P2.D) : teintes de texte des statuts pour le contraste de 4,5:1 (IHM-03), sauvegarde quotidienne, rétention et copie hors du serveur (ENF-06). |
+| 3.14 | 16/11/2026 | Intégrations (lot P3.A) : journal des échanges et reprises, import des fournisseurs, des services et de la pharmacie, rattachement des commandes de la pharmacie (ligne ajoutée à la matrice), export comptable, import et export structurés (13) ; ressources d'API (11.2) ; état `ecritures` (14.4). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1645,6 +1646,9 @@ L'API REST sert l'interface web et les intégrations. Elle suit les règles ci-d
 | `/journal-audit` | GET | Lecture seule, pagination par curseur. |
 | `/tableaux-de-bord/{code}` | GET | |
 | `/etats/{code}` | GET | `Accept: application/pdf`, tableur ou JSON, ou `?format=pdf|xlsx|csv|json` ; filtres du tableau de bord (14.1). |
+| `/journal-integration` | GET, POST | Pagination par curseur, filtres `typeDonnees`, `statut` ; `POST` lance l'échange du jour (`typeDonnees`) ; `POST /journal-integration/{id}/reprises` reprend un échange en échec (administrateur). |
+| `/commandes-pharmacie` | GET | Commandes importées de la pharmacie, filtre `rattachee` ; `POST /commandes-pharmacie/{id}/rattachement` (`engagementId`, idempotent). |
+| `/budgets/{id}/export` | GET | Lignes et dotations initiales au format de l'import des dotations, `?format=csv|json`. |
 | `/recettes` | GET, POST | Si le volet est actif. |
 
 ### 11.3. Idempotence
@@ -1785,6 +1789,16 @@ L'application est internationalisée dès le lot 0 : ajouter une langue ne deman
 | INT-06 | Identifiants uniques partagés entre modules pour éviter les doublons. |
 | INT-07 | Chaque échange est journalisé (`JournalIntegration`) ; les erreurs sont reprises automatiquement ou manuellement ; les reprises sont idempotentes. |
 
+**Mise en œuvre (lot P3.A).**
+
+- **Journal et reprises (INT-07).** Un échange est identifié par son système, son type de données (fournisseurs, services, pharmacie) et sa période (le jour, ou la fenêtre relue pour la pharmacie, 30 jours par défaut). Relancer ou reprendre un échange rejoue la même ligne du journal : le nombre de tentatives augmente, sans nouvelle ligne. Un échange se déroule dans un point de sauvegarde : en échec, il n'écrit rien d'autre que sa ligne du journal (code d'erreur, jamais de détail technique). La tâche planifiée quotidienne lance les trois échanges, puis reprend d'elle-même les échanges en échec jusqu'à cinq tentatives ; au-delà, l'administrateur les reprend depuis l'écran « Intégrations ». Le journal se consulte avec le droit de consulter le paramétrage (ADM, RB, AUD) ; seul l'administrateur lance et reprend.
+- **Lecture seule.** Le module lit Hopitalia avec le compte technique (`GET` seulement) et n'y écrit jamais. L'établissement du module qui reçoit les services et la pharmacie est fixé par `HOPITALIA_ETABLISSEMENT` ; sans compte technique ni établissement, l'échange est refusé (`503 CONFIGURATION_INCOMPLETE`).
+- **Fournisseurs et services (INT-01, INT-06).** Rapprochement par le code Hopitalia (`codeFourn`, `codeService`). Un élément déjà saisi dans le module avec le même code est rattaché, pas dupliqué. Hopitalia fait foi pour la raison sociale, l'adresse, le téléphone et le libellé du service ; une valeur absente d'Hopitalia n'efface pas celle complétée dans le module. Un élément disparu est désactivé, réactivé s'il revient. Une liste vide est refusée (l'échange échoue) plutôt que de tout désactiver. Chaque création, modification et désactivation est tracée au nom de l'échange (`HOPITALIA`).
+- **Pharmacie (INT-03, EF-REC-07).** Une commande importée attend son rattachement (liste « à rattacher », avec les engagements validés du même fournisseur dont le reste à commander la couvre). L'agent financier la rattache à un engagement validé du même fournisseur : le bon de commande du module est créé dans la limite du montant net de l'engagement (EF-CMD-01). Le montant d'une ligne Hopitalia étant le total de la ligne, le prix unitaire est ce total divisé par la quantité, arrondi au centime. Un approvisionnement devient une réception **validée** dès que sa commande est rattachée (preuve : bon de livraison) ; s'il porte un produit absent de la commande ou dépasse la quantité commandée, il reste en attente. Un approvisionnement déjà importé et inchangé n'est pas réimporté (empreinte du contenu). Modifié dans Hopitalia après sa réception, il ne change pas la réception validée (RG-18) : une alerte d'écart est adressée à l'agent financier. Supprimé dans Hopitalia, sa réception passe à l'état `ANNULE`, avec trace et alerte.
+- **Comptabilité (INT-04).** L'état `ecritures` donne les écritures équilibrées des liquidations validées (compte de charge du compte budgétaire au débit ; fournisseur 401 et déductions au crédit, sur le compte d'attente 471 que le comptable ventile) et des paiements exécutés (fournisseur 401 au débit ; trésorerie 521, 531 ou 571 selon le type de compte au crédit), en CSV ou tableur. Comptes et présentation à valider par le service comptable.
+- **Import et export structurés (INT-05).** Un budget s'exporte (`/budgets/{id}/export`, CSV ou JSON) au format de l'import des dotations, et se réimporte tel quel dans un autre budget. Engagements, liquidations et paiements s'exportent par les états (JSON, CSV, tableur) et par l'API ; ils s'importent par l'API (JSON, `POST` idempotents), si bien que les contrôles et les circuits de validation s'appliquent : aucun import ne crée une opération déjà validée.
+- **Identifiants partagés (INT-06).** Chaque objet du module a un identifiant unique (UUID) exposé par l'API ; les codes Hopitalia sont uniques (un fournisseur, un centre par établissement, une commande et un approvisionnement par établissement).
+
 ## 14. Tableaux de bord, alertes et états
 
 ### 14.1. Tableau de bord de la direction
@@ -1843,6 +1857,7 @@ La tutelle n'impose pas de modèle officiel : la présentation des états est li
 **Production des états (lot P2.C).**
 
 - États disponibles (`/etats/{code}`) : `budget` (budget primitif et révisé, crédits disponibles), `restes` (restes à engager, à liquider et à payer), `engagements`, `contrats` (exécution financière), `commandes` (et réceptions), `factures`, `liquidations`, `paiements`, `rapprochements`, `depenses` (par service, compte, nature et fournisseur) et `echeances` (contrats par date d'échéance). Le journal des opérations et le rapport d'audit relèvent de la consultation du journal (T-236).
+- État `ecritures` (lot P3.A) : écritures pour la comptabilité, débit égal au crédit (13, INT-04).
 - Mêmes filtres et même périmètre que le tableau de bord (14.1) : chaque total d'état est celui du tableau de bord pour les mêmes filtres. Un paiement groupé compte pour sa part affectée au périmètre ; le total des paiements ne compte que les paiements exécutés.
 - Formats : JSON, CSV (séparateur « ; », pour tableur français), tableur XLSX (montants en nombres exacts) et PDF (A4 paysage, en-tête répété, numéros de page). Le format se choisit par `?format=` ou par l'en-tête `Accept`. Titres, colonnes, statuts, montants et dates suivent la langue de l'agent (I18N-08).
 

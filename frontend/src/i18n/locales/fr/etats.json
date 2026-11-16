@@ -52,6 +52,10 @@
     "echeances": {
       "titre": "Contrats par date d'échéance",
       "description": "Échéance, jours restants et consommation."
+    },
+    "ecritures": {
+      "titre": "Écritures pour la comptabilité",
+      "description": "Liquidations validées et paiements exécutés en écritures équilibrées (débit, crédit, compte SYSCOHADA), à importer dans le logiciel comptable."
     }
   }
 }

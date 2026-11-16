@@ -35,7 +35,8 @@
     "EN_VALIDATION": "En cours de validation",
     "A_CORRIGER": "À corriger",
     "VALIDE": "Service fait validé",
-    "REJETE": "Rejetée"
+    "REJETE": "Rejetée",
+    "ANNULE": "Annulée (supprimée dans Hopitalia)"
   },
   "retard": "En retard",
   "aJour": "Dans les délais",

@@ -51,6 +51,7 @@ const TONS: Record<string, Ton> = {
   A_CORRIGER: 'attention',
   VALIDE: 'succes',
   REJETE: 'erreur',
+  ANNULE: 'erreur',
 }
 const MODIFIABLES = ['BROUILLON', 'A_CORRIGER']
 // Réceptionnaire (ENREGISTRER_RECEPTION) ; valideurs et réceptionnaire déposent les pièces.

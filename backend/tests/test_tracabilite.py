@@ -19,8 +19,9 @@ EXIGENCES = (
     + [f"REC-{i:02d}" for i in range(1, 19)]
     + [f"API-{i:02d}" for i in range(1, 12)]
 )
-# « RG-04 », « REC-03 » ou « rg04 » / « rec03 » dans un nom de fonction.
-MOTIF = re.compile(r"\b(RG|REC|API)-(\d{2})\b|(?<![a-z])(rg|rec|api)(\d{2})(?!\d)")
+# « RG-04 », « REC-03 » ou « rg04 » / « rec03 » dans un nom de fonction ; pas une exigence
+# fonctionnelle comme « EF-REC-07 », qui n'est pas le scénario REC-07.
+MOTIF = re.compile(r"(?<!EF-)\b(RG|REC|API)-(\d{2})\b|(?<![a-z])(rg|rec|api)(\d{2})(?!\d)")
 
 
 def _identifiants(texte: str) -> set[str]:
@@ -70,6 +71,10 @@ def tableau() -> str:
 def test_chaque_exigence_a_son_test() -> None:
     """RG-01 à RG-20, REC-01 à REC-18 et API-01 à API-11 : au moins un test chacune."""
     assert [e for e, tests in inventaire().items() if not tests] == []
+
+
+def test_exigence_fonctionnelle_pas_confondue_avec_un_scenario() -> None:
+    assert _identifiants("EF-REC-07 et REC-08, test_rec09") == {"REC-08", "REC-09"}
 
 
 def test_tableau_de_tracabilite_a_jour() -> None:

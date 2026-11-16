@@ -45,6 +45,7 @@ Le droit de consulter est limité au périmètre de l'utilisateur : son ou ses �
 | Contrôler un engagement (imputation, crédits) | — | — | V | — | — | — | — | — | — | L | — |
 | Valider un engagement | — | — | L | L | L | — | V | V | — | L | — |
 | Émettre un bon de commande | — | — | L | S | L | — | — | — | — | L | — |
+| Rattacher une commande de la pharmacie à un engagement | — | — | S | L | — | — | — | — | — | L | — |
 | Enregistrer une réception | — | — | — | L | L | S | — | — | — | L | — |
 | Valider le service fait | — | — | L | L | — | — | V | — | — | L | — |
 | Enregistrer une facture | — | — | S | L | — | — | — | — | — | L | — |
@@ -59,6 +60,8 @@ Le droit de consulter est limité au périmètre de l'utilisateur : son ou ses �
 | Consulter le journal d'audit | — | — | — | — | — | — | L | L | — | L | — |
 
 Pour l'annulation d'une opération validée, AF saisit la demande et VAL ou ORD la valide.
+
+Le rattachement d'une commande de la pharmacie à un engagement a été ajouté le 16/11/2026 (EF-REC-07, lot 7) : l'agent financier rattache, le gestionnaire des marchés et commandes consulte. Ligne à confirmer par la DAF.
 
 ## Ordre des validations
 

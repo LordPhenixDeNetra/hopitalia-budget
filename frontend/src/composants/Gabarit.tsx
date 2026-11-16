@@ -1,5 +1,7 @@
 import {
+  ApiOutlined,
   LockOutlined,
+  MedicineBoxOutlined,
   SearchOutlined,
   ApartmentOutlined,
   BellOutlined,
@@ -55,6 +57,8 @@ export function Gabarit() {
   // Matrice des habilitations : journal d'audit (VAL, ORD, AUD), clôture d'exercice (RB, ORD).
   const voitAudit = ['VAL', 'ORD', 'AUD'].some((p) => profils.has(p))
   const clotureExercice = ['RB', 'ORD'].some((p) => profils.has(p))
+  // Rattacher une commande de la pharmacie : AF saisit, GMC et AUD consultent.
+  const voitPharmacie = ['AF', 'GMC', 'AUD'].some((p) => profils.has(p))
 
   const changerLangue = (langue: Langue) => {
     memoriserLangue(langue)
@@ -132,6 +136,15 @@ export function Gabarit() {
               icon: <ShoppingCartOutlined aria-hidden />,
               label: t('menu.commandes'),
             },
+            ...(voitPharmacie
+              ? [
+                  {
+                    key: '/commandes-pharmacie',
+                    icon: <MedicineBoxOutlined aria-hidden />,
+                    label: t('menu.commandesPharmacie'),
+                  },
+                ]
+              : []),
             {
               key: '/factures',
               icon: <FileDoneOutlined aria-hidden />,
@@ -176,6 +189,12 @@ export function Gabarit() {
                     key: '/habilitations',
                     icon: <SafetyOutlined aria-hidden />,
                     label: t('menu.habilitations'),
+                  },
+                  // Journal d'intégration : mêmes profils que le paramétrage (ADM, RB, AUD).
+                  {
+                    key: '/integrations',
+                    icon: <ApiOutlined aria-hidden />,
+                    label: t('menu.integrations'),
                   },
                 ]
               : []),

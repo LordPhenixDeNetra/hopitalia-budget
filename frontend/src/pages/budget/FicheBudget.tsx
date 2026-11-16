@@ -1,4 +1,9 @@
-import { MinusCircleOutlined, PlusOutlined, UploadOutlined } from '@ant-design/icons'
+import {
+  DownloadOutlined,
+  MinusCircleOutlined,
+  PlusOutlined,
+  UploadOutlined,
+} from '@ant-design/icons'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import {
   Alert,
@@ -22,7 +27,7 @@ import type { ColumnsType } from 'antd/es/table/interface'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router'
-import { appelerApi } from '../../api/client'
+import { appelerApi, telechargerFichier } from '../../api/client'
 import { useAfficherErreur } from '../../api/erreurs'
 import {
   creerNotificationCredit,
@@ -340,6 +345,8 @@ function Notifications({ budgetId }: { budgetId: string }) {
   )
 }
 
+const FORMATS_EXPORT = ['csv', 'json'] as const
+
 /** Fiche budget (/budgets/:id) : situation, lignes, import, notifications, révisions. */
 export function FicheBudget() {
   const { id = '' } = useParams()
@@ -347,7 +354,15 @@ export function FicheBudget() {
   const { t: tCommun } = useTranslation()
   const { t: tParam } = useTranslation('parametrage')
   const peutSaisir = useAProfil(['RB'])
+  // Export au format de l'import des dotations (T-206) : profils qui consultent le budget.
+  const peutExporter = useAProfil(['RB', 'AF', 'VAL', 'ORD', 'AUD'])
+  const afficherErreur = useAfficherErreur()
   const { data: budget, isLoading, error } = useObtenirBudget(id)
+  const exporter = (format: string) =>
+    telechargerFichier(
+      `/api/v1/budgets/${id}/export?format=${format}`,
+      `budget-${budget?.reference ?? id}.${format}`,
+    ).catch((e: unknown) => afficherErreur(e))
 
   if (isLoading) return <Spin aria-label={tCommun('tableau.chargement')} />
   if (error || !budget) {
@@ -389,6 +404,21 @@ export function FicheBudget() {
       <Typography.Title level={1}>
         {budget.reference} — {tParam(`valeurs.${budget.type}`)}
       </Typography.Title>
+      {peutExporter && (
+        <Space wrap>
+          <Typography.Text>{t('export.titre')}</Typography.Text>
+          {FORMATS_EXPORT.map((format) => (
+            <Button
+              key={format}
+              size="small"
+              icon={<DownloadOutlined aria-hidden />}
+              onClick={() => void exporter(format)}
+            >
+              {t(`export.${format}`)}
+            </Button>
+          ))}
+        </Space>
+      )}
       <Tabs items={onglets} destroyOnHidden />
     </Flex>
   )

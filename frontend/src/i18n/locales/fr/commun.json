@@ -23,7 +23,9 @@
     "etats": "États",
     "recherche": "Recherche",
     "audit": "Journal d'audit",
-    "clotureExercice": "Clôture d'exercice"
+    "clotureExercice": "Clôture d'exercice",
+    "integrations": "Intégrations",
+    "commandesPharmacie": "Commandes de la pharmacie"
   },
   "entete": {
     "langue": "Langue",

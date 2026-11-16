@@ -96,5 +96,10 @@
   },
   "ligne": {
     "disponibilite": "Disponibilité"
+  },
+  "export": {
+    "titre": "Exporter les lignes et dotations (format de l'import) :",
+    "csv": "CSV",
+    "json": "JSON"
   }
 }
