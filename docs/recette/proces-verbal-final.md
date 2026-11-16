@@ -9,7 +9,7 @@ Ce procès-verbal prononce la recette de l'ensemble du module. Il s'appuie sur l
 | | |
 |---|---|
 | Établissement | |
-| Environnement | Recette ([deploiement-recette.md](../exploitation/deploiement-recette.md)) |
+| Environnement | Recette ([installation](../../site/src/content/docs/installer/installation.md)) |
 | Version (étiquette `vX.Y.Z`) | |
 | Date de la séance | |
 | Participants (nom, fonction, profil) | |
@@ -33,7 +33,7 @@ Ce procès-verbal prononce la recette de l'ensemble du module. Il s'appuie sur l
 | Intégration Hopitalia | Fournisseurs, services et commandes de la pharmacie importés sans doublon ; rattachement par l'agent financier ; approvisionnement supprimé annulé. | |
 | Export comptable | Fichier `ecritures` accepté par le service comptable. | |
 | Accessibilité et petits écrans | Navigation au clavier ; écrans lisibles sur téléphone et tablette. | |
-| Exploitation | Sauvegarde quotidienne et essai de restauration réalisés sur le serveur ([plan-exploitation.md](../exploitation/plan-exploitation.md)). | |
+| Exploitation | Sauvegarde quotidienne et essai de restauration réalisés sur le serveur ([sauvegarde et restauration](../../site/src/content/docs/installer/sauvegarde.md)). | |
 | Documentation | Guide utilisateur relu par chaque profil ; guide d'administration éprouvé ; matrice et workflows validés. | |
 
 ## Critères généraux d'acceptation (section 15.4)

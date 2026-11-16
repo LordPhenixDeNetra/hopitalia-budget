@@ -18,10 +18,10 @@ Chaque version publiée porte une étiquette `vX.Y.Z` et son document OpenAPI. F
 
    ```bash
    git fetch --tags && git checkout vX.Y.Z
-   docker compose up -d --build
+   docker compose up -d --build --wait
    ```
 
-4. L'API applique les migrations à son démarrage. Vérifier `/health`, puis une connexion et l'ouverture du tableau de bord.
+4. L'API applique les migrations à son démarrage ; `--wait` attend qu'elle et l'interface soient saines. Vérifier ensuite une connexion et l'ouverture du tableau de bord.
 
 ## Revenir en arrière
 

@@ -8,23 +8,23 @@ Le module suit uniquement des marchés **déjà attribués** et des contrats **d
 
 | Document | Contenu |
 |---|---|
+| [Documentation](site/src/content/docs/) | Servie par l'application sous `/docs/` : découvrir, installer et exploiter, utiliser (écran par écran), administrer, intégrer, notes de version. |
 | [Cahier des charges](docs/Cahier_des_charges_Module_Budgetaire_Hopitalia_V3.md) | Source de vérité : exigences, règles de gestion, formules, modèle de données, conventions d'API. |
 | [Cahier des tâches](CAHIER_DES_TACHES.md) | Tâches par priorité, statuts et avancement. |
 | [AGENTS.md](AGENTS.md) | Règles du projet pour les développeurs et les agents de code. |
 | [docs/cadrage/](docs/cadrage/) | Décisions de cadrage, intégration avec Hopitalia, nomenclature, jeu d'essai. |
 | [docs/recette/recette-blanche.md](docs/recette/recette-blanche.md) | Répétition de la recette sur un poste : Hopitalia simulé, serveur de courrier de test. |
 | [docs/presentation/](docs/presentation/) | Présentation de la proposition : environnement de démonstration, parcours de validation, fiche de décision. |
-| [docs/exploitation/](docs/exploitation/) | Plan d'exploitation, sauvegarde et restauration, déploiement de l'environnement de recette. |
 | [docs/conception/](docs/conception/) | Dictionnaire des données, workflows et matrice des habilitations (produits depuis le code). |
-| [docs/guides/](docs/guides/) | Guide utilisateur (par profil) et guide d'administration. |
-| [docs/integration/](docs/integration/) | Guide d'intégration de l'API ; le document OpenAPI de chaque version est joint à sa version GitHub. |
 
 ## Structure
 
 ```
 backend/    API FastAPI (Python)
 frontend/   Interface React + TypeScript + Vite
-docs/       Cahier des charges, cadrage, références
+site/       Documentation (Astro, Starlight), servie par l'interface sous /docs/
+simulation/ Hopitalia simulé, recette blanche, environnement de démonstration
+docs/       Cahier des charges, cadrage, conception, recette, présentation
 ```
 
 ## Prérequis
@@ -38,10 +38,17 @@ docs/       Cahier des charges, cadrage, références
 
 ```bash
 cp .env.example .env        # puis renseigner POSTGRES_PASSWORD, COORDONNEES_CLE (et l'accès Hopitalia)
-docker compose up -d --build
+docker compose up -d --build --wait
 ```
 
-Les migrations de la base s'appliquent au démarrage de l'API.
+Les migrations de la base s'appliquent au démarrage de l'API. `--wait` rend la main quand l'API et l'interface sont saines (`docker compose ps` : `(healthy)`) ; les tâches planifiées démarrent une fois l'API saine.
+
+| Image | Contexte | `.dockerignore` |
+|---|---|---|
+| `hopitalia-budget-api` | `backend/` | `backend/.dockerignore` |
+| `hopitalia-budget-web` (interface et documentation) | racine du dépôt, `frontend/Dockerfile` | `.dockerignore` |
+
+Les `.dockerignore` sont des listes blanches : seul ce qui sert à construire l'application entre dans une image. Un nouveau fichier nécessaire à la construction s'y ajoute explicitement.
 
 **Premier administrateur.** La connexion passe par Hopitalia, mais les droits budgétaires sont propres au module : un agent sans profil est refusé. Attribuer le premier profil d'administrateur avec l'identifiant Hopitalia de l'agent (`userId`) :
 
@@ -65,7 +72,7 @@ Ensuite, les administrateurs attribuent et retirent les profils dans l'écran **
 | API | http://127.0.0.1:8000 (santé : `/health`) |
 | PostgreSQL | interne au réseau Docker |
 
-Le service `integrations` importe chaque jour d'Hopitalia les fournisseurs, les services et les achats de la pharmacie, avec le compte technique (variables `HOPITALIA_*` de `.env.example`, détail dans [docs/cadrage/integration-hopitalia.md](docs/cadrage/integration-hopitalia.md), section 8). Le service `sauvegarde` sauvegarde la base et les pièces chaque jour ([docs/exploitation/sauvegarde.md](docs/exploitation/sauvegarde.md)).
+Le service `integrations` importe chaque jour d'Hopitalia les fournisseurs, les services et les achats de la pharmacie, avec le compte technique (variables `HOPITALIA_*` de `.env.example`, détail dans [docs/cadrage/integration-hopitalia.md](docs/cadrage/integration-hopitalia.md), section 8). Le service `sauvegarde` sauvegarde la base et les pièces chaque jour (documentation : [Sauvegarde et restauration](site/src/content/docs/installer/sauvegarde.md)).
 
 Arrêt : `docker compose down` (ajouter `-v` pour effacer aussi la base et les sauvegardes).
 
@@ -126,6 +133,22 @@ L'interface de développement (http://127.0.0.1:5173) envoie les appels `/api` �
 | Build | `npm run build` |
 | Client d'API généré | `npm run api` (après mise à jour de `openapi.json`) |
 
+### Documentation (site/)
+
+```bash
+cd site
+npm ci
+npm run dev        # http://127.0.0.1:4321/docs/
+```
+
+Les pages sont dans `site/src/content/docs/`, en français ; une capture d'écran s'insère par `<Capture nom="…" alt="…" />`.
+
+| Vérification | Commande |
+|---|---|
+| Construction (liens vérifiés, puis en-têtes de sécurité de `/docs/`) | `npm run build` |
+| Tests (construction, accessibilité, captures, en-têtes) | `npm test`, après `npm run build` |
+| Captures d'écran | Dans l'environnement de démonstration démarré et rempli (documentation : installer/demonstration) : `cd frontend && npx playwright test -c playwright.captures.config.ts` |
+
 ### Hooks avant commit
 
 ```bash
@@ -138,7 +161,7 @@ pre-commit install
 
 Le workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) s'exécute sur chaque demande de fusion et chaque push sur `main` :
 
-- `backend` et `frontend` : les vérifications ci-dessus, lancées seulement si leur dossier ou le workflow a changé ;
+- `backend`, `frontend` et `site` : les vérifications ci-dessus, lancées seulement si leur dossier ou le workflow a changé ;
 - `dco` : chaque commit de la demande de fusion porte une signature `Signed-off-by` (`git commit -s`) ;
 - `ci-ok` : synthèse, seule vérification exigée par la protection de `main`.
 

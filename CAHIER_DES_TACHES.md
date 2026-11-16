@@ -34,10 +34,10 @@
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
 | P2 | 31 | 0 | 0 | 1 | 0 | 0 | 32 |
-| P3 | 13 | 7 | 1 | 1 | 0 | 1 | 23 |
-| **Total** | **193** | **11** | **1** | **2** | **0** | **2** | **209** |
+| P3 | 14 | 7 | 1 | 1 | 0 | 1 | 24 |
+| **Total** | **194** | **11** | **1** | **2** | **0** | **2** | **210** |
 
-Avancement : 193 / 207 tâches actives terminées (93 %), hors 2 abandonnées.
+Avancement : 194 / 208 tâches actives terminées (93 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -339,8 +339,8 @@ flowchart LR
 | T-250 | Tests responsive à 375, 768, 1024 et 1440 px. | IHM-08 | T-193 | Fait | Captures Playwright sans débordement. Test Playwright : 19 écrans à 375, 768, 1024 et 1440 px, aucun débordement horizontal, captures jointes au rapport. |
 | T-251 | Tests de performance à volumétrie d'un exercice. | ENF-07 | T-195 | Fait | Lectures < 1 s (95 %), tableaux de bord < 3 s. `test_performance.py` sur 2 000 engagements avec toute leur chaîne : lectures au plus 0,52 s (95 %), tableau de direction 2,3 s, restes à payer 0,8 s, état du budget 0,5 s. Liste des commandes, transmis et payé calculés en SQL. |
 | T-252 | Revue de sécurité (OWASP, dépendances, secrets, chiffrement des coordonnées bancaires). | ENF-03 | T-195 | Fait | Aucune faille critique ouverte. `docs/recette/revue-securite.md` : aucune faille critique ouverte ; limitation de débit, en-têtes HTTP et adresse du client corrigés (test `test_limite_de_debit_jeton_forge`) ; `npm audit` et `pip-audit` sans vulnérabilité. |
-| T-253 | Sauvegardes automatiques et test de restauration. | ENF-06 | T-027 | Fait | Restauration réussie et chronométrée. Service `sauvegarde` (base et pièces, quotidien, rétention 30 jours) ; restauration chronométrée par `exploitation/restaurer.sh` : 4 s pour un exercice (17 Mo), lignes identiques (`docs/exploitation/sauvegarde.md`). |
-| T-254 | Environnement de recette déployé. | — | T-027 | Bloqué | Accessible aux testeurs de la DAF. Bloqué : serveur de recette, nom d'hôte et certificat (DSI de l'hôpital), accès à Hopitalia de recette (équipe Hopitalia). Déploiement prêt : `docs/exploitation/deploiement-recette.md`. Déploiement répété sur un poste avec la pile de simulation (`docs/recette/recette-blanche.md`). |
+| T-253 | Sauvegardes automatiques et test de restauration. | ENF-06 | T-027 | Fait | Restauration réussie et chronométrée. Service `sauvegarde` (base et pièces, quotidien, rétention 30 jours) ; restauration chronométrée par `exploitation/restaurer.sh` : 4 s pour un exercice (17 Mo), lignes identiques (documentation : installer/sauvegarde). |
+| T-254 | Environnement de recette déployé. | — | T-027 | Bloqué | Accessible aux testeurs de la DAF. Bloqué : serveur de recette, nom d'hôte et certificat (DSI de l'hôpital), accès à Hopitalia de recette (équipe Hopitalia). Déploiement prêt : documentation, installer/installation. Déploiement répété sur un poste avec la pile de simulation (`docs/recette/recette-blanche.md`). |
 
 ---
 
@@ -383,11 +383,12 @@ flowchart LR
 |---|---|---|---|---|---|
 | T-280 | Dictionnaire des données (généré depuis le modèle). | §16 | T-195 | Fait | Chaque table et champ documenté. `docs/conception/dictionnaire-donnees.md` produit depuis le modèle : 62 tables et 568 colonnes décrites (type, obligation, clés, description) ; `test_dictionnaire.py` échoue si une table ou une colonne n'est pas décrite ou si le document n'est plus à jour. |
 | T-281 | Description des workflows et matrice des habilitations finale. | §16 | T-112, T-016 | En cours | Validée par la DAF. `docs/conception/workflows-et-habilitations.md` produit depuis le domaine (cycles, circuits par défaut, matrice) et vérifié par `test_doc_workflows.py`. Reste : validation par la DAF. |
-| T-282 | Documentation OpenAPI publiée et guide d'intégration. | §16 | T-248 | Fait | Publiée avec la version. Guide `docs/integration/guide-integration.md` ; version de l'API = version du paquet ; workflow `publication.yml` qui joint le document OpenAPI et le guide à la version GitHub de chaque étiquette `vX.Y.Z`. Version v0.1.0 publiée le 16/11/2026 par le workflow : `openapi-v0.1.0.json` et `guide-integration.md` joints. |
-| T-283 | Guide utilisateur (par profil). | §16 | T-198 | En cours | Relu par un utilisateur de chaque profil. `docs/guides/guide-utilisateur.md`, par profil. Reste : relecture par un utilisateur de chaque profil (recette T-198). |
-| T-284 | Guide d'administration (paramétrage, circuits, alertes). | §16 | T-198 | En cours | Un administrateur paramètre un établissement seul. `docs/guides/guide-administration.md`, dans l'ordre de mise en service. Reste : un administrateur paramètre seul un établissement de recette avec ce guide (T-254). |
-| T-285 | Plan de déploiement, de sauvegarde, de reprise et de maintenance. | §16 | T-253 | En cours | Validé par l'exploitation. `docs/exploitation/plan-exploitation.md` (services, secrets, déploiement et mise à jour, sauvegarde, reprise par incident, surveillance, maintenance, responsabilités) ; redémarrage automatique de `db`, `api` et `web`. Reste : validation par la DSI. |
+| T-282 | Documentation OpenAPI publiée et guide d'intégration. | §16 | T-248 | Fait | Publiée avec la version. Guide d'intégration (documentation, partie « Intégrer », depuis le 16/11/2026) ; version de l'API = version du paquet ; workflow `publication.yml` qui joint le document OpenAPI et le guide à la version GitHub de chaque étiquette `vX.Y.Z`. Version v0.1.0 publiée le 16/11/2026 par le workflow : `openapi-v0.1.0.json` et `guide-integration.md` joints. Les versions suivantes joignent la documentation construite (`documentation-vX.Y.Z.zip`). |
+| T-283 | Guide utilisateur (par profil). | §16 | T-198 | En cours | Relu par un utilisateur de chaque profil. Documentation, partie « Utiliser » : une page par écran, avec qui fait quoi et une capture (à l'origine `docs/guides/guide-utilisateur.md`). Reste : relecture par un utilisateur de chaque profil (recette T-198). |
+| T-284 | Guide d'administration (paramétrage, circuits, alertes). | §16 | T-198 | En cours | Un administrateur paramètre un établissement seul. Documentation, partie « Administrer », dans l'ordre de mise en service (à l'origine `docs/guides/guide-administration.md`). Reste : un administrateur paramètre seul un établissement de recette avec ce guide (T-254). |
+| T-285 | Plan de déploiement, de sauvegarde, de reprise et de maintenance. | §16 | T-253 | En cours | Validé par l'exploitation. Documentation, partie « Installer et exploiter » (services, secrets, déploiement et mise à jour, sauvegarde, reprise par incident, surveillance, maintenance, responsabilités) ; redémarrage automatique de `db`, `api` et `web`. Reste : validation par la DSI. |
 | T-286 | Procès-verbal de recette final. | §15.4 | T-246, T-198 | Bloqué | Signé par les représentants de l'établissement. Bloqué : séance de recette finale avec les représentants de l'établissement, après la recette des lots 1 à 5 (T-198) et l'environnement de recette (T-254). Modèle prêt : `docs/recette/proces-verbal-final.md`. |
+| T-287 | Site de documentation servi par l'application, avec captures d'écran. | §16 | T-283, T-284, T-285, T-282 | Fait | Construit avec l'image de l'interface et servi sous `/docs/` ; chaque écran documenté avec sa capture ; tests du site verts. `site/` (Astro, Starlight) : six parties, français d'abord (anglais prévu, avec avis de traduction) ; recherche hors ligne ; en-têtes de sécurité qui autorisent les scripts inline par leur empreinte ; 25 captures prises dans l'environnement de démonstration (`frontend/e2e-captures/`) ; tests de construction, d'accessibilité (axe), de captures et d'en-têtes ; job `site` de la CI ; documentation jointe à chaque version. |
 
 ---
 
@@ -457,3 +458,7 @@ flowchart LR
 | 16/11/2026 | T-225 (P2.B) | Bloqué | Fait | Courriels d'alerte dans la langue du destinataire, reçus en environnement de test. |
 | 16/11/2026 | T-198, T-254 | — | — | Recette blanche sur un poste (Hopitalia simulé, serveur de courrier de test) : 11 étapes conformes ; séance réelle et serveur de l'hôpital toujours attendus. |
 | 16/11/2026 | T-198, T-205, T-281, T-283 à T-286 | — | — | Présentation de la proposition préparée : environnement de démonstration (`simulation/demonstration.py`), parcours de validation et fiche de décision (`docs/presentation/`) ; statuts inchangés en attendant les décisions. |
+| 16/11/2026 | T-287 (P3.D) | — | Fait | Site de documentation servi sous `/docs/`, sur le modèle de HermiNas : guides utilisateur, d'administration, d'exploitation et d'intégration repris en pages, avec captures de l'environnement de démonstration ; anciens documents de `docs/guides/`, `docs/exploitation/` et `docs/integration/` retirés (spec 3.19). |
+| 16/11/2026 | T-225 (P2.B) | Fait | Fait | Correctif : l'onglet Règles de l'écran Alertes permet enfin de cocher « Par courriel » (le réglage n'était modifiable que par l'API) ; test T-225. Accueil : profils et établissements affichés par leur nom, plus par leur identifiant. |
+| 16/11/2026 | — | — | — | Pile de simulation : la tâche quotidienne des échanges n'y démarre plus, sinon son premier import devançait la recette blanche lancée plus d'une minute après le démarrage. |
+| 16/11/2026 | T-027 (P0) | Fait | Fait | Support Docker complété : `.dockerignore` en listes blanches (contexte de l'interface : 192 fichiers, 4,8 Mo ; de l'API : 112 fichiers, 1,1 Mo), dépendances de l'API en cache, contrôles de santé de l'API et de l'interface, tâches planifiées démarrées une fois l'API saine au lieu d'une minute d'attente. |

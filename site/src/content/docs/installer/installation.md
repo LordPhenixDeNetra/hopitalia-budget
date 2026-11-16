@@ -25,19 +25,30 @@ L'environnement de recette et la production s'installent de la même façon, cha
 3. Construire et démarrer :
 
    ```bash
-   docker compose up -d --build
+   docker compose up -d --build --wait
    ```
 
-   L'API applique les migrations de la base à son démarrage.
+   L'API applique les migrations de la base à son démarrage. `--wait` rend la main quand l'API et l'interface sont saines, ou signale celle qui ne l'est pas ; les tâches planifiées démarrent une fois l'API saine.
 
 ## Vérifier
 
-- `docker compose ps` : tous les services sont démarrés.
+- `docker compose ps` : tous les services sont démarrés ; `api`, `web` et `db` sont `(healthy)`.
 - `curl http://127.0.0.1:8000/health` répond.
 - `docker compose logs sauvegarde` montre une première sauvegarde.
 - L'interface s'ouvre par le nom d'hôte, en HTTPS ; la documentation est sous `/docs/`.
 - `curl -I` sur l'interface montre l'en-tête `Content-Security-Policy`.
 - Le port 8000 n'est pas joignable depuis un autre poste : les ports 8000 et 8080 n'écoutent que sur `127.0.0.1`, seul le proxy HTTPS est joignable.
+
+## Les images
+
+| Image | Construite depuis | Contenu |
+|---|---|---|
+| `hopitalia-budget-api` | `backend/` | Python 3.12 : l'API, ses migrations et ses tâches planifiées (`alertes`, `courriels`, `integrations`). Utilisateur sans privilège `app`. |
+| `hopitalia-budget-web` | Racine du dépôt (`frontend/Dockerfile`) | nginx : l'interface construite et cette documentation, sous `/docs/`. |
+
+Les fichiers `.dockerignore` sont des **listes blanches** : n'entre dans une image que ce qui sert à la construire. Les tests, les outils de développement, les documents du projet et le fichier `.env` n'y entrent jamais.
+
+Les images de PostgreSQL et de la sauvegarde sont les images officielles `postgres:16-alpine`.
 
 ## Premier administrateur
 
