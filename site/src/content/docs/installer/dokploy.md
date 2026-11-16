@@ -20,7 +20,7 @@ L'application n'a pas besoin du second domaine : elle appelle l'API par `/api/` 
 
 ## Ce que contient la pile
 
-- Le module complet (`docker-compose.yml`) : base, API, interface, tâches planifiées, sauvegarde.
+- Le module complet : base, API, interface, tâches planifiées, sauvegarde. Ses services sont recopiés de `docker-compose.yml`, car Dokploy ne suit pas `include` ; la CI vérifie que la copie reste identique.
 - `hopitalia-simule` : connexion des agents, annuaire, fournisseurs, services et pharmacie, avec une clé de signature et un mot de passe **secrets**, fixés dans Dokploy.
 - `courrier-test` : reçoit les courriels d'alerte ; rien ne part vers de vraies boîtes.
 - `demonstration` : au **premier** démarrage, rejoue la recette blanche puis ajoute les pièces à valider, les alertes, l'échange en échec et les recettes, puis s'arrête. Aux déploiements suivants, il voit la base remplie et ne fait rien.
@@ -44,7 +44,7 @@ L'application n'a pas besoin du second domaine : elle appelle l'API par `/api/` 
    - `POSTGRES_PASSWORD`, `COORDONNEES_CLE`, `HOPITALIA_JWT_CLE`, `SIMULATION_MOT_DE_PASSE` : les secrets générés ;
    - `HOPITALIA_COMPTE_TECHNIQUE_MOT_DE_PASSE` : la même valeur que `SIMULATION_MOT_DE_PASSE` ;
    - `ADRESSE_API`, `ADRESSE_WEB` : à changer seulement si les ports 18000 ou 18080 sont déjà pris sur le serveur.
-5. **Domains** : ajouter deux domaines, HTTPS activé, certificat **Let's Encrypt** :
+5. **Domains** : ajouter deux domaines, HTTPS activé, certificat **Let's Encrypt**. Si `web` et `api` ne figurent pas dans la liste des services, cliquer sur le bouton d'actualisation à côté de la liste : Dokploy relit alors le fichier Compose du dépôt.
 
    | Host | Service | Container Port | Path |
    |---|---|---|---|
