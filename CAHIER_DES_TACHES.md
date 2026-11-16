@@ -34,10 +34,10 @@
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
 | P2 | 30 | 0 | 0 | 2 | 0 | 0 | 32 |
-| P3 | 12 | 8 | 1 | 1 | 0 | 1 | 23 |
-| **Total** | **191** | **12** | **1** | **3** | **0** | **2** | **209** |
+| P3 | 13 | 7 | 1 | 1 | 0 | 1 | 23 |
+| **Total** | **192** | **11** | **1** | **3** | **0** | **2** | **209** |
 
-Avancement : 191 / 207 tâches actives terminées (92 %), hors 2 abandonnées.
+Avancement : 192 / 207 tâches actives terminées (93 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -384,7 +384,7 @@ flowchart LR
 |---|---|---|---|---|---|
 | T-280 | Dictionnaire des données (généré depuis le modèle). | §16 | T-195 | Fait | Chaque table et champ documenté. `docs/conception/dictionnaire-donnees.md` produit depuis le modèle : 62 tables et 568 colonnes décrites (type, obligation, clés, description) ; `test_dictionnaire.py` échoue si une table ou une colonne n'est pas décrite ou si le document n'est plus à jour. |
 | T-281 | Description des workflows et matrice des habilitations finale. | §16 | T-112, T-016 | En cours | Validée par la DAF. `docs/conception/workflows-et-habilitations.md` produit depuis le domaine (cycles, circuits par défaut, matrice) et vérifié par `test_doc_workflows.py`. Reste : validation par la DAF. |
-| T-282 | Documentation OpenAPI publiée et guide d'intégration. | §16 | T-248 | En cours | Publiée avec la version. Guide `docs/integration/guide-integration.md` ; version de l'API = version du paquet ; workflow `publication.yml` qui joint le document OpenAPI et le guide à la version GitHub de chaque étiquette `vX.Y.Z`. Reste : première étiquette de version poussée. |
+| T-282 | Documentation OpenAPI publiée et guide d'intégration. | §16 | T-248 | Fait | Publiée avec la version. Guide `docs/integration/guide-integration.md` ; version de l'API = version du paquet ; workflow `publication.yml` qui joint le document OpenAPI et le guide à la version GitHub de chaque étiquette `vX.Y.Z`. Version v0.1.0 publiée le 16/11/2026 par le workflow : `openapi-v0.1.0.json` et `guide-integration.md` joints. |
 | T-283 | Guide utilisateur (par profil). | §16 | T-198 | En cours | Relu par un utilisateur de chaque profil. `docs/guides/guide-utilisateur.md`, par profil. Reste : relecture par un utilisateur de chaque profil (recette T-198). |
 | T-284 | Guide d'administration (paramétrage, circuits, alertes). | §16 | T-198 | En cours | Un administrateur paramètre un établissement seul. `docs/guides/guide-administration.md`, dans l'ordre de mise en service. Reste : un administrateur paramètre seul un établissement de recette avec ce guide (T-254). |
 | T-285 | Plan de déploiement, de sauvegarde, de reprise et de maintenance. | §16 | T-253 | En cours | Validé par l'exploitation. `docs/exploitation/plan-exploitation.md` (services, secrets, déploiement et mise à jour, sauvegarde, reprise par incident, surveillance, maintenance, responsabilités) ; redémarrage automatique de `db`, `api` et `web`. Reste : validation par la DSI. |
@@ -454,3 +454,4 @@ flowchart LR
 | 16/11/2026 | T-286 (P3.D) | À faire | Bloqué | Modèle de procès-verbal prêt ; séance de recette finale à tenir. |
 | 16/11/2026 | T-270 à T-273 (P3.C) | À faire | Fait | Thème sombre audité, préférences d'affichage sur le profil, traduction anglaise contrôlée, mode droite à gauche. |
 | 16/11/2026 | T-260 à T-263 (P3.B) | À faire | Fait | Volet recettes : activation par établissement, recettes, débiteurs et mouvements, formules 6.4, tableau de bord. |
+| 16/11/2026 | T-282 (P3.D) | En cours | Fait | Version v0.1.0 publiée avec son document OpenAPI et le guide d'intégration. |
