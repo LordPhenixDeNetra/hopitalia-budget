@@ -34,10 +34,10 @@
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
 | P2 | 30 | 0 | 0 | 2 | 0 | 0 | 32 |
-| P3 | 8 | 8 | 5 | 1 | 0 | 1 | 23 |
-| **Total** | **187** | **12** | **5** | **3** | **0** | **2** | **209** |
+| P3 | 12 | 8 | 1 | 1 | 0 | 1 | 23 |
+| **Total** | **191** | **12** | **1** | **3** | **0** | **2** | **209** |
 
-Avancement : 187 / 207 tâches actives terminées (90 %), hors 2 abandonnées.
+Avancement : 191 / 207 tâches actives terminées (92 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -364,10 +364,10 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-260 | Activation du volet par établissement. | §7.2 | T-080 | À faire | Volet invisible quand il est désactivé. |
-| T-261 | Recettes et débiteurs (nature, service, source, période). | EF-RCT-01 | T-260 | À faire | CRUD API + écran + tests. |
-| T-262 | Calculs : facturé, encaissé, reste à recouvrer, taux. | EF-RCT-02, RG-14 | T-261 | À faire | Tests unitaires. |
-| T-263 | Tableau de bord des recettes. | EF-RCT-02 | T-262 | À faire | Filtres par nature, service, période. |
+| T-260 | Activation du volet par établissement. | §7.2 | T-080 | Fait | Volet invisible quand il est désactivé. `voletRecettesActif` par établissement, activé par l'administrateur ; désactivé : menu absent, API refusée (`test_t260_volet_invisible_quand_desactive`, test Vitest du menu). |
+| T-261 | Recettes et débiteurs (nature, service, source, période). | EF-RCT-01 | T-260 | Fait | CRUD API + écran + tests. Recettes (création idempotente, modification avec `If-Match`, traces), débiteurs, mouvements facturé et encaissé avec contre-mouvement motivé ; écran Recettes ; tests API et parcours Playwright T-261. |
+| T-262 | Calculs : facturé, encaissé, reste à recouvrer, taux. | EF-RCT-02, RG-14 | T-261 | Fait | Tests unitaires. Formules 6.4 dans `domaine/indicateurs.py` (reste à recouvrer, taux de recouvrement et de réalisation), jamais stockées (test RG-14 étendu) ; tests unitaires `test_t262_*`. |
+| T-263 | Tableau de bord des recettes. | EF-RCT-02 | T-262 | Fait | Filtres par nature, service, période. Tableau de bord par nature, service et mois, filtres nature, service, période (`test_t263_tableau_de_bord_des_recettes`) ; écran audité (accessibilité, responsive, sombre, droite à gauche). |
 
 ### P3.C — Options d'interface
 
@@ -453,3 +453,4 @@ flowchart LR
 | 16/11/2026 | T-281 à T-285 (P3.D) | À faire | En cours | Workflows et matrice, guide d'intégration et publication, guides utilisateur et d'administration, plan d'exploitation rédigés ; validations attendues. |
 | 16/11/2026 | T-286 (P3.D) | À faire | Bloqué | Modèle de procès-verbal prêt ; séance de recette finale à tenir. |
 | 16/11/2026 | T-270 à T-273 (P3.C) | À faire | Fait | Thème sombre audité, préférences d'affichage sur le profil, traduction anglaise contrôlée, mode droite à gauche. |
+| 16/11/2026 | T-260 à T-263 (P3.B) | À faire | Fait | Volet recettes : activation par établissement, recettes, débiteurs et mouvements, formules 6.4, tableau de bord. |

@@ -28,5 +28,12 @@
     "modifie": "Facility {{code}} saved.",
     "desactives_one": "{{count}} facility deactivated.",
     "desactives_other": "{{count}} facilities deactivated."
+  },
+  "recettes": {
+    "titre": "Revenue module",
+    "actif": "Enabled",
+    "inactif": "Disabled",
+    "activer": "Enable the revenue module",
+    "desactiver": "Disable the revenue module"
   }
 }

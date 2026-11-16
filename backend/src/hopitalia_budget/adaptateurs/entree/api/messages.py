@@ -562,6 +562,22 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
         ("Échange non repris", "Seul un échange en échec peut être repris."),
         ("Exchange not retried", "Only a failed exchange can be retried."),
     ),
+    "VOLET_RECETTES_INACTIF": (
+        409,
+        (
+            "Volet recettes inactif",
+            "Le volet recettes n'est pas activé pour cet établissement.",
+        ),
+        ("Revenue module inactive", "The revenue module is not enabled for this establishment."),
+    ),
+    "CONTRE_MOUVEMENT_EXCESSIF": (
+        422,
+        (
+            "Contre-mouvement excessif",
+            "Le contre-mouvement de {montant} dépasse le cumul enregistré ({cumul}).",
+        ),
+        ("Reversal too large", "The reversal of {montant} exceeds the recorded total ({cumul})."),
+    ),
     "HOPITALIA_INDISPONIBLE": (
         502,
         ("Hopitalia indisponible", "Le service de connexion Hopitalia ne répond pas."),

@@ -59,6 +59,9 @@ import type {
   ContratSortie,
   CoordonneeCreation,
   CoordonneeSortie,
+  DebiteurCreation,
+  DebiteurModification,
+  DebiteurSortie,
   DecisionCreation,
   DecisionOrdonnancement,
   DelegationCreation,
@@ -113,6 +116,7 @@ import type {
   ListerCommandesPharmacieParams,
   ListerComptesTresorerieParams,
   ListerContratsParams,
+  ListerDebiteursParams,
   ListerDelegationsParams,
   ListerEchangesParams,
   ListerEngagementsParams,
@@ -131,6 +135,7 @@ import type {
   ListerOrdonnancementsParams,
   ListerPaiementsParams,
   ListerProgrammesParams,
+  ListerRecettesParams,
   ListerReglesParams,
   ListerReservesParams,
   ListerRevisionsParams,
@@ -145,6 +150,8 @@ import type {
   ModifierRegleParams,
   Moi,
   MotifSchema,
+  MouvementCreation,
+  MouvementSortie,
   NoeudSortie,
   NotificationCreation,
   NotificationSortie,
@@ -163,6 +170,7 @@ import type {
   PageContratResume,
   PageCurseurEchangeSortie,
   PageCurseurEntreeJournal,
+  PageDebiteurSortie,
   PageDelegationSortie,
   PageEngagementSortie,
   PageEtablissementSortie,
@@ -175,6 +183,7 @@ import type {
   PageOrdonnancementSortie,
   PagePaiementSortie,
   PageProgrammeSortie,
+  PageRecetteSortie,
   PageReferentielSortie,
   PageRevisionSortie,
   PageSiteSortie,
@@ -202,6 +211,9 @@ import type {
   ReceptionChamps,
   ReceptionCreation,
   ReceptionSortie,
+  RecetteCreation,
+  RecetteModification,
+  RecetteSortie,
   RechercherParams,
   ReferentielCreation,
   ReferentielModification,
@@ -233,6 +245,8 @@ import type {
   SyntheseContrat,
   TableauDirection,
   TableauDirectionParams,
+  TableauRecettes,
+  TableauRecettesParams,
   TransitionCreation,
   TransitionModification,
   TransitionReference,
@@ -11679,6 +11693,723 @@ export const useRattacherCommandePharmacie = <TError = HTTPValidationError,
       return useMutation(getRattacherCommandePharmacieMutationOptions(options), queryClient);
     }
 
+export const getListerRecettesUrl = (params?: ListerRecettesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/recettes?${stringifiedParams}` : `/api/v1/recettes`
+}
+
+/**
+ * Recettes des établissements où le volet est actif, avec leurs indicateurs (6.4).
+ * @summary Lister Recettes
+ */
+export const listerRecettes = async (params?: ListerRecettesParams, options?: Parameters<typeof appelerApi>[1]): Promise<PageRecetteSortie> => {
+
+  return appelerApi<PageRecetteSortie>(getListerRecettesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerRecettesQueryKey = (params?: ListerRecettesParams,) => {
+    return [
+    `/api/v1/recettes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListerRecettesQueryOptions = <TData = Awaited<ReturnType<typeof listerRecettes>>, TError = HTTPValidationError>(params?: ListerRecettesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerRecettes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerRecettesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerRecettes>>> = ({ signal }) => listerRecettes(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerRecettes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerRecettesQueryResult = NonNullable<Awaited<ReturnType<typeof listerRecettes>>>
+export type ListerRecettesQueryError = HTTPValidationError
+
+
+/**
+ * Recettes des établissements où le volet est actif, avec leurs indicateurs (6.4).
+ * @summary Lister Recettes
+ */
+export function useListerRecettes<TData = Awaited<ReturnType<typeof listerRecettes>>, TError = HTTPValidationError>(
+ params: undefined |  ListerRecettesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerRecettes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerRecettes>>,
+          TError,
+          Awaited<ReturnType<typeof listerRecettes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Recettes des établissements où le volet est actif, avec leurs indicateurs (6.4).
+ * @summary Lister Recettes
+ */
+export function useListerRecettes<TData = Awaited<ReturnType<typeof listerRecettes>>, TError = HTTPValidationError>(
+ params?: ListerRecettesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerRecettes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerRecettes>>,
+          TError,
+          Awaited<ReturnType<typeof listerRecettes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Recettes des établissements où le volet est actif, avec leurs indicateurs (6.4).
+ * @summary Lister Recettes
+ */
+export function useListerRecettes<TData = Awaited<ReturnType<typeof listerRecettes>>, TError = HTTPValidationError>(
+ params?: ListerRecettesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerRecettes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Recettes des établissements où le volet est actif, avec leurs indicateurs (6.4).
+ * @summary Lister Recettes
+ */
+export function useListerRecettes<TData = Awaited<ReturnType<typeof listerRecettes>>, TError = HTTPValidationError>(
+ params?: ListerRecettesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerRecettes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerRecettesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreerRecetteUrl = () => {
+
+
+
+
+  return `/api/v1/recettes`
+}
+
+/**
+ * Recette prévue (EF-RCT-01) : nature, service, source, période, débiteur.
+ * @summary Creer Recette
+ */
+export const creerRecette = async (recetteCreation: RecetteCreation, options?: Parameters<typeof appelerApi>[1]): Promise<RecetteSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<RecetteSortie>(getCreerRecetteUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(recetteCreation)
+  }
+);}
+
+
+
+
+
+export const getCreerRecetteMutationKey = () => ['creerRecette'] as const;
+
+export const getCreerRecetteMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerRecette>>, TError,CreerRecetteMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof creerRecette>>, TError,CreerRecetteMutationVariables, TContext> => {
+
+const mutationKey = getCreerRecetteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creerRecette>>, CreerRecetteMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  creerRecette(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreerRecetteMutationResult = NonNullable<Awaited<ReturnType<typeof creerRecette>>>
+    export type CreerRecetteMutationBody = RecetteCreation
+    export type CreerRecetteMutationError = HTTPValidationError
+    export type CreerRecetteMutationVariables = {data: RecetteCreation}
+
+    /**
+ * Recette prévue (EF-RCT-01) : nature, service, source, période, débiteur.
+ * @summary Creer Recette
+ */
+export const useCreerRecette = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerRecette>>, TError,CreerRecetteMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creerRecette>>,
+        TError,
+        CreerRecetteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreerRecetteMutationOptions(options), queryClient);
+    }
+
+export const getObtenirRecetteUrl = (recetteId: string,) => {
+
+
+
+
+  return `/api/v1/recettes/${recetteId}`
+}
+
+/**
+ * @summary Obtenir Recette
+ */
+export const obtenirRecette = async (recetteId: string, options?: Parameters<typeof appelerApi>[1]): Promise<RecetteSortie> => {
+
+  return appelerApi<RecetteSortie>(getObtenirRecetteUrl(recetteId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenirRecetteQueryKey = (recetteId: string,) => {
+    return [
+    `/api/v1/recettes/${recetteId}`
+    ] as const;
+    }
+
+
+export const getObtenirRecetteQueryOptions = <TData = Awaited<ReturnType<typeof obtenirRecette>>, TError = HTTPValidationError>(recetteId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirRecette>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenirRecetteQueryKey(recetteId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenirRecette>>> = ({ signal }) => obtenirRecette(recetteId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: recetteId !== null && recetteId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenirRecette>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenirRecetteQueryResult = NonNullable<Awaited<ReturnType<typeof obtenirRecette>>>
+export type ObtenirRecetteQueryError = HTTPValidationError
+
+
+/** @summary Obtenir Recette */
+export function useObtenirRecette<TData = Awaited<ReturnType<typeof obtenirRecette>>, TError = HTTPValidationError>(
+ recetteId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirRecette>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenirRecette>>,
+          TError,
+          Awaited<ReturnType<typeof obtenirRecette>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Recette */
+export function useObtenirRecette<TData = Awaited<ReturnType<typeof obtenirRecette>>, TError = HTTPValidationError>(
+ recetteId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirRecette>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenirRecette>>,
+          TError,
+          Awaited<ReturnType<typeof obtenirRecette>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Recette */
+export function useObtenirRecette<TData = Awaited<ReturnType<typeof obtenirRecette>>, TError = HTTPValidationError>(
+ recetteId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirRecette>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Recette */
+export function useObtenirRecette<TData = Awaited<ReturnType<typeof obtenirRecette>>, TError = HTTPValidationError>(
+ recetteId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirRecette>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenirRecetteQueryOptions(recetteId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getModifierRecetteUrl = (recetteId: string,) => {
+
+
+
+
+  return `/api/v1/recettes/${recetteId}`
+}
+
+/**
+ * @summary Modifier Recette
+ */
+export const modifierRecette = async (recetteId: string,
+    recetteModification: RecetteModification, options?: Parameters<typeof appelerApi>[1]): Promise<RecetteSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<RecetteSortie>(getModifierRecetteUrl(recetteId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(recetteModification)
+  }
+);}
+
+
+
+
+
+export const getModifierRecetteMutationKey = () => ['modifierRecette'] as const;
+
+export const getModifierRecetteMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierRecette>>, TError,ModifierRecetteMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof modifierRecette>>, TError,ModifierRecetteMutationVariables, TContext> => {
+
+const mutationKey = getModifierRecetteMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modifierRecette>>, ModifierRecetteMutationVariables> = (props) => {
+          const {recetteId,data} = props ?? {};
+
+          return  modifierRecette(recetteId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModifierRecetteMutationResult = NonNullable<Awaited<ReturnType<typeof modifierRecette>>>
+    export type ModifierRecetteMutationBody = RecetteModification
+    export type ModifierRecetteMutationError = HTTPValidationError
+    export type ModifierRecetteMutationVariables = {recetteId: string;data: RecetteModification}
+
+    /** @summary Modifier Recette */
+export const useModifierRecette = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierRecette>>, TError,ModifierRecetteMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modifierRecette>>,
+        TError,
+        ModifierRecetteMutationVariables,
+        TContext
+      > => {
+      return useMutation(getModifierRecetteMutationOptions(options), queryClient);
+    }
+
+export const getListerMouvementsUrl = (recetteId: string,) => {
+
+
+
+
+  return `/api/v1/recettes/${recetteId}/mouvements`
+}
+
+/**
+ * @summary Lister Mouvements
+ */
+export const listerMouvements = async (recetteId: string, options?: Parameters<typeof appelerApi>[1]): Promise<MouvementSortie[]> => {
+
+  return appelerApi<MouvementSortie[]>(getListerMouvementsUrl(recetteId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerMouvementsQueryKey = (recetteId: string,) => {
+    return [
+    `/api/v1/recettes/${recetteId}/mouvements`
+    ] as const;
+    }
+
+
+export const getListerMouvementsQueryOptions = <TData = Awaited<ReturnType<typeof listerMouvements>>, TError = HTTPValidationError>(recetteId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerMouvements>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerMouvementsQueryKey(recetteId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerMouvements>>> = ({ signal }) => listerMouvements(recetteId, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: recetteId !== null && recetteId !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerMouvements>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerMouvementsQueryResult = NonNullable<Awaited<ReturnType<typeof listerMouvements>>>
+export type ListerMouvementsQueryError = HTTPValidationError
+
+
+/** @summary Lister Mouvements */
+export function useListerMouvements<TData = Awaited<ReturnType<typeof listerMouvements>>, TError = HTTPValidationError>(
+ recetteId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerMouvements>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerMouvements>>,
+          TError,
+          Awaited<ReturnType<typeof listerMouvements>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Mouvements */
+export function useListerMouvements<TData = Awaited<ReturnType<typeof listerMouvements>>, TError = HTTPValidationError>(
+ recetteId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerMouvements>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerMouvements>>,
+          TError,
+          Awaited<ReturnType<typeof listerMouvements>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Mouvements */
+export function useListerMouvements<TData = Awaited<ReturnType<typeof listerMouvements>>, TError = HTTPValidationError>(
+ recetteId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerMouvements>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Mouvements */
+export function useListerMouvements<TData = Awaited<ReturnType<typeof listerMouvements>>, TError = HTTPValidationError>(
+ recetteId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerMouvements>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerMouvementsQueryOptions(recetteId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getEnregistrerMouvementUrl = (recetteId: string,) => {
+
+
+
+
+  return `/api/v1/recettes/${recetteId}/mouvements`
+}
+
+/**
+ * Facturé ou encaissé saisi ; un contre-mouvement négatif corrige une erreur (motif).
+ * @summary Enregistrer Mouvement
+ */
+export const enregistrerMouvement = async (recetteId: string,
+    mouvementCreation: MouvementCreation, options?: Parameters<typeof appelerApi>[1]): Promise<MouvementSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<MouvementSortie>(getEnregistrerMouvementUrl(recetteId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(mouvementCreation)
+  }
+);}
+
+
+
+
+
+export const getEnregistrerMouvementMutationKey = () => ['enregistrerMouvement'] as const;
+
+export const getEnregistrerMouvementMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enregistrerMouvement>>, TError,EnregistrerMouvementMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof enregistrerMouvement>>, TError,EnregistrerMouvementMutationVariables, TContext> => {
+
+const mutationKey = getEnregistrerMouvementMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof enregistrerMouvement>>, EnregistrerMouvementMutationVariables> = (props) => {
+          const {recetteId,data} = props ?? {};
+
+          return  enregistrerMouvement(recetteId,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type EnregistrerMouvementMutationResult = NonNullable<Awaited<ReturnType<typeof enregistrerMouvement>>>
+    export type EnregistrerMouvementMutationBody = MouvementCreation
+    export type EnregistrerMouvementMutationError = HTTPValidationError
+    export type EnregistrerMouvementMutationVariables = {recetteId: string;data: MouvementCreation}
+
+    /**
+ * Facturé ou encaissé saisi ; un contre-mouvement négatif corrige une erreur (motif).
+ * @summary Enregistrer Mouvement
+ */
+export const useEnregistrerMouvement = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof enregistrerMouvement>>, TError,EnregistrerMouvementMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof enregistrerMouvement>>,
+        TError,
+        EnregistrerMouvementMutationVariables,
+        TContext
+      > => {
+      return useMutation(getEnregistrerMouvementMutationOptions(options), queryClient);
+    }
+
+export const getTableauRecettesUrl = (params: TableauRecettesParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/tableaux-de-bord/recettes?${stringifiedParams}` : `/api/v1/tableaux-de-bord/recettes`
+}
+
+/**
+ * Prévu, facturé, encaissé, reste à recouvrer et taux, au total et par nature, service et
+ * mois. La période (`du`, `au`) borne les mouvements ; le prévu compte en entier.
+ * @summary Tableau Recettes
+ */
+export const tableauRecettes = async (params: TableauRecettesParams, options?: Parameters<typeof appelerApi>[1]): Promise<TableauRecettes> => {
+
+  return appelerApi<TableauRecettes>(getTableauRecettesUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getTableauRecettesQueryKey = (params?: TableauRecettesParams,) => {
+    return [
+    `/api/v1/tableaux-de-bord/recettes`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getTableauRecettesQueryOptions = <TData = Awaited<ReturnType<typeof tableauRecettes>>, TError = HTTPValidationError>(params: TableauRecettesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tableauRecettes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getTableauRecettesQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof tableauRecettes>>> = ({ signal }) => tableauRecettes(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof tableauRecettes>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type TableauRecettesQueryResult = NonNullable<Awaited<ReturnType<typeof tableauRecettes>>>
+export type TableauRecettesQueryError = HTTPValidationError
+
+
+/**
+ * Prévu, facturé, encaissé, reste à recouvrer et taux, au total et par nature, service et
+ * mois. La période (`du`, `au`) borne les mouvements ; le prévu compte en entier.
+ * @summary Tableau Recettes
+ */
+export function useTableauRecettes<TData = Awaited<ReturnType<typeof tableauRecettes>>, TError = HTTPValidationError>(
+ params: TableauRecettesParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof tableauRecettes>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof tableauRecettes>>,
+          TError,
+          Awaited<ReturnType<typeof tableauRecettes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Prévu, facturé, encaissé, reste à recouvrer et taux, au total et par nature, service et
+ * mois. La période (`du`, `au`) borne les mouvements ; le prévu compte en entier.
+ * @summary Tableau Recettes
+ */
+export function useTableauRecettes<TData = Awaited<ReturnType<typeof tableauRecettes>>, TError = HTTPValidationError>(
+ params: TableauRecettesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tableauRecettes>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof tableauRecettes>>,
+          TError,
+          Awaited<ReturnType<typeof tableauRecettes>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Prévu, facturé, encaissé, reste à recouvrer et taux, au total et par nature, service et
+ * mois. La période (`du`, `au`) borne les mouvements ; le prévu compte en entier.
+ * @summary Tableau Recettes
+ */
+export function useTableauRecettes<TData = Awaited<ReturnType<typeof tableauRecettes>>, TError = HTTPValidationError>(
+ params: TableauRecettesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tableauRecettes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * Prévu, facturé, encaissé, reste à recouvrer et taux, au total et par nature, service et
+ * mois. La période (`du`, `au`) borne les mouvements ; le prévu compte en entier.
+ * @summary Tableau Recettes
+ */
+export function useTableauRecettes<TData = Awaited<ReturnType<typeof tableauRecettes>>, TError = HTTPValidationError>(
+ params: TableauRecettesParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof tableauRecettes>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getTableauRecettesQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
 export const getListerSitesUrl = (params?: ListerSitesParams,) => {
   const normalizedParams = new URLSearchParams();
 
@@ -15497,6 +16228,388 @@ export const useModifierFournisseur = <TError = HTTPValidationError,
         TContext
       > => {
       return useMutation(getModifierFournisseurMutationOptions(options), queryClient);
+    }
+
+export const getListerDebiteursUrl = (params?: ListerDebiteursParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : String(value))
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/v1/debiteurs?${stringifiedParams}` : `/api/v1/debiteurs`
+}
+
+/**
+ * @summary Lister Debiteurs
+ */
+export const listerDebiteurs = async (params?: ListerDebiteursParams, options?: Parameters<typeof appelerApi>[1]): Promise<PageDebiteurSortie> => {
+
+  return appelerApi<PageDebiteurSortie>(getListerDebiteursUrl(params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getListerDebiteursQueryKey = (params?: ListerDebiteursParams,) => {
+    return [
+    `/api/v1/debiteurs`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getListerDebiteursQueryOptions = <TData = Awaited<ReturnType<typeof listerDebiteurs>>, TError = HTTPValidationError>(params?: ListerDebiteursParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerDebiteurs>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListerDebiteursQueryKey(params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listerDebiteurs>>> = ({ signal }) => listerDebiteurs(params, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listerDebiteurs>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListerDebiteursQueryResult = NonNullable<Awaited<ReturnType<typeof listerDebiteurs>>>
+export type ListerDebiteursQueryError = HTTPValidationError
+
+
+/** @summary Lister Debiteurs */
+export function useListerDebiteurs<TData = Awaited<ReturnType<typeof listerDebiteurs>>, TError = HTTPValidationError>(
+ params: undefined |  ListerDebiteursParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerDebiteurs>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerDebiteurs>>,
+          TError,
+          Awaited<ReturnType<typeof listerDebiteurs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Debiteurs */
+export function useListerDebiteurs<TData = Awaited<ReturnType<typeof listerDebiteurs>>, TError = HTTPValidationError>(
+ params?: ListerDebiteursParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerDebiteurs>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listerDebiteurs>>,
+          TError,
+          Awaited<ReturnType<typeof listerDebiteurs>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Debiteurs */
+export function useListerDebiteurs<TData = Awaited<ReturnType<typeof listerDebiteurs>>, TError = HTTPValidationError>(
+ params?: ListerDebiteursParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerDebiteurs>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Lister Debiteurs */
+export function useListerDebiteurs<TData = Awaited<ReturnType<typeof listerDebiteurs>>, TError = HTTPValidationError>(
+ params?: ListerDebiteursParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listerDebiteurs>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListerDebiteursQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getCreerDebiteurUrl = () => {
+
+
+
+
+  return `/api/v1/debiteurs`
+}
+
+/**
+ * @summary Creer Debiteur
+ */
+export const creerDebiteur = async (debiteurCreation: DebiteurCreation, options?: Parameters<typeof appelerApi>[1]): Promise<DebiteurSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<DebiteurSortie>(getCreerDebiteurUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(debiteurCreation)
+  }
+);}
+
+
+
+
+
+export const getCreerDebiteurMutationKey = () => ['creerDebiteur'] as const;
+
+export const getCreerDebiteurMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerDebiteur>>, TError,CreerDebiteurMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof creerDebiteur>>, TError,CreerDebiteurMutationVariables, TContext> => {
+
+const mutationKey = getCreerDebiteurMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof creerDebiteur>>, CreerDebiteurMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  creerDebiteur(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreerDebiteurMutationResult = NonNullable<Awaited<ReturnType<typeof creerDebiteur>>>
+    export type CreerDebiteurMutationBody = DebiteurCreation
+    export type CreerDebiteurMutationError = HTTPValidationError
+    export type CreerDebiteurMutationVariables = {data: DebiteurCreation}
+
+    /** @summary Creer Debiteur */
+export const useCreerDebiteur = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof creerDebiteur>>, TError,CreerDebiteurMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof creerDebiteur>>,
+        TError,
+        CreerDebiteurMutationVariables,
+        TContext
+      > => {
+      return useMutation(getCreerDebiteurMutationOptions(options), queryClient);
+    }
+
+export const getObtenirDebiteurUrl = (identifiant: string,) => {
+
+
+
+
+  return `/api/v1/debiteurs/${identifiant}`
+}
+
+/**
+ * @summary Obtenir Debiteur
+ */
+export const obtenirDebiteur = async (identifiant: string, options?: Parameters<typeof appelerApi>[1]): Promise<DebiteurSortie> => {
+
+  return appelerApi<DebiteurSortie>(getObtenirDebiteurUrl(identifiant),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+);}
+
+
+
+
+
+export const getObtenirDebiteurQueryKey = (identifiant: string,) => {
+    return [
+    `/api/v1/debiteurs/${identifiant}`
+    ] as const;
+    }
+
+
+export const getObtenirDebiteurQueryOptions = <TData = Awaited<ReturnType<typeof obtenirDebiteur>>, TError = HTTPValidationError>(identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirDebiteur>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+) => {
+
+const {query: queryOptions, request: requestOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getObtenirDebiteurQueryKey(identifiant);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof obtenirDebiteur>>> = ({ signal }) => obtenirDebiteur(identifiant, { signal, ...requestOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: identifiant !== null && identifiant !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof obtenirDebiteur>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ObtenirDebiteurQueryResult = NonNullable<Awaited<ReturnType<typeof obtenirDebiteur>>>
+export type ObtenirDebiteurQueryError = HTTPValidationError
+
+
+/** @summary Obtenir Debiteur */
+export function useObtenirDebiteur<TData = Awaited<ReturnType<typeof obtenirDebiteur>>, TError = HTTPValidationError>(
+ identifiant: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirDebiteur>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenirDebiteur>>,
+          TError,
+          Awaited<ReturnType<typeof obtenirDebiteur>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Debiteur */
+export function useObtenirDebiteur<TData = Awaited<ReturnType<typeof obtenirDebiteur>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirDebiteur>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof obtenirDebiteur>>,
+          TError,
+          Awaited<ReturnType<typeof obtenirDebiteur>>
+        > , 'initialData'
+      >, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Debiteur */
+export function useObtenirDebiteur<TData = Awaited<ReturnType<typeof obtenirDebiteur>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirDebiteur>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/** @summary Obtenir Debiteur */
+export function useObtenirDebiteur<TData = Awaited<ReturnType<typeof obtenirDebiteur>>, TError = HTTPValidationError>(
+ identifiant: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof obtenirDebiteur>>, TError, TData>>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getObtenirDebiteurQueryOptions(identifiant,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return withQueryKey(query, queryOptions.queryKey);
+}
+
+
+
+
+
+
+
+export const getModifierDebiteurUrl = (identifiant: string,) => {
+
+
+
+
+  return `/api/v1/debiteurs/${identifiant}`
+}
+
+/**
+ * @summary Modifier Debiteur
+ */
+export const modifierDebiteur = async (identifiant: string,
+    debiteurModification: DebiteurModification, options?: Parameters<typeof appelerApi>[1]): Promise<DebiteurSortie> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return appelerApi<DebiteurSortie>(getModifierDebiteurUrl(identifiant),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(debiteurModification)
+  }
+);}
+
+
+
+
+
+export const getModifierDebiteurMutationKey = () => ['modifierDebiteur'] as const;
+
+export const getModifierDebiteurMutationOptions = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierDebiteur>>, TError,ModifierDebiteurMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+): UseMutationOptions<Awaited<ReturnType<typeof modifierDebiteur>>, TError,ModifierDebiteurMutationVariables, TContext> => {
+
+const mutationKey = getModifierDebiteurMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof modifierDebiteur>>, ModifierDebiteurMutationVariables> = (props) => {
+          const {identifiant,data} = props ?? {};
+
+          return  modifierDebiteur(identifiant,data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ModifierDebiteurMutationResult = NonNullable<Awaited<ReturnType<typeof modifierDebiteur>>>
+    export type ModifierDebiteurMutationBody = DebiteurModification
+    export type ModifierDebiteurMutationError = HTTPValidationError
+    export type ModifierDebiteurMutationVariables = {identifiant: string;data: DebiteurModification}
+
+    /** @summary Modifier Debiteur */
+export const useModifierDebiteur = <TError = HTTPValidationError,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof modifierDebiteur>>, TError,ModifierDebiteurMutationVariables, TContext>, request?: SecondParameter<typeof appelerApi>}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof modifierDebiteur>>,
+        TError,
+        ModifierDebiteurMutationVariables,
+        TContext
+      > => {
+      return useMutation(getModifierDebiteurMutationOptions(options), queryClient);
     }
 
 export const getListerExercicesUrl = (params?: ListerExercicesParams,) => {

@@ -19,11 +19,11 @@ Tableau produit à partir des tests (nom et docstring des tests backend, titre d
 | RG-11 | `backend/tests/test_contrats.py::test_rec04_avenant_effectif_apres_validation` |
 | RG-12 | `backend/tests/test_architecture.py::test_rec15_aucune_fonction_de_passation_dans_l_api` |
 | RG-13 | `backend/tests/test_paiements.py::test_rg13_qui_valide_la_liquidation_ne_la_paie_pas`<br>`backend/tests/test_paiements.py::test_ventilation_solde_et_statut_de_la_facture`<br>`backend/tests/test_workflow.py::test_rg13_separation_des_taches_selon_le_circuit`<br>`frontend/src/App.test.tsx : révision : aucun bouton de décision si le serveur le refuse (RG-13)` |
-| RG-14 | `backend/tests/test_architecture.py::test_rg14_aucun_indicateur_stocke` |
+| RG-14 | `backend/tests/test_architecture.py::test_rg14_aucun_indicateur_stocke`<br>`backend/tests/test_recettes.py::test_t261_recettes_mouvements_et_indicateurs` |
 | RG-15 | `backend/tests/test_contrats.py::test_rg15_ventilation_incoherente_refusee`<br>`backend/tests/test_contrats.py::test_rg15_ventilation_vaut_pour_contrat_et_marche`<br>`backend/tests/test_engagements.py::test_rg15_engagement_incoherent_refuse` |
 | RG-16 | `backend/tests/test_factures.py::test_rec11_doublon_de_facture` |
 | RG-17 | `backend/tests/test_factures.py::test_une_liquidation_par_imputation` |
-| RG-18 | `backend/tests/test_engagements.py::test_annulation_partielle_puis_totale`<br>`backend/tests/test_paiements.py::test_rg18_annulation_du_paiement` |
+| RG-18 | `backend/tests/test_engagements.py::test_annulation_partielle_puis_totale`<br>`backend/tests/test_paiements.py::test_rg18_annulation_du_paiement`<br>`backend/tests/test_recettes.py::test_t261_recettes_mouvements_et_indicateurs`<br>`backend/tests/test_recettes.py::test_t262_contre_mouvement` |
 | RG-19 | `backend/tests/test_engagements.py::test_rg02_credit_insuffisant_et_derogation_limitee` |
 | RG-20 | `backend/tests/test_engagements.py::test_rec16_deux_engagements_simultanes_un_seul_passe`<br>`backend/tests/test_tracabilite.py::test_chaque_exigence_a_son_test` |
 | REC-01 | `backend/tests/test_tracabilite.py::test_chaque_exigence_a_son_test`<br>`frontend/e2e/parcours.spec.ts : REC-01 : créer un exercice puis importer les crédits du budget` |

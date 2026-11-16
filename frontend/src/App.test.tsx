@@ -58,6 +58,7 @@ beforeAll(async () => {
     'cloture',
     'audit',
     'integrations',
+    'recettes',
   ])
 })
 
@@ -1337,5 +1338,34 @@ describe('options d’interface (lot P3.C)', () => {
       theme: 'SOMBRE',
       densite: 'CONFORTABLE',
     })
+  }, 15_000)
+})
+
+describe('volet recettes (lot P3.B)', () => {
+  const page = (donnees: unknown[]) => ({
+    donnees,
+    pagination: { page: 1, taille: 100, total: donnees.length, suivant: null },
+  })
+  const RB = { ...MOI, habilitations: [{ profil: 'RB', etablissementId: 'a1' }] }
+
+  test('T-260 : menu Recettes visible seulement si le volet est activé', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    simulerApi({
+      'GET /api/v1/moi': [json(RB)],
+      'GET /api/v1/etablissements': [json(page([{ ...ETABLISSEMENT, voletRecettesActif: false }]))],
+    })
+    afficher('/')
+    expect(await screen.findByText('Bienvenue, Awa Diop', {}, { timeout: 5000 })).toBeTruthy()
+    expect(screen.queryByRole('menuitem', { name: /Recettes/ })).toBeNull()
+
+    cleanup()
+    simulerApi({
+      'GET /api/v1/moi': [json(RB)],
+      'GET /api/v1/etablissements': [json(page([{ ...ETABLISSEMENT, voletRecettesActif: true }]))],
+    })
+    afficher('/')
+    expect(
+      await screen.findByRole('menuitem', { name: /Recettes/ }, { timeout: 5000 }),
+    ).toBeTruthy()
   }, 15_000)
 })

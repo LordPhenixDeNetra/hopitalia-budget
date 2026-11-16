@@ -76,7 +76,12 @@ Le circuit est figé à la soumission : le modifier ne change pas les pièces d�
 - Le responsable budgétaire crée ensuite le budget et importe les dotations (guide utilisateur, profil RB).
 - **Délégations** : chaque agent crée les siennes pour ses absences (guide utilisateur).
 
-## 7. Intégration Hopitalia
+## 7. Volet recettes
+
+- Sur la fiche de l'établissement, « Activer le volet recettes ». Désactivé, le volet est invisible et refusé ; les recettes déjà saisies sont conservées.
+- **Paramétrage**, « Débiteurs » : organismes qui doivent les recettes (État, assurance, mutuelle…), communs à tous les établissements.
+
+## 8. Intégration Hopitalia
 
 **Intégrations** (ADM pour lancer et reprendre ; RB et AUD en lecture) :
 
@@ -87,7 +92,7 @@ Le circuit est figé à la soumission : le modifier ne change pas les pièces d�
 
 Pré-requis côté serveur : compte technique Hopitalia et établissement cible (`HOPITALIA_ETABLISSEMENT`), voir le [plan d'exploitation](../exploitation/plan-exploitation.md).
 
-## 8. Contrôle et audit
+## 9. Contrôle et audit
 
 - Le **journal d'audit** (VAL, ORD, AUD) retrace toute modification de donnée financière, les connexions et les exports.
 - Contrôle périodique conseillé : profils encore justifiés, délégations en cours, échanges en échec, alertes non lues anciennes.

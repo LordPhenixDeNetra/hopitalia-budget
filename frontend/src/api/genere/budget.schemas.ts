@@ -810,6 +810,49 @@ export interface CoordonneeSortie {
   parDefaut: boolean;
 }
 
+export type TypeDebiteur = typeof TypeDebiteur[keyof typeof TypeDebiteur];
+
+
+export const TypeDebiteur = {
+  ETAT: 'ETAT',
+  COLLECTIVITE: 'COLLECTIVITE',
+  ASSURANCE: 'ASSURANCE',
+  MUTUELLE: 'MUTUELLE',
+  ENTREPRISE: 'ENTREPRISE',
+  PARTICULIER: 'PARTICULIER',
+  AUTRE: 'AUTRE',
+} as const;
+
+export interface DebiteurCreation {
+  /**
+     * @minLength 1
+     * @maxLength 20
+     * @pattern ^[A-Za-z0-9_.-]+$
+     */
+  code: string;
+  /**
+     * @minLength 1
+     * @maxLength 200
+     */
+  nom: string;
+  type: TypeDebiteur;
+}
+
+export interface DebiteurModification {
+  nom?: string | null;
+  type?: TypeDebiteur | null;
+  actif?: boolean | null;
+}
+
+export interface DebiteurSortie {
+  id: string;
+  code: string;
+  nom: string;
+  type: TypeDebiteur;
+  actif: boolean;
+  version: number;
+}
+
 export type Decision = typeof Decision[keyof typeof Decision];
 
 
@@ -1193,6 +1236,7 @@ export interface EtablissementCreation {
 export interface EtablissementModification {
   nom?: string | null;
   actif?: boolean | null;
+  voletRecettesActif?: boolean | null;
 }
 
 export interface EtablissementSortie {
@@ -1201,6 +1245,7 @@ export interface EtablissementSortie {
   nom: string;
   actif: boolean;
   version: number;
+  voletRecettesActif: boolean;
 }
 
 export interface VisaSortie {
@@ -1471,6 +1516,19 @@ export interface Indicateurs {
   tauxPaiement: string | null;
 }
 
+export interface IndicateursRecetteSortie {
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  prevu: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  facture: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  encaisse: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  resteARecouvrer: string;
+  tauxRecouvrement: string | null;
+  tauxRealisation: string | null;
+}
+
 export interface Jetons {
   jetonAcces: string;
   jetonRafraichissement: string;
@@ -1733,6 +1791,45 @@ export interface MotifSchema {
   motif: string;
 }
 
+export type TypeMouvement = typeof TypeMouvement[keyof typeof TypeMouvement];
+
+
+export const TypeMouvement = {
+  FACTURE: 'FACTURE',
+  ENCAISSEMENT: 'ENCAISSEMENT',
+} as const;
+
+export interface MouvementCreation {
+  type: TypeMouvement;
+  date: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  reference?: string | null;
+  motif?: string | null;
+}
+
+export type OrigineMouvement = typeof OrigineMouvement[keyof typeof OrigineMouvement];
+
+
+export const OrigineMouvement = {
+  SAISIE: 'SAISIE',
+  HOPITALIA: 'HOPITALIA',
+} as const;
+
+export interface MouvementSortie {
+  id: string;
+  recetteId: string;
+  type: TypeMouvement;
+  date: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montant: string;
+  reference: string | null;
+  motif: string | null;
+  origine: OrigineMouvement;
+  creeParCode: string;
+  creeLe: string;
+}
+
 export interface NotificationLigne {
   ligneId: string;
   /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
@@ -1941,6 +2038,11 @@ export interface PageContratResume {
   pagination: Pagination;
 }
 
+export interface PageDebiteurSortie {
+  donnees: DebiteurSortie[];
+  pagination: Pagination;
+}
+
 export interface PageDelegationSortie {
   donnees: DelegationSortie[];
   pagination: Pagination;
@@ -2039,6 +2141,45 @@ export interface ProgrammeSortie {
 
 export interface PageProgrammeSortie {
   donnees: ProgrammeSortie[];
+  pagination: Pagination;
+}
+
+export type TypeRecette = typeof TypeRecette[keyof typeof TypeRecette];
+
+
+export const TypeRecette = {
+  SUBVENTION_DOTATION: 'SUBVENTION_DOTATION',
+  RECETTE_PROPRE: 'RECETTE_PROPRE',
+  REMBOURSEMENT_ASSURANCE: 'REMBOURSEMENT_ASSURANCE',
+  PRESTATION_HOSPITALIERE: 'PRESTATION_HOSPITALIERE',
+  AUTRE: 'AUTRE',
+} as const;
+
+export interface RecetteSortie {
+  id: string;
+  etablissementId: string;
+  exerciceId: string;
+  periodeId: string | null;
+  numero: string;
+  nature: TypeRecette;
+  libelle: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantPrevisionnel: string;
+  dateEcheance: string | null;
+  sourceId: string;
+  centreId: string | null;
+  ligneId: string | null;
+  debiteurId: string | null;
+  debiteur: string | null;
+  service: string | null;
+  indicateurs: IndicateursRecetteSortie;
+  creeParCode: string;
+  creeLe: string;
+  version: number;
+}
+
+export interface PageRecetteSortie {
+  donnees: RecetteSortie[];
   pagination: Pagination;
 }
 
@@ -2396,6 +2537,37 @@ export interface ReceptionSortie {
   attestation: AttestationSortie | null;
 }
 
+export interface RecetteCreation {
+  etablissementId: string;
+  exerciceId: string;
+  periodeId?: string | null;
+  nature: TypeRecette;
+  /**
+     * @minLength 1
+     * @maxLength 300
+     */
+  libelle: string;
+  /** @pattern ^-?\d{1,16}(\.\d{1,2})?$ */
+  montantPrevisionnel: string;
+  dateEcheance?: string | null;
+  sourceId: string;
+  centreId?: string | null;
+  ligneId?: string | null;
+  debiteurId?: string | null;
+}
+
+/**
+ * Prévision modifiable (ce n'est pas une opération validée) ; tracée.
+ */
+export interface RecetteModification {
+  libelle?: string | null;
+  montantPrevisionnel?: string | null;
+  dateEcheance?: string | null;
+  periodeId?: string | null;
+  centreId?: string | null;
+  debiteurId?: string | null;
+}
+
 export interface ReferentielCreation {
   /**
      * @minLength 1
@@ -2454,6 +2626,12 @@ export interface Repartition {
   paye: string;
   budgetRevise: string | null;
   tauxEngagement: string | null;
+}
+
+export interface RepartitionRecettes {
+  cle: string;
+  libelle: string;
+  indicateurs: IndicateursRecetteSortie;
 }
 
 export interface Repartitions {
@@ -2719,6 +2897,13 @@ export interface TableauDirection {
   repartitions: Repartitions;
   marches: MarcheTableau[];
   operationnel: Operationnel;
+}
+
+export interface TableauRecettes {
+  totaux: IndicateursRecetteSortie;
+  parNature: RepartitionRecettes[];
+  parService: RepartitionRecettes[];
+  parMois: RepartitionRecettes[];
 }
 
 export type TransitionCreationTypeObjet = typeof TransitionCreationTypeObjet[keyof typeof TransitionCreationTypeObjet];
@@ -3142,6 +3327,30 @@ export type ListerCommandesPharmacieParams = {
   taille?: number;
 };
 
+export type ListerRecettesParams = {
+  exerciceId?: string | null;
+  etablissementId?: string | null;
+  nature?: TypeRecette | null;
+  centreId?: string | null;
+  debiteurId?: string | null;
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+};
+
+export type TableauRecettesParams = {
+  exerciceId: string;
+  etablissementId?: string | null;
+  nature?: TypeRecette | null;
+  centreId?: string | null;
+  du?: string | null;
+  au?: string | null;
+};
+
 export type ListerSitesParams = {
   /** @minimum 1 */
   page?: number;
@@ -3281,6 +3490,21 @@ export type ListerFournisseursParams = {
   /** Champs code, raisonSociale ; - : décroissant */
   tri?: string | null;
   code?: string | null;
+  actif?: boolean | null;
+};
+
+export type ListerDebiteursParams = {
+  /** @minimum 1 */
+  page?: number;
+  /**
+   * @minimum 1
+   * @maximum 100
+   */
+  taille?: number;
+  /** Champs code, nom ; - : décroissant */
+  tri?: string | null;
+  code?: string | null;
+  type?: string | null;
   actif?: boolean | null;
 };
 

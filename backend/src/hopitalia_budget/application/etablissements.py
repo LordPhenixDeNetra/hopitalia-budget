@@ -74,6 +74,7 @@ def modifier(
     version_attendue: int,
     nom: str | None,
     actif: bool | None,
+    volet_recettes_actif: bool | None = None,
 ) -> Etablissement:
     etablissement = obtenir(depot, utilisateur, id_etablissement)
     if not utilisateur.peut(Operation.PARAMETRER, Droit.SAISIR, etablissement.id):
@@ -85,6 +86,8 @@ def modifier(
         etablissement.nom = nom
     if actif is not None:
         etablissement.actif = actif
+    if volet_recettes_actif is not None:
+        etablissement.volet_recettes_actif = volet_recettes_actif
     etablissement = depot.enregistrer(etablissement)
     journal.tracer(
         EvenementAudit(

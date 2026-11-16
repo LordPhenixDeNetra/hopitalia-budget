@@ -3,6 +3,7 @@ import {
   BgColorsOutlined,
   LockOutlined,
   MedicineBoxOutlined,
+  RiseOutlined,
   SearchOutlined,
   ApartmentOutlined,
   BellOutlined,
@@ -73,6 +74,11 @@ export function Gabarit() {
   const clotureExercice = ['RB', 'ORD'].some((p) => profils.has(p))
   // Rattacher une commande de la pharmacie : AF saisit, GMC et AUD consultent.
   const voitPharmacie = ['AF', 'GMC', 'AUD'].some((p) => profils.has(p))
+  // Volet recettes (T-260) : invisible tant qu'aucun établissement visible ne l'a activé ;
+  // profils de « Gérer les recettes » dans la matrice.
+  const voitRecettes =
+    ['RB', 'AF', 'VAL', 'ORD', 'CPT', 'AUD'].some((p) => profils.has(p)) &&
+    etablissements.some((e) => e.voletRecettesActif)
 
   const changerLangue = (langue: Langue) => {
     memoriserLangue(langue)
@@ -169,6 +175,15 @@ export function Gabarit() {
               icon: <WalletOutlined aria-hidden />,
               label: t('menu.paiements'),
             },
+            ...(voitRecettes
+              ? [
+                  {
+                    key: '/recettes',
+                    icon: <RiseOutlined aria-hidden />,
+                    label: t('menu.recettes'),
+                  },
+                ]
+              : []),
             {
               key: '/nomenclature',
               icon: <ApartmentOutlined aria-hidden />,

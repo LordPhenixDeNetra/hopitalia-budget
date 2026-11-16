@@ -1,5 +1,5 @@
 """Calcul unique des indicateurs (cahier des charges, section 6) : ligne budgétaire (6.1),
-contrat (6.2), avance et retenue de garantie.
+contrat (6.2), avance et retenue de garantie, recettes (6.4).
 
 Seul endroit où ces formules sont écrites (ARC-S) : écrans, états, contrôles et tableaux de
 bord appellent les fonctions `calculer_*`. Les indicateurs ne sont jamais stockés (RG-14).
@@ -280,6 +280,37 @@ def reste_a_payer_facture(nets_valides: list[Decimal], allocations: list[Decimal
     """6.3 : nets à payer des liquidations validées, moins les allocations reçues ; pour une
     facture, ou pour une seule liquidation (son solde dû, RG-07)."""
     return sum(nets_valides, ZERO) - sum(allocations, ZERO)
+
+
+# --- 6.4. Recettes (volet activable, EF-RCT-02) ---------------------------------------------
+
+
+@dataclass(frozen=True)
+class IndicateursRecette:
+    """Prévu, facturé et encaissé d'une recette (ou d'un ensemble de recettes)."""
+
+    prevu: Decimal
+    facture: Decimal
+    encaisse: Decimal
+    reste_a_recouvrer: Decimal
+    taux_recouvrement: Decimal | None
+    taux_realisation: Decimal | None
+
+
+def calculer_indicateurs_recette(
+    prevu: Decimal, facture: Decimal, encaisse: Decimal
+) -> IndicateursRecette:
+    """Reste à recouvrer = facturé - encaissé ; taux de recouvrement = encaissé / facturé ;
+    taux de réalisation = facturé / prévu. Facturé et encaissé sont des sommes de mouvements ;
+    sur un ensemble de recettes, les montants s'additionnent avant le calcul des taux."""
+    return IndicateursRecette(
+        prevu=prevu,
+        facture=facture,
+        encaisse=encaisse,
+        reste_a_recouvrer=facture - encaisse,
+        taux_recouvrement=_taux(encaisse, facture),
+        taux_realisation=_taux(facture, prevu),
+    )
 
 
 def parametres_depuis_valeurs(valeurs: dict[str, str]) -> ParametresCalcul:

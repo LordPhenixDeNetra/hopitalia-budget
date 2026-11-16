@@ -95,6 +95,11 @@ def test_rg14_aucun_indicateur_stocke() -> None:
         "consommation_budgetaire",
         "taux_engagement",
         "taux_consommation",
+        # Recettes (6.4) : facturé et encaissé sont des sommes de mouvements.
+        "encaisse",
+        "reste_a_recouvrer",
+        "taux_recouvrement",
+        "taux_realisation",
     }
     stockes = [
         f"{table.name}.{colonne.name}"

@@ -25,7 +25,8 @@
     "audit": "Audit journal",
     "clotureExercice": "Year closing",
     "integrations": "Integrations",
-    "commandesPharmacie": "Pharmacy orders"
+    "commandesPharmacie": "Pharmacy orders",
+    "recettes": "Revenue"
   },
   "entete": {
     "langue": "Language",

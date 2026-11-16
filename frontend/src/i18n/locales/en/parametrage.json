@@ -14,7 +14,8 @@
     "exercices": "Fiscal years",
     "budgets": "Budgets",
     "lignes-budgetaires": "Budget lines",
-    "circuits-validation": "Approval flows"
+    "circuits-validation": "Approval flows",
+    "debiteurs": "Debtors"
   },
   "champs": {
     "code": "Code",
@@ -51,7 +52,8 @@
     "natureEconomique": "Economic nature",
     "dotationInitiale": "Initial allocation",
     "actions": "Actions",
-    "typesObjets": "Mandatory for"
+    "typesObjets": "Mandatory for",
+    "nom": "Name"
   },
   "valeurs": {
     "CLINIQUE": "Clinical",
@@ -77,7 +79,13 @@
     "Derogation": "Derogation",
     "Reception": "Receipt",
     "Liquidation": "Settlement",
-    "Facture": "Invoice"
+    "Facture": "Invoice",
+    "ETAT": "Government",
+    "COLLECTIVITE": "Local authority",
+    "ASSURANCE": "Insurer",
+    "MUTUELLE": "Mutual insurer",
+    "ENTREPRISE": "Company",
+    "PARTICULIER": "Individual"
   },
   "actions": {
     "creer": "Add",

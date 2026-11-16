@@ -58,10 +58,13 @@ Le droit de consulter est limité au périmètre de l'utilisateur : son ou ses �
 | Clôturer un exercice | — | S | — | — | — | — | — | V | — | L | — |
 | Consulter les tableaux de bord et exporter les états | L | L | L | L | L | — | L | L | L | L | L |
 | Consulter le journal d'audit | — | — | — | — | — | — | L | L | — | L | — |
+| Gérer les recettes (prévisions, facturé, encaissé) | — | S | S | — | — | — | L | L | S | L | — |
 
 Pour l'annulation d'une opération validée, AF saisit la demande et VAL ou ORD la valide.
 
 Le rattachement d'une commande de la pharmacie à un engagement a été ajouté le 16/11/2026 (EF-REC-07, lot 7) : l'agent financier rattache, le gestionnaire des marchés et commandes consulte. Ligne à confirmer par la DAF.
+
+La gestion des recettes (volet activable, lot P3.B) a été ajoutée le 16/11/2026 : le responsable budgétaire saisit les prévisions, l'agent financier et le comptable le facturé et l'encaissé ; valideur, ordonnateur et auditeur consultent. Ligne à confirmer par la DAF.
 
 ## Ordre des validations
 

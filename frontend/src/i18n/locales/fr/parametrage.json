@@ -14,7 +14,8 @@
     "exercices": "Exercices budgétaires",
     "budgets": "Budgets",
     "lignes-budgetaires": "Lignes budgétaires",
-    "circuits-validation": "Circuits de validation"
+    "circuits-validation": "Circuits de validation",
+    "debiteurs": "Débiteurs"
   },
   "champs": {
     "code": "Code",
@@ -51,7 +52,8 @@
     "natureEconomique": "Nature économique",
     "dotationInitiale": "Dotation initiale",
     "actions": "Actions",
-    "typesObjets": "Obligatoire pour"
+    "typesObjets": "Obligatoire pour",
+    "nom": "Nom"
   },
   "valeurs": {
     "CLINIQUE": "Clinique",
@@ -77,7 +79,13 @@
     "Derogation": "Dérogation",
     "Reception": "Réception",
     "Liquidation": "Liquidation",
-    "Facture": "Facture"
+    "Facture": "Facture",
+    "ETAT": "État",
+    "COLLECTIVITE": "Collectivité",
+    "ASSURANCE": "Assurance",
+    "MUTUELLE": "Mutuelle",
+    "ENTREPRISE": "Entreprise",
+    "PARTICULIER": "Particulier"
   },
   "actions": {
     "creer": "Ajouter",

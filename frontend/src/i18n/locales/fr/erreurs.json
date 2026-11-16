@@ -76,5 +76,7 @@
   },
   "COMMANDE_DEJA_RATTACHEE": "Cette commande de la pharmacie est déjà rattachée à un engagement.",
   "FOURNISSEUR_DIFFERENT": "Le fournisseur de l'engagement n'est pas celui de la commande.",
-  "ECHANGE_NON_REPRENABLE": "Seul un échange en échec peut être repris."
+  "ECHANGE_NON_REPRENABLE": "Seul un échange en échec peut être repris.",
+  "VOLET_RECETTES_INACTIF": "Le volet recettes n'est pas activé pour cet établissement.",
+  "CONTRE_MOUVEMENT_EXCESSIF": "Le contre-mouvement dépasse le cumul déjà enregistré."
 }

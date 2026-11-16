@@ -47,6 +47,7 @@ class Operation(StrEnum):
     CLOTURER_EXERCICE = "CLOTURER_EXERCICE"
     CONSULTER_TABLEAUX_BORD = "CONSULTER_TABLEAUX_BORD"
     CONSULTER_AUDIT = "CONSULTER_AUDIT"
+    GERER_RECETTES = "GERER_RECETTES"
 
 
 # Colonnes dans l'ordre de Profil ; « - » : aucun accès. Même lecture que le document validé.
@@ -74,6 +75,7 @@ _LIGNES = {
     Operation.CLOTURER_EXERCICE: "- S - - - - - V - L -",
     Operation.CONSULTER_TABLEAUX_BORD: "L L L L L - L L L L L",
     Operation.CONSULTER_AUDIT: "- - - - - - L L - L -",
+    Operation.GERER_RECETTES: "- S S - - - L L S L -",
 }
 
 MATRICE: dict[Operation, dict[Profil, Droit]] = {

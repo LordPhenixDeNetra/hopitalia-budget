@@ -13,7 +13,12 @@ from hopitalia_budget.domaine.utilisateur import Habilitation
 
 def _vers_domaine(modele: EtablissementModele) -> Etablissement:
     return Etablissement(
-        id=modele.id, code=modele.code, nom=modele.nom, actif=modele.actif, version=modele.version
+        id=modele.id,
+        code=modele.code,
+        nom=modele.nom,
+        actif=modele.actif,
+        version=modele.version,
+        volet_recettes_actif=modele.volet_recettes_actif,
     )
 
 
@@ -66,6 +71,7 @@ class DepotEtablissementsSql:
         modele = self.session.get_one(EtablissementModele, etablissement.id)
         modele.nom = etablissement.nom
         modele.actif = etablissement.actif
+        modele.volet_recettes_actif = etablissement.volet_recettes_actif
         # version_id_col : une modification concurrente lève StaleDataError (traduite en 412).
         self.session.flush()
         return _vers_domaine(modele)

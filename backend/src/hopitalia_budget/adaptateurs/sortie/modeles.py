@@ -15,6 +15,7 @@ from sqlalchemy import (
     String,
     Text,
     UniqueConstraint,
+    false,
     text,
 )
 from sqlalchemy.dialects.postgresql import JSONB
@@ -34,6 +35,7 @@ class EtablissementModele(Base):
     nom: Mapped[str] = mapped_column(String(200))
     actif: Mapped[bool] = mapped_column(default=True)
     version: Mapped[int] = mapped_column(default=1)
+    volet_recettes_actif: Mapped[bool] = mapped_column(default=False, server_default=false())
 
     __mapper_args__ = {"version_id_col": version}  # noqa: RUF012  (convention SQLAlchemy)
 
@@ -1185,3 +1187,70 @@ class ApprovisionnementPharmacieModele(Base):
     reception_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("reception.id"), unique=True)
     supprime: Mapped[bool] = mapped_column(default=False)
     importe_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+# --- Lot P3.B : recettes (volet activable) -------------------------------------------------------
+
+
+class DebiteurModele(Base):
+    """Débiteur d'une recette : État, assurance, mutuelle… Commun à tous les établissements."""
+
+    __tablename__ = "debiteur"
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    code: Mapped[str] = mapped_column(String(20), unique=True)
+    nom: Mapped[str] = mapped_column(String(200))
+    type: Mapped[str] = mapped_column(String(20))
+    actif: Mapped[bool] = mapped_column(default=True)
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class RecetteModele(Base):
+    """Recette prévue d'un établissement (EF-RCT-01) ; facturé et encaissé sont calculés depuis
+    ses mouvements, jamais stockés (RG-14)."""
+
+    __tablename__ = "recette"
+    __table_args__ = (UniqueConstraint("etablissement_id", "numero"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    etablissement_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("etablissement.id"), index=True)
+    exercice_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("exercice.id"), index=True)
+    periode_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("periode.id"))
+    numero: Mapped[str] = mapped_column(String(30))
+    nature: Mapped[str] = mapped_column(String(30), index=True)
+    libelle: Mapped[str] = mapped_column(String(300))
+    montant_previsionnel: Mapped[Decimal] = mapped_column(MONTANT)
+    date_echeance: Mapped[date | None]
+    source_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("referentiel.id"))
+    centre_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("centre_responsabilite.id"))
+    ligne_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("ligne_budgetaire.id"))
+    debiteur_id: Mapped[uuid.UUID | None] = mapped_column(ForeignKey("debiteur.id"))
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    version: Mapped[int] = mapped_column(default=1)
+
+    __mapper_args__ = {"version_id_col": version}  # noqa: RUF012
+
+
+class MouvementRecetteModele(Base):
+    """Facturé ou encaissé d'une recette ; jamais modifié : une correction est un
+    contre-mouvement négatif, motivé (RG-18). Origine : saisie, ou Hopitalia (INT-02)."""
+
+    __tablename__ = "mouvement_recette"
+    __table_args__ = (UniqueConstraint("origine", "reference_externe"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    recette_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("recette.id"), index=True)
+    type: Mapped[str] = mapped_column(String(15))
+    date: Mapped[date]
+    montant: Mapped[Decimal] = mapped_column(MONTANT)
+    reference: Mapped[str | None] = mapped_column(String(100))
+    motif: Mapped[str | None] = mapped_column(String(500))
+    origine: Mapped[str] = mapped_column(String(15))
+    reference_externe: Mapped[str | None] = mapped_column(String(100))
+    cree_par_id: Mapped[int] = mapped_column(BigInteger)
+    cree_par_code: Mapped[str] = mapped_column(String(20))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))

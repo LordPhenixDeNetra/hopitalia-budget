@@ -7306,6 +7306,558 @@
         }
       }
     },
+    "/api/v1/recettes": {
+      "get": {
+        "tags": [
+          "recettes"
+        ],
+        "summary": "Lister Recettes",
+        "description": "Recettes des établissements où le volet est actif, avec leurs indicateurs (6.4).",
+        "operationId": "lister_recettes",
+        "parameters": [
+          {
+            "name": "exerciceId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Exerciceid"
+            }
+          },
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "nature",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TypeRecette"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Nature"
+            }
+          },
+          {
+            "name": "centreId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Centreid"
+            }
+          },
+          {
+            "name": "debiteurId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Debiteurid"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_RecetteSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "recettes"
+        ],
+        "summary": "Creer Recette",
+        "description": "Recette prévue (EF-RCT-01) : nature, service, source, période, débiteur.",
+        "operationId": "creer_recette",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecetteCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecetteSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recettes/{recette_id}": {
+      "get": {
+        "tags": [
+          "recettes"
+        ],
+        "summary": "Obtenir Recette",
+        "operationId": "obtenir_recette",
+        "parameters": [
+          {
+            "name": "recette_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recette Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecetteSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "recettes"
+        ],
+        "summary": "Modifier Recette",
+        "operationId": "modifier_recette",
+        "parameters": [
+          {
+            "name": "recette_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recette Id"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RecetteModification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecetteSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/recettes/{recette_id}/mouvements": {
+      "get": {
+        "tags": [
+          "recettes"
+        ],
+        "summary": "Lister Mouvements",
+        "operationId": "lister_mouvements",
+        "parameters": [
+          {
+            "name": "recette_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recette Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MouvementSortie"
+                  },
+                  "title": "Response Lister Mouvements"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "recettes"
+        ],
+        "summary": "Enregistrer Mouvement",
+        "description": "Facturé ou encaissé saisi ; un contre-mouvement négatif corrige une erreur (motif).",
+        "operationId": "enregistrer_mouvement",
+        "parameters": [
+          {
+            "name": "recette_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Recette Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MouvementCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MouvementSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/tableaux-de-bord/recettes": {
+      "get": {
+        "tags": [
+          "recettes"
+        ],
+        "summary": "Tableau Recettes",
+        "description": "Prévu, facturé, encaissé, reste à recouvrer et taux, au total et par nature, service et\nmois. La période (`du`, `au`) borne les mouvements ; le prévu compte en entier.",
+        "operationId": "tableau_recettes",
+        "parameters": [
+          {
+            "name": "exerciceId",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Exerciceid"
+            }
+          },
+          {
+            "name": "etablissementId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Etablissementid"
+            }
+          },
+          {
+            "name": "nature",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TypeRecette"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Nature"
+            }
+          },
+          {
+            "name": "centreId",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Centreid"
+            }
+          },
+          {
+            "name": "du",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Du"
+            }
+          },
+          {
+            "name": "au",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "date"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Au"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TableauRecettes"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/sites": {
       "get": {
         "tags": [
@@ -10054,6 +10606,295 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/FournisseurSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/debiteurs": {
+      "get": {
+        "tags": [
+          "debiteurs"
+        ],
+        "summary": "Lister Debiteurs",
+        "operationId": "lister_debiteurs",
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          },
+          {
+            "name": "tri",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Champs code, nom ; - : décroissant",
+              "title": "Tri"
+            },
+            "description": "Champs code, nom ; - : décroissant"
+          },
+          {
+            "name": "code",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code"
+            }
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Type"
+            }
+          },
+          {
+            "name": "actif",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actif"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_DebiteurSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "debiteurs"
+        ],
+        "summary": "Creer Debiteur",
+        "operationId": "creer_debiteur",
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DebiteurCreation"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DebiteurSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/debiteurs/{identifiant}": {
+      "get": {
+        "tags": [
+          "debiteurs"
+        ],
+        "summary": "Obtenir Debiteur",
+        "operationId": "obtenir_debiteur",
+        "parameters": [
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DebiteurSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "debiteurs"
+        ],
+        "summary": "Modifier Debiteur",
+        "operationId": "modifier_debiteur",
+        "parameters": [
+          {
+            "name": "identifiant",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Identifiant"
+            }
+          },
+          {
+            "name": "If-Match",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "If-Match"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DebiteurModification"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DebiteurSortie"
                 }
               }
             }
@@ -15527,6 +16368,111 @@
         ],
         "title": "CoordonneeSortie"
       },
+      "DebiteurCreation": {
+        "properties": {
+          "code": {
+            "type": "string",
+            "maxLength": 20,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_.-]+$",
+            "title": "Code"
+          },
+          "nom": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Nom"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeDebiteur"
+          }
+        },
+        "type": "object",
+        "required": [
+          "code",
+          "nom",
+          "type"
+        ],
+        "title": "DebiteurCreation"
+      },
+      "DebiteurModification": {
+        "properties": {
+          "nom": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 200,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Nom"
+          },
+          "type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/TypeDebiteur"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "actif": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Actif"
+          }
+        },
+        "type": "object",
+        "title": "DebiteurModification"
+      },
+      "DebiteurSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "code": {
+            "type": "string",
+            "title": "Code"
+          },
+          "nom": {
+            "type": "string",
+            "title": "Nom"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeDebiteur"
+          },
+          "actif": {
+            "type": "boolean",
+            "title": "Actif"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "code",
+          "nom",
+          "type",
+          "actif",
+          "version"
+        ],
+        "title": "DebiteurSortie"
+      },
       "Decision": {
         "type": "string",
         "enum": [
@@ -16805,6 +17751,17 @@
               }
             ],
             "title": "Actif"
+          },
+          "voletRecettesActif": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Voletrecettesactif"
           }
         },
         "type": "object",
@@ -16832,6 +17789,10 @@
           "version": {
             "type": "integer",
             "title": "Version"
+          },
+          "voletRecettesActif": {
+            "type": "boolean",
+            "title": "Voletrecettesactif"
           }
         },
         "type": "object",
@@ -16840,7 +17801,8 @@
           "code",
           "nom",
           "actif",
-          "version"
+          "version",
+          "voletRecettesActif"
         ],
         "title": "EtablissementSortie"
       },
@@ -18148,6 +19110,82 @@
           "tauxPaiement"
         ],
         "title": "Indicateurs"
+      },
+      "IndicateursRecetteSortie": {
+        "properties": {
+          "prevu": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Prevu",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "facture": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Facture",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "encaisse": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Encaisse",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "resteARecouvrer": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Restearecouvrer",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "tauxRecouvrement": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxrecouvrement"
+          },
+          "tauxRealisation": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tauxrealisation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "prevu",
+          "facture",
+          "encaisse",
+          "resteARecouvrer",
+          "tauxRecouvrement",
+          "tauxRealisation"
+        ],
+        "title": "IndicateursRecetteSortie"
       },
       "IndicateursSortie": {
         "properties": {
@@ -19501,6 +20539,135 @@
         ],
         "title": "MotifSchema"
       },
+      "MouvementCreation": {
+        "properties": {
+          "type": {
+            "$ref": "#/components/schemas/TypeMouvement"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 100
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "motif": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 500
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motif"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "date",
+          "montant"
+        ],
+        "title": "MouvementCreation"
+      },
+      "MouvementSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "recetteId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Recetteid"
+          },
+          "type": {
+            "$ref": "#/components/schemas/TypeMouvement"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "title": "Date"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "reference": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reference"
+          },
+          "motif": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Motif"
+          },
+          "origine": {
+            "$ref": "#/components/schemas/OrigineMouvement"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "recetteId",
+          "type",
+          "date",
+          "montant",
+          "reference",
+          "motif",
+          "origine",
+          "creeParCode",
+          "creeLe"
+        ],
+        "title": "MouvementSortie"
+      },
       "NatureDerogation": {
         "type": "string",
         "enum": [
@@ -20090,6 +21257,14 @@
         ],
         "title": "Origine"
       },
+      "OrigineMouvement": {
+        "type": "string",
+        "enum": [
+          "SAISIE",
+          "HOPITALIA"
+        ],
+        "title": "OrigineMouvement"
+      },
       "PageAlertes": {
         "properties": {
           "donnees": {
@@ -20297,6 +21472,26 @@
           "pagination"
         ],
         "title": "Page[ContratResume]"
+      },
+      "Page_DebiteurSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/DebiteurSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[DebiteurSortie]"
       },
       "Page_DelegationSortie_": {
         "properties": {
@@ -20537,6 +21732,26 @@
           "pagination"
         ],
         "title": "Page[ProgrammeSortie]"
+      },
+      "Page_RecetteSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/RecetteSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[RecetteSortie]"
       },
       "Page_ReferentielSortie_": {
         "properties": {
@@ -21744,6 +22959,359 @@
         ],
         "title": "ReceptionSortie"
       },
+      "RecetteCreation": {
+        "properties": {
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "exerciceId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Exerciceid"
+          },
+          "periodeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Periodeid"
+          },
+          "nature": {
+            "$ref": "#/components/schemas/TypeRecette"
+          },
+          "libelle": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Libelle"
+          },
+          "montantPrevisionnel": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantprevisionnel",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Sourceid"
+          },
+          "centreId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Centreid"
+          },
+          "ligneId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ligneid"
+          },
+          "debiteurId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debiteurid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "etablissementId",
+          "exerciceId",
+          "nature",
+          "libelle",
+          "montantPrevisionnel",
+          "sourceId"
+        ],
+        "title": "RecetteCreation"
+      },
+      "RecetteModification": {
+        "properties": {
+          "libelle": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 300,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Libelle"
+          },
+          "montantPrevisionnel": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+                "examples": [
+                  "45000000.00"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Montantprevisionnel"
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "periodeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Periodeid"
+          },
+          "centreId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Centreid"
+          },
+          "debiteurId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debiteurid"
+          }
+        },
+        "type": "object",
+        "title": "RecetteModification",
+        "description": "Prévision modifiable (ce n'est pas une opération validée) ; tracée."
+      },
+      "RecetteSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "exerciceId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Exerciceid"
+          },
+          "periodeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Periodeid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "nature": {
+            "$ref": "#/components/schemas/TypeRecette"
+          },
+          "libelle": {
+            "type": "string",
+            "title": "Libelle"
+          },
+          "montantPrevisionnel": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montantprevisionnel",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "dateEcheance": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Dateecheance"
+          },
+          "sourceId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Sourceid"
+          },
+          "centreId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Centreid"
+          },
+          "ligneId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Ligneid"
+          },
+          "debiteurId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debiteurid"
+          },
+          "debiteur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debiteur"
+          },
+          "service": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service"
+          },
+          "indicateurs": {
+            "$ref": "#/components/schemas/IndicateursRecetteSortie"
+          },
+          "creeParCode": {
+            "type": "string",
+            "title": "Creeparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "version": {
+            "type": "integer",
+            "title": "Version"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "exerciceId",
+          "periodeId",
+          "numero",
+          "nature",
+          "libelle",
+          "montantPrevisionnel",
+          "dateEcheance",
+          "sourceId",
+          "centreId",
+          "ligneId",
+          "debiteurId",
+          "debiteur",
+          "service",
+          "indicateurs",
+          "creeParCode",
+          "creeLe",
+          "version"
+        ],
+        "title": "RecetteSortie"
+      },
       "ReferentielCreation": {
         "properties": {
           "code": {
@@ -22036,6 +23604,28 @@
         ],
         "title": "Repartition",
         "description": "Une clé (compte, service, nature ou fournisseur) et ses montants ; clé nulle : non\nrenseignée."
+      },
+      "RepartitionRecettes": {
+        "properties": {
+          "cle": {
+            "type": "string",
+            "title": "Cle"
+          },
+          "libelle": {
+            "type": "string",
+            "title": "Libelle"
+          },
+          "indicateurs": {
+            "$ref": "#/components/schemas/IndicateursRecetteSortie"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cle",
+          "libelle",
+          "indicateurs"
+        ],
+        "title": "RepartitionRecettes"
       },
       "Repartitions": {
         "properties": {
@@ -23382,6 +24972,42 @@
         ],
         "title": "TableauDirection"
       },
+      "TableauRecettes": {
+        "properties": {
+          "totaux": {
+            "$ref": "#/components/schemas/IndicateursRecetteSortie"
+          },
+          "parNature": {
+            "items": {
+              "$ref": "#/components/schemas/RepartitionRecettes"
+            },
+            "type": "array",
+            "title": "Parnature"
+          },
+          "parService": {
+            "items": {
+              "$ref": "#/components/schemas/RepartitionRecettes"
+            },
+            "type": "array",
+            "title": "Parservice"
+          },
+          "parMois": {
+            "items": {
+              "$ref": "#/components/schemas/RepartitionRecettes"
+            },
+            "type": "array",
+            "title": "Parmois"
+          }
+        },
+        "type": "object",
+        "required": [
+          "totaux",
+          "parNature",
+          "parService",
+          "parMois"
+        ],
+        "title": "TableauRecettes"
+      },
       "TransitionCreation": {
         "properties": {
           "etablissementId": {
@@ -23576,6 +25202,19 @@
         ],
         "title": "TypeContrat"
       },
+      "TypeDebiteur": {
+        "type": "string",
+        "enum": [
+          "ETAT",
+          "COLLECTIVITE",
+          "ASSURANCE",
+          "MUTUELLE",
+          "ENTREPRISE",
+          "PARTICULIER",
+          "AUTRE"
+        ],
+        "title": "TypeDebiteur"
+      },
       "TypeDeduction": {
         "type": "string",
         "enum": [
@@ -23741,6 +25380,14 @@
           "AVOIR"
         ],
         "title": "TypeFacture"
+      },
+      "TypeMouvement": {
+        "type": "string",
+        "enum": [
+          "FACTURE",
+          "ENCAISSEMENT"
+        ],
+        "title": "TypeMouvement"
       },
       "TypeOrdre": {
         "type": "string",
@@ -23952,6 +25599,17 @@
           "REFUSEE"
         ],
         "title": "TypeReception"
+      },
+      "TypeRecette": {
+        "type": "string",
+        "enum": [
+          "SUBVENTION_DOTATION",
+          "RECETTE_PROPRE",
+          "REMBOURSEMENT_ASSURANCE",
+          "PRESTATION_HOSPITALIERE",
+          "AUTRE"
+        ],
+        "title": "TypeRecette"
       },
       "TypeRevision": {
         "type": "string",

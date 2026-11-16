@@ -15,6 +15,7 @@ from hopitalia_budget.adaptateurs.entree.api.schemas import Montant, Schema, Typ
 from hopitalia_budget.adaptateurs.sortie.modeles import (
     BudgetModele,
     CentreResponsabiliteModele,
+    DebiteurModele,
     EtablissementModele,
     ExerciceModele,
     FournisseurModele,
@@ -26,6 +27,7 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
 )
 from hopitalia_budget.domaine.erreurs import ErreurMetier
 from hopitalia_budget.domaine.habilitations import Operation
+from hopitalia_budget.domaine.recettes import TypeDebiteur
 from hopitalia_budget.domaine.utilisateur import Utilisateur
 
 CODE = Field(min_length=1, max_length=20, pattern=r"^[A-Za-z0-9_.-]+$")
@@ -301,6 +303,30 @@ class FournisseurModification(Schema):
     identifiants_administratifs: str | None = Field(default=None, max_length=200)
     adresse: str | None = Field(default=None, max_length=300)
     contact: str | None = Field(default=None, max_length=200)
+    actif: bool | None = None
+
+
+# --- Débiteurs des recettes (lot P3.B) ------------------------------------------------------
+
+
+class DebiteurSortie(Schema):
+    id: UUID
+    code: str
+    nom: str
+    type: TypeDebiteur
+    actif: bool
+    version: int
+
+
+class DebiteurCreation(Schema):
+    code: str = CODE
+    nom: str = LIBELLE
+    type: TypeDebiteur
+
+
+class DebiteurModification(Schema):
+    nom: str | None = LIBELLE_OPTIONNEL
+    type: TypeDebiteur | None = None
     actif: bool | None = None
 
 
@@ -586,6 +612,21 @@ DEFINITIONS = [
             "actif": Filtre(FournisseurModele.actif, bool),
         },
         tris={"code": FournisseurModele.code, "raisonSociale": FournisseurModele.raison_sociale},
+    ),
+    DefinitionCrud(
+        chemin="debiteurs",
+        singulier="debiteur",
+        type_objet="Debiteur",
+        modele=DebiteurModele,
+        sortie=DebiteurSortie,
+        creation=DebiteurCreation,
+        modification=DebiteurModification,
+        filtres={
+            "code": Filtre(DebiteurModele.code),
+            "type": Filtre(DebiteurModele.type),
+            "actif": Filtre(DebiteurModele.actif, bool),
+        },
+        tris={"code": DebiteurModele.code, "nom": DebiteurModele.nom},
     ),
     DefinitionCrud(
         chemin="exercices",
