@@ -158,6 +158,32 @@ describe('préférences et session (T-069, T-074, T-077)', () => {
     expect(await screen.findByText('Welcome, Awa Diop')).toBeTruthy()
   })
 
+  test('accueil : profils nommés, établissement par son code et son nom, jamais son identifiant', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    simulerApi({
+      'GET /api/v1/moi': [
+        json({
+          ...MOI,
+          habilitations: [{ profil: 'RB', etablissementId: 'a1' }, ...MOI.habilitations],
+        }),
+      ],
+      'GET /api/v1/etablissements': [
+        json({
+          donnees: [ETABLISSEMENT],
+          pagination: { page: 1, taille: 100, total: 1, suivant: null },
+        }),
+      ],
+    })
+    afficher('/')
+    expect(
+      await screen.findByText('Responsable budgétaire (RB) — CHU-FANN — CHU de Fann'),
+    ).toBeTruthy()
+    expect(
+      screen.getByText('Administrateur fonctionnel (ADM) — tous les établissements'),
+    ).toBeTruthy()
+    expect(screen.queryByText(/— a1$/)).toBeNull()
+  })
+
   test('session expirée : retour à la connexion avec un message', async () => {
     jetons.enregistrer('acces-expire', 'rafraichissement-refuse')
     simulerApi({
