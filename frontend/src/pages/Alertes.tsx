@@ -232,6 +232,17 @@ function Regles() {
                 ),
             },
             {
+              title: t('regles.parCourriel'),
+              key: 'courriel',
+              render: (_, r) => (
+                <Switch
+                  aria-label={`${t('regles.parCourriel')} — ${t(`types.${r.type}`)}`}
+                  checked={valeur(r).notifierParEmail}
+                  onChange={(notifierParEmail) => modifier(r.type, { notifierParEmail })}
+                />
+              ),
+            },
+            {
               key: 'enregistrer',
               render: (_, r) =>
                 saisies[r.type] &&

@@ -22,6 +22,7 @@
     "actif": "Active",
     "seuilPourcent": "Seuil (%)",
     "delaiJours": "Délai (jours)",
+    "parCourriel": "Par courriel",
     "enregistree": "Règle enregistrée.",
     "lancer": "Lancer la détection maintenant",
     "planifiee": "Détection lancée."
