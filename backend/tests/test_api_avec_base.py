@@ -107,6 +107,31 @@ def test_preference_de_langue_conservee(client: TestClient, donnees: dict[str, s
     assert client.get("/api/v1/moi", headers=entetes(ADMIN)).json()["langue"] == "en"
 
 
+def test_t271_preferences_d_affichage_conservees(
+    client: TestClient, donnees: dict[str, str]
+) -> None:
+    """T-270, T-271 : thème, densité et colonnes masquées conservés sur le profil ; un champ
+    absent garde sa valeur."""
+    url = "/api/v1/moi/preferences"
+    client.put(url, json={"langue": "en"}, headers=entetes(ADMIN))
+    client.put(url, json={"theme": "SOMBRE", "densite": "CONFORTABLE"}, headers=entetes(ADMIN))
+    colonnes = {"engagements": ["fournisseur", "dateEngagement"]}
+    client.put(url, json={"colonnesMasquees": colonnes}, headers=entetes(ADMIN))
+    moi = client.get("/api/v1/moi", headers=entetes(ADMIN)).json()
+    assert (moi["langue"], moi["theme"], moi["densite"], moi["colonnesMasquees"]) == (
+        "en",
+        "SOMBRE",
+        "CONFORTABLE",
+        colonnes,
+    )
+    refus = client.put(url, json={"theme": "ROSE"}, headers=entetes(ADMIN))
+    assert refus.status_code == 422
+    trop: dict[str, list[str]] = {f"tableau{i}": [] for i in range(51)}
+    assert (
+        client.put(url, json={"colonnesMasquees": trop}, headers=entetes(ADMIN)).status_code == 422
+    )
+
+
 # --- T-053, T-054 : habilitations et cloisonnement (REC-13, REC-17, API-10) ------------------
 
 

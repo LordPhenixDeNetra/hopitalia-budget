@@ -57,12 +57,16 @@ class HabilitationModele(Base):
 
 
 class PreferenceUtilisateurModele(Base):
-    """Préférences d'un agent dans le module (langue de l'interface)."""
+    """Préférences d'un agent dans le module : langue, thème, densité et colonnes masquées des
+    tableaux ; conservées entre les sessions et d'un poste à l'autre."""
 
     __tablename__ = "preference_utilisateur"
 
     utilisateur_id: Mapped[int] = mapped_column(BigInteger, primary_key=True)
-    langue: Mapped[str] = mapped_column(String(5))
+    langue: Mapped[str | None] = mapped_column(String(5))
+    theme: Mapped[str | None] = mapped_column(String(10))
+    densite: Mapped[str | None] = mapped_column(String(12))
+    colonnes_masquees: Mapped[dict[str, list[str]] | None] = mapped_column(JSONB)
 
 
 class CleIdempotenceModele(Base):
