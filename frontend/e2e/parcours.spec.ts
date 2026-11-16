@@ -1494,7 +1494,11 @@ test('T-271 : colonnes masquées conservées d’une session à l’autre (IHM-0
   const entete = page.getByRole('columnheader', { name: 'Nom' })
   await expect(entete).toBeVisible()
   await page.getByRole('button', { name: 'Colonnes' }).click()
-  await page.getByRole('checkbox', { name: 'Nom' }).uncheck()
+  // La case suit la préférence, mise à jour au rendu suivant : clic, puis attente de l'état
+  // (uncheck() vérifie l'état aussitôt et échoue sur une machine lente).
+  const caseNom = page.getByRole('checkbox', { name: 'Nom' })
+  await caseNom.click()
+  await expect(caseNom).not.toBeChecked()
   await expect(entete).toHaveCount(0)
   await expect.poll(() => preferences).toEqual({ colonnesMasquees: { etablissements: ['nom'] } })
 
