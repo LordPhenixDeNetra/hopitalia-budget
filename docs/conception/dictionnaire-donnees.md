@@ -6,7 +6,7 @@ Produit depuis le modèle (`backend/src/hopitalia_budget/adaptateurs/sortie/mode
 
 Conventions : montants en `Numeric(18,2)` (francs CFA) ; indicateurs (engagé, liquidé, payé, restes, disponibles) jamais stockés, toujours calculés (RG-14) ; toute modification de donnée financière est tracée dans `journal_audit`.
 
-62 tables, 571 colonnes.
+65 tables, 607 colonnes.
 
 ## Tables
 
@@ -72,6 +72,9 @@ Conventions : montants en `Numeric(18,2)` (francs CFA) ; indicateurs (engagé, l
 - [`journal_integration`](#journal-integration)
 - [`commande_pharmacie`](#commande-pharmacie)
 - [`approvisionnement_pharmacie`](#approvisionnement-pharmacie)
+- [`debiteur`](#debiteur)
+- [`recette`](#recette)
+- [`mouvement_recette`](#mouvement-recette)
 
 ## etablissement
 
@@ -86,6 +89,7 @@ Unicité : `code`.
 | `nom` | VARCHAR(200) | Oui |  | Nom de l'établissement. |
 | `actif` | BOOLEAN | Oui |  | Faux : élément désactivé, conservé pour l'historique, plus proposé à la saisie. |
 | `version` | INTEGER | Oui |  | Version de la ligne : verrou optimiste, comparée à l'en-tête `If-Match`. |
+| `volet_recettes_actif` | BOOLEAN | Oui |  | Vrai : volet recettes activé pour l'établissement (T-260) ; faux : volet invisible et refusé. |
 
 ## habilitation
 
@@ -1139,3 +1143,65 @@ Unicité : `etablissement_id`, `id_hopitalia` ; `reception_id`.
 | `reception_id` | UUID | Non | → `reception`, unique | Réception validée créée pour l'approvisionnement (vide : en attente). |
 | `supprime` | BOOLEAN | Oui |  | Vrai : approvisionnement supprimé dans Hopitalia ; sa réception est annulée. |
 | `importe_le` | TIMESTAMP WITH TIME ZONE | Oui |  | Date et heure du premier import. |
+
+## debiteur
+
+Table `debiteur`. Débiteur d'une recette : État, assurance, mutuelle… Commun à tous les établissements.
+
+Unicité : `code`.
+
+| Colonne | Type | Obligatoire | Clé | Description |
+|---|---|---|---|---|
+| `id` | UUID | Oui | primaire | Identifiant unique (UUID), exposé par l'API et partagé entre modules (INT-06). |
+| `code` | VARCHAR(20) | Oui | unique | Code de l'élément, unique dans son périmètre. |
+| `nom` | VARCHAR(200) | Oui |  | Nom du débiteur. |
+| `type` | VARCHAR(20) | Oui |  | Type de débiteur : État, collectivité, assurance, mutuelle, entreprise, particulier, autre. |
+| `actif` | BOOLEAN | Oui |  | Faux : élément désactivé, conservé pour l'historique, plus proposé à la saisie. |
+| `version` | INTEGER | Oui |  | Version de la ligne : verrou optimiste, comparée à l'en-tête `If-Match`. |
+
+## recette
+
+Table `recette`. Recette prévue d'un établissement (EF-RCT-01) ; facturé et encaissé sont calculés depuis ses mouvements, jamais stockés (RG-14).
+
+Unicité : `etablissement_id`, `numero`.
+
+| Colonne | Type | Obligatoire | Clé | Description |
+|---|---|---|---|---|
+| `id` | UUID | Oui | primaire | Identifiant unique (UUID), exposé par l'API et partagé entre modules (INT-06). |
+| `etablissement_id` | UUID | Oui | → `etablissement` | Établissement propriétaire : cloisonnement vérifié à chaque requête. |
+| `exercice_id` | UUID | Oui | → `exercice` | Référence vers `exercice`. |
+| `periode_id` | UUID | Non | → `periode` | Référence vers `periode`. |
+| `numero` | VARCHAR(30) | Oui |  | Numéro de la recette, unique par établissement (`RCT-ANNEE-RANG`). |
+| `nature` | VARCHAR(30) | Oui |  | Nature : subvention ou dotation, recette propre, remboursement d'assurance, prestation hospitalière, autre (EF-RCT-01). |
+| `libelle` | VARCHAR(300) | Oui |  | Libellé affiché. |
+| `montant_previsionnel` | NUMERIC(18, 2) | Oui |  | Montant prévu ; facturé et encaissé se calculent depuis les mouvements (RG-14). |
+| `date_echeance` | DATE | Non |  | Date à laquelle la recette est attendue. |
+| `source_id` | UUID | Oui | → `referentiel` | Référence vers `referentiel`. |
+| `centre_id` | UUID | Non | → `centre_responsabilite` | Référence vers `centre_responsabilite`. |
+| `ligne_id` | UUID | Non | → `ligne_budgetaire` | Ligne budgétaire de prévision, facultative. |
+| `debiteur_id` | UUID | Non | → `debiteur` | Référence vers `debiteur`. |
+| `cree_par_id` | BIGINT | Oui |  | Identifiant Hopitalia (`userId`) de l'agent créateur. |
+| `cree_par_code` | VARCHAR(20) | Oui |  | Code de l'agent créateur. |
+| `cree_le` | TIMESTAMP WITH TIME ZONE | Oui |  | Date et heure de création. |
+| `version` | INTEGER | Oui |  | Version de la ligne : verrou optimiste, comparée à l'en-tête `If-Match`. |
+
+## mouvement-recette
+
+Table `mouvement_recette`. Facturé ou encaissé d'une recette ; jamais modifié : une correction est un contre-mouvement négatif, motivé (RG-18). Origine : saisie, ou Hopitalia (INT-02).
+
+Unicité : `origine`, `reference_externe`.
+
+| Colonne | Type | Obligatoire | Clé | Description |
+|---|---|---|---|---|
+| `id` | UUID | Oui | primaire | Identifiant unique (UUID), exposé par l'API et partagé entre modules (INT-06). |
+| `recette_id` | UUID | Oui | → `recette` | Référence vers `recette`. |
+| `type` | VARCHAR(15) | Oui |  | Facturé ou encaissé. |
+| `date` | DATE | Oui |  | Date de la facturation ou de l'encaissement. |
+| `montant` | NUMERIC(18, 2) | Oui |  | Montant du mouvement ; négatif pour un contre-mouvement motivé (RG-18). |
+| `reference` | VARCHAR(100) | Non |  | Référence de la pièce (facture, titre, relevé). |
+| `motif` | VARCHAR(500) | Non |  | Motif, obligatoire pour un contre-mouvement. |
+| `origine` | VARCHAR(15) | Oui |  | Saisi dans le module ou importé d'Hopitalia (INT-02). |
+| `reference_externe` | VARCHAR(100) | Non |  | Identifiant dans Hopitalia d'un mouvement importé : unique, un import ne le duplique pas. |
+| `cree_par_id` | BIGINT | Oui |  | Identifiant Hopitalia (`userId`) de l'agent créateur. |
+| `cree_par_code` | VARCHAR(20) | Oui |  | Code de l'agent créateur. |
+| `cree_le` | TIMESTAMP WITH TIME ZONE | Oui |  | Date et heure de création. |

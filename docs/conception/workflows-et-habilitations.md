@@ -51,6 +51,7 @@ S : saisir ; V : valider ; L : consulter ; — : aucun accès. Le droit vaut dan
 | Clôturer un exercice | — | S | — | — | — | — | — | V | — | L | — |
 | Consulter les tableaux de bord et exporter les états | L | L | L | L | L | — | L | L | L | L | L |
 | Consulter le journal d'audit | — | — | — | — | — | — | L | L | — | L | — |
+| Gérer les recettes (prévisions, facturé, encaissé) | — | S | S | — | — | — | L | L | S | L | — |
 
 ## Objets validés par circuit
 

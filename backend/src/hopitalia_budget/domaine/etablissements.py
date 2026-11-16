@@ -10,6 +10,8 @@ class Etablissement:
     nom: str
     actif: bool
     version: int
+    # Volet recettes (section 4.8) : désactivé par défaut, activé par l'administrateur (T-260).
+    volet_recettes_actif: bool = False
 
 
 # (champ, décroissant)

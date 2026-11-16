@@ -41,6 +41,7 @@ class EtablissementSortie(Schema):
     nom: str
     actif: bool
     version: int
+    volet_recettes_actif: bool
 
 
 class EtablissementCreation(Schema):
@@ -51,6 +52,7 @@ class EtablissementCreation(Schema):
 class EtablissementModification(Schema):
     nom: str | None = Field(default=None, min_length=1, max_length=200)
     actif: bool | None = None
+    volet_recettes_actif: bool | None = None
 
 
 def _sortie(etablissement: Etablissement) -> EtablissementSortie:
@@ -176,6 +178,7 @@ def modifier_etablissement(
         version_attendue(if_match),
         corps.nom,
         corps.actif,
+        corps.volet_recettes_actif,
     )
     session.commit()
     response.headers["ETag"] = etag(etablissement.version)

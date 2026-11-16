@@ -48,6 +48,7 @@ LIBELLES = {
     "Clôturer un exercice": Operation.CLOTURER_EXERCICE,
     "Consulter les tableaux de bord et exporter les états": Operation.CONSULTER_TABLEAUX_BORD,
     "Consulter le journal d'audit": Operation.CONSULTER_AUDIT,
+    "Gérer les recettes (prévisions, facturé, encaissé)": Operation.GERER_RECETTES,
 }
 
 
@@ -109,6 +110,7 @@ def test_creation_tracee_dans_le_journal() -> None:
         "nom": "CHU A",
         "actif": True,
         "version": 1,
+        "volet_recettes_actif": False,
     }
 
 
