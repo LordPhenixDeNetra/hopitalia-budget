@@ -1,5 +1,12 @@
-.venv/
-**/__pycache__/
-.pytest_cache/
-.mypy_cache/
-.ruff_cache/
+# Contexte de l'image de l'API (backend/Dockerfile). Liste blanche : tout est ignoré, sauf le code,
+# les migrations et ce qui sert à l'installer. Tests, environnement virtuel, caches et secrets
+# n'entrent jamais dans l'image.
+*
+!pyproject.toml
+!alembic.ini
+!src/
+!migrations/
+
+# Caches Python, même sous src/ et migrations/
+**/__pycache__
+**/*.pyc

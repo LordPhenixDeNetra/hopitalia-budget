@@ -1,13 +1,28 @@
-# Contexte de l'image de l'interface (frontend/Dockerfile) : seuls frontend/ et site/ servent.
-**/node_modules
-**/dist
-**/.astro
-**/coverage
-**/test-results
-**/playwright-report*
-.git
-backend
-docs
-simulation
-exploitation
-site/en-tetes-docs.conf
+# Contexte de l'image de l'interface (frontend/Dockerfile), à la racine du dépôt. Liste blanche :
+# tout est ignoré, sauf ce qui sert à construire l'interface et sa documentation. Tests, outils de
+# développement, documents du projet, backend et secrets (.env) n'entrent jamais dans l'image.
+*
+
+# Interface (frontend/)
+!frontend/package.json
+!frontend/package-lock.json
+!frontend/index.html
+!frontend/vite.config.ts
+!frontend/tsconfig.json
+!frontend/tsconfig.app.json
+!frontend/tsconfig.node.json
+!frontend/nginx.conf
+!frontend/src/
+
+# Documentation servie sous /docs/ (site/)
+!site/package.json
+!site/package-lock.json
+!site/astro.config.mjs
+!site/public/
+!site/scripts/csp.mjs
+!site/src/
+
+# Tests du frontend, même sous src/
+frontend/src/**/*.test.ts
+frontend/src/**/*.test.tsx
+frontend/src/test/

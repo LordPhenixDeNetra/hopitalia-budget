@@ -63,6 +63,7 @@ Module de gestion et de suivi budgétaire hospitalier de la solution Hopitalia :
   - un statut n'est jamais signalé par la seule couleur (IHM-06) : composant `BadgeStatut` ;
   - composants déclarés avec `function` : la règle de lint des textes en dur ne voit pas ceux écrits en fonction fléchée à retour implicite, ni les attributs comme `aria-label` (à vérifier en revue) ;
   - montants affichés avec le composant `Montant` (chaîne décimale formatée sans passer par un nombre flottant).
+- **Images Docker :** les `.dockerignore` (racine pour l'interface, `backend/` pour l'API) sont des listes blanches. Un fichier nécessaire à la construction ou à l'exécution s'y ajoute explicitement ; tests, outils de développement, documents et secrets n'entrent jamais dans une image.
 - **Fichiers générés, jamais modifiés à la main :** `frontend/openapi.json` (`python -m hopitalia_budget.outils.exporter_openapi`) et `frontend/src/api/genere/` (`npm run api`). La CI vérifie qu'ils sont à jour.
 - **Écriture d'une opération :** `POST` avec en-tête `Idempotency-Key` (une clé par ouverture de formulaire), modification avec `If-Match` (version lue), trace dans le journal d'audit dans la même transaction, `session.commit()` explicite dans la route.
 
@@ -104,6 +105,7 @@ Détail et installation : [README.md](README.md).
 | `backend/` | `ruff check .` · `ruff format --check .` · `mypy` · `pytest` (base de test : `TEST_DATABASE_URL`) |
 | `frontend/` | `npm run format:check` · `npm run lint` · `npm run typecheck` · `npm test` · `npm run e2e` |
 | `site/` | `npm run build` · `npm test` |
+| Docker | `docker compose build` · `docker compose up -d --wait` (après un changement d'un `Dockerfile`, d'un `.dockerignore` ou d'un fichier nécessaire à la construction) |
 | Racine | `pre-commit run --files <fichiers modifiés>` · `docker compose up -d --build` pour l'ensemble |
 
 La CI (`.github/workflows/ci.yml`) relance ces vérifications ; seul le job `ci-ok` est exigé pour fusionner.

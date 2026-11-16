@@ -38,10 +38,17 @@ docs/       Cahier des charges, cadrage, conception, recette, présentation
 
 ```bash
 cp .env.example .env        # puis renseigner POSTGRES_PASSWORD, COORDONNEES_CLE (et l'accès Hopitalia)
-docker compose up -d --build
+docker compose up -d --build --wait
 ```
 
-Les migrations de la base s'appliquent au démarrage de l'API.
+Les migrations de la base s'appliquent au démarrage de l'API. `--wait` rend la main quand l'API et l'interface sont saines (`docker compose ps` : `(healthy)`) ; les tâches planifiées démarrent une fois l'API saine.
+
+| Image | Contexte | `.dockerignore` |
+|---|---|---|
+| `hopitalia-budget-api` | `backend/` | `backend/.dockerignore` |
+| `hopitalia-budget-web` (interface et documentation) | racine du dépôt, `frontend/Dockerfile` | `.dockerignore` |
+
+Les `.dockerignore` sont des listes blanches : seul ce qui sert à construire l'application entre dans une image. Un nouveau fichier nécessaire à la construction s'y ajoute explicitement.
 
 **Premier administrateur.** La connexion passe par Hopitalia, mais les droits budgétaires sont propres au module : un agent sans profil est refusé. Attribuer le premier profil d'administrateur avec l'identifiant Hopitalia de l'agent (`userId`) :
 
