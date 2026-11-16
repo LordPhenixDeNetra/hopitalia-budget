@@ -72,9 +72,9 @@ Deux précisions à donner en séance :
 - **Où :** `agent002`, écrans Tableau de bord, Contrats, Engagements, Factures, Paiements.
 - **Démonstration :**
   1. Tableau de bord : budget, engagé, liquidé, payé et disponible par ligne. Rappeler que ces étapes d'une même dépense ne s'additionnent pas.
-  2. Contrats : le marché M-2026-001 (100 M). Sa fiche donne engagé 80 M, liquidé 45 M, payé 30 M et 20 M restant à engager, comme l'annexe 18.2.
-  3. Factures : FAC-001, partiellement payée (25 M sur 30 M), et ses rattachements à l'engagement et à la réception.
-  4. Paiements : les paiements de l'annexe, et le reste à payer sur liquidé (15 M).
+  2. Contrats : le marché « Fournitures médicales » (100 M). Sa synthèse donne engagé 80 M, liquidé 45 M, payé 35 M et 20 M restant à engager : l'annexe 18.2, solde de LIQ-001 compris.
+  3. Factures : FAC-001 payée, FAC-002 partiellement payée (reste 10 M), FAC-003 en contrôle ; l'onglet « Rapprochement » de FAC-003 montre un écart à expliquer.
+  4. Paiements : les ordonnancements pris en charge, puis les paiements ; reste à payer sur liquidé : 10 M.
 - **Référence :**
   - [recette-lots-1-a-5.md](../recette/recette-lots-1-a-5.md) ;
   - [repetition-recette.md](../recette/repetition-recette.md), répétition conforme.
@@ -173,7 +173,7 @@ Deux précisions à donner en séance :
   1. Intégrations : l'échange « Services » est en échec. Le reprendre : il réussit, sans doublon.
   2. Expliquer que la tâche quotidienne reprend seule les échecs ; elle a été mise en pause pour la séance.
   3. Expliquer que la démonstration utilise un Hopitalia simulé (121 fournisseurs, 85 commandes de la pharmacie). La vérification doit se refaire sur leur instance.
-- **Référence :** [integration-hopitalia.md](../cadrage/integration-hopitalia.md), [guide-integration.md](../integration/guide-integration.md).
+- **Référence :** [integration-hopitalia.md](../cadrage/integration-hopitalia.md), [Intégrer](../../site/src/content/docs/integrer/index.md).
 
 ## V-10. Environnement de recette et exploitation
 
@@ -183,7 +183,7 @@ Deux précisions à donner en séance :
   - fréquence de l'essai de restauration : trimestrielle (ENF-06), à valider ;
   - serveur de messagerie de l'hôpital.
 - **Qui décide :** DSI.
-- **Où :** [deploiement-recette.md](../exploitation/deploiement-recette.md), [plan-exploitation.md](../exploitation/plan-exploitation.md), [sauvegarde.md](../exploitation/sauvegarde.md).
+- **Où :** documentation, partie « Installer et exploiter » : [installation](../../site/src/content/docs/installer/installation.md), [surveillance et maintenance](../../site/src/content/docs/installer/exploitation.md), [sauvegarde et restauration](../../site/src/content/docs/installer/sauvegarde.md).
 
 ## V-11. Paramètres techniques provisoires
 
@@ -198,11 +198,11 @@ Deux précisions à donner en séance :
 ## V-12. Guides et procès-verbal final
 
 - **Décision attendue :**
-  - désigner un agent par profil pour relire le guide utilisateur (T-283) ;
-  - désigner un administrateur qui paramètre un établissement avec le guide d'administration (T-284) ;
+  - désigner un agent par profil pour relire la partie « Utiliser » de la documentation (T-283) ;
+  - désigner un administrateur qui paramètre un établissement avec la partie « Administrer » (T-284) ;
   - fixer la date de la recette finale et de son procès-verbal (T-286).
 - **Qui décide :** DAF.
-- **Référence :** [guide-utilisateur.md](../guides/guide-utilisateur.md), [guide-administration.md](../guides/guide-administration.md), [proces-verbal-final.md](../recette/proces-verbal-final.md).
+- **Référence :** documentation, parties [Utiliser](../../site/src/content/docs/utiliser/index.mdx) et [Administrer](../../site/src/content/docs/administrer/index.md), [proces-verbal-final.md](../recette/proces-verbal-final.md).
 
 ## Après la séance
 
