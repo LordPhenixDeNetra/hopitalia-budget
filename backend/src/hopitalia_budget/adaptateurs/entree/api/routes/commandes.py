@@ -44,6 +44,7 @@ from hopitalia_budget.adaptateurs.sortie.commandes_sql import (
     DepotReceptionsSql,
     accepte_valide,
     lignes_commande,
+    numero_suivant,
     total_commande,
 )
 from hopitalia_budget.adaptateurs.sortie.engagements_sql import DepotEngagementsSql
@@ -75,13 +76,6 @@ from hopitalia_budget.domaine.utilisateur import Utilisateur
 router = APIRouter(tags=["commandes"])
 BC, LC, R, LR = BonCommandeModele, LigneCommandeModele, ReceptionModele, LigneReceptionModele
 Quantite = Annotated[Decimal, Field(ge=0, max_digits=18, decimal_places=3)]
-
-
-def _numero(session: Session, modele: Any, etablissement_id: UUID, prefixe: str, annee: str) -> str:
-    rang = 1 + (
-        session.scalar(select(func.count()).where(modele.etablissement_id == etablissement_id)) or 0
-    )
-    return f"{prefixe}-{annee}-{rang:05d}"
 
 
 # --- Bons de commande (T-160, T-166) -----------------------------------------------------------
@@ -203,7 +197,7 @@ def emettre_commande(
             etablissement_id=engagement.etablissement_id,
             engagement_id=engagement_id,
             fournisseur_id=engagement.fournisseur_id,
-            numero=_numero(session, BC, engagement.etablissement_id, "BC", exercice.code),
+            numero=numero_suivant(session, BC, engagement.etablissement_id, "BC", exercice.code),
             type=corps.type,
             date_emission=corps.date_emission,
             lieu_livraison=corps.lieu_livraison,
@@ -449,7 +443,7 @@ def enregistrer_reception(
         m = R(
             etablissement_id=commande.etablissement_id,
             bon_commande_id=bon_commande_id,
-            numero=_numero(
+            numero=numero_suivant(
                 session, R, commande.etablissement_id, "REC", str(corps.date_reception.year)
             ),
             date_reception=corps.date_reception,

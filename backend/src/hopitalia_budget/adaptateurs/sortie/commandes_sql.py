@@ -2,6 +2,7 @@
 
 from collections import defaultdict
 from decimal import Decimal
+from typing import Any
 from uuid import UUID
 
 from sqlalchemy import func, select
@@ -26,6 +27,16 @@ from hopitalia_budget.domaine.commandes import (
 )
 
 BC, LC, R, LR = BonCommandeModele, LigneCommandeModele, ReceptionModele, LigneReceptionModele
+
+
+def numero_suivant(
+    session: Session, modele: Any, etablissement_id: UUID, prefixe: str, annee: str
+) -> str:
+    """Numéro de pièce de l'établissement : `BC-2026-00001`, `REC-2026-00001`."""
+    rang = 1 + (
+        session.scalar(select(func.count()).where(modele.etablissement_id == etablissement_id)) or 0
+    )
+    return f"{prefixe}-{annee}-{rang:05d}"
 
 
 def lignes_commande(session: Session, bon_commande_id: UUID) -> list[LigneCommande]:
