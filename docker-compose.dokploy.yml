@@ -1,0 +1,51 @@
+# Démonstration en ligne, déployée par Dokploy (documentation : installer/dokploy) : le module complet
+# (docker-compose.yml), un Hopitalia simulé et un serveur de courrier de test, puis le jeu de
+# démonstration chargé au premier démarrage. Variables : .env.dokploy.example, à recopier dans
+# l'onglet « Environment » de Dokploy. Jamais face à un vrai Hopitalia ni avec de vraies données.
+include:
+  - docker-compose.yml
+
+services:
+  # Connexion des agents, annuaire, fournisseurs, services et pharmacie, avec une clé de signature et
+  # un mot de passe secrets : ceux des tests sont publics.
+  hopitalia-simule:
+    build:
+      context: .
+      dockerfile: simulation/Dockerfile
+    image: hopitalia-budget-demonstration
+    environment:
+      HOPITALIA_JWT_CLE: ${HOPITALIA_JWT_CLE:?HOPITALIA_JWT_CLE manquant}
+      SIMULATION_MOT_DE_PASSE: ${SIMULATION_MOT_DE_PASSE:?SIMULATION_MOT_DE_PASSE manquant}
+    restart: unless-stopped
+
+  # Reçoit les courriels d'alerte ; rien ne part vers de vraies boîtes.
+  courrier-test:
+    image: axllent/mailpit:v1.21
+    restart: unless-stopped
+
+  # Remplit la base au premier démarrage (recette blanche, puis pièces à valider, alertes, échange en
+  # échec, recettes), puis s'arrête. Aux déploiements suivants, la base déjà remplie est laissée telle
+  # quelle. Pour repartir de zéro : supprimer le volume de la base dans Dokploy, puis redéployer.
+  demonstration:
+    image: hopitalia-budget-demonstration
+    command: ["python", "simulation/demonstration.py"]
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-hopitalia}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-hopitalia_budget}
+      COORDONNEES_CLE: ${COORDONNEES_CLE:-}
+      SMTP_HOTE: courrier-test
+      SMTP_PORT: "1025"
+      URL_APPLICATION: ${URL_APPLICATION:-}
+      RECETTE_API: http://api:8000
+      RECETTE_SIMULE: http://hopitalia-simule:8090
+      RECETTE_COURRIER: http://courrier-test:8025
+      RECETTE_JWT_CLE: ${HOPITALIA_JWT_CLE:?HOPITALIA_JWT_CLE manquant}
+      RECETTE_DANS_LA_PILE: "oui"
+      RECETTE_SI_BASE_VIDE: "oui"
+    depends_on:
+      api:
+        condition: service_healthy
+      hopitalia-simule:
+        condition: service_started
+      courrier-test:
+        condition: service_started
+    restart: "no"
