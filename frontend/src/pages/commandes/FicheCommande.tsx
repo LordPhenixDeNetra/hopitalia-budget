@@ -162,7 +162,7 @@ function FormulaireReception({
           scroll={{ x: 'max-content' }}
           columns={[
             { title: t('champs.designation'), dataIndex: 'designation' },
-            { title: t('champs.resteARecevoir'), dataIndex: 'resteARecevoir', align: 'right' },
+            { title: t('champs.resteARecevoir'), dataIndex: 'resteARecevoir', align: 'end' },
             {
               title: t('receptions.recue'),
               key: 'recue',
@@ -267,9 +267,9 @@ function DetailReception({
           scroll={{ x: 'max-content' }}
           columns={[
             { title: t('champs.designation'), dataIndex: 'ligneCommandeId', render: designation },
-            { title: t('receptions.recue'), dataIndex: 'quantiteRecue', align: 'right' },
-            { title: t('receptions.acceptee'), dataIndex: 'quantiteAcceptee', align: 'right' },
-            { title: t('receptions.rejetee'), dataIndex: 'quantiteRejetee', align: 'right' },
+            { title: t('receptions.recue'), dataIndex: 'quantiteRecue', align: 'end' },
+            { title: t('receptions.acceptee'), dataIndex: 'quantiteAcceptee', align: 'end' },
+            { title: t('receptions.rejetee'), dataIndex: 'quantiteRejetee', align: 'end' },
           ]}
         />
         <Card size="small" title={t('reserves.titre')}>
@@ -482,15 +482,15 @@ export function FicheCommande() {
         scroll={{ x: 'max-content' }}
         columns={[
           { title: t('champs.designation'), dataIndex: 'designation' },
-          { title: t('champs.quantite'), dataIndex: 'quantite', align: 'right' },
+          { title: t('champs.quantite'), dataIndex: 'quantite', align: 'end' },
           {
             title: t('champs.prixUnitaire'),
             dataIndex: 'prixUnitaire',
-            align: 'right',
+            align: 'end',
             render: (v: string) => <Montant valeur={v} />,
           },
-          { title: t('champs.quantiteAcceptee'), dataIndex: 'quantiteAcceptee', align: 'right' },
-          { title: t('champs.resteARecevoir'), dataIndex: 'resteARecevoir', align: 'right' },
+          { title: t('champs.quantiteAcceptee'), dataIndex: 'quantiteAcceptee', align: 'end' },
+          { title: t('champs.resteARecevoir'), dataIndex: 'resteARecevoir', align: 'end' },
         ]}
       />
       <Flex justify="space-between" align="center" wrap gap="small">

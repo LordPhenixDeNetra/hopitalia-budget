@@ -1689,6 +1689,25 @@ export const MoiLangue = {
   en: 'en',
 } as const;
 
+export type MoiTheme = typeof MoiTheme[keyof typeof MoiTheme] | null;
+
+
+export const MoiTheme = {
+  CLAIR: 'CLAIR',
+  SOMBRE: 'SOMBRE',
+  SYSTEME: 'SYSTEME',
+} as const;
+
+export type MoiDensite = typeof MoiDensite[keyof typeof MoiDensite] | null;
+
+
+export const MoiDensite = {
+  COMPACTE: 'COMPACTE',
+  CONFORTABLE: 'CONFORTABLE',
+} as const;
+
+export type MoiColonnesMasquees = {[key: string]: string[]};
+
 export interface ProfilBudgetaire {
   profil: string;
   etablissementId: string | null;
@@ -1701,6 +1720,9 @@ export interface Moi {
   service: string;
   habilitations: ProfilBudgetaire[];
   langue: MoiLangue;
+  theme?: MoiTheme;
+  densite?: MoiDensite;
+  colonnesMasquees?: MoiColonnesMasquees;
 }
 
 export interface MotifSchema {
@@ -2212,7 +2234,7 @@ export interface Planification {
   signaux: number;
 }
 
-export type PreferencesLangue = typeof PreferencesLangue[keyof typeof PreferencesLangue];
+export type PreferencesLangue = typeof PreferencesLangue[keyof typeof PreferencesLangue] | null;
 
 
 export const PreferencesLangue = {
@@ -2220,8 +2242,33 @@ export const PreferencesLangue = {
   en: 'en',
 } as const;
 
+export type PreferencesTheme = typeof PreferencesTheme[keyof typeof PreferencesTheme] | null;
+
+
+export const PreferencesTheme = {
+  CLAIR: 'CLAIR',
+  SOMBRE: 'SOMBRE',
+  SYSTEME: 'SYSTEME',
+} as const;
+
+export type PreferencesDensite = typeof PreferencesDensite[keyof typeof PreferencesDensite] | null;
+
+
+export const PreferencesDensite = {
+  COMPACTE: 'COMPACTE',
+  CONFORTABLE: 'CONFORTABLE',
+} as const;
+
+export type PreferencesColonnesMasquees = {[key: string]: string[]} | null;
+
+/**
+ * Préférences à modifier : un champ absent garde sa valeur.
+ */
 export interface Preferences {
-  langue: PreferencesLangue;
+  langue?: PreferencesLangue;
+  theme?: PreferencesTheme;
+  densite?: PreferencesDensite;
+  colonnesMasquees?: PreferencesColonnesMasquees;
 }
 
 export interface ProgrammeCreation {

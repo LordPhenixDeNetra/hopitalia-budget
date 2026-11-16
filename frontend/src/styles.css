@@ -17,10 +17,10 @@ h5 {
   font-family: 'Lexend', system-ui, sans-serif;
 }
 
-/* Montants : chiffres à chasse fixe, alignés à droite (IHM-05). */
+/* Montants : chiffres à chasse fixe, alignés en fin de ligne (IHM-05), à droite en français. */
 .montant {
   font-variant-numeric: tabular-nums;
-  text-align: right;
+  text-align: end;
   white-space: nowrap;
 }
 

@@ -155,7 +155,7 @@ function TableRepartition({ lignes }: { lignes: Repartition[] }) {
   const montant = (titre: string, cle: 'engage' | 'liquide' | 'paye' | 'budgetRevise') => ({
     title: t(titre),
     dataIndex: cle,
-    align: 'right' as const,
+    align: 'end' as const,
     render: (v?: string | null) => (v ? <Montant valeur={v} /> : ''),
   })
   return (
@@ -179,7 +179,7 @@ function TableRepartition({ lignes }: { lignes: Repartition[] }) {
         {
           title: t('indicateurs.tauxEngagement'),
           dataIndex: 'tauxEngagement',
-          align: 'right',
+          align: 'end',
           render: (v?: string | null) => (v ? `${v} %` : ''),
         },
       ]}
@@ -215,7 +215,7 @@ export function TableauDeBord() {
     ...(['montantActualise', 'engage', 'paye', 'resteAEngager'] as const).map((cle) => ({
       title: t(`marches.${cle}`),
       dataIndex: cle,
-      align: 'right' as const,
+      align: 'end' as const,
       render: (v: string) => <Montant valeur={v} />,
     })),
     {
@@ -266,7 +266,7 @@ export function TableauDeBord() {
                     {
                       title: t('chaine.montant'),
                       dataIndex: 'montant',
-                      align: 'right',
+                      align: 'end',
                       render: (v: string) => <Montant valeur={v} />,
                     },
                   ]}
@@ -295,7 +295,7 @@ export function TableauDeBord() {
                       ...(['budgetRevise', 'engage', 'liquide', 'paye'] as const).map((cle) => ({
                         title: t(`indicateurs.${cle}`),
                         key: cle,
-                        align: 'right' as const,
+                        align: 'end' as const,
                         render: (_: unknown, lg: (typeof data.lignes)[number]) => (
                           <Montant valeur={lg.indicateurs[cle]} />
                         ),
@@ -303,7 +303,7 @@ export function TableauDeBord() {
                       {
                         title: t('indicateurs.tauxEngagement'),
                         key: 'taux',
-                        align: 'right',
+                        align: 'end',
                         render: (_, lg) =>
                           lg.indicateurs.tauxEngagement ? `${lg.indicateurs.tauxEngagement} %` : '',
                       },

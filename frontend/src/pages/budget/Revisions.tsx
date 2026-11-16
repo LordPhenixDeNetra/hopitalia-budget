@@ -230,7 +230,7 @@ export function Revisions({ budgetId, ligneId }: { budgetId: string; ligneId?: s
     {
       title: t('revisions.montant'),
       dataIndex: 'montant',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     { title: t('revisions.motif'), dataIndex: 'motif' },
@@ -251,6 +251,7 @@ export function Revisions({ budgetId, ligneId }: { budgetId: string; ligneId?: s
         </Button>
       )}
       <TableauServeur<RevisionSortie>
+        nom="revisions"
         colonnes={colonnes}
         donnees={data?.donnees ?? []}
         total={data?.pagination.total ?? 0}

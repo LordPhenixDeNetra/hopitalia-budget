@@ -296,6 +296,7 @@ export function PageReferentiel({
         )}
       </Flex>
       <TableauServeur<Enregistrement>
+        nom={definition.chemin}
         colonnes={colonnes}
         donnees={data?.donnees ?? []}
         total={data?.pagination.total ?? 0}

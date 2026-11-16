@@ -303,7 +303,7 @@ function DetailOrdonnancement({
             {
               title: t('ordonnancements.montant'),
               dataIndex: 'montant',
-              align: 'right',
+              align: 'end',
               render: (v: string) => <Montant valeur={v} />,
             },
           ]}
@@ -344,7 +344,7 @@ function Ordonnancements() {
     {
       title: t('ordonnancements.montant'),
       dataIndex: 'montant',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     {
@@ -511,7 +511,7 @@ function FormulairePaiement({ fermer }: { fermer: () => void }) {
                 {
                   title: t('paiements.resteAPayer'),
                   dataIndex: 'resteAPayer',
-                  align: 'right',
+                  align: 'end',
                   render: (v: string) => <Montant valeur={v} />,
                 },
                 {
@@ -588,7 +588,7 @@ function ListePaiements() {
     {
       title: t('paiements.montant'),
       dataIndex: 'montant',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     {

@@ -86,7 +86,7 @@ export function Contrats() {
     {
       title: t('champs.montantActualise'),
       dataIndex: 'montantActualise',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     {
@@ -171,6 +171,7 @@ export function Contrats() {
         />
       </Flex>
       <TableauServeur<ContratResume>
+        nom="contrats"
         colonnes={colonnes}
         donnees={data?.donnees ?? []}
         total={data?.pagination.total ?? 0}

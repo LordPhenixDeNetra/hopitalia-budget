@@ -137,11 +137,11 @@ export function ClotureExercice() {
               dataIndex: 'creeLe',
               render: (v: string) => formaterDateHeure(v, i18n.language),
             },
-            { title: t('engagementsReportes'), dataIndex: 'engagementsReportes', align: 'right' },
+            { title: t('engagementsReportes'), dataIndex: 'engagementsReportes', align: 'end' },
             {
               title: t('montantReporte'),
               dataIndex: 'montantReporte',
-              align: 'right',
+              align: 'end',
               render: (v: string) => <Montant valeur={v} />,
             },
             { title: t('motif'), dataIndex: 'motif' },

@@ -80,5 +80,21 @@
     "seuil90": "Seuil de 90 % atteint",
     "seuil100": "100 % atteints ou dépassés",
     "sansBase": "Sans base de calcul"
+  },
+  "affichage": {
+    "titre": "Affichage",
+    "theme": "Thème",
+    "densite": "Densité",
+    "themes": {
+      "CLAIR": "Clair",
+      "SOMBRE": "Sombre",
+      "SYSTEME": "Système"
+    },
+    "densites": {
+      "COMPACTE": "Compacte",
+      "CONFORTABLE": "Confortable"
+    },
+    "colonnes": "Colonnes",
+    "colonnesAide": "Colonnes affichées"
   }
 }

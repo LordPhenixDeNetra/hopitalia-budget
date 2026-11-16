@@ -260,6 +260,7 @@ export function Habilitations() {
         />
       </Flex>
       <TableauServeur<HabilitationSortie>
+        nom="habilitations"
         colonnes={colonnes}
         donnees={data?.donnees ?? []}
         total={data?.pagination.total ?? 0}

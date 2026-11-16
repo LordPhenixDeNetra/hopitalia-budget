@@ -368,7 +368,7 @@ function DetailLiquidation({
             {
               title: t('liquidations.deductionsTotal'),
               dataIndex: 'montant',
-              align: 'right',
+              align: 'end',
               render: (v: string) => <Montant valeur={v} />,
             },
             { title: t('liquidations.motifDeduction'), dataIndex: 'motif' },
@@ -398,7 +398,7 @@ function DetailLiquidation({
                 {
                   title: tEngagements('controles.depassement'),
                   dataIndex: 'depassement',
-                  align: 'right',
+                  align: 'end',
                   render: (v: string) => <Montant valeur={v} />,
                 },
                 { title: tEngagements('controles.etat'), key: 'etat', render: (_, r) => etat(r) },
@@ -481,13 +481,13 @@ function Liquidations({ facture, rafraichir }: { facture: FactureSortie; rafraic
     {
       title: t('liquidations.montantLiquide'),
       dataIndex: 'montantLiquide',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     {
       title: t('liquidations.netAPayer'),
       dataIndex: 'netAPayer',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     {

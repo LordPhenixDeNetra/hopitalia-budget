@@ -73,7 +73,7 @@ export function Jauge({ libelle, taux }: { libelle: string; taux: string | null 
               position: 'absolute',
               top: -3,
               bottom: -3,
-              left: `${(r / ECHELLE) * 100}%`,
+              insetInlineStart: `${(r / ECHELLE) * 100}%`,
               width: 2,
               background: token.colorText,
             }}

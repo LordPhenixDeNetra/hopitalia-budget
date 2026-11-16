@@ -173,6 +173,7 @@
           "utilisateur connecté"
         ],
         "summary": "Modifier Preferences",
+        "description": "Préférences conservées sur le profil de l'agent, d'une session et d'un poste à l'autre.",
         "operationId": "modifier_preferences",
         "requestBody": {
           "content": {
@@ -19431,6 +19432,47 @@
               }
             ],
             "title": "Langue"
+          },
+          "theme": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "CLAIR",
+                  "SOMBRE",
+                  "SYSTEME"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Theme"
+          },
+          "densite": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "COMPACTE",
+                  "CONFORTABLE"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Densite"
+          },
+          "colonnesMasquees": {
+            "additionalProperties": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "type": "object",
+            "title": "Colonnesmasquees"
           }
         },
         "type": "object",
@@ -21029,19 +21071,78 @@
       "Preferences": {
         "properties": {
           "langue": {
-            "type": "string",
-            "enum": [
-              "fr",
-              "en"
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "fr",
+                  "en"
+                ]
+              },
+              {
+                "type": "null"
+              }
             ],
             "title": "Langue"
+          },
+          "theme": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "CLAIR",
+                  "SOMBRE",
+                  "SYSTEME"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Theme"
+          },
+          "densite": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "COMPACTE",
+                  "CONFORTABLE"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Densite"
+          },
+          "colonnesMasquees": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "items": {
+                    "type": "string",
+                    "maxLength": 60
+                  },
+                  "type": "array",
+                  "maxItems": 50
+                },
+                "propertyNames": {
+                  "maxLength": 60
+                },
+                "type": "object",
+                "maxProperties": 50
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Colonnesmasquees"
           }
         },
         "type": "object",
-        "required": [
-          "langue"
-        ],
-        "title": "Preferences"
+        "title": "Preferences",
+        "description": "Préférences à modifier : un champ absent garde sa valeur."
       },
       "Profil": {
         "type": "string",

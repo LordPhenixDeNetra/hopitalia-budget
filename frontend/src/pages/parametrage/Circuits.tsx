@@ -252,6 +252,7 @@ export function Circuits() {
         </Button>
       )}
       <TableauServeur<CircuitSortie>
+        nom="circuits-validation"
         colonnes={colonnes}
         donnees={data?.donnees ?? []}
         total={data?.pagination.total ?? 0}

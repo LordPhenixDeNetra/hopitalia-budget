@@ -62,16 +62,16 @@ export function RestesAPayer() {
     {
       title: t('restes.montantTtc'),
       dataIndex: 'montantTtc',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
     {
       title: t('restes.resteAPayer'),
       dataIndex: 'resteAPayer',
-      align: 'right',
+      align: 'end',
       render: (v: string) => <Montant valeur={v} />,
     },
-    { title: t('restes.ageJours'), dataIndex: 'ageJours', align: 'right' },
+    { title: t('restes.ageJours'), dataIndex: 'ageJours', align: 'end' },
   ]
 
   return (

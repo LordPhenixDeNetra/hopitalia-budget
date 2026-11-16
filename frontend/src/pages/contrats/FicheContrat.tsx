@@ -259,7 +259,7 @@ function Avenants({ contrat, peutSaisir }: { contrat: ContratSortie; peutSaisir:
   const colonnes: ColumnsType<AvenantSortie> = [
     { title: t('avenants.numero'), dataIndex: 'numero' },
     { title: t('avenants.objet'), dataIndex: 'objet' },
-    { title: t('avenants.variation'), dataIndex: 'variation', align: 'right', render: montant },
+    { title: t('avenants.variation'), dataIndex: 'variation', align: 'end', render: montant },
     {
       title: t('avenants.dateEffet'),
       dataIndex: 'dateEffet',
@@ -275,13 +275,13 @@ function Avenants({ contrat, peutSaisir }: { contrat: ContratSortie; peutSaisir:
     {
       title: t('avenants.montantAvant'),
       dataIndex: 'montantAvant',
-      align: 'right',
+      align: 'end',
       render: montant,
     },
     {
       title: t('avenants.nouveauPlafond'),
       dataIndex: 'nouveauPlafond',
-      align: 'right',
+      align: 'end',
       render: montant,
     },
     {
@@ -460,7 +460,7 @@ export function FicheContrat() {
             {
               title: t('champs.montant'),
               dataIndex: 'montant',
-              align: 'right',
+              align: 'end',
               render: (v: string) => <Montant valeur={v} />,
             },
           ]}
