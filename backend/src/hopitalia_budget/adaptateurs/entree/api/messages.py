@@ -541,6 +541,27 @@ _CATALOGUE: dict[str, tuple[int, tuple[str, str], tuple[str, str]]] = {
         ),
         ("Incomplete configuration", "The module is not configured for this ({parametre})."),
     ),
+    "COMMANDE_DEJA_RATTACHEE": (
+        409,
+        (
+            "Commande déjà rattachée",
+            "Cette commande de la pharmacie est déjà rattachée à un engagement.",
+        ),
+        ("Order already linked", "This pharmacy order is already linked to a commitment."),
+    ),
+    "FOURNISSEUR_DIFFERENT": (
+        422,
+        (
+            "Fournisseur différent",
+            "Le fournisseur de l'engagement n'est pas celui de la commande.",
+        ),
+        ("Different supplier", "The commitment's supplier is not the order's supplier."),
+    ),
+    "ECHANGE_NON_REPRENABLE": (
+        409,
+        ("Échange non repris", "Seul un échange en échec peut être repris."),
+        ("Exchange not retried", "Only a failed exchange can be retried."),
+    ),
     "HOPITALIA_INDISPONIBLE": (
         502,
         ("Hopitalia indisponible", "Le service de connexion Hopitalia ne répond pas."),

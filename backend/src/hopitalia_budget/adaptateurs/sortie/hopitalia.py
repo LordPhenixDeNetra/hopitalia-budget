@@ -47,6 +47,18 @@ class ClientHopitalia:
     def deconnecter(self, jeton_rafraichissement: str) -> None:
         self._appeler("/api/auth/logout", {"refresh_token": jeton_rafraichissement})
 
+    def lire(self, chemin: str, jeton: str, **parametres: str) -> Any:
+        """Lecture seule : le module n'appelle que des `GET` (note d'intégration, §3)."""
+        try:
+            reponse = self.client.get(
+                chemin, params=parametres, headers={"Authorization": f"Bearer {jeton}"}
+            )
+        except httpx.HTTPError as exc:
+            raise ErreurMetier("HOPITALIA_INDISPONIBLE") from exc
+        if reponse.status_code != 200:
+            raise ErreurMetier("HOPITALIA_INDISPONIBLE")
+        return reponse.json()
+
     def rechercher_agent(self, code_agent: str, jeton: str) -> AgentHopitalia:
         """Agent par son code, avec le jeton de l'utilisateur qui fait la recherche."""
         try:

@@ -15,6 +15,13 @@ class Parametres(BaseSettings):
     hopitalia_api_url: str = "http://localhost:8080"
     hopitalia_jwt_cle: SecretStr = SecretStr("")
     hopitalia_delai_secondes: float = 10.0
+    # Échanges planifiés avec Hopitalia (lot 7) : compte technique en lecture seule, et
+    # établissement du module qui reçoit les services et les achats de la pharmacie.
+    hopitalia_compte_technique: str = ""
+    hopitalia_compte_technique_mot_de_passe: SecretStr = SecretStr("")
+    hopitalia_etablissement: str = ""
+    # Fenêtre relue à chaque import de la pharmacie (jours) ; l'import est idempotent.
+    integration_fenetre_jours: int = 30
     # Clé Fernet de chiffrement des coordonnées bancaires (ENF-03), générée une fois par
     # installation et conservée hors dépôt.
     coordonnees_cle: SecretStr = SecretStr("")
