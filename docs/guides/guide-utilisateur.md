@@ -14,6 +14,7 @@ Ce guide explique, profil par profil, ce que chaque agent fait dans le module de
 - En haut, le sélecteur d'**établissement** limite l'affichage à un établissement ; « tous les établissements » montre tout votre périmètre.
 - Le sélecteur de **langue** passe l'interface en anglais ou en français. Les données ne changent pas.
 - L'**accueil** rappelle vos profils et les établissements où ils s'appliquent.
+- **Affichage**, dans l'en-tête : thème clair, sombre ou celui de votre ordinateur, et densité compacte ou confortable. Dans les listes, le bouton « Colonnes » masque les colonnes inutiles. Ces choix sont conservés sur votre profil, d'un poste à l'autre.
 
 **Retrouver une pièce.** « Recherche » trouve un engagement, une commande, une facture, un paiement ou un contrat par son numéro ou son objet, et ouvre sa fiche.
 

@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.15 · 16 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.16 · 16 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -22,6 +22,7 @@
 | 3.13 | 15/11/2026 | Qualité et exploitation (lot P2.D) : teintes de texte des statuts pour le contraste de 4,5:1 (IHM-03), sauvegarde quotidienne, rétention et copie hors du serveur (ENF-06). |
 | 3.14 | 16/11/2026 | Intégrations (lot P3.A) : journal des échanges et reprises, import des fournisseurs, des services et de la pharmacie, rattachement des commandes de la pharmacie (ligne ajoutée à la matrice), export comptable, import et export structurés (13) ; ressources d'API (11.2) ; état `ecritures` (14.4). |
 | 3.15 | 16/11/2026 | Livrables documentaires (lot P3.D) : emplacement de chaque livrable, documents produits depuis le code (16) ; publication du document OpenAPI avec chaque version. |
+| 3.16 | 16/11/2026 | Options d'interface (lot P3.C) : palette du thème sombre (IHM-03), préférences d'affichage sur le profil (IHM-01, IHM-02), contrôle de la traduction anglaise (I18N-01), mode droite à gauche de test (I18N-10). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1749,8 +1750,8 @@ Règle d'usage : **un seul niveau d'imbrication**. Au-delà, on repart de la res
 | Réf. | Exigence |
 |---|---|
 | IHM-01 | **Style** sobre et fonctionnel, de type « minimaliste suisse » : grille régulière, hiérarchie typographique nette, peu d'effets. Thème clair par défaut, thème sombre en option. |
-| IHM-02 | **Densité** élevée adaptée au travail sur écran toute la journée : mode compact d'Ant Design pour les tableaux et formulaires. |
-| IHM-03 | **Palette** définie une seule fois dans le thème Ant Design (`ConfigProvider`), jamais de couleur en dur dans un composant. Couleur principale `#1E40AF` (bleu de confiance), fond `#F8FAFC`, cartes `#FFFFFF`, texte `#020617`, texte secondaire `#475569`, bordures `#E2E8F0`, succès `#059669`, avertissement `#B45309`, erreur `#DC2626`. Un texte ou une étiquette de statut prend la teinte foncée de sa couleur, pour garder le contraste de 4,5:1 (IHM-07) : succès `#047857` (`#065F46` sur une étiquette), avertissement `#92400E`, erreur `#B91C1C`, information `#1E40AF` ; textes discrets et indications de saisie `#64748B`. |
+| IHM-02 | **Densité** élevée adaptée au travail sur écran toute la journée : mode compact d'Ant Design pour les tableaux et formulaires. **Préférences d'affichage** (lot P3.C) : thème (clair, sombre ou celui du système), densité (compacte par défaut, ou confortable) et colonnes masquées de chaque tableau, choisis par l'agent et conservés sur son profil (`PUT /moi/preferences`, champs partiels), donc d'une session et d'un poste à l'autre. |
+| IHM-03 | **Palette** définie une seule fois dans le thème Ant Design (`ConfigProvider`), jamais de couleur en dur dans un composant. Couleur principale `#1E40AF` (bleu de confiance), fond `#F8FAFC`, cartes `#FFFFFF`, texte `#020617`, texte secondaire `#475569`, bordures `#E2E8F0`, succès `#059669`, avertissement `#B45309`, erreur `#DC2626`. Un texte ou une étiquette de statut prend la teinte foncée de sa couleur, pour garder le contraste de 4,5:1 (IHM-07) : succès `#047857` (`#065F46` sur une étiquette), avertissement `#92400E`, erreur `#B91C1C`, information `#1E40AF` ; textes discrets et indications de saisie `#64748B`. Thème sombre (lot P3.C) : fonds `#020617`, `#0F172A`, `#1E293B` ; texte `#F1F5F9`, secondaire `#CBD5E1`, discret `#94A3B8` ; couleur principale `#60A5FA`, liens `#93C5FD`, succès `#34D399`, avertissement `#FBBF24`, erreur `#F87171`, bordures `#334155` ; texte foncé (`#020617`) sur les boutons pleins, le blanc n'y atteignant pas 4,5:1 ; élément de menu sélectionné en texte clair sur `#1E3A8A`. |
 | IHM-04 | **Typographie :** Lexend pour les titres, Source Sans 3 pour le texte, 14 px minimum dans les tableaux, 16 px dans les formulaires. Polices hébergées avec l'application, pas chargées depuis Google : le réseau de l'hôpital peut filtrer l'accès externe. |
 | IHM-05 | **Montants :** chiffres à chasse fixe (`tabular-nums`), alignés à droite, séparateur de milliers, devise affichée (`45 000 000 XOF`). |
 | IHM-06 | **Statuts et alertes** jamais signalés par la seule couleur : libellé et icône toujours présents (accessibilité). |
@@ -1776,7 +1777,7 @@ L'application est internationalisée dès le lot 0 : ajouter une langue ne deman
 | I18N-07 | **Erreurs de l'API :** le backend renvoie un code stable (section 11.9) ; le frontend traduit ce code. Le champ `detail` suit l'en-tête `Accept-Language`. |
 | I18N-08 | **Contenus produits par le backend** (états PDF et tableur, courriels d'alerte) dans la langue de l'utilisateur destinataire. |
 | I18N-09 | **Données métier non traduites :** libellés de comptes, de fournisseurs ou de contrats restent tels que saisis. Seule l'interface est traduite. |
-| I18N-10 | **Prêt pour l'écriture de droite à gauche** (propriétés CSS logiques, `direction` d'Ant Design), sans qu'aucune langue de ce type ne soit prévue au départ. |
+| I18N-10 | **Prêt pour l'écriture de droite à gauche** (propriétés CSS logiques, `direction` d'Ant Design), sans qu'aucune langue de ce type ne soit prévue au départ. La direction suit la langue ; une règle de lint refuse les propriétés physiques (gauche, droite) ; un mode de test (`localStorage` `hopitalia-budget.direction` = `"rtl"`) force la droite à gauche. |
 
 ## 13. Intégrations
 
