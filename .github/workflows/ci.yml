@@ -35,7 +35,7 @@ jobs:
           # La documentation vérifie aussi les noms des captures du scénario (frontend/e2e-captures/).
           grep -qE '^(site/|frontend/e2e-captures/|\.github/workflows/)' <<<"$fichiers" && echo "site=true" >> "$GITHUB_OUTPUT" || echo "site=false" >> "$GITHUB_OUTPUT"
           # Les images : un fichier nécessaire à la construction doit figurer dans les listes blanches.
-          grep -qE '^(backend/|frontend/|site/|docker-compose|\.dockerignore|\.github/workflows/)' <<<"$fichiers" && echo "docker=true" >> "$GITHUB_OUTPUT" || echo "docker=false" >> "$GITHUB_OUTPUT"
+          grep -qE '^(backend/|frontend/|site/|simulation/|docker-compose|\.dockerignore|\.github/workflows/)' <<<"$fichiers" && echo "docker=true" >> "$GITHUB_OUTPUT" || echo "docker=false" >> "$GITHUB_OUTPUT"
 
   backend:
     name: backend
@@ -140,6 +140,14 @@ jobs:
           curl -fsS http://127.0.0.1:8000/health
           curl -fsS -o /dev/null http://127.0.0.1:8080/
           curl -fsS -o /dev/null http://127.0.0.1:8080/docs/
+      # Démonstration en ligne (Dokploy) : fichier valide et image de démonstration construite.
+      - name: Démonstration Dokploy
+        env:
+          HOPITALIA_JWT_CLE: ci
+          SIMULATION_MOT_DE_PASSE: ci
+        run: |
+          docker compose -f docker-compose.dokploy.yml config -q
+          docker compose -f docker-compose.dokploy.yml build hopitalia-simule
       - if: failure()
         run: docker compose ps && docker compose logs --tail 50
 
