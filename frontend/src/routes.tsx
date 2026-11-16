@@ -88,6 +88,19 @@ export const routes: RouteObject[] = [
         lazy: () => import('./pages/commandes/Commandes').then((m) => ({ Component: m.Commandes })),
       },
       {
+        path: 'commandes-pharmacie',
+        handle: fil('menu.commandesPharmacie'),
+        lazy: () =>
+          import('./pages/commandes/CommandesPharmacie').then((m) => ({
+            Component: m.CommandesPharmacie,
+          })),
+      },
+      {
+        path: 'integrations',
+        handle: fil('menu.integrations'),
+        lazy: () => import('./pages/Integrations').then((m) => ({ Component: m.Integrations })),
+      },
+      {
         path: 'bons-commande/:id',
         handle: fil('menu.commandes'),
         lazy: () =>

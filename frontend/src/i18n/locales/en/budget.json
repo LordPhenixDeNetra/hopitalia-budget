@@ -96,5 +96,10 @@
   },
   "ligne": {
     "disponibilite": "Availability"
+  },
+  "export": {
+    "titre": "Export lines and allocations (import format):",
+    "csv": "CSV",
+    "json": "JSON"
   }
 }

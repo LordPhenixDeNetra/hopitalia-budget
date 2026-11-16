@@ -57,6 +57,7 @@ beforeAll(async () => {
     'recherche',
     'cloture',
     'audit',
+    'integrations',
   ])
 })
 
@@ -1206,5 +1207,111 @@ describe('recherche, audit et clôture (lot 6)', () => {
       motif: 'Fin de gestion',
     })
     expect(await screen.findByRole('button', { name: 'Rouvrir' })).toBeTruthy()
+  }, 15_000)
+})
+
+describe('intégrations (lot 7)', () => {
+  test('alerte d’une réception importée : message propre au cas (EF-REC-07)', () => {
+    const message = i18n.t('messages.ECART_RAPPROCHEMENT', {
+      ns: 'alertes',
+      numero: 'REC-2026-00002',
+      context: 'HOPITALIA_SUPPRIME',
+    })
+    expect(message).toMatch(/^Réception REC-2026-00002 annulée/)
+  })
+
+  const echange = {
+    id: 7,
+    systemeExterne: 'HOPITALIA',
+    direction: 'ENTRANT',
+    typeDonnees: 'PHARMACIE',
+    identifiantUnique: 'HOPITALIA:PHARMACIE:2026-10-15:2026-11-14',
+    etablissementId: 'a1',
+    parametres: { debut: '2026-10-15', fin: '2026-11-14' },
+    statut: 'ECHEC',
+    erreur: 'HOPITALIA_INDISPONIBLE',
+    resultat: null,
+    tentatives: 1,
+    declencheParCode: null,
+    creeLe: '2026-11-14T09:00:00Z',
+    date: '2026-11-14T09:00:00Z',
+  }
+
+  test('journal : échec traduit, reprise par l’administrateur (T-200)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(MOI)],
+      'GET /api/v1/journal-integration': [
+        json({ donnees: [echange], pagination: { taille: 50, suivant: null } }),
+      ],
+      'POST /api/v1/journal-integration/7/reprises': [
+        json({ ...echange, statut: 'SUCCES', erreur: null, resultat: { commandes: 1 } }),
+      ],
+    })
+    afficher('/integrations')
+    expect(
+      await screen.findByText(
+        'Le service de connexion Hopitalia ne répond pas. Réessayez plus tard.',
+        {},
+        { timeout: 5000 },
+      ),
+    ).toBeTruthy()
+    expect(screen.getByText('En échec')).toBeTruthy()
+    await userEvent.click(screen.getByRole('button', { name: /Reprendre/ }))
+    expect(await screen.findByText('Échange réussi.')).toBeTruthy()
+    expect(
+      appel.mock.calls.some(
+        ([url, options]) =>
+          String(url).endsWith('/journal-integration/7/reprises') && options?.method === 'POST',
+      ),
+    ).toBe(true)
+  }, 15_000)
+
+  test('commandes de la pharmacie : rattachement par l’agent financier (EF-REC-07)', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const commande = {
+      id: 'cp1',
+      etablissementId: 'a1',
+      numero: 'BCP-0501',
+      dateCommande: '2026-03-02',
+      codeFournisseur: 'PHARMA-TEST',
+      fournisseurId: 'f1',
+      service: 'Pharmacie centrale',
+      lignes: [
+        { codeProduit: 'P1', nomProduit: 'Paracétamol', quantite: '10.000', montant: '50000.00' },
+      ],
+      montant: '50000.00',
+      bonCommandeId: null,
+      approvisionnementsEnAttente: 1,
+      propositions: [
+        {
+          engagementId: 'e1',
+          numero: 'ENG-2026-00001',
+          objet: 'Médicaments',
+          resteACommander: '9000000.00',
+        },
+      ],
+    }
+    const appel = simulerApi({
+      'GET /api/v1/moi': [
+        json({ ...MOI, habilitations: [{ profil: 'AF', etablissementId: 'a1' }] }),
+      ],
+      'GET /api/v1/commandes-pharmacie': [
+        json({ donnees: [commande], pagination: { page: 1, taille: 25, total: 1, suivant: null } }),
+      ],
+      'POST /api/v1/commandes-pharmacie/cp1/rattachement': [
+        json({ ...commande, bonCommandeId: 'bc1', approvisionnementsEnAttente: 0 }, 201),
+      ],
+    })
+    afficher('/commandes-pharmacie')
+    await userEvent.click(
+      await screen.findByLabelText('Engagement — BCP-0501', {}, { timeout: 5000 }),
+    )
+    await userEvent.click(await screen.findByTitle('ENG-2026-00001 — Médicaments'))
+    await userEvent.click(screen.getByRole('button', { name: /Rattacher/ }))
+    expect(await screen.findByText("Commande rattachée à l'engagement.")).toBeTruthy()
+    const envoi = appel.mock.calls.find(([url]) => String(url).endsWith('/rattachement'))!
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({ engagementId: 'e1' })
+    expect(new Headers(envoi[1]!.headers).get('Idempotency-Key')).toMatch(/[0-9a-f-]{36}/)
   }, 15_000)
 })

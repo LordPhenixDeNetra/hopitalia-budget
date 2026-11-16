@@ -56,6 +56,8 @@
     "ENGAGEMENT_ANCIEN": "Engagement {{numero}}, validé le {{valideLe}}, toujours non soldé.",
     "ECHEANCE_CONTRAT": "Contrat {{numero}} : échéance au {{echeance}}.",
     "MODIFICATION_APRES_VALIDATION": "Tentative de modification refusée sur une opération au statut {{statut}}.",
-    "CONTROLE_BLOQUANT": "Opération refusée par le contrôle {{code}}."
+    "CONTROLE_BLOQUANT": "Opération refusée par le contrôle {{code}}.",
+    "ECART_RAPPROCHEMENT_HOPITALIA_MODIFIE": "Réception {{numero}} : l'approvisionnement a été modifié dans Hopitalia après sa réception. Vérifier la réception et la facture.",
+    "ECART_RAPPROCHEMENT_HOPITALIA_SUPPRIME": "Réception {{numero}} annulée : l'approvisionnement a été supprimé dans Hopitalia. Vérifier les liquidations de la commande."
   }
 }

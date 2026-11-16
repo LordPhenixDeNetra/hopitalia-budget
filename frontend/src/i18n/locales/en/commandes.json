@@ -35,7 +35,8 @@
     "EN_VALIDATION": "Being approved",
     "A_CORRIGER": "To correct",
     "VALIDE": "Service delivery approved",
-    "REJETE": "Rejected"
+    "REJETE": "Rejected",
+    "ANNULE": "Cancelled (deleted in Hopitalia)"
   },
   "retard": "Late",
   "aJour": "On time",

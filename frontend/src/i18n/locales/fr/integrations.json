@@ -1,0 +1,82 @@
+{
+  "titre": "Intégrations",
+  "intro": "Échanges avec Hopitalia : fournisseurs, services et pharmacie. Chaque échange est journalisé ; un échange en échec se reprend avec ses paramètres d'origine, sans créer de doublon. La tâche planifiée lance les échanges chaque jour et reprend d'elle-même les échecs.",
+  "lancer": {
+    "FOURNISSEURS": "Importer les fournisseurs",
+    "SERVICES": "Importer les services",
+    "PHARMACIE": "Importer la pharmacie"
+  },
+  "types": {
+    "FOURNISSEURS": "Fournisseurs",
+    "SERVICES": "Services",
+    "PHARMACIE": "Pharmacie"
+  },
+  "statuts": {
+    "EN_COURS": "En cours",
+    "SUCCES": "Réussi",
+    "ECHEC": "En échec"
+  },
+  "filtres": {
+    "type": "Type de données",
+    "statut": "Statut"
+  },
+  "colonnes": {
+    "date": "Dernière tentative",
+    "type": "Données",
+    "periode": "Période",
+    "statut": "Statut",
+    "tentatives": "Tentatives",
+    "resultat": "Résultat",
+    "declencheur": "Lancé par",
+    "actions": "Actions"
+  },
+  "resultats": {
+    "lus_one": "{{count}} lu",
+    "lus_other": "{{count}} lus",
+    "crees_one": "{{count}} créé",
+    "crees_other": "{{count}} créés",
+    "modifies_one": "{{count}} modifié",
+    "modifies_other": "{{count}} modifiés",
+    "desactives_one": "{{count}} désactivé",
+    "desactives_other": "{{count}} désactivés",
+    "commandes_one": "{{count}} commande",
+    "commandes_other": "{{count}} commandes",
+    "approvisionnements_one": "{{count}} approvisionnement",
+    "approvisionnements_other": "{{count}} approvisionnements",
+    "receptions_one": "{{count}} réception",
+    "receptions_other": "{{count}} réceptions",
+    "ecarts_one": "{{count}} écart",
+    "ecarts_other": "{{count}} écarts",
+    "annulations_one": "{{count}} annulation",
+    "annulations_other": "{{count}} annulations"
+  },
+  "reprendre": "Reprendre",
+  "reussi": "Échange réussi.",
+  "echoue": "Échange en échec : {{erreur}}",
+  "plus": "Afficher plus",
+  "pharmacie": {
+    "titre": "Commandes de la pharmacie",
+    "intro": "Commandes saisies dans la pharmacie d'Hopitalia, importées sans ressaisie. L'agent financier rattache chacune à un engagement validé du même fournisseur ; les approvisionnements deviennent alors des réceptions validées (preuve : bon de livraison).",
+    "vues": {
+      "aRattacher": "À rattacher",
+      "rattachees": "Rattachées"
+    },
+    "colonnes": {
+      "numero": "Numéro Hopitalia",
+      "date": "Date",
+      "fournisseur": "Fournisseur",
+      "service": "Service",
+      "montant": "Montant",
+      "approvisionnements": "Approvisionnements en attente",
+      "rattachement": "Rattachement",
+      "produit": "Produit",
+      "designation": "Désignation",
+      "quantite": "Quantité"
+    },
+    "engagement": "Engagement",
+    "rattacher": "Rattacher",
+    "rattachee": "Commande rattachée à l'engagement.",
+    "aucuneProposition": "Aucun engagement validé du fournisseur ne couvre cette commande.",
+    "voirCommande": "Voir le bon de commande"
+  }
+}

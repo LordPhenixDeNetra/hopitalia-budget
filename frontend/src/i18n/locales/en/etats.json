@@ -52,6 +52,10 @@
     "echeances": {
       "titre": "Contracts by end date",
       "description": "End date, days left and consumption."
+    },
+    "ecritures": {
+      "titre": "Accounting entries",
+      "description": "Approved settlements and executed payments as balanced entries (debit, credit, SYSCOHADA account), to import into the accounting software."
     }
   }
 }

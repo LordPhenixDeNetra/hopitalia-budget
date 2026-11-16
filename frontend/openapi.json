@@ -1522,6 +1522,64 @@
         }
       }
     },
+    "/api/v1/budgets/{budget_id}/export": {
+      "get": {
+        "tags": [
+          "budget",
+          "budgets"
+        ],
+        "summary": "Exporter Budget",
+        "description": "Lignes et dotations initiales au format de l'import des dotations (INT-05, T-206) : le\nfichier exporté se réimporte tel quel dans un autre budget, sans perte.",
+        "operationId": "exporter_budget",
+        "parameters": [
+          {
+            "name": "budget_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Budget Id"
+            }
+          },
+          {
+            "name": "format",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "enum": [
+                "csv",
+                "json"
+              ],
+              "type": "string",
+              "default": "csv",
+              "title": "Format"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              },
+              "text/csv": {}
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/notifications-credits": {
       "post": {
         "tags": [
@@ -6507,7 +6565,8 @@
                 "rapprochements",
                 "restes",
                 "depenses",
-                "echeances"
+                "echeances",
+                "ecritures"
               ],
               "type": "string",
               "title": "Code"
@@ -6909,6 +6968,326 @@
                     "$ref": "#/components/schemas/Resultat"
                   },
                   "title": "Response Rechercher"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/journal-integration": {
+      "get": {
+        "tags": [
+          "integrations"
+        ],
+        "summary": "Lister Echanges",
+        "description": "Échanges du plus récent au plus ancien, par curseur (section 11).",
+        "operationId": "lister_echanges",
+        "parameters": [
+          {
+            "name": "apres",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Apres"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 100,
+              "title": "Taille"
+            }
+          },
+          {
+            "name": "typeDonnees",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TypeEchange"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Typedonnees"
+            }
+          },
+          {
+            "name": "statut",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/StatutEchange"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Statut"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageCurseur_EchangeSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "integrations"
+        ],
+        "summary": "Lancer Echange",
+        "description": "Lance l'échange du jour sans attendre la tâche planifiée ; relancé, il est rejoué sur la\nmême ligne du journal (sans doublon).",
+        "operationId": "lancer_echange",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EchangeLancement"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchangeSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/journal-integration/{echange_id}/reprises": {
+      "post": {
+        "tags": [
+          "integrations"
+        ],
+        "summary": "Reprendre Echange",
+        "description": "Reprise manuelle d'un échange en échec, avec ses paramètres d'origine (INT-07).",
+        "operationId": "reprendre_echange",
+        "parameters": [
+          {
+            "name": "echange_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Echange Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EchangeSortie"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/commandes-pharmacie": {
+      "get": {
+        "tags": [
+          "integrations"
+        ],
+        "summary": "Lister Commandes Pharmacie",
+        "description": "Commandes importées de la pharmacie ; `rattachee=false` : la liste « à rattacher ».",
+        "operationId": "lister_commandes_pharmacie",
+        "parameters": [
+          {
+            "name": "rattachee",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Rattachee"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "taille",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 25,
+              "title": "Taille"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Page_CommandePharmacieSortie_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/commandes-pharmacie/{commande_id}/rattachement": {
+      "post": {
+        "tags": [
+          "integrations"
+        ],
+        "summary": "Rattacher Commande Pharmacie",
+        "description": "Rattache la commande à un engagement validé (EF-REC-07) : le bon de commande du module\nest créé, puis les approvisionnements déjà importés deviennent des réceptions validées.",
+        "operationId": "rattacher_commande_pharmacie",
+        "parameters": [
+          {
+            "name": "commande_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid",
+              "title": "Commande Id"
+            }
+          },
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Idempotency-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Rattachement"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CommandePharmacieSortie"
                 }
               }
             }
@@ -13587,6 +13966,117 @@
         ],
         "title": "ClotureSortie"
       },
+      "CommandePharmacieSortie": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Id"
+          },
+          "etablissementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Etablissementid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "dateCommande": {
+            "type": "string",
+            "format": "date",
+            "title": "Datecommande"
+          },
+          "codeFournisseur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Codefournisseur"
+          },
+          "fournisseurId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Fournisseurid"
+          },
+          "service": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Service"
+          },
+          "lignes": {
+            "items": {
+              "$ref": "#/components/schemas/LignePharmacie"
+            },
+            "type": "array",
+            "title": "Lignes"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          },
+          "bonCommandeId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Boncommandeid"
+          },
+          "approvisionnementsEnAttente": {
+            "type": "integer",
+            "title": "Approvisionnementsenattente"
+          },
+          "propositions": {
+            "items": {
+              "$ref": "#/components/schemas/PropositionEngagement"
+            },
+            "type": "array",
+            "title": "Propositions"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "etablissementId",
+          "numero",
+          "dateCommande",
+          "codeFournisseur",
+          "fournisseurId",
+          "service",
+          "lignes",
+          "montant",
+          "bonCommandeId",
+          "approvisionnementsEnAttente",
+          "propositions"
+        ],
+        "title": "CommandePharmacieSortie"
+      },
       "CompteComptableSortie": {
         "properties": {
           "code": {
@@ -15511,6 +16001,131 @@
           "sansEcart"
         ],
         "title": "EcartsSortie"
+      },
+      "EchangeLancement": {
+        "properties": {
+          "typeDonnees": {
+            "$ref": "#/components/schemas/TypeEchange"
+          }
+        },
+        "type": "object",
+        "required": [
+          "typeDonnees"
+        ],
+        "title": "EchangeLancement"
+      },
+      "EchangeSortie": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "systemeExterne": {
+            "type": "string",
+            "title": "Systemeexterne"
+          },
+          "direction": {
+            "type": "string",
+            "title": "Direction"
+          },
+          "typeDonnees": {
+            "$ref": "#/components/schemas/TypeEchange"
+          },
+          "identifiantUnique": {
+            "type": "string",
+            "title": "Identifiantunique"
+          },
+          "etablissementId": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uuid"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Etablissementid"
+          },
+          "parametres": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Parametres"
+          },
+          "statut": {
+            "$ref": "#/components/schemas/StatutEchange"
+          },
+          "erreur": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Erreur"
+          },
+          "resultat": {
+            "anyOf": [
+              {
+                "additionalProperties": {
+                  "type": "integer"
+                },
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Resultat"
+          },
+          "tentatives": {
+            "type": "integer",
+            "title": "Tentatives"
+          },
+          "declencheParCode": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Declencheparcode"
+          },
+          "creeLe": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Creele"
+          },
+          "date": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Date"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "systemeExterne",
+          "direction",
+          "typeDonnees",
+          "identifiantUnique",
+          "etablissementId",
+          "parametres",
+          "statut",
+          "erreur",
+          "resultat",
+          "tentatives",
+          "declencheParCode",
+          "creeLe",
+          "date"
+        ],
+        "title": "EchangeSortie"
       },
       "EcheanceSchema": {
         "properties": {
@@ -18011,6 +18626,38 @@
         ],
         "title": "LigneOrdonnancementSortie"
       },
+      "LignePharmacie": {
+        "properties": {
+          "codeProduit": {
+            "type": "string",
+            "title": "Codeproduit"
+          },
+          "nomProduit": {
+            "type": "string",
+            "title": "Nomproduit"
+          },
+          "quantite": {
+            "type": "string",
+            "title": "Quantite"
+          },
+          "montant": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Montant",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "codeProduit",
+          "nomProduit",
+          "quantite",
+          "montant"
+        ],
+        "title": "LignePharmacie"
+      },
       "LigneReceptionSchema-Input": {
         "properties": {
           "ligneCommandeId": {
@@ -19429,6 +20076,26 @@
         ],
         "title": "PageAlertes"
       },
+      "PageCurseur_EchangeSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/EchangeSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/PaginationCurseur"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "PageCurseur[EchangeSortie]"
+      },
       "PageCurseur_EntreeJournal_": {
         "properties": {
           "donnees": {
@@ -19528,6 +20195,26 @@
           "pagination"
         ],
         "title": "Page[CircuitSortie]"
+      },
+      "Page_CommandePharmacieSortie_": {
+        "properties": {
+          "donnees": {
+            "items": {
+              "$ref": "#/components/schemas/CommandePharmacieSortie"
+            },
+            "type": "array",
+            "title": "Donnees"
+          },
+          "pagination": {
+            "$ref": "#/components/schemas/Pagination"
+          }
+        },
+        "type": "object",
+        "required": [
+          "donnees",
+          "pagination"
+        ],
+        "title": "Page[CommandePharmacieSortie]"
       },
       "Page_CompteTresorerieSortie_": {
         "properties": {
@@ -20560,6 +21247,39 @@
         ],
         "title": "ProgrammeSortie"
       },
+      "PropositionEngagement": {
+        "properties": {
+          "engagementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Engagementid"
+          },
+          "numero": {
+            "type": "string",
+            "title": "Numero"
+          },
+          "objet": {
+            "type": "string",
+            "title": "Objet"
+          },
+          "resteACommander": {
+            "type": "string",
+            "pattern": "^-?\\d{1,16}(\\.\\d{1,2})?$",
+            "title": "Resteacommander",
+            "examples": [
+              "45000000.00"
+            ]
+          }
+        },
+        "type": "object",
+        "required": [
+          "engagementId",
+          "numero",
+          "objet",
+          "resteACommander"
+        ],
+        "title": "PropositionEngagement"
+      },
       "Rafraichissement": {
         "properties": {
           "jetonRafraichissement": {
@@ -20680,6 +21400,20 @@
           "creeParCode"
         ],
         "title": "RapprochementSortie"
+      },
+      "Rattachement": {
+        "properties": {
+          "engagementId": {
+            "type": "string",
+            "format": "uuid",
+            "title": "Engagementid"
+          }
+        },
+        "type": "object",
+        "required": [
+          "engagementId"
+        ],
+        "title": "Rattachement"
       },
       "ReceptionChamps": {
         "properties": {
@@ -22113,6 +22847,15 @@
         ],
         "title": "StatutCreation"
       },
+      "StatutEchange": {
+        "type": "string",
+        "enum": [
+          "EN_COURS",
+          "SUCCES",
+          "ECHEC"
+        ],
+        "title": "StatutEchange"
+      },
       "StatutEngagement": {
         "type": "string",
         "enum": [
@@ -22203,7 +22946,8 @@
           "EN_VALIDATION",
           "A_CORRIGER",
           "VALIDE",
-          "REJETE"
+          "REJETE",
+          "ANNULE"
         ],
         "title": "StatutReception"
       },
@@ -22875,6 +23619,15 @@
           "seuilHorsMarche"
         ],
         "title": "TypeDepenseSortie"
+      },
+      "TypeEchange": {
+        "type": "string",
+        "enum": [
+          "FOURNISSEURS",
+          "SERVICES",
+          "PHARMACIE"
+        ],
+        "title": "TypeEchange"
       },
       "TypeFacture": {
         "type": "string",

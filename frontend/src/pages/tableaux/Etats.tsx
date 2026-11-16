@@ -16,6 +16,7 @@ const CODES = [
   'rapprochements',
   'depenses',
   'echeances',
+  'ecritures',
 ] as const
 const FORMATS = ['pdf', 'xlsx', 'csv', 'json'] as const
 

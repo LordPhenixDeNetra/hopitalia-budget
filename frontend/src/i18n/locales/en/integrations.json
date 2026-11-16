@@ -1,0 +1,82 @@
+{
+  "titre": "Integrations",
+  "intro": "Exchanges with Hopitalia: suppliers, departments and pharmacy. Every exchange is logged; a failed exchange is retried with its original parameters, without creating duplicates. The scheduled task runs the exchanges every day and retries failures by itself.",
+  "lancer": {
+    "FOURNISSEURS": "Import suppliers",
+    "SERVICES": "Import departments",
+    "PHARMACIE": "Import pharmacy"
+  },
+  "types": {
+    "FOURNISSEURS": "Suppliers",
+    "SERVICES": "Departments",
+    "PHARMACIE": "Pharmacy"
+  },
+  "statuts": {
+    "EN_COURS": "Running",
+    "SUCCES": "Succeeded",
+    "ECHEC": "Failed"
+  },
+  "filtres": {
+    "type": "Data type",
+    "statut": "Status"
+  },
+  "colonnes": {
+    "date": "Last attempt",
+    "type": "Data",
+    "periode": "Period",
+    "statut": "Status",
+    "tentatives": "Attempts",
+    "resultat": "Result",
+    "declencheur": "Started by",
+    "actions": "Actions"
+  },
+  "resultats": {
+    "lus_one": "{{count}} read",
+    "lus_other": "{{count}} read",
+    "crees_one": "{{count}} created",
+    "crees_other": "{{count}} created",
+    "modifies_one": "{{count}} updated",
+    "modifies_other": "{{count}} updated",
+    "desactives_one": "{{count}} deactivated",
+    "desactives_other": "{{count}} deactivated",
+    "commandes_one": "{{count}} order",
+    "commandes_other": "{{count}} orders",
+    "approvisionnements_one": "{{count}} delivery",
+    "approvisionnements_other": "{{count}} deliveries",
+    "receptions_one": "{{count}} receipt",
+    "receptions_other": "{{count}} receipts",
+    "ecarts_one": "{{count}} discrepancy",
+    "ecarts_other": "{{count}} discrepancies",
+    "annulations_one": "{{count}} cancellation",
+    "annulations_other": "{{count}} cancellations"
+  },
+  "reprendre": "Retry",
+  "reussi": "Exchange succeeded.",
+  "echoue": "Exchange failed: {{erreur}}",
+  "plus": "Show more",
+  "pharmacie": {
+    "titre": "Pharmacy orders",
+    "intro": "Orders entered in the Hopitalia pharmacy, imported without re-entry. The finance officer links each one to an approved commitment with the same supplier; deliveries then become approved receipts (proof: delivery note).",
+    "vues": {
+      "aRattacher": "To link",
+      "rattachees": "Linked"
+    },
+    "colonnes": {
+      "numero": "Hopitalia number",
+      "date": "Date",
+      "fournisseur": "Supplier",
+      "service": "Department",
+      "montant": "Amount",
+      "approvisionnements": "Pending deliveries",
+      "rattachement": "Link",
+      "produit": "Product",
+      "designation": "Description",
+      "quantite": "Quantity"
+    },
+    "engagement": "Commitment",
+    "rattacher": "Link",
+    "rattachee": "Order linked to the commitment.",
+    "aucuneProposition": "No approved commitment with this supplier covers this order.",
+    "voirCommande": "View the purchase order"
+  }
+}

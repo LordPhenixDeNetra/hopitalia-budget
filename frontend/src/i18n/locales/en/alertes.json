@@ -56,6 +56,8 @@
     "ENGAGEMENT_ANCIEN": "Commitment {{numero}}, approved on {{valideLe}}, still not completed.",
     "ECHEANCE_CONTRAT": "Contract {{numero}}: ends on {{echeance}}.",
     "MODIFICATION_APRES_VALIDATION": "Change refused on an operation with status {{statut}}.",
-    "CONTROLE_BLOQUANT": "Operation refused by check {{code}}."
+    "CONTROLE_BLOQUANT": "Operation refused by check {{code}}.",
+    "ECART_RAPPROCHEMENT_HOPITALIA_MODIFIE": "Receipt {{numero}}: the delivery was changed in Hopitalia after receipt. Check the receipt and the invoice.",
+    "ECART_RAPPROCHEMENT_HOPITALIA_SUPPRIME": "Receipt {{numero}} cancelled: the delivery was deleted in Hopitalia. Check the order's settlements."
   }
 }
