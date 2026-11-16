@@ -10,6 +10,7 @@ courriels reçus, un échange Hopitalia en échec à reprendre devant l'assistan
 Rien n'est masqué : chaque fonction à valider est activée et remplie.
 """
 
+import os
 import time
 from typing import Any
 
@@ -25,9 +26,9 @@ from recette_blanche import (
     SIMULE,
     VAL_A,
     client,
-    compose,
     creer,
     entetes,
+    outil,
     s,
 )
 
@@ -116,9 +117,7 @@ def alertes_et_courriels() -> None:
     )
     planification.raise_for_status()
     time.sleep(1)
-    sortie = compose(
-        "exec", "-T", "courriels", "python", "-m", "hopitalia_budget.outils.courriels"
-    )
+    sortie = outil("courriels", "hopitalia_budget.outils.courriels")
     recus = httpx.get(f"{COURRIER}/api/v1/messages", timeout=30).json()[
         "messages_count"
     ]
@@ -261,7 +260,11 @@ if __name__ == "__main__":
     alertes_et_courriels()
     echange_a_reprendre()
     recettes()
+    # Sur un serveur, l'adresse publique ; son mot de passe n'est jamais affiché.
+    interface = (
+        os.environ.get("URL_APPLICATION")
+        or "http://127.0.0.1:8080 (mot de passe : recette)"
+    )
     print(
-        "\nDémonstration prête : interface http://127.0.0.1:8080 (comptes agentNNN / recette), "
-        "courriels http://127.0.0.1:8025."
+        f"\nDémonstration prête : interface {interface}, comptes agent001 à agent015."
     )

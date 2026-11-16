@@ -13,6 +13,7 @@ Le module suit uniquement des marchés **déjà attribués** et des contrats **d
 | [Cahier des tâches](CAHIER_DES_TACHES.md) | Tâches par priorité, statuts et avancement. |
 | [AGENTS.md](AGENTS.md) | Règles du projet pour les développeurs et les agents de code. |
 | [docs/cadrage/](docs/cadrage/) | Décisions de cadrage, intégration avec Hopitalia, nomenclature, jeu d'essai. |
+| [Démonstration en ligne](site/src/content/docs/installer/dokploy.md) | Déploiement sur Dokploy (`docker-compose.dokploy.yml`, `.env.dokploy.example`) : https://budget.hopitalia.cloud, API https://apibudget.hopitalia.cloud. |
 | [docs/recette/recette-blanche.md](docs/recette/recette-blanche.md) | Répétition de la recette sur un poste : Hopitalia simulé, serveur de courrier de test. |
 | [docs/presentation/](docs/presentation/) | Présentation de la proposition : environnement de démonstration, parcours de validation, fiche de décision. |
 | [docs/conception/](docs/conception/) | Dictionnaire des données, workflows et matrice des habilitations (produits depuis le code). |

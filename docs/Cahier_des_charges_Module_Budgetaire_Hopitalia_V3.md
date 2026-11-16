@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.19 · 16 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.20 · 16 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -24,6 +24,7 @@
 | 3.15 | 16/11/2026 | Livrables documentaires (lot P3.D) : emplacement de chaque livrable, documents produits depuis le code (16) ; publication du document OpenAPI avec chaque version. |
 | 3.16 | 16/11/2026 | Options d'interface (lot P3.C) : palette du thème sombre (IHM-03), préférences d'affichage sur le profil (IHM-01, IHM-02), contrôle de la traduction anglaise (I18N-01), mode droite à gauche de test (I18N-10). |
 | 3.17 | 16/11/2026 | Volet recettes (lot P3.B) : activation par établissement, débiteurs, mouvements de facturé et d'encaissé, formules (6.4), tableau de bord, ressources d'API (11.2), ligne ajoutée à la matrice des habilitations. |
+| 3.20 | 16/11/2026 | Démonstration en ligne sur un serveur géré par Dokploy, avec un Hopitalia simulé et des données fictives (15) ; images Docker construites depuis des listes blanches, avec contrôles de santé. |
 | 3.19 | 16/11/2026 | Documentation des utilisateurs, de l'exploitation et de l'intégration réunie dans un site servi par l'application sous `/docs/`, avec captures d'écran produites depuis l'environnement de démonstration (16) ; l'administrateur choisit les alertes envoyées par courriel dans l'écran Alertes (14.3). |
 | 3.18 | 16/11/2026 | Courriels d'alerte (T-225) : adresse saisie par l'agent, file d'envoi, langue du destinataire (14.3) ; recette blanche avec Hopitalia simulé et serveur de courrier de test (15). |
 
@@ -1892,6 +1893,8 @@ La tutelle n'impose pas de modèle officiel : la présentation des états est li
 ## 15. Recette
 
 **Recette blanche (16/11/2026).** Avant la séance avec la DAF, la recette se répète sur un poste avec la pile complète, un Hopitalia simulé et un serveur de courrier de test (`docker-compose.simulation.yml`, `simulation/`, `docs/recette/recette-blanche.md`). La répétition produit un procès-verbal de répétition, sans valeur de procès-verbal de recette : elle ne remplace ni la séance, ni la signature, ni la vérification sur un vrai Hopitalia.
+
+**Démonstration en ligne (16/11/2026).** Pour présenter la proposition à distance, la même pile tourne sur un serveur géré par Dokploy (`docker-compose.dokploy.yml`) : application sous `budget.hopitalia.cloud`, API sous `apibudget.hopitalia.cloud`, Hopitalia simulé et serveur de courrier internes, jeu de démonstration chargé au premier démarrage. Clé de signature des jetons et mot de passe des comptes propres au serveur, jamais dans le dépôt. Elle ne reçoit ni vrai Hopitalia ni vraies données, et ne vaut pas environnement de recette (T-254).
 
 ### 15.1. Scénarios fonctionnels
 

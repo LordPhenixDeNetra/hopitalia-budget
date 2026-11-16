@@ -37,8 +37,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    # Adresse publiée sur le serveur (ADRESSE_API) : changer le port s'il est déjà pris (Dokploy).
     ports:
-      - "127.0.0.1:8000:8000"
+      - "${ADRESSE_API:-127.0.0.1:8000}:8000"
     # Sain quand les migrations sont appliquées et que l'API répond : les autres services l'attendent.
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=5)"]
@@ -91,7 +92,9 @@ services:
       HOPITALIA_COMPTE_TECHNIQUE: ${HOPITALIA_COMPTE_TECHNIQUE:-}
       HOPITALIA_COMPTE_TECHNIQUE_MOT_DE_PASSE: ${HOPITALIA_COMPTE_TECHNIQUE_MOT_DE_PASSE:-}
       HOPITALIA_ETABLISSEMENT: ${HOPITALIA_ETABLISSEMENT:-}
-    command: ["sh", "-c", "while true; do python -m hopitalia_budget.outils.integrations; sleep 86400; done"]
+      INTEGRATIONS_QUOTIDIENNES: ${INTEGRATIONS_QUOTIDIENNES:-oui}
+    # INTEGRATIONS_QUOTIDIENNES=non : la tâche ne tourne pas (démonstration, qui lance ses échanges).
+    command: ["sh", "-c", "if [ \"$${INTEGRATIONS_QUOTIDIENNES:-oui}\" = non ]; then exec sleep infinity; fi; while true; do python -m hopitalia_budget.outils.integrations; sleep 86400; done"]
     depends_on:
       api:
         condition: service_healthy
@@ -126,7 +129,7 @@ services:
       api:
         condition: service_healthy
     ports:
-      - "127.0.0.1:8080:80"
+      - "${ADRESSE_WEB:-127.0.0.1:8080}:80"
     healthcheck:
       test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/"]
       interval: 10s

@@ -53,4 +53,4 @@ Mot de passe `recette` pour tous. Une fenêtre de navigation privée par compte 
 - **Messagerie** : les courriels arrivent dans la boîte de test, jamais dans de vraies boîtes.
 - **Échanges** : la tâche quotidienne des échanges est arrêtée, pour qu'un échec reste visible jusqu'à sa reprise.
 
-Les captures d'écran de cette documentation sont prises dans cet environnement.
+Les captures d'écran de cette documentation sont prises dans cet environnement. Pour la même démonstration sur un serveur, avec des secrets propres : [Démonstration en ligne (Dokploy)](/docs/installer/dokploy/).

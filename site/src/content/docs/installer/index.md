@@ -26,7 +26,7 @@ Cette partie s'adresse à la DSI de l'hôpital et à l'équipe projet. Elle couv
 
 Ensuite : [mettre à jour](/docs/installer/mise-a-jour/), [surveiller et entretenir](/docs/installer/exploitation/), [reprendre après un incident](/docs/installer/incidents/).
 
-Pour essayer le module sur un poste, sans serveur ni Hopitalia, voir l'[environnement de démonstration](/docs/installer/demonstration/).
+Pour essayer le module sur un poste, sans serveur ni Hopitalia, voir l'[environnement de démonstration](/docs/installer/demonstration/) ; pour le présenter en ligne, la [démonstration sur Dokploy](/docs/installer/dokploy/).
 
 ## Responsabilités
 

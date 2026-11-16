@@ -4,6 +4,11 @@
 (docs/recette/recette-blanche.md) :
     .venv/Scripts/python ../simulation/recette_blanche.py
 
+Sur un serveur, le script tourne dans un conteneur de la pile (service `demonstration` de
+docker-compose.dokploy.yml), réglé par des variables : RECETTE_API, RECETTE_SIMULE, RECETTE_COURRIER
+(adresses des services), RECETTE_JWT_CLE (clé secrète des jetons), RECETTE_DANS_LA_PILE=oui (outils du
+module lancés directement) et RECETTE_SI_BASE_VIDE=oui (rien n'est fait si la base est déjà remplie).
+
 Le paramétrage passe par l'API, comme le ferait l'administrateur ; le jeu d'essai de l'annexe 18.2
 est saisi et vérifié par les mêmes étapes que les tests automatisés (REC-14), mais contre la vraie
 pile (nginx exclu) : base PostgreSQL, Hopitalia simulé, tâches planifiées, serveur de courrier de
@@ -13,6 +18,7 @@ Une répétition ne remplace ni la séance avec la DAF ni sa signature : elle tr
 avant elles.
 """
 
+import os
 import subprocess
 import sys
 import time
@@ -27,7 +33,8 @@ import httpx
 RACINE = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(RACINE / "backend"))
 
-from tests.conftest import entetes  # noqa: E402  (après l'ajout du chemin des tests)
+from tests import conftest  # noqa: E402  (après l'ajout du chemin des tests)
+from tests.conftest import entetes  # noqa: E402
 from tests.test_commandes import REC_A  # noqa: E402
 from tests.test_contrats import GMC_A  # noqa: E402
 from tests.test_engagements import AF_A  # noqa: E402
@@ -43,9 +50,13 @@ from tests.test_lot1 import (  # noqa: E402
 from tests.test_paiements import CPT_A, VAL_CPT_A  # noqa: E402
 from tests.test_recette_chaine_depense import test_rec14_jeu_d_essai_de_l_annexe_18_2  # noqa: E402
 
-API = "http://127.0.0.1:8000"
-SIMULE = "http://127.0.0.1:8090"
-COURRIER = "http://127.0.0.1:8025"
+API = os.environ.get("RECETTE_API", "http://127.0.0.1:8000")
+SIMULE = os.environ.get("RECETTE_SIMULE", "http://127.0.0.1:8090")
+COURRIER = os.environ.get("RECETTE_COURRIER", "http://127.0.0.1:8025")
+DANS_LA_PILE = os.environ.get("RECETTE_DANS_LA_PILE") == "oui"
+# Sur un serveur, la clé des jetons est secrète : les jetons de la répétition sont signés avec elle.
+if cle := os.environ.get("RECETTE_JWT_CLE"):
+    conftest.jeton.__defaults__ = (*(conftest.jeton.__defaults__ or ())[:-1], cle)
 COMPOSE = [
     "docker",
     "compose",
@@ -89,15 +100,37 @@ def creer(utilisateur: int, url: str, corps: Any) -> dict[str, Any]:
     return resultat
 
 
-def compose(*arguments: str) -> str:
+def outil(service: str, module: str, *arguments: str) -> str:
+    """Outil du module (`python -m …`) : dans le conteneur du service sur un poste, directement
+    quand le script tourne lui-même dans la pile."""
+    commande = (
+        [sys.executable, "-m", module, *arguments]
+        if DANS_LA_PILE
+        else [*COMPOSE, "exec", "-T", service, "python", "-m", module, *arguments]
+    )
     sortie = subprocess.run(
-        [*COMPOSE, *arguments],
-        cwd=RACINE,
-        capture_output=True,
-        encoding="utf-8",
-        check=True,
+        commande, cwd=RACINE, capture_output=True, encoding="utf-8", check=True
     )
     return sortie.stdout.strip()
+
+
+def attendre_api() -> None:
+    for _ in range(60):
+        try:
+            if client.get("/health").status_code == 200:
+                return
+        except httpx.HTTPError:
+            pass
+        time.sleep(2)
+
+
+# Déploiement : la démonstration remplit la base au premier démarrage seulement.
+if os.environ.get("RECETTE_SI_BASE_VIDE") == "oui":
+    attendre_api()
+    deja = client.get("/api/v1/etablissements", headers=entetes(ADMIN))
+    if deja.status_code == 200 and deja.json()["donnees"]:
+        print("Base déjà remplie : rien à faire.")
+        sys.exit(0)
 
 
 # --- Préparation : paramétrage par l'API, comme l'administrateur -----------------------------
@@ -105,19 +138,9 @@ def compose(*arguments: str) -> str:
 
 @etape("PREP-01", "Pile démarrée, premier administrateur attribué sur le serveur")
 def _() -> str:
-    for _ in range(60):
-        try:
-            if client.get("/health").status_code == 200:
-                break
-        except httpx.HTTPError:
-            pass
-        time.sleep(2)
-    compose(
-        "exec",
-        "-T",
+    attendre_api()
+    outil(
         "api",
-        "python",
-        "-m",
         "hopitalia_budget.outils.habiliter",
         "--utilisateur-id",
         str(ADMIN),
@@ -482,14 +505,7 @@ def _() -> str:
 def _() -> str:
     sortie = ""
     for _ in range(3):
-        sortie = compose(
-            "exec",
-            "-T",
-            "courriels",
-            "python",
-            "-m",
-            "hopitalia_budget.outils.courriels",
-        )
+        sortie = outil("courriels", "hopitalia_budget.outils.courriels")
         time.sleep(1)
     messages = httpx.get(f"{COURRIER}/api/v1/messages", timeout=30).json()["messages"]
     recus = {m["To"][0]["Address"]: m["Subject"] for m in messages}
