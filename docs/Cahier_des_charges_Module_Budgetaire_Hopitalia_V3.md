@@ -1,6 +1,6 @@
 # Cahier des charges — Module de gestion et de suivi budgétaire hospitalier
 
-**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.17 · 16 novembre 2026 · Statut : validé le 13/11/2026**
+**Solution Hopitalia · Projet `hopitalia-budget` (nom affiché : Hopitalia Budget) · Version 3.18 · 16 novembre 2026 · Statut : validé le 13/11/2026**
 
 | Version | Date | Objet |
 |---|---|---|
@@ -24,6 +24,7 @@
 | 3.15 | 16/11/2026 | Livrables documentaires (lot P3.D) : emplacement de chaque livrable, documents produits depuis le code (16) ; publication du document OpenAPI avec chaque version. |
 | 3.16 | 16/11/2026 | Options d'interface (lot P3.C) : palette du thème sombre (IHM-03), préférences d'affichage sur le profil (IHM-01, IHM-02), contrôle de la traduction anglaise (I18N-01), mode droite à gauche de test (I18N-10). |
 | 3.17 | 16/11/2026 | Volet recettes (lot P3.B) : activation par établissement, débiteurs, mouvements de facturé et d'encaissé, formules (6.4), tableau de bord, ressources d'API (11.2), ligne ajoutée à la matrice des habilitations. |
+| 3.18 | 16/11/2026 | Courriels d'alerte (T-225) : adresse saisie par l'agent, file d'envoi, langue du destinataire (14.3) ; recette blanche avec Hopitalia simulé et serveur de courrier de test (15). |
 
 > **Périmètre non négociable.** Le module prend en charge le suivi financier des marchés **déjà attribués** et des contrats **déjà signés**. Il ne prend pas en charge le lancement, la passation, l'évaluation ni l'attribution des marchés publics.
 
@@ -1872,6 +1873,7 @@ Facture en attente : reçue, en contrôle, retournée, liquidée, mise en paieme
 - Destinataires : les profils qui saisissent ou valident l'opération concernée, dans l'établissement de l'objet (crédit : RB et AF ; marché, seuil, avenant, échéance : GMC et VAL, plus ORD pour les seuils ; factures et liquidations : AF, avec VAL, REC ou CPT selon le cas ; paiement : CPT et AF ; modification après validation : VAL, ORD et AUD ; contrôle bloquant : AF et VAL). Chaque agent marque ses propres alertes comme lues.
 - Règles par établissement, valeurs par défaut sinon : chaque type actif ; seuil des marchés à 80 %, puis repères à 90 et 100 % ; facture échue à sa date d'échéance, ou 30 jours après sa réception ; engagement ancien après 90 jours ; échéance de contrat dans les 60 jours. Seul l'administrateur les modifie ; chaque modification est tracée.
 - La tâche planifiée (seuils, factures échues, engagements anciens, échéances) tourne une fois par jour ; l'administrateur peut la lancer à la demande.
+- **Courriels (T-225).** Une règle qui le demande (`notifierParEmail`) envoie aussi l'alerte par courriel aux agents des profils destinataires de l'établissement qui ont donné leur adresse. L'API Hopitalia ne fournissant pas d'adresse, chaque agent saisit la sienne dans l'écran Alertes (`PUT /moi/preferences`, champ `courriel`). Le courriel est dans la langue du destinataire (I18N-08), avec le texte de l'écran Alertes. L'alerte est écrite dans la transaction de l'opération ; une file d'envoi, traitée chaque minute par le service `courriels`, envoie ensuite par le serveur de messagerie de l'hôpital (`SMTP_*`). Une panne de messagerie ne bloque aucune opération : un courriel en échec est repris jusqu'à cinq tentatives ; sans serveur configuré, la file attend. Les alertes antérieures à la mise en service des courriels ne sont pas envoyées.
 
 ### 14.4. États et éditions
 
@@ -1887,6 +1889,8 @@ La tutelle n'impose pas de modèle officiel : la présentation des états est li
 - Formats : JSON, CSV (séparateur « ; », pour tableur français), tableur XLSX (montants en nombres exacts) et PDF (A4 paysage, en-tête répété, numéros de page). Le format se choisit par `?format=` ou par l'en-tête `Accept`. Titres, colonnes, statuts, montants et dates suivent la langue de l'agent (I18N-08).
 
 ## 15. Recette
+
+**Recette blanche (16/11/2026).** Avant la séance avec la DAF, la recette se répète sur un poste avec la pile complète, un Hopitalia simulé et un serveur de courrier de test (`docker-compose.simulation.yml`, `simulation/`, `docs/recette/recette-blanche.md`). La répétition produit un procès-verbal de répétition, sans valeur de procès-verbal de recette : elle ne remplace ni la séance, ni la signature, ni la vérification sur un vrai Hopitalia.
 
 ### 15.1. Scénarios fonctionnels
 
