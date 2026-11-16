@@ -20511,6 +20511,17 @@
             },
             "type": "object",
             "title": "Colonnesmasquees"
+          },
+          "courriel": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Courriel"
           }
         },
         "type": "object",
@@ -22353,6 +22364,19 @@
               }
             ],
             "title": "Colonnesmasquees"
+          },
+          "courriel": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 254,
+                "pattern": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Courriel"
           }
         },
         "type": "object",

@@ -33,17 +33,16 @@
 |---|---:|---:|---:|---:|---:|---:|---:|
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
-| P2 | 30 | 0 | 0 | 2 | 0 | 0 | 32 |
+| P2 | 31 | 0 | 0 | 1 | 0 | 0 | 32 |
 | P3 | 13 | 7 | 1 | 1 | 0 | 1 | 23 |
-| **Total** | **192** | **11** | **1** | **3** | **0** | **2** | **209** |
+| **Total** | **193** | **11** | **1** | **2** | **0** | **2** | **209** |
 
-Avancement : 192 / 207 tâches actives terminées (93 %), hors 2 abandonnées.
+Avancement : 193 / 207 tâches actives terminées (93 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
 | Tâche | Ce qui bloque | Qui peut débloquer |
 |---|---|---|
-| T-225 (courriels d'alerte) | Adresses électroniques des agents, absentes de l'API Hopitalia utilisée ; serveur SMTP de l'hôpital. | Équipe Hopitalia (adresses), DSI de l'hôpital (serveur de messagerie). |
 | T-254 (environnement de recette), donc aussi la séance de recette T-198 | Serveur, nom d'hôte et certificat TLS ; accès à l'API Hopitalia de recette. | DSI de l'hôpital (serveur), équipe Hopitalia (accès). |
 | T-286 (procès-verbal de recette final) | Séance de recette finale, après T-198 et T-254. | DAF et direction de l'établissement. |
 
@@ -285,7 +284,7 @@ flowchart LR
 | T-195 | Scénario de bout en bout de l'annexe 18.2 (marché de 100 M XOF). | REC-14, §18.2 | T-193, T-015 | Fait | Tous les montants de l'annexe retrouvés. Toutes les pièces du jeu d'essai saisies par l'API ; montants de la synthèse du marché, des lignes et des liquidations, statuts et contrôles de la section 4 retrouvés (`test_rec14_jeu_d_essai_de_l_annexe_18_2`). Les alertes du jeu se vérifieront avec T-222. |
 | T-196 | Test d'absence de fonction de passation dans l'API et les écrans. | RG-12, REC-15 | T-193 | Fait | Aucun point d'API ni écran de passation. Aucun point d'API (chemins, résumés, identifiants d'opération du schéma OpenAPI) ni route ou menu de l'interface au vocabulaire de la passation (`test_rec15_aucune_fonction_de_passation_dans_l_api`, test d'interface REC-15). |
 | T-197 | Revue d'architecture ARC-S, ARC-O, ARC-L, ARC-I, ARC-D. | §15.3 | T-193 | Fait | Grille de revue complétée, écarts corrigés. Grille complétée (`docs/recette/revue-architecture.md`) ; trois formules recalculées hors du service unique ramenées dans `domaine/indicateurs.py` (ARC-S) ; test ARC-I ajouté. |
-| T-198 | Recette utilisateur des lots 1 à 5 avec la DAF. | §15.4 | T-195 | En cours | Procès-verbal de recette partiel signé. Support de recette prêt (`docs/recette/recette-lots-1-a-5.md`). En attente de la séance avec la DAF et de la signature du procès-verbal ; c'est la DAF qui peut la terminer. |
+| T-198 | Recette utilisateur des lots 1 à 5 avec la DAF. | §15.4 | T-195 | En cours | Procès-verbal de recette partiel signé. Support de recette prêt (`docs/recette/recette-lots-1-a-5.md`). En attente de la séance avec la DAF et de la signature du procès-verbal ; c'est la DAF qui peut la terminer. Recette blanche faite le 16/11/2026 (`docs/recette/repetition-recette.md`, 11 étapes conformes). |
 
 ---
 
@@ -310,7 +309,7 @@ flowchart LR
 | T-222 | Alertes planifiées (seuils 80/90/100 %, factures échues, engagements anciens, échéances de contrat). | §14.3 | T-220 | Fait | Tâche planifiée testée avec une horloge simulée. Seuils 80/90/100 %, factures échues, engagements anciens, échéances de contrat ; tâche rejouable sans doublon, testée avec une horloge simulée (`test_t222_alertes_planifiees_horloge_simulee`) ; service quotidien `alertes` dans docker-compose. |
 | T-223 | Alerte de modification après validation. | §14.3, RG-18 | T-116, T-220 | Fait | Tentative tracée et signalée. Tentative refusée tracée au journal d'audit (`TENTATIVE_MODIFICATION`) et signalée à VAL, ORD et AUD, avec le code de l'agent (`test_t221_t223_chaque_blocage_cree_son_alerte`). |
 | T-224 | Centre d'alertes (liste, marquer comme lue) et pagination par curseur. | §11.2 | T-221 | Fait | Écran et API testés. API par curseur, compteur, lecture propre à chaque agent, cloisonnement (`test_t224_centre_d_alertes`) ; écran Alertes et badge du menu (test Vitest). |
-| T-225 | Notifications par courriel (option par règle), dans la langue du destinataire. | §7.6, I18N-08 | T-222, T-056, T-059 | Bloqué | Courriel reçu en environnement de test, dans la langue du destinataire. Bloqué : adresses électroniques des agents (non fournies par l'API Hopitalia utilisée) et serveur SMTP de l'hôpital. Peuvent débloquer : l'équipe Hopitalia (adresses) et la DSI de l'hôpital (serveur). |
+| T-225 | Notifications par courriel (option par règle), dans la langue du destinataire. | §7.6, I18N-08 | T-222, T-056, T-059 | Fait | Courriel reçu en environnement de test, dans la langue du destinataire. Adresse saisie par l'agent (l'API Hopitalia n'en fournit pas), file d'envoi et service `courriels`, reprise jusqu'à cinq tentatives (spec 3.18) ; tests `test_t225_*` ; recette blanche : courriel reçu dans le serveur de courrier de test, en français pour le RB et en anglais pour l'AF. Le serveur de l'hôpital se configure au déploiement (`SMTP_*`). |
 
 ### P2.C — Lot 6 : états, audit, clôture
 
@@ -341,7 +340,7 @@ flowchart LR
 | T-251 | Tests de performance à volumétrie d'un exercice. | ENF-07 | T-195 | Fait | Lectures < 1 s (95 %), tableaux de bord < 3 s. `test_performance.py` sur 2 000 engagements avec toute leur chaîne : lectures au plus 0,52 s (95 %), tableau de direction 2,3 s, restes à payer 0,8 s, état du budget 0,5 s. Liste des commandes, transmis et payé calculés en SQL. |
 | T-252 | Revue de sécurité (OWASP, dépendances, secrets, chiffrement des coordonnées bancaires). | ENF-03 | T-195 | Fait | Aucune faille critique ouverte. `docs/recette/revue-securite.md` : aucune faille critique ouverte ; limitation de débit, en-têtes HTTP et adresse du client corrigés (test `test_limite_de_debit_jeton_forge`) ; `npm audit` et `pip-audit` sans vulnérabilité. |
 | T-253 | Sauvegardes automatiques et test de restauration. | ENF-06 | T-027 | Fait | Restauration réussie et chronométrée. Service `sauvegarde` (base et pièces, quotidien, rétention 30 jours) ; restauration chronométrée par `exploitation/restaurer.sh` : 4 s pour un exercice (17 Mo), lignes identiques (`docs/exploitation/sauvegarde.md`). |
-| T-254 | Environnement de recette déployé. | — | T-027 | Bloqué | Accessible aux testeurs de la DAF. Bloqué : serveur de recette, nom d'hôte et certificat (DSI de l'hôpital), accès à Hopitalia de recette (équipe Hopitalia). Déploiement prêt : `docs/exploitation/deploiement-recette.md`. |
+| T-254 | Environnement de recette déployé. | — | T-027 | Bloqué | Accessible aux testeurs de la DAF. Bloqué : serveur de recette, nom d'hôte et certificat (DSI de l'hôpital), accès à Hopitalia de recette (équipe Hopitalia). Déploiement prêt : `docs/exploitation/deploiement-recette.md`. Déploiement répété sur un poste avec la pile de simulation (`docs/recette/recette-blanche.md`). |
 
 ---
 
@@ -455,3 +454,5 @@ flowchart LR
 | 16/11/2026 | T-270 à T-273 (P3.C) | À faire | Fait | Thème sombre audité, préférences d'affichage sur le profil, traduction anglaise contrôlée, mode droite à gauche. |
 | 16/11/2026 | T-260 à T-263 (P3.B) | À faire | Fait | Volet recettes : activation par établissement, recettes, débiteurs et mouvements, formules 6.4, tableau de bord. |
 | 16/11/2026 | T-282 (P3.D) | En cours | Fait | Version v0.1.0 publiée avec son document OpenAPI et le guide d'intégration. |
+| 16/11/2026 | T-225 (P2.B) | Bloqué | Fait | Courriels d'alerte dans la langue du destinataire, reçus en environnement de test. |
+| 16/11/2026 | T-198, T-254 | — | — | Recette blanche sur un poste (Hopitalia simulé, serveur de courrier de test) : 11 étapes conformes ; séance réelle et serveur de l'hôpital toujours attendus. |

@@ -59,5 +59,11 @@
     "CONTROLE_BLOQUANT": "Opération refusée par le contrôle {{code}}.",
     "ECART_RAPPROCHEMENT_HOPITALIA_MODIFIE": "Réception {{numero}} : l'approvisionnement a été modifié dans Hopitalia après sa réception. Vérifier la réception et la facture.",
     "ECART_RAPPROCHEMENT_HOPITALIA_SUPPRIME": "Réception {{numero}} annulée : l'approvisionnement a été supprimé dans Hopitalia. Vérifier les liquidations de la commande."
+  },
+  "courriel": {
+    "libelle": "Recevoir mes alertes par courriel à :",
+    "exemple": "prenom.nom@hopital.sn",
+    "enregistrer": "Enregistrer l'adresse",
+    "enregistre": "Adresse enregistrée."
   }
 }

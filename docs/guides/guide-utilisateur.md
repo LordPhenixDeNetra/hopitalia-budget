@@ -18,7 +18,7 @@ Ce guide explique, profil par profil, ce que chaque agent fait dans le module de
 
 **Retrouver une pièce.** « Recherche » trouve un engagement, une commande, une facture, un paiement ou un contrat par son numéro ou son objet, et ouvre sa fiche.
 
-**Les alertes.** Le menu « Alertes » affiche le nombre d'alertes non lues. Une alerte signale un dépassement, un doublon, un écart ou une échéance, et renvoie à la pièce concernée. Elle est marquée lue une fois consultée.
+**Les alertes.** En haut de l'écran Alertes, donnez votre adresse pour recevoir aussi par courriel, dans votre langue, les alertes que l'administrateur a choisi d'envoyer. Le menu « Alertes » affiche le nombre d'alertes non lues. Une alerte signale un dépassement, un doublon, un écart ou une échéance, et renvoie à la pièce concernée. Elle est marquée lue une fois consultée.
 
 **Valider une pièce.** Ouvrir la pièce depuis sa liste ou depuis l'alerte, puis l'onglet « Validation et pièces » :
 

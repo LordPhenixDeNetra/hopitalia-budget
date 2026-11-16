@@ -6,7 +6,7 @@ Produit depuis le modèle (`backend/src/hopitalia_budget/adaptateurs/sortie/mode
 
 Conventions : montants en `Numeric(18,2)` (francs CFA) ; indicateurs (engagé, liquidé, payé, restes, disponibles) jamais stockés, toujours calculés (RG-14) ; toute modification de donnée financière est tracée dans `journal_audit`.
 
-65 tables, 607 colonnes.
+66 tables, 619 colonnes.
 
 ## Tables
 
@@ -75,6 +75,7 @@ Conventions : montants en `Numeric(18,2)` (francs CFA) ; indicateurs (engagé, l
 - [`debiteur`](#debiteur)
 - [`recette`](#recette)
 - [`mouvement_recette`](#mouvement-recette)
+- [`courriel`](#courriel)
 
 ## etablissement
 
@@ -117,6 +118,7 @@ Table `preference_utilisateur`. Préférences d'un agent dans le module : langue
 | `theme` | VARCHAR(10) | Non |  | Thème choisi par l'agent : clair, sombre ou celui du système (IHM-01). |
 | `densite` | VARCHAR(12) | Non |  | Densité de l'affichage choisie par l'agent : compacte ou confortable (IHM-02). |
 | `colonnes_masquees` | JSONB | Non |  | Colonnes masquées par l'agent, par tableau (JSON : nom du tableau -> clés des colonnes). |
+| `courriel` | VARCHAR(254) | Non |  | Adresse où l'agent reçoit ses alertes par courriel (T-225), saisie par lui ; vide : aucun courriel. |
 
 ## cle-idempotence
 
@@ -1049,6 +1051,7 @@ Unicité : `type`, `type_objet`, `id_objet`, `cle`.
 | `profils` | JSONB | Oui |  | Profils destinataires de l'alerte (JSON). |
 | `code_agent` | VARCHAR(20) | Non |  | Code de l'agent Hopitalia concerné. |
 | `cree_le` | TIMESTAMP WITH TIME ZONE | Oui |  | Date et heure de création. |
+| `courriels_prepares` | BOOLEAN | Oui |  | Vrai : l'alerte a été examinée pour l'envoi des courriels (une seule fois). |
 
 ## lecture-alerte
 
@@ -1205,3 +1208,22 @@ Unicité : `origine`, `reference_externe`.
 | `cree_par_id` | BIGINT | Oui |  | Identifiant Hopitalia (`userId`) de l'agent créateur. |
 | `cree_par_code` | VARCHAR(20) | Oui |  | Code de l'agent créateur. |
 | `cree_le` | TIMESTAMP WITH TIME ZONE | Oui |  | Date et heure de création. |
+
+## courriel
+
+Table `courriel`. Courriel d'alerte à envoyer à un agent (T-225), dans sa langue (I18N-08) ; une file d'envoi reprise jusqu'à cinq tentatives, pour qu'une panne de messagerie ne bloque aucune opération.
+
+Unicité : `alerte_id`, `utilisateur_id`.
+
+| Colonne | Type | Obligatoire | Clé | Description |
+|---|---|---|---|---|
+| `id` | UUID | Oui | primaire | Identifiant unique (UUID), exposé par l'API et partagé entre modules (INT-06). |
+| `alerte_id` | UUID | Oui | → `alerte` | Référence vers `alerte`. |
+| `utilisateur_id` | BIGINT | Oui |  | Identifiant Hopitalia (`userId`) de l'agent. |
+| `adresse` | VARCHAR(254) | Oui |  | Adresse du destinataire au moment de la mise en file. |
+| `langue` | VARCHAR(5) | Oui |  | Langue du courriel : celle du destinataire (I18N-08). |
+| `statut` | VARCHAR(10) | Oui |  | `A_ENVOYER`, `ENVOYE` ou `ECHEC` (repris jusqu'à cinq tentatives). |
+| `tentatives` | INTEGER | Oui |  | Nombre de tentatives ; la reprise automatique s'arrête à cinq. |
+| `erreur` | VARCHAR(300) | Non |  | Code d'erreur du dernier échec. |
+| `cree_le` | TIMESTAMP WITH TIME ZONE | Oui |  | Date et heure de création. |
+| `envoye_le` | TIMESTAMP WITH TIME ZONE | Non |  | Date et heure de l'envoi réussi. |

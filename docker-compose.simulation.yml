@@ -1,0 +1,51 @@
+# Recette blanche (environnement de test sur un poste, jamais en production) : Hopitalia simulé et
+# serveur de courrier de test. S'ajoute à docker-compose.yml :
+#   docker compose -p hopitalia-budget-simulation -f docker-compose.yml -f docker-compose.simulation.yml up -d --build
+# Projet à part (-p) : ses volumes ne touchent pas à ceux de l'environnement de développement.
+# Mode d'emploi : docs/recette/recette-blanche.md.
+#
+# La clé de signature ci-dessous n'est pas un secret : c'est celle des tests automatisés, connue de
+# tous, valable seulement face à l'Hopitalia simulé.
+x-simulation: &simulation
+  HOPITALIA_API_URL: http://hopitalia-simule:8090
+  HOPITALIA_JWT_CLE: cle-de-signature-de-test-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+  HOPITALIA_COMPTE_TECHNIQUE: svc-budget
+  HOPITALIA_COMPTE_TECHNIQUE_MOT_DE_PASSE: recette
+  HOPITALIA_ETABLISSEMENT: CHU-A
+
+services:
+  hopitalia-simule:
+    image: hopitalia-budget-api
+    environment:
+      HOPITALIA_JWT_CLE: cle-de-signature-de-test-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+    volumes:
+      - ./simulation:/simulation:ro
+    command: ["uvicorn", "--app-dir", "/simulation", "hopitalia_simule:app", "--host", "0.0.0.0", "--port", "8090"]
+    ports:
+      - "127.0.0.1:8090:8090"
+
+  # Serveur de courrier de test : boîte de réception sur http://127.0.0.1:8025.
+  courrier-test:
+    image: axllent/mailpit:v1.21
+    ports:
+      - "127.0.0.1:8025:8025"
+
+  api:
+    environment:
+      <<: *simulation
+    depends_on:
+      - hopitalia-simule
+
+  integrations:
+    environment:
+      <<: *simulation
+
+  alertes:
+    environment:
+      <<: *simulation
+
+  courriels:
+    environment:
+      SMTP_HOTE: courrier-test
+      SMTP_PORT: "1025"
+      URL_APPLICATION: http://127.0.0.1:8080

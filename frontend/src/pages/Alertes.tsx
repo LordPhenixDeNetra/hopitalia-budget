@@ -17,14 +17,16 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { useAfficherErreur } from '../api/erreurs'
 import {
+  getLireMoiQueryKey,
   lancerAlertesPlanifiees,
   listerAlertes,
   listerRegles,
   marquerAlerte,
+  modifierPreferences,
   modifierRegle,
 } from '../api/genere/budget'
 import type { AlerteSortie, RegleSortie, TypeAlerte } from '../api/genere/budget.schemas'
-import { useAProfil } from '../auth/session'
+import { useAProfil, useSession } from '../auth/session'
 import { BadgeStatut } from '../composants/BadgeStatut'
 import { formaterDateHeure } from '../format/format'
 import { useOptions } from './parametrage/PageReferentiel'
@@ -259,6 +261,7 @@ export function Alertes() {
         {t('titre')}
       </Typography.Title>
       <Typography.Paragraph>{t('intro')}</Typography.Paragraph>
+      <CourrielAlertes />
       <Tabs
         items={[
           { key: 'alertes', label: t('onglets.alertes'), children: <CentreAlertes /> },
@@ -267,6 +270,42 @@ export function Alertes() {
             : []),
         ]}
       />
+    </Flex>
+  )
+}
+
+/** Adresse où l'agent reçoit ses alertes par courriel (T-225) ; vide : pas de courriel. */
+function CourrielAlertes() {
+  const { t } = useTranslation('alertes')
+  const { moi } = useSession()
+  const { message } = App.useApp()
+  const afficherErreur = useAfficherErreur()
+  const client = useQueryClient()
+  const [saisie, setSaisie] = useState<string>()
+  const valeur = saisie ?? moi?.courriel ?? ''
+  const envoi = useMutation({
+    mutationFn: () => modifierPreferences({ courriel: valeur.trim() || null }),
+    onSuccess: (enregistre) => {
+      client.setQueryData(getLireMoiQueryKey(), enregistre)
+      setSaisie(undefined)
+      void message.success(t('courriel.enregistre'))
+    },
+    onError: (erreur) => afficherErreur(erreur),
+  })
+  return (
+    <Flex gap="small" align="center" wrap>
+      <Typography.Text id="courriel-alertes">{t('courriel.libelle')}</Typography.Text>
+      <Input
+        type="email"
+        aria-labelledby="courriel-alertes"
+        style={{ maxWidth: 280 }}
+        value={valeur}
+        onChange={(e) => setSaisie(e.target.value)}
+        placeholder={t('courriel.exemple')}
+      />
+      <Button loading={envoi.isPending} onClick={() => envoi.mutate()}>
+        {t('courriel.enregistrer')}
+      </Button>
     </Flex>
   )
 }

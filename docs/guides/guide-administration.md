@@ -69,7 +69,7 @@ Le circuit est figé à la soumission : le modifier ne change pas les pièces d�
 - activer ou désactiver chaque type d'alerte par établissement ;
 - régler les seuils, par exemple 80, 90 et 100 % de consommation d'un marché, et les délais : factures échues, engagements anciens, échéances de contrat ;
 - les alertes planifiées sont détectées une fois par jour. « Lancer la détection maintenant » les recalcule sans attendre ;
-- l'envoi par courriel attend les adresses des agents et le serveur de messagerie de l'hôpital (T-225).
+- « Par courriel » : l'alerte part aussi par courriel aux agents destinataires qui ont donné leur adresse (écran Alertes), dans leur langue. Le serveur de messagerie se règle sur le serveur (`SMTP_*`, plan d'exploitation).
 
 ## 6. Budget et délégations
 

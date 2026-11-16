@@ -39,6 +39,7 @@ pnpm-debug.log*
 # Tests Playwright
 test-results/
 playwright-report/
+playwright-report-recette/
 blob-report/
 playwright/.cache/
 
