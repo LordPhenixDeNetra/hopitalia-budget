@@ -19,7 +19,8 @@ import jwt
 from fastapi import FastAPI, Header, HTTPException
 
 CLE = os.environ["HOPITALIA_JWT_CLE"]
-MOT_DE_PASSE = "recette"
+# Mot de passe de tous les comptes : `recette` sur un poste, secret sur un serveur.
+MOT_DE_PASSE = os.environ.get("SIMULATION_MOT_DE_PASSE", "recette")
 # Données datées des quatre dernières semaines : le module relit une fenêtre de 30 jours.
 DEBUT = date.today() - timedelta(days=28)
 

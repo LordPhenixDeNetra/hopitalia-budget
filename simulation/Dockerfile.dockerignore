@@ -1,0 +1,12 @@
+# Contexte de l'image de démonstration (simulation/Dockerfile), à la racine du dépôt. Liste blanche :
+# le code du module, ses tests (étapes réutilisées par la répétition), la nomenclature de référence et
+# les scripts de simulation. Rien d'autre, ni secret ni environnement local.
+*
+!backend/pyproject.toml
+!backend/src/
+!backend/tests/
+!docs/cadrage/nomenclature-budgetaire.csv
+!simulation/*.py
+
+**/__pycache__
+**/*.pyc
