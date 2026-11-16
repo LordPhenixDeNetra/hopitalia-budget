@@ -60,7 +60,7 @@ Ensuite, les administrateurs attribuent et retirent les profils dans l'écran **
 | API | http://127.0.0.1:8000 (santé : `/health`) |
 | PostgreSQL | interne au réseau Docker |
 
-Le service `sauvegarde` sauvegarde la base et les pièces chaque jour ([docs/exploitation/sauvegarde.md](docs/exploitation/sauvegarde.md)).
+Le service `integrations` importe chaque jour d'Hopitalia les fournisseurs, les services et les achats de la pharmacie, avec le compte technique (variables `HOPITALIA_*` de `.env.example`, détail dans [docs/cadrage/integration-hopitalia.md](docs/cadrage/integration-hopitalia.md), section 8). Le service `sauvegarde` sauvegarde la base et les pièces chaque jour ([docs/exploitation/sauvegarde.md](docs/exploitation/sauvegarde.md)).
 
 Arrêt : `docker compose down` (ajouter `-v` pour effacer aussi la base et les sauvegardes).
 

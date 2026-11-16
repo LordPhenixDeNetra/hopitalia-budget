@@ -126,3 +126,24 @@ docker run -d --name hb-test-backend --network hb-test-net -p 127.0.0.1:58080:80
 | Documentation OpenAPI | À `/openapi.json`, et non `/v3/api-docs` comme indiqué dans le README d'Hopitalia |
 
 La base de test est vide : le contenu des réponses (pharmacie, encaissements) sera vérifié avec des données lors des tâches d'intégration (T-201 à T-203).
+
+## 8. Mise en œuvre dans le module (lot 7, 16/11/2026)
+
+Les échanges des sections 4 et 5 sont en place : tâche planifiée quotidienne (service `integrations` de `docker-compose.yml`), écran « Intégrations » (journal, lancement, reprise) et écran « Commandes de la pharmacie » (rattachement). Règles détaillées : cahier des charges, section 13.
+
+| Variable | Contenu |
+|---|---|
+| `HOPITALIA_COMPTE_TECHNIQUE`, `HOPITALIA_COMPTE_TECHNIQUE_MOT_DE_PASSE` | Compte technique (section 3). |
+| `HOPITALIA_ETABLISSEMENT` | Code, dans le module, de l'établissement qui reçoit les services et la pharmacie de cette instance Hopitalia. |
+| `INTEGRATION_FENETRE_JOURS` | Jours relus à chaque import de la pharmacie (30 par défaut). |
+
+**À vérifier sur une instance Hopitalia qui contient des données.** La base de test du 13/11/2026 était vide : le module est testé contre une API simulée qui suit cette note. Points lus dans le code et non encore confirmés par des réponses réelles :
+
+| Point | Hypothèse du module |
+|---|---|
+| Listes | Tableau JSON, ou page Spring dont le contenu est dans `content`. |
+| Lignes d'un approvisionnement (`GET /api/pharmacie/approvisionnements/{id}`) | Dans `lignes` ou `details` ; le lien avec la commande passe par `numBonCmde`. |
+| Historique des suppressions | Identifiant de l'approvisionnement supprimé dans `approvisionnementId`, sinon `id`. |
+| Montants et quantités | Nombres JSON ; montant d'une ligne = total de la ligne (section 5). |
+
+Cette vérification conclut les tâches T-201 et T-202, sur l'environnement de recette (T-254).

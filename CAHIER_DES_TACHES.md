@@ -34,10 +34,10 @@
 | P0 | 69 | 2 | 0 | 0 | 0 | 1 | 72 |
 | P1 | 80 | 2 | 0 | 0 | 0 | 0 | 82 |
 | P2 | 30 | 0 | 0 | 2 | 0 | 0 | 32 |
-| P3 | 0 | 0 | 22 | 0 | 0 | 1 | 23 |
-| **Total** | **179** | **4** | **22** | **2** | **0** | **2** | **209** |
+| P3 | 3 | 3 | 16 | 0 | 0 | 1 | 23 |
+| **Total** | **182** | **7** | **16** | **2** | **0** | **2** | **209** |
 
-Avancement : 179 / 207 tâches actives terminées (86 %), hors 2 abandonnées.
+Avancement : 182 / 207 tâches actives terminées (88 %), hors 2 abandonnées.
 
 **Bloquants actuels**
 
@@ -350,14 +350,14 @@ flowchart LR
 
 | ID | Tâche | Réf. | Dépend de | Statut | Critère de fin |
 |---|---|---|---|---|---|
-| T-200 | Journal d'intégration, reprises automatiques et manuelles, idempotentes. | INT-07 | T-049 | À faire | Échange en échec repris sans doublon. |
-| T-201 | Import des fournisseurs et services depuis Hopitalia (identifiant externe, désactivation sans suppression). | INT-01, EF-REF-05 | T-011, T-017, T-200 | À faire | Deux synchronisations successives sans doublon ; un fournisseur retiré d'Hopitalia est désactivé. |
-| T-202 | Import des bons de commande et approvisionnements de la pharmacie Hopitalia, rattachement aux engagements, annulation des réceptions supprimées. | INT-03 | T-011, T-017, T-160, T-161, T-200 | À faire | Approvisionnement importé une seule fois ; suppression dans Hopitalia annule la réception avec trace (EF-REC-07). |
+| T-200 | Journal d'intégration, reprises automatiques et manuelles, idempotentes. | INT-07 | T-049 | Fait | Échange en échec repris sans doublon. Journal `journal_integration` (une ligne par échange, type et période) ; échec sans écriture partielle, reprise automatique (tâche planifiée, cinq tentatives) ou manuelle, sur la même ligne, sans doublon (`test_t200_echange_en_echec_repris_sans_doublon`) ; écran « Intégrations ». |
+| T-201 | Import des fournisseurs et services depuis Hopitalia (identifiant externe, désactivation sans suppression). | INT-01, EF-REF-05 | T-011, T-017, T-200 | En cours | Deux synchronisations successives sans doublon ; un fournisseur retiré d'Hopitalia est désactivé. Import fait (rapprochement par code Hopitalia, rattachement des éléments existants, désactivation, réactivation, liste vide refusée) et critère vérifié contre une API simulée (`test_t201_fournisseurs_et_services_sans_doublon`). Reste : vérification sur une instance Hopitalia avec données (note d'intégration, section 8). |
+| T-202 | Import des bons de commande et approvisionnements de la pharmacie Hopitalia, rattachement aux engagements, annulation des réceptions supprimées. | INT-03 | T-011, T-017, T-160, T-161, T-200 | En cours | Approvisionnement importé une seule fois ; suppression dans Hopitalia annule la réception avec trace (EF-REC-07). Import, rattachement par l'agent financier, réceptions validées, alerte d'écart, annulation tracée des réceptions supprimées ; critère vérifié contre une API simulée (`test_t202_pharmacie_rattachement_receptions_et_suppression`). Reste : vérification sur une instance Hopitalia avec données. |
 | T-203 | Échange avec la facturation patient et le recouvrement (volet recettes). | INT-02 | T-011, T-017, T-262 | À faire | Facturé et encaissé alimentés par interface. *Bloqué : T-011.* |
 | T-204 | Échange avec la banque (confirmation des virements). | INT-04 | T-187 | Abandonné | *Abandonné : confirmations de virement saisies à la main dans le module (§17, point 17).* |
-| T-205 | Export vers la comptabilité par fichier (tableur, CSV). | INT-04 | T-187, T-206 | À faire | Fichier accepté par le service comptable. |
-| T-206 | Import et export structurés (budgets, engagements, liquidations, paiements). | INT-05 | T-200 | À faire | Aller-retour export → import sans perte. |
-| T-207 | Identifiants uniques partagés entre modules. | INT-06 | T-200 | À faire | Aucun doublon après deux synchronisations. |
+| T-205 | Export vers la comptabilité par fichier (tableur, CSV). | INT-04 | T-187, T-206 | En cours | Fichier accepté par le service comptable. État `ecritures` (CSV, tableur) : écritures équilibrées des liquidations et des paiements (`test_t205_ecritures_comptables_equilibrees`). Reste : acceptation du fichier par le service comptable (comptes proposés à valider). |
+| T-206 | Import et export structurés (budgets, engagements, liquidations, paiements). | INT-05 | T-200 | Fait | Aller-retour export → import sans perte. Export du budget au format de l'import des dotations (CSV, JSON), réimporté dans un autre budget et réexporté à l'identique (`test_t206_budget_export_import_aller_retour`) ; engagements, liquidations et paiements exportés par les états et l'API, importés par l'API avec leurs contrôles (`test_t206_engagement_reimporte_par_l_api`). |
+| T-207 | Identifiants uniques partagés entre modules. | INT-06 | T-200 | Fait | Aucun doublon après deux synchronisations. UUID exposés par l'API ; codes Hopitalia uniques (fournisseur, centre par établissement, commande et approvisionnement par établissement) ; deux synchronisations sans doublon, un élément déjà saisi rattaché et non dupliqué. |
 
 ### P3.B — Volet recettes (activable)
 
@@ -446,3 +446,5 @@ flowchart LR
 | 15/11/2026 | T-245 à T-248 (P2.D) | À faire | Fait | Traçabilité RG, REC et API vers les tests vérifiée automatiquement, tests RG-01, RG-14, API-09 ajoutés, contrat d'API OpenAPI. |
 | 15/11/2026 | T-249 à T-253 (P2.D) | À faire | Fait | Accessibilité (axe, clavier), responsive sur quatre largeurs, performance à volumétrie d'un exercice, revue de sécurité, sauvegardes et restauration chronométrée. |
 | 15/11/2026 | T-254 (P2.D) | À faire | Bloqué | Serveur de recette attendu de la DSI ; déploiement documenté. |
+| 16/11/2026 | T-200, T-206, T-207 (P3.A) | À faire | Fait | Journal d'intégration et reprises, export et import structurés, identifiants partagés. |
+| 16/11/2026 | T-201, T-202, T-205 (P3.A) | À faire | En cours | Imports Hopitalia et export comptable faits et testés ; restent la vérification sur des données Hopitalia réelles et la validation du service comptable. |
