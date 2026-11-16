@@ -12,7 +12,10 @@ Le module suit uniquement des marchés **déjà attribués** et des contrats **d
 | [Cahier des tâches](CAHIER_DES_TACHES.md) | Tâches par priorité, statuts et avancement. |
 | [AGENTS.md](AGENTS.md) | Règles du projet pour les développeurs et les agents de code. |
 | [docs/cadrage/](docs/cadrage/) | Décisions de cadrage, intégration avec Hopitalia, nomenclature, jeu d'essai. |
-| [docs/exploitation/](docs/exploitation/) | Sauvegarde et restauration, déploiement de l'environnement de recette. |
+| [docs/exploitation/](docs/exploitation/) | Plan d'exploitation, sauvegarde et restauration, déploiement de l'environnement de recette. |
+| [docs/conception/](docs/conception/) | Dictionnaire des données, workflows et matrice des habilitations (produits depuis le code). |
+| [docs/guides/](docs/guides/) | Guide utilisateur (par profil) et guide d'administration. |
+| [docs/integration/](docs/integration/) | Guide d'intégration de l'API ; le document OpenAPI de chaque version est joint à sa version GitHub. |
 
 ## Structure
 
