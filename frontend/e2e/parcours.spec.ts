@@ -1246,6 +1246,7 @@ const ECRANS = [
   '/cloture-exercice',
   '/integrations',
   '/commandes-pharmacie',
+  '/recettes',
 ]
 
 /** API simulée minimale : un agent qui voit tous les écrans, des listes vides ou typiques. */
@@ -1505,4 +1506,83 @@ test('T-271 : colonnes masquées conservées d’une session à l’autre (IHM-0
   await page.reload()
   await expect(page.getByRole('columnheader', { name: 'Code' })).toBeVisible()
   await expect(entete).toHaveCount(0)
+})
+
+test('T-261 : saisir un encaissement sur une recette (EF-RCT-02)', async ({ page }, infos) => {
+  test.skip(infos.project.name !== 'ordinateur', 'Parcours de saisie testé à la largeur ordinateur')
+  const indicateurs = {
+    prevu: '10000000.00',
+    facture: '8000000.00',
+    encaisse: '0.00',
+    resteARecouvrer: '8000000.00',
+    tauxRecouvrement: '0.00',
+    tauxRealisation: '80.00',
+  }
+  const recette = {
+    id: 'r1',
+    etablissementId: 'a1',
+    exerciceId: 'x1',
+    periodeId: null,
+    numero: 'RCT-2026-00001',
+    nature: 'SUBVENTION_DOTATION',
+    libelle: 'Subvention de fonctionnement',
+    montantPrevisionnel: '10000000.00',
+    dateEcheance: '2026-06-30',
+    sourceId: 's1',
+    centreId: null,
+    ligneId: null,
+    debiteurId: 'd1',
+    debiteur: 'Trésor public',
+    service: null,
+    indicateurs,
+    creeParCode: 'AG002',
+    creeLe: '2026-01-10T09:00:00Z',
+    version: 1,
+  }
+  await simulerToutesLesPages(page)
+  const envois: { corps: unknown; cle: string | null }[] = []
+  await page.route('**/api/v1/recettes**', async (route) => {
+    const requete = route.request()
+    const chemin = new URL(requete.url()).pathname
+    if (requete.method() === 'POST') {
+      envois.push({ corps: requete.postDataJSON(), cle: requete.headers()['idempotency-key'] })
+      await route.fulfill({
+        status: 201,
+        json: {
+          id: 'm2',
+          recetteId: 'r1',
+          origine: 'SAISIE',
+          creeParCode: 'AG002',
+          creeLe: '2026-03-15T09:00:00Z',
+          ...requete.postDataJSON(),
+        },
+      })
+    } else if (chemin.endsWith('/mouvements')) {
+      await route.fulfill({ json: [] })
+    } else {
+      await route.fulfill({ json: pageDe([recette]) })
+    }
+  })
+  await connecterAgentFinancier(page, '/recettes')
+  await page.getByRole('button', { name: 'RCT-2026-00001' }).click()
+  const fiche = page.getByRole('dialog')
+  await expect(fiche.getByText('Trésor public')).toBeVisible()
+  await fiche.getByLabel('Type').click()
+  await page.getByTitle('Encaissé').click()
+  await fiche.getByLabel('Date').fill('2026-03-15')
+  await fiche.getByLabel('Montant', { exact: true }).fill('5000000.00')
+  await fiche.getByLabel('Référence').fill('Relevé 03-2026')
+  await fiche.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page.getByText('Mouvement enregistré.')).toBeVisible()
+  expect(envois).toEqual([
+    {
+      corps: {
+        type: 'ENCAISSEMENT',
+        date: '2026-03-15',
+        montant: '5000000.00',
+        reference: 'Relevé 03-2026',
+      },
+      cle: expect.stringMatching(/[0-9a-f-]{36}/),
+    },
+  ])
 })

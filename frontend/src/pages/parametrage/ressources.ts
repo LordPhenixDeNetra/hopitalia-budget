@@ -146,6 +146,32 @@ export const RESSOURCES: Record<string, DefinitionRessource> = {
     ecriture: ADM,
     desactivable: true,
   },
+  // Débiteurs des recettes (volet recettes, lot P3.B), communs à tous les établissements.
+  debiteurs: {
+    chemin: 'debiteurs',
+    colonnes: ['code', 'nom', 'type', 'actif'],
+    tris: ['code', 'nom'],
+    champs: [
+      CODE,
+      { nom: 'nom', type: 'texte', requis: true },
+      {
+        nom: 'type',
+        type: 'choix',
+        requis: true,
+        valeurs: [
+          'ETAT',
+          'COLLECTIVITE',
+          'ASSURANCE',
+          'MUTUELLE',
+          'ENTREPRISE',
+          'PARTICULIER',
+          'AUTRE',
+        ],
+      },
+    ],
+    ecriture: ADM,
+    desactivable: true,
+  },
   exercices: {
     chemin: 'exercices',
     colonnes: ['code', 'dateOuverture', 'dateCloture', 'statut'],
@@ -231,6 +257,7 @@ export const PARAMETRAGE = [
   'comptes-tresorerie',
   'types-pieces',
   'fournisseurs',
+  'debiteurs',
   'exercices',
   'circuits-validation',
 ]

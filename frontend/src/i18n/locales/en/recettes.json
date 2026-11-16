@@ -1,0 +1,76 @@
+{
+  "titre": "Revenue",
+  "intro": "Expected revenue of the establishment, with its invoiced and collected amounts. The amount left to collect and the rates are computed from the entries; a mistake is corrected by a negative, justified reversal.",
+  "onglets": {
+    "liste": "Revenue",
+    "tableau": "Dashboard"
+  },
+  "nouvelle": "New revenue",
+  "creee": "Revenue recorded.",
+  "sansService": "No department",
+  "filtres": {
+    "exercice": "Year",
+    "nature": "Nature",
+    "service": "Department",
+    "du": "From",
+    "au": "To"
+  },
+  "colonnes": {
+    "numero": "Number",
+    "libelle": "Label",
+    "nature": "Nature",
+    "debiteur": "Debtor",
+    "service": "Department"
+  },
+  "champs": {
+    "etablissementId": "Establishment",
+    "exerciceId": "Year",
+    "nature": "Nature",
+    "libelle": "Label",
+    "montantPrevisionnel": "Expected amount",
+    "dateEcheance": "Due date",
+    "sourceId": "Funding source",
+    "centreId": "Department",
+    "debiteurId": "Debtor"
+  },
+  "natures": {
+    "SUBVENTION_DOTATION": "Grant or allocation",
+    "RECETTE_PROPRE": "Own revenue",
+    "REMBOURSEMENT_ASSURANCE": "Insurance reimbursement",
+    "PRESTATION_HOSPITALIERE": "Hospital services",
+    "AUTRE": "Other"
+  },
+  "types": {
+    "FACTURE": "Invoiced",
+    "ENCAISSEMENT": "Collected"
+  },
+  "origines": {
+    "SAISIE": "Entered in the module",
+    "HOPITALIA": "Imported from Hopitalia"
+  },
+  "indicateurs": {
+    "prevu": "Expected",
+    "facture": "Invoiced",
+    "encaisse": "Collected",
+    "resteARecouvrer": "Left to collect",
+    "tauxRecouvrement": "Collection rate",
+    "tauxRealisation": "Achievement rate"
+  },
+  "mouvements": {
+    "titre": "Entries",
+    "ajouter": "Record an entry",
+    "aide": "Negative amount to correct a mistake: a reason is then required.",
+    "type": "Type",
+    "date": "Date",
+    "montant": "Amount",
+    "reference": "Reference",
+    "motif": "Reason",
+    "origine": "Origin",
+    "enregistre": "Entry recorded."
+  },
+  "repartitions": {
+    "nature": "By nature",
+    "service": "By department",
+    "mois": "By month"
+  }
+}

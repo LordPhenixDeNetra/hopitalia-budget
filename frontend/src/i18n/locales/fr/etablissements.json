@@ -28,5 +28,12 @@
     "modifie": "Établissement {{code}} enregistré.",
     "desactives_one": "{{count}} établissement désactivé.",
     "desactives_other": "{{count}} établissements désactivés."
+  },
+  "recettes": {
+    "titre": "Volet recettes",
+    "actif": "Activé",
+    "inactif": "Désactivé",
+    "activer": "Activer le volet recettes",
+    "desactiver": "Désactiver le volet recettes"
   }
 }

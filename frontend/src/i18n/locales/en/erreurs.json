@@ -76,5 +76,7 @@
   },
   "COMMANDE_DEJA_RATTACHEE": "This pharmacy order is already linked to a commitment.",
   "FOURNISSEUR_DIFFERENT": "The commitment's supplier is not the order's supplier.",
-  "ECHANGE_NON_REPRENABLE": "Only a failed exchange can be retried."
+  "ECHANGE_NON_REPRENABLE": "Only a failed exchange can be retried.",
+  "VOLET_RECETTES_INACTIF": "The revenue module is not enabled for this establishment.",
+  "CONTRE_MOUVEMENT_EXCESSIF": "The reversal exceeds the total already recorded."
 }

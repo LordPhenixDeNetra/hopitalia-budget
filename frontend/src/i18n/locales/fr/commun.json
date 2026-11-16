@@ -25,7 +25,8 @@
     "audit": "Journal d'audit",
     "clotureExercice": "Clôture d'exercice",
     "integrations": "Intégrations",
-    "commandesPharmacie": "Commandes de la pharmacie"
+    "commandesPharmacie": "Commandes de la pharmacie",
+    "recettes": "Recettes"
   },
   "entete": {
     "langue": "Langue",

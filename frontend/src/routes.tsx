@@ -96,6 +96,11 @@ export const routes: RouteObject[] = [
           })),
       },
       {
+        path: 'recettes',
+        handle: fil('menu.recettes'),
+        lazy: () => import('./pages/recettes/Recettes').then((m) => ({ Component: m.Recettes })),
+      },
+      {
         path: 'integrations',
         handle: fil('menu.integrations'),
         lazy: () => import('./pages/Integrations').then((m) => ({ Component: m.Integrations })),

@@ -80,6 +80,15 @@ export function FicheEtablissement() {
                 <BadgeStatut ton="neutre" libelle={tCommun('statut.inactif')} />
               ),
             },
+            {
+              key: 'recettes',
+              label: t('recettes.titre'),
+              children: etablissement.voletRecettesActif ? (
+                <BadgeStatut ton="succes" libelle={t('recettes.actif')} />
+              ) : (
+                <BadgeStatut ton="neutre" libelle={t('recettes.inactif')} />
+              ),
+            },
           ]}
         />
         <Form
@@ -100,6 +109,14 @@ export function FicheEtablissement() {
             </Button>
             <Button onClick={() => modification.mutate({ actif: !etablissement.actif })}>
               {etablissement.actif ? t('actions.desactiver') : t('actions.activer')}
+            </Button>
+            {/* Volet recettes (T-260) : invisible dans l'établissement tant qu'il est désactivé. */}
+            <Button
+              onClick={() =>
+                modification.mutate({ voletRecettesActif: !etablissement.voletRecettesActif })
+              }
+            >
+              {etablissement.voletRecettesActif ? t('recettes.desactiver') : t('recettes.activer')}
             </Button>
           </Flex>
         </Form>

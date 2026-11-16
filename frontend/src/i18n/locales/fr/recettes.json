@@ -1,0 +1,76 @@
+{
+  "titre": "Recettes",
+  "intro": "Recettes prévues de l'établissement, avec leur facturé et leur encaissé. Le reste à recouvrer et les taux sont calculés à partir des mouvements ; une erreur se corrige par un contre-mouvement négatif, motivé.",
+  "onglets": {
+    "liste": "Recettes",
+    "tableau": "Tableau de bord"
+  },
+  "nouvelle": "Nouvelle recette",
+  "creee": "Recette enregistrée.",
+  "sansService": "Sans service",
+  "filtres": {
+    "exercice": "Exercice",
+    "nature": "Nature",
+    "service": "Service",
+    "du": "Du",
+    "au": "Au"
+  },
+  "colonnes": {
+    "numero": "Numéro",
+    "libelle": "Libellé",
+    "nature": "Nature",
+    "debiteur": "Débiteur",
+    "service": "Service"
+  },
+  "champs": {
+    "etablissementId": "Établissement",
+    "exerciceId": "Exercice",
+    "nature": "Nature",
+    "libelle": "Libellé",
+    "montantPrevisionnel": "Montant prévu",
+    "dateEcheance": "Échéance",
+    "sourceId": "Source de financement",
+    "centreId": "Service",
+    "debiteurId": "Débiteur"
+  },
+  "natures": {
+    "SUBVENTION_DOTATION": "Subvention ou dotation",
+    "RECETTE_PROPRE": "Recette propre",
+    "REMBOURSEMENT_ASSURANCE": "Remboursement d'assurance",
+    "PRESTATION_HOSPITALIERE": "Prestation hospitalière",
+    "AUTRE": "Autre"
+  },
+  "types": {
+    "FACTURE": "Facturé",
+    "ENCAISSEMENT": "Encaissé"
+  },
+  "origines": {
+    "SAISIE": "Saisi dans le module",
+    "HOPITALIA": "Importé d'Hopitalia"
+  },
+  "indicateurs": {
+    "prevu": "Prévu",
+    "facture": "Facturé",
+    "encaisse": "Encaissé",
+    "resteARecouvrer": "Reste à recouvrer",
+    "tauxRecouvrement": "Taux de recouvrement",
+    "tauxRealisation": "Taux de réalisation"
+  },
+  "mouvements": {
+    "titre": "Mouvements",
+    "ajouter": "Enregistrer un mouvement",
+    "aide": "Montant négatif pour corriger une erreur : le motif est alors obligatoire.",
+    "type": "Type",
+    "date": "Date",
+    "montant": "Montant",
+    "reference": "Référence",
+    "motif": "Motif",
+    "origine": "Origine",
+    "enregistre": "Mouvement enregistré."
+  },
+  "repartitions": {
+    "nature": "Par nature",
+    "service": "Par service",
+    "mois": "Par mois"
+  }
+}
