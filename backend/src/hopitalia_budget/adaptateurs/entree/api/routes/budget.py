@@ -17,7 +17,7 @@ from fastapi import APIRouter, BackgroundTasks, Body, Depends, Header, Query, Re
 from fastapi.responses import JSONResponse
 from pydantic import Field
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 
 from hopitalia_budget.adaptateurs.entree.api.crud import (
     JournalDep,
@@ -709,6 +709,78 @@ def obtenir_import_dotations(
         raise ErreurMetier("RESSOURCE_INTROUVABLE")
     _visible(utilisateur, travail.etablissement_id)
     return ImportSortie.model_validate(travail, from_attributes=True)
+
+
+@router.get(
+    "/budgets/{budget_id}/export",
+    responses={200: {"content": {"text/csv": {}, "application/json": {}}}},
+    tags=["budgets"],
+)
+def exporter_budget(
+    budget_id: UUID,
+    session: SessionDep,
+    utilisateur: UtilisateurDep,
+    journal: JournalDep,
+    format: Literal["csv", "json"] = "csv",
+) -> Response:
+    """Lignes et dotations initiales au format de l'import des dotations (INT-05, T-206) : le
+    fichier exporté se réimporte tel quel dans un autre budget, sans perte."""
+    budget = _budget(session, utilisateur, budget_id)
+    if not utilisateur.peut(Operation.SAISIR_BUDGET, Droit.CONSULTER, budget.etablissement_id):
+        raise ErreurMetier("ACCES_REFUSE")
+    lg, noeud, centre, ref = (
+        LigneBudgetaireModele,
+        NoeudNomenclatureModele,
+        CentreResponsabiliteModele,
+        ReferentielModele,
+    )
+    prog = aliased(ReferentielModele)
+    programme = select(prog.code).where(prog.id == lg.programme_id).scalar_subquery()
+    lignes = [
+        dict(zip(COLONNES_DOTATIONS, valeurs, strict=True))
+        for valeurs in session.execute(
+            select(
+                lg.code,
+                lg.libelle,
+                noeud.code,
+                centre.code,
+                ref.code,
+                programme,
+                lg.dotation_initiale,
+            )
+            .join(noeud, noeud.id == lg.compte_budgetaire_id)
+            .join(centre, centre.id == lg.centre_id)
+            .join(ref, ref.id == lg.source_id)
+            .where(lg.budget_id == budget_id)
+            .order_by(lg.code)
+        )
+    ]
+    for ligne in lignes:
+        ligne["programme"] = ligne["programme"] or ""
+        ligne["dotation"] = f"{ligne['dotation']:f}"
+    tracer(
+        journal,
+        utilisateur,
+        "EXPORT",
+        "Budget",
+        budget_id,
+        None,
+        {"format": format, "lignes": str(len(lignes))},
+        budget.etablissement_id,
+    )
+    session.commit()
+    nom = f'attachment; filename="budget-{budget_id}.{format}"'
+    if format == "json":
+        return JSONResponse(lignes, headers={"Content-Disposition": nom})
+    tampon = io.StringIO()
+    ecrivain = csv.DictWriter(tampon, COLONNES_DOTATIONS, delimiter=";", lineterminator="\n")
+    ecrivain.writeheader()
+    ecrivain.writerows(lignes)
+    return Response(
+        tampon.getvalue(),
+        media_type="text/csv; charset=utf-8",
+        headers={"Content-Disposition": nom},
+    )
 
 
 # --- Notifications de crédits (T-091) ------------------------------------------------------

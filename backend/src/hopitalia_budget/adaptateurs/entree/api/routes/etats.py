@@ -49,10 +49,13 @@ from hopitalia_budget.adaptateurs.sortie.modeles import (
     ExerciceModele,
     FactureModele,
     FournisseurModele,
+    ImputationEngagementModele,
+    LigneBudgetaireModele,
     LiquidationModele,
     NoeudNomenclatureModele,
     PaiementModele,
     RapprochementModele,
+    ReferentielModele,
 )
 from hopitalia_budget.adaptateurs.sortie.paiements_sql import (
     paye_par_liquidation,
@@ -102,6 +105,7 @@ TITRES = {
         "restes": "Restes à engager, à liquider et à payer",
         "depenses": "Dépenses par service, compte, nature et fournisseur",
         "echeances": "Contrats par date d'échéance",
+        "ecritures": "Écritures pour la comptabilité",
     },
     "en": {
         "budget": "Initial and revised budget, available credits",
@@ -115,6 +119,7 @@ TITRES = {
         "restes": "Amounts left to commit, settle and pay",
         "depenses": "Spending by department, account, nature and supplier",
         "echeances": "Contracts by end date",
+        "ecritures": "Accounting entries",
     },
 }
 COLONNES = {
@@ -158,6 +163,11 @@ COLONNES = {
         "element": "Élément",
         "echeance": "Échéance",
         "jours": "Jours restants",
+        "journal": "Journal",
+        "piece": "Pièce",
+        "tiers": "Tiers",
+        "debit": "Débit",
+        "credit": "Crédit",
         "total": "Total",
         "filtres": "Exercice {exercice} · édité le {date}",
     },
@@ -201,6 +211,11 @@ COLONNES = {
         "element": "Item",
         "echeance": "End date",
         "jours": "Days left",
+        "journal": "Journal",
+        "piece": "Document",
+        "tiers": "Third party",
+        "debit": "Debit",
+        "credit": "Credit",
         "total": "Total",
         "filtres": "Year {exercice} · printed on {date}",
     },
@@ -583,6 +598,126 @@ def _paiements(
     return rangees, {"montant": sum((m for pa, m in tries if pa.statut == "EXECUTE"), ZERO)}
 
 
+# Comptes SYSCOHADA de l'export comptable (INT-04) : fournisseurs, trésorerie par type de compte,
+# et compte d'attente pour les déductions (avances récupérées, retenues de garantie, pénalités),
+# que le service comptable ventile. Proposition à valider par le service comptable (T-205).
+COMPTE_FOURNISSEURS = "401"
+COMPTE_DEDUCTIONS = "471"
+COMPTES_TRESORERIE = {"BANQUE": "521", "TRESOR": "531", "CAISSE": "571"}
+
+
+def _ecritures(
+    session: Session, p: Perimetre, _: date, langue: str
+) -> tuple[Lignes, dict[str, Valeur]]:
+    """Écritures équilibrées des liquidations validées (charge au débit, fournisseur et
+    déductions au crédit) et des paiements exécutés (fournisseur au débit, trésorerie au crédit),
+    pour l'import dans le logiciel comptable (INT-04, T-205)."""
+    engagements = [e.id for e in _engagements(session, p)]
+    liquidations = session.execute(
+        select(LiquidationModele, FactureModele, NoeudNomenclatureModele)
+        .join(FactureModele, FactureModele.id == LiquidationModele.facture_id)
+        .join(
+            ImputationEngagementModele,
+            ImputationEngagementModele.id == LiquidationModele.imputation_id,
+        )
+        .join(
+            LigneBudgetaireModele, LigneBudgetaireModele.id == ImputationEngagementModele.ligne_id
+        )
+        .join(
+            NoeudNomenclatureModele,
+            NoeudNomenclatureModele.id == LigneBudgetaireModele.compte_budgetaire_id,
+        )
+        .where(
+            FactureModele.engagement_id.in_(engagements),
+            LiquidationModele.statut == StatutLiquidation.VALIDE,
+        )
+    ).all()
+    calcul = montants(session, [lq for lq, _, _ in liquidations])
+    tiers = _noms(
+        session, FournisseurModele, {f.fournisseur_id for _, f, _ in liquidations}, "code"
+    )
+    rangees: Lignes = []
+    for lq, f, compte in liquidations:
+        m = calcul[lq.id]
+        commun: dict[str, Valeur] = {
+            "date": lq.date_liquidation,
+            "journal": "ACH",
+            "piece": lq.numero,
+        }
+        libelle = f"{f.numero} — {f.objet}"[:200]
+        rangees.append(
+            commun
+            | {
+                "compte": compte.compte_comptable_code or compte.code,
+                "tiers": None,
+                "libelle": libelle,
+                "debit": m.montant_liquide,
+                "credit": ZERO,
+            }
+        )
+        rangees.append(
+            commun
+            | {
+                "compte": COMPTE_FOURNISSEURS,
+                "tiers": tiers.get(f.fournisseur_id),
+                "libelle": libelle,
+                "debit": ZERO,
+                "credit": m.net_a_payer,
+            }
+        )
+        if m.deductions:
+            rangees.append(
+                commun
+                | {
+                    "compte": COMPTE_DEDUCTIONS,
+                    "tiers": None,
+                    "libelle": libelle,
+                    "debit": ZERO,
+                    "credit": m.deductions,
+                }
+            )
+    paiements = session.execute(
+        select(PaiementModele, ReferentielModele, AllocationPaiementModele.montant)
+        .join(AllocationPaiementModele, AllocationPaiementModele.paiement_id == PaiementModele.id)
+        .join(LiquidationModele, LiquidationModele.id == AllocationPaiementModele.liquidation_id)
+        .join(FactureModele, FactureModele.id == LiquidationModele.facture_id)
+        .join(ReferentielModele, ReferentielModele.id == PaiementModele.compte_tresorerie_id)
+        .where(FactureModele.engagement_id.in_(engagements), PaiementModele.statut == "EXECUTE")
+    ).all()
+    # Part de chaque paiement affectée au périmètre, comme l'état des paiements.
+    parts: dict[UUID, tuple[PaiementModele, ReferentielModele, Decimal]] = {}
+    for pa, tresorerie, montant in paiements:
+        cumul = parts.get(pa.id, (pa, tresorerie, ZERO))[2]
+        parts[pa.id] = (pa, tresorerie, cumul + montant)
+    tiers |= _noms(
+        session, FournisseurModele, {pa.fournisseur_id for pa, _, _ in parts.values()}, "code"
+    )
+    for pa, tresorerie, montant in parts.values():
+        commun = {"date": pa.date_paiement, "journal": "BQ", "piece": pa.numero}
+        rangees.append(
+            commun
+            | {
+                "compte": COMPTE_FOURNISSEURS,
+                "tiers": tiers.get(pa.fournisseur_id),
+                "libelle": pa.numero,
+                "debit": montant,
+                "credit": ZERO,
+            }
+        )
+        rangees.append(
+            commun
+            | {
+                "compte": COMPTES_TRESORERIE.get(tresorerie.type_compte or "", "52"),
+                "tiers": tresorerie.code,
+                "libelle": pa.numero,
+                "debit": ZERO,
+                "credit": montant,
+            }
+        )
+    rangees.sort(key=lambda r: (r["date"], r["piece"]))
+    return rangees, _somme(rangees, "debit", "credit")
+
+
 def _rapprochements(
     session: Session, p: Perimetre, _: date, langue: str
 ) -> tuple[Lignes, dict[str, Valeur]]:
@@ -774,6 +909,19 @@ ETATS: dict[str, tuple[list[tuple[str, TypeColonne]], Construction]] = {
         ],
         _echeances,
     ),
+    "ecritures": (
+        [
+            ("date", "date"),
+            ("journal", "texte"),
+            ("piece", "texte"),
+            ("compte", "texte"),
+            ("tiers", "texte"),
+            ("libelle", "texte"),
+            ("debit", "montant"),
+            ("credit", "montant"),
+        ],
+        _ecritures,
+    ),
 }
 CodeEtat = Literal[
     "budget",
@@ -787,6 +935,7 @@ CodeEtat = Literal[
     "restes",
     "depenses",
     "echeances",
+    "ecritures",
 ]
 
 
