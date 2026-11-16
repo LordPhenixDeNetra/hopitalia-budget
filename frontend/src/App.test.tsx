@@ -1369,3 +1369,25 @@ describe('volet recettes (lot P3.B)', () => {
     ).toBeTruthy()
   }, 15_000)
 })
+
+describe('courriels d’alerte (T-225)', () => {
+  test('l’agent enregistre l’adresse où recevoir ses alertes', async () => {
+    jetons.enregistrer('acces', 'rafraichissement')
+    const appel = simulerApi({
+      'GET /api/v1/moi': [json(MOI)],
+      'GET /api/v1/alertes': [json({ donnees: [], pagination: { taille: 50, suivant: null } })],
+      'PUT /api/v1/moi/preferences': [json({ ...MOI, courriel: 'awa.diop@chu.sn' })],
+    })
+    afficher('/alertes')
+    const champ = await screen.findByLabelText(
+      'Recevoir mes alertes par courriel à :',
+      {},
+      { timeout: 5000 },
+    )
+    await userEvent.type(champ, 'awa.diop@chu.sn')
+    await userEvent.click(screen.getByRole('button', { name: "Enregistrer l'adresse" }))
+    expect(await screen.findByText('Adresse enregistrée.')).toBeTruthy()
+    const envoi = appel.mock.calls.find(([, options]) => options?.method === 'PUT')!
+    expect(JSON.parse(String(envoi[1]!.body))).toEqual({ courriel: 'awa.diop@chu.sn' })
+  }, 15_000)
+})

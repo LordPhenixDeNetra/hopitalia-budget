@@ -59,5 +59,11 @@
     "CONTROLE_BLOQUANT": "Operation refused by check {{code}}.",
     "ECART_RAPPROCHEMENT_HOPITALIA_MODIFIE": "Receipt {{numero}}: the delivery was changed in Hopitalia after receipt. Check the receipt and the invoice.",
     "ECART_RAPPROCHEMENT_HOPITALIA_SUPPRIME": "Receipt {{numero}} cancelled: the delivery was deleted in Hopitalia. Check the order's settlements."
+  },
+  "courriel": {
+    "libelle": "Receive my alerts by email at:",
+    "exemple": "first.last@hospital.sn",
+    "enregistrer": "Save the address",
+    "enregistre": "Address saved."
   }
 }

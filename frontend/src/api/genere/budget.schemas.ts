@@ -1781,6 +1781,7 @@ export interface Moi {
   theme?: MoiTheme;
   densite?: MoiDensite;
   colonnesMasquees?: MoiColonnesMasquees;
+  courriel?: string | null;
 }
 
 export interface MotifSchema {
@@ -2410,6 +2411,7 @@ export interface Preferences {
   theme?: PreferencesTheme;
   densite?: PreferencesDensite;
   colonnesMasquees?: PreferencesColonnesMasquees;
+  courriel?: string | null;
 }
 
 export interface ProgrammeCreation {

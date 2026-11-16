@@ -69,6 +69,8 @@ class PreferenceUtilisateurModele(Base):
     theme: Mapped[str | None] = mapped_column(String(10))
     densite: Mapped[str | None] = mapped_column(String(12))
     colonnes_masquees: Mapped[dict[str, list[str]] | None] = mapped_column(JSONB)
+    # Adresse des courriels d'alerte (T-225), saisie par l'agent : l'API Hopitalia n'en fournit pas.
+    courriel: Mapped[str | None] = mapped_column(String(254))
 
 
 class CleIdempotenceModele(Base):
@@ -1082,6 +1084,10 @@ class AlerteModele(Base):
     profils: Mapped[list[str]] = mapped_column(JSONB)
     code_agent: Mapped[str | None] = mapped_column(String(20))
     cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True), index=True)
+    # Courriels préparés (T-225) : chaque alerte n'est examinée qu'une fois par l'envoi.
+    courriels_prepares: Mapped[bool] = mapped_column(
+        default=False, server_default=false(), index=True
+    )
 
 
 class LectureAlerteModele(Base):
@@ -1254,3 +1260,22 @@ class MouvementRecetteModele(Base):
     cree_par_id: Mapped[int] = mapped_column(BigInteger)
     cree_par_code: Mapped[str] = mapped_column(String(20))
     cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+
+
+class CourrielModele(Base):
+    """Courriel d'alerte à envoyer à un agent (T-225), dans sa langue (I18N-08) ; une file d'envoi
+    reprise jusqu'à cinq tentatives, pour qu'une panne de messagerie ne bloque aucune opération."""
+
+    __tablename__ = "courriel"
+    __table_args__ = (UniqueConstraint("alerte_id", "utilisateur_id"),)
+
+    id: Mapped[uuid.UUID] = mapped_column(primary_key=True, default=uuid.uuid4)
+    alerte_id: Mapped[uuid.UUID] = mapped_column(ForeignKey("alerte.id"), index=True)
+    utilisateur_id: Mapped[int] = mapped_column(BigInteger)
+    adresse: Mapped[str] = mapped_column(String(254))
+    langue: Mapped[str] = mapped_column(String(5))
+    statut: Mapped[str] = mapped_column(String(10), index=True)
+    tentatives: Mapped[int] = mapped_column(default=0)
+    erreur: Mapped[str | None] = mapped_column(String(300))
+    cree_le: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    envoye_le: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))

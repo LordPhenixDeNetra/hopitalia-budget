@@ -22,6 +22,15 @@ class Parametres(BaseSettings):
     hopitalia_etablissement: str = ""
     # Fenêtre relue à chaque import de la pharmacie (jours) ; l'import est idempotent.
     integration_fenetre_jours: int = 30
+    # Courriels d'alerte (T-225) : sans serveur, les courriels restent en file, rien n'est perdu.
+    smtp_hote: str = ""
+    smtp_port: int = 25
+    smtp_starttls: bool = False
+    smtp_utilisateur: str = ""
+    smtp_mot_de_passe: SecretStr = SecretStr("")
+    smtp_expediteur: str = "hopitalia-budget@localhost"
+    # Adresse de l'interface, pour le lien des courriels (facultative).
+    url_application: str = ""
     # Clé Fernet de chiffrement des coordonnées bancaires (ENF-03), générée une fois par
     # installation et conservée hors dépôt.
     coordonnees_cle: SecretStr = SecretStr("")

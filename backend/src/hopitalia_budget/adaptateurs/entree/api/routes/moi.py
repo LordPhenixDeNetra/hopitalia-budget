@@ -29,6 +29,8 @@ ColonnesMasquees = Annotated[
     Field(max_length=50),
 ]
 
+Courriel = Annotated[str, StringConstraints(max_length=254, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")]
+
 
 class Moi(Schema):
     id_hopitalia: int
@@ -41,6 +43,7 @@ class Moi(Schema):
     theme: Theme | None = None
     densite: Densite | None = None
     colonnes_masquees: dict[str, list[str]] = Field(default_factory=dict)
+    courriel: str | None = None
 
 
 class Preferences(Schema):
@@ -50,6 +53,8 @@ class Preferences(Schema):
     theme: Theme | None = None
     densite: Densite | None = None
     colonnes_masquees: ColonnesMasquees | None = None
+    # Adresse des courriels d'alerte (T-225) ; null la retire.
+    courriel: Courriel | None = None
 
 
 def _moi(utilisateur: Utilisateur, preference: PreferenceUtilisateurModele | None) -> Moi:
@@ -67,6 +72,7 @@ def _moi(utilisateur: Utilisateur, preference: PreferenceUtilisateurModele | Non
         theme=p.theme if p is not None else None,  # type: ignore[arg-type]
         densite=p.densite if p is not None else None,  # type: ignore[arg-type]
         colonnes_masquees=(p.colonnes_masquees or {}) if p is not None else {},
+        courriel=p.courriel if p is not None else None,
     )
 
 
